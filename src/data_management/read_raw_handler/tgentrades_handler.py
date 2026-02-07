@@ -2,13 +2,13 @@ import typing as t
 
 import pandas as pd
 
-from src.data_management.raw_data_handler.abstract_raw_data_handler import (
-    AbstractRawDataHandler,
+from src.data_management.read_raw_handler.abstract_read_raw_handler import (
+    AbstractReadRawHandler,
 )
 from src.exceptions.data_exceptions import DataError
 
 
-class TgentradesHandler(AbstractRawDataHandler):
+class TgentradesHandler(AbstractReadRawHandler):
     def _custom_process(self, df: pd.DataFrame) -> pd.DataFrame:
         is_header = self._check_is_header(df.iloc[0])
         if is_header:

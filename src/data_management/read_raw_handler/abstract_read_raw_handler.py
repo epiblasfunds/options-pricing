@@ -10,7 +10,7 @@ from src.enums.data_type import DataType
 from src.exceptions.data_exceptions import DataError
 
 
-class AbstractRawDataHandler(ABC):
+class AbstractReadRawHandler(ABC):
     def _check_is_header(self, series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 
