@@ -1,10 +1,10 @@
-import pandas as pd
+import typing as t
+from enum import Enum
 from pathlib import Path
+
+import pandas as pd
 from tqdm import tqdm
 
-from enum import Enum
-
-import typing as t
 
 # Data types for columns
 class DataType(Enum):
@@ -13,6 +13,11 @@ class DataType(Enum):
     TEXT = 2
     FLOAT = 3
     INT = 4
+
+# CCONTRACTS_C2 types
+class CONTRACT_TYPE(Enum):
+    FUTURE = "FUTURE"
+    OPTION = "OPTION"
 
 # Years to process
 FIRST_YEAR = 2017
@@ -158,9 +163,141 @@ def build_data_raw(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_file = output_dir / f"{file_prefix}.csv"
-    data_raw.to_csv(output_file, index=False, encoding="utf-8")
+    data_raw.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
     print(f"\nArchivo guardado en: {output_file}")
     print(f"Total filas finales: {len(data_raw)}")
 
     return data_raw
+
+
+def merge_trade_with_contracts(
+        trades_filename: str,
+        contracts_filename: str,
+        merge_columns: t.List[str],
+        selected_columns_dict: t.Dict[str, DataType]
+) -> pd.DataFrame:
+    
+    # Read CSVs
+    trades_df = pd.read_csv(
+        Path(f"raw_data/{trades_filename}"),
+        delimiter=";",
+        header=0,
+        dtype="string",
+    )
+    contracts_df = pd.read_csv(
+        Path(f"raw_data/{contracts_filename}"),
+        delimiter=";",
+        header=0,
+        dtype="string",
+    )
+
+    # Merge
+    merged_df = trades_df.merge(
+        contracts_df,
+        on = merge_columns,
+        how = "left",
+        suffixes=("", "_contract")
+    )
+
+    # Select only relevant columns
+    merged_df = merged_df[list(selected_columns_dict.keys())]
+
+    # Save CSV
+    output_dir = Path(f"raw_data")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_file = output_dir / f"TRADE_IBEX_DATABASE.csv"
+    merged_df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
+
+    print(f"\nArchivo guardado en: {output_file}")
+    print(f"Total filas finales: {len(merged_df)}")
+
+    return merged_df
+
+def filtered_contracts_with_trades(
+        contract_type: str
+) -> pd.DataFrame:
+    
+    # Read CSV trades with contracts
+    file = Path("raw_data/TRADE_IBEX_DATABASE.csv")
+    df = pd.read_csv(
+        file,
+        delimiter=";",
+        header=0,
+        dtype="string",
+    )
+
+    # Filter by contract type
+    if contract_type == CONTRACT_TYPE.FUTURE.value:
+        prefixes = ("FIBX",)
+        contract_column_new = "FutureContractCode"
+        filename_prefix = "FUTURE"
+    elif contract_type == CONTRACT_TYPE.OPTION.value:
+        prefixes = ("CIBX", "PIBX")
+        contract_column_new = "OptionContractCode"
+        filename_prefix = "OPTIONS"
+    else:
+        raise ValueError(f"Tipo de contrato desconocido: {contract_type}")
+
+    # Apply filter
+    df = df[df['ContractCode'].str.startswith(prefixes, na=False)]
+
+    # Change column names
+    df.rename(columns={"ContractCode": contract_column_new}, inplace=True)
+
+    # Save CSV
+    output_dir = Path(f"raw_data")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_file = output_dir / f"{filename_prefix}_TRADE_IBEX_DATABASE.csv"
+    df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
+
+    print(f"\nArchivo guardado en: {output_file}")
+    print(f"Total filas finales: {len(df)}")
+
+    return df
+
+def build_options_underlying_ibex_database():
+    # Read CSVs
+    options_trade_ibex_file = Path("raw_data/OPTIONS_TRADE_IBEX_DATABASE.csv")
+    future_trade_ibex_file = Path("raw_data/FUTURE_TRADE_IBEX_DATABASE.csv")
+
+    # Load dataframes
+    options_df = pd.read_csv(
+        options_trade_ibex_file,
+        delimiter=";",
+        header=0,
+        dtype="string",
+    )
+    future_df = pd.read_csv(
+        future_trade_ibex_file,
+        delimiter=";",
+        header=0,
+        dtype="string",
+    )
+
+    # Select relevant columns
+    options_df = options_df[["OptionContractCode", "MaturityDate"]]
+
+
+    # Drop duplicates in future_df to avoid multiple matches when merging with options_df
+    future_maturity_df = future_df[["FutureContractCode", "MaturityDate"]].drop_duplicates(subset=["MaturityDate"])
+
+    # Merge
+    df = options_df.merge(
+        future_maturity_df,
+        how="left",
+        on="MaturityDate",
+    )
+    # Select relevant columns
+    df = df[["OptionContractCode", "FutureContractCode", "MaturityDate"]]
+
+    # Save CSV
+    output_file = Path("raw_data/OPTIONS_UNDERLYING_IBEX_DATABASE.csv")
+    df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
+
+    print(f"\nArchivo guardado en: {output_file}")
+    print(f"Total filas finales: {len(df)}")
+
+    return df
