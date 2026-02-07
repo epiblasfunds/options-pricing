@@ -1,2 +1,4 @@
-data*
-tfmenv*
+data/*
+tfmenv/*
+*.csv
+__pycache__/
