@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 
-from config.config import config
+from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
 from src.enums.data_type import DataType
 from src.exceptions.data_exceptions import DataError
 
@@ -73,6 +73,31 @@ class AbstractRawDataHandler(ABC):
 
         return time_str
 
+    # Convert data types
+    def _convert_data_types(
+        self,
+        df: pd.DataFrame,
+        selected_columns_dict: t.Dict[str, DataType],
+    ) -> pd.DataFrame:
+        for col, dtype in selected_columns_dict.items():
+            if dtype == DataType.DATE:
+                df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
+            elif dtype == DataType.DATETIME:
+                df[col] = (
+                    df[col]
+                    .str.strip()
+                    .str.split(" ")
+                    .str[-1]
+                    .apply(self._prepare_datetime)
+                )
+                df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
+            elif dtype == DataType.FLOAT:
+                df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
+            elif dtype == DataType.INT:
+                df[col] = pd.to_numeric(df[col], downcast="integer")
+
+        return df
+
     def build_raw_data(
         self,
         columns_list: t.List[str],
@@ -84,8 +109,10 @@ class AbstractRawDataHandler(ABC):
         data_raw = []
 
         # For every year, we read each contract type
-        for year in tqdm(range(config.fist_year, config.last_year + 1)):
-            path_year = Path(f"data/{year}")
+        first_year = config.data_config.raw_data_config.first_year
+        last_year = config.data_config.raw_data_config.last_year
+        for year in tqdm(range(first_year, last_year + 1)):
+            path_year = SOURCE_DATA_DIR_PATH / f"{year}"
 
             file_list = list(path_year.glob(f"{file_prefix}_*.TXT")) + list(
                 path_year.glob(f"{file_prefix}_*.M3")
@@ -124,30 +151,10 @@ class AbstractRawDataHandler(ABC):
                     df = df[IBX_mask]
 
                     # Convert data types
-                    for col, dtype in selected_columns_dict.items():
-                        if dtype == DataType.DATE:
-                            df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
-                        elif dtype == DataType.DATETIME:
-
-                            try:
-                                df[col] = (
-                                    df[col]
-                                    .str.strip()
-                                    .str.split(" ")
-                                    .str[-1]
-                                    .apply(self._prepare_datetime)
-                                )
-                                df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
-                            except Exception as e:
-                                raise ValueError(
-                                    f"Unexpected format in column {col}. file: {file.name} Error: {e}"
-                                )
-                        elif dtype == DataType.FLOAT:
-                            df[col] = pd.to_numeric(
-                                df[col].str.replace(",", "."), downcast="float"
-                            )
-                        elif dtype == DataType.INT:
-                            df[col] = pd.to_numeric(df[col], downcast="integer")
+                    df = self._convert_data_types(
+                        df=df,
+                        selected_columns_dict=selected_columns_dict
+                    )
 
                     # Metadata
                     df["Year"] = year
@@ -160,10 +167,8 @@ class AbstractRawDataHandler(ABC):
         data_raw = pd.concat(data_raw, ignore_index=True)
 
         # Save CSV
-        output_dir = Path("raw_data")
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        output_file = output_dir / f"{file_prefix}.csv"
+        RAW_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)
+        output_file = RAW_DATA_STEP_DIR_PATH / f"{file_prefix}.csv"
         data_raw.to_csv(output_file, index=False, encoding="utf-8")
 
         print(f"\nArchivo guardado en: {output_file}")
