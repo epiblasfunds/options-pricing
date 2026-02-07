@@ -32,5 +32,24 @@
             "Quantity": "INT",
             "TradeType": "TEXT"
         }
+    },
+    "merge_raw_step": {
+        "output_filename": "TRADE_IBEX_DATABASE",
+        "merge_columns": [
+            "SessionDate",
+            "ContractCode"
+        ],
+        "trade_ibex_columns": [
+            "SessionDate",
+            "MarketCode",
+            "TradeExecID",
+            "ContractCode",
+            "ExecTime",
+            "TradePrice",
+            "Quantity",
+            "TradeType",
+            "StrikePrice",
+            "MaturityDate"
+        ]
     }
 }

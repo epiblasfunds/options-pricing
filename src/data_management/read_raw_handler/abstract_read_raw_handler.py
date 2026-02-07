@@ -109,8 +109,8 @@ class AbstractReadRawHandler(ABC):
         data_raw = []
 
         # For every year, we read each contract type
-        first_year = config.data_config.raw_data_config.first_year
-        last_year = config.data_config.raw_data_config.last_year
+        first_year = config.data_config.read_raw_config.first_year
+        last_year = config.data_config.read_raw_config.last_year
         for year in tqdm(range(first_year, last_year + 1)):
             path_year = SOURCE_DATA_DIR_PATH / f"{year}"
 
@@ -169,7 +169,7 @@ class AbstractReadRawHandler(ABC):
         # Save CSV
         RAW_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)
         output_file = RAW_DATA_STEP_DIR_PATH / f"{file_prefix}.csv"
-        data_raw.to_csv(output_file, index=False, encoding="utf-8")
+        data_raw.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
         print(f"\nArchivo guardado en: {output_file}")
         print(f"Total filas finales: {len(data_raw)}")

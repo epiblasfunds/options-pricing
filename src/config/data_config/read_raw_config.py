@@ -4,7 +4,7 @@ import typing as t
 from src.enums.data_type import DataType
 
 
-class RawDataConfig:
+class ReadRawConfig:
     def _load_read_raw_step(self, data_config: t.Dict):
         read_raw_step_name = "read_raw_step"
 
