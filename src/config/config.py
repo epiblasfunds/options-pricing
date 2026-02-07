@@ -2,6 +2,8 @@ import json
 import typing as t
 from pathlib import Path
 
+from src.enums.data_type import DataType
+
 PROJECT_ROOT_PATH = Path(__file__).resolve().parent.parent
 RESOURCES_PATH = PROJECT_ROOT_PATH / "resources"
 
@@ -19,7 +21,7 @@ class Config:
         ]
         self.ccontracts_c2_columns_list = list(cconctracts_c2_columns_dict.keys())
         self.ccontracts_c2_columns_selected_dict = {
-            k: v for k, v in cconctracts_c2_columns_dict.items() if v is not None
+            k: DataType[v] for k, v in cconctracts_c2_columns_dict.items() if v is not None
         }
         self.cconctracts_c2_prefix = data_config[read_raw_step_name][
             "cconctracts_c2_prefix"
@@ -29,7 +31,7 @@ class Config:
         tgentrades_columns_dict = data_config[read_raw_step_name]["tgentrades_columns"]
         self.tgentrades_columns_list = list(tgentrades_columns_dict.keys())
         self.tgentrades_columns_selected_dict = {
-            k: v for k, v in tgentrades_columns_dict.items() if v is not None
+            k: DataType[v] for k, v in tgentrades_columns_dict.items() if v is not None
         }
         self.tgentrades_prefix = data_config[read_raw_step_name]["tgentrades_prefix"]
 

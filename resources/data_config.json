@@ -1,0 +1,36 @@
+{
+    "first_year": 2017,
+    "last_year": 2022,
+    "read_raw_step": {
+        "ccontracts_c2_columns": {
+            "SessionDate": "DATE",
+            "ClearingHouseCode": null,
+            "ContractCode": "TEXT",
+            "ContractGroupCode": null,
+            "ContractTypeCode": null,
+            "StrikePrice": "FLOAT",
+            "MaturityDate": "DATE",
+            "TradingEndDate": null,
+            "ExerciseUnderlyingContractCode": null,
+            "MarginUnderlyingContractCode": null,
+            "ArrayCode": null,
+            "ExpiryNumber": null,
+            "OffsetNumber": null,
+            "ExpirySpan": null,
+            "MaturityMonthYear": null,
+            "ISINCode": null
+        },
+        "ccontracts_c2_prefix": "CCONCTRACTS_C2",
+        "tgentrades_columns": {
+            "SessionDate": "DATE",
+            "MarketCode": "TEXT",
+            "TradeExecID": "TEXT",
+            "ContractCode": "TEXT",
+            "ExecTime": "DATETIME",
+            "TradePrice": "FLOAT",
+            "Quantity": "INT",
+            "TradeType": "TEXT"
+        },
+        "tgentrades_prefix": "CCONCTRACTS_C2"
+    }
+}
