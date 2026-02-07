@@ -16,7 +16,7 @@ class AbstractRawDataHandler(ABC):
 
     @abstractmethod
     def _custom_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError("_default_custom_process not implemented.")
+        raise NotImplementedError("_custom_process not implemented.")
 
     @abstractmethod
     def _validate(self) -> t.List[t.Tuple[DataError, str]]:
@@ -130,7 +130,7 @@ class AbstractRawDataHandler(ABC):
 
                     # Custom process for each case. We can use the default one,
                     # which checks if the first row is a header and removes it if so.
-                    df = self._default_custom_process(df=df)
+                    df = self._custom_process(df=df)
 
                     # Columns
                     total_columns = df.shape[1]

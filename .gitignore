@@ -1,3 +1,4 @@
 data/*
 tfmenv/*
 *.csv
+__pycache__/

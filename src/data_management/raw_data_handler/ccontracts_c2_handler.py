@@ -17,4 +17,8 @@ class CContractsC2Handler(AbstractRawDataHandler):
         return df
 
     def _validate(self) -> t.List[t.Tuple[DataError, str]]:
+        # Validar que un mismo ContractCode tenga la misma maturity para distintos SessionDate
+
+
+
         pass
