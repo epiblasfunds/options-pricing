@@ -51,5 +51,18 @@
             "StrikePrice",
             "MaturityDate"
         ]
+    },
+    "product_split_step": {
+        "contract_types": {
+            "OPTIONS": {
+                "prefixes": ["CIBX", "PIBX"],
+                "contract_column_new": "OptionContractCode"
+            },
+            "FUTURES": {
+                "prefixes": ["FIBX"],
+                "contract_column_new": "FutureContractCode"
+            }
+        },
+        "output_filename": "TRADE_IBEX_DATABASE"
     }
 }

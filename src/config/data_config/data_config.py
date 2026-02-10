@@ -1,4 +1,5 @@
 from src.config.data_config.merge_raw_config import MergeRawConfig
+from src.config.data_config.product_split_config import ProductSplitConfig
 from src.config.data_config.read_raw_config import ReadRawConfig
 
 
@@ -8,5 +9,8 @@ class DataConfig:
             data_config_file_path=data_config_file_path
         )
         self.merge_raw_config = MergeRawConfig(
+            data_config_file_path=data_config_file_path
+        )
+        self.product_split_config = ProductSplitConfig(
             data_config_file_path=data_config_file_path
         )
