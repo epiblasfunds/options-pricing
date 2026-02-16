@@ -34,3 +34,14 @@ trades_with_contracts_filename = MERGE_RAW_DATA_STEP_DIR_PATH / f"{config.data_c
 dfs = trades_by_contract_type(
     trades_contract_filename=trades_with_contracts_filename,
     )
+
+# OPTIONS_UNDERLYING_IBEX_DATABASE
+output_contracts = config.data_config.product_split_config.output_filename_contracts
+
+options_tr_filename = PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"OPTIONS_{output_contracts}.csv"
+futures_tr_filename = PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"FUTURES_{output_contracts}.csv"
+
+df = options_future_contract_relationship(
+        options_trades_filename=options_tr_filename,
+        futures_trades_filename=futures_tr_filename,
+    )

@@ -8,7 +8,8 @@ class ProductSplitConfig:
             data_config = json.load(f)
         product_split_step_name = "product_split_step"
         self.contract_types = data_config[product_split_step_name]["contract_types"]
-        self.output_filename = data_config[product_split_step_name]["output_filename"]
+        self.output_filename_contracts = data_config[product_split_step_name]["output_filename_contracts"]
+        self.output_filename_relationship = data_config[product_split_step_name]["output_filename_relationship"]
 
     def __init__(self, data_config_file_path: str):
         self._load_config(data_config_file_path)

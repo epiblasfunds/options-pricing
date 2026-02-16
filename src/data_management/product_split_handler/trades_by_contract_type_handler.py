@@ -6,7 +6,7 @@ from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
 
 
 def trades_by_contract_type(
-        trades_contract_filename: pd.DataFrame,
+        trades_contract_filename: Path,
 ) -> dict[str, pd.DataFrame]:
     
     # Read CSV trades with contracts
@@ -18,7 +18,7 @@ def trades_by_contract_type(
             dtype="string",
             )
     except Exception as e:
-        raise ValueError(f"Error al leer el archivo: {e}")
+        raise ValueError(f"Error al leer el archivo {trades_contract_filename}: {e}")
     
     results = {}
     
@@ -34,7 +34,7 @@ def trades_by_contract_type(
 
         # Save CSV
         PRODUCT_SPLIT_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)
-        output_filename = f"{contract_type}_{config.data_config.product_split_config.output_filename}"
+        output_filename = f"{contract_type}_{config.data_config.product_split_config.output_filename_contracts}"
         output_file = PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"{output_filename}.csv"
         filtered_df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 

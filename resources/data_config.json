@@ -63,6 +63,7 @@
                 "contract_column_new": "FutureContractCode"
             }
         },
-        "output_filename": "TRADE_IBEX_DATABASE"
+        "output_filename_contracts": "TRADE_IBEX_DATABASE",
+        "output_filename_relationship": "OPTIONS_UNDERLYING_IBEX_DATABASE"
     }
 }
