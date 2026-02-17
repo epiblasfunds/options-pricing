@@ -36,15 +36,11 @@ def options_future_contract_relationship(
     options_df = (
     df_options[["OptionContractCode", "MaturityDate"]]
         .copy()
-        .dropna(subset=["MaturityDate"])
-        .drop_duplicates()
    )
 
     futures_df = (
         df_futures[["FutureContractCode", "MaturityDate"]]
         .copy()
-        .dropna(subset=["MaturityDate"])
-        .drop_duplicates()
     )
 
     # Merge on MaturityDate
