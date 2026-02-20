@@ -6,11 +6,11 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
-from src.enums.data_type import DataType
+from src.enums.data_type_enum import DataTypeEnum
 from src.exceptions.data_exceptions import DataError
 
 
-class AbstractRawDataHandler(ABC):
+class AbstractReadRawHandler(ABC):
     def _check_is_header(self, series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 
@@ -21,6 +21,10 @@ class AbstractRawDataHandler(ABC):
     @abstractmethod
     def _validate(self) -> t.List[t.Tuple[DataError, str]]:
         raise NotImplementedError("_validate not implemented.")
+    
+    @abstractmethod
+    def _filter_by_ibex(self, df: pd.DataFrame, contracts_prefixes: t.List[str]) -> pd.DataFrame:
+        raise NotImplementedError("_filter_by_ibex not implemented.")
 
     def validate(self):
         error_list = self._validate()
@@ -77,12 +81,12 @@ class AbstractRawDataHandler(ABC):
     def _convert_data_types(
         self,
         df: pd.DataFrame,
-        selected_columns_dict: t.Dict[str, DataType],
+        selected_columns_dict: t.Dict[str, DataTypeEnum],
     ) -> pd.DataFrame:
         for col, dtype in selected_columns_dict.items():
-            if dtype == DataType.DATE:
+            if dtype == DataTypeEnum.DATE:
                 df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
-            elif dtype == DataType.DATETIME:
+            elif dtype == DataTypeEnum.DATETIME:
                 df[col] = (
                     df[col]
                     .str.strip()
@@ -91,26 +95,27 @@ class AbstractRawDataHandler(ABC):
                     .apply(self._prepare_datetime)
                 )
                 df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
-            elif dtype == DataType.FLOAT:
+            elif dtype == DataTypeEnum.FLOAT:
                 df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
-            elif dtype == DataType.INT:
+            elif dtype == DataTypeEnum.INT:
                 df[col] = pd.to_numeric(df[col], downcast="integer")
 
         return df
-
+    
     def build_raw_data(
         self,
         columns_list: t.List[str],
-        selected_columns_dict: t.Dict[str, DataType],
+        selected_columns_dict: t.Dict[str, DataTypeEnum],
         file_prefix: str,
+        contracts_prefixes: t.List[str]
     ) -> pd.DataFrame:
 
         # Data raw
         data_raw = []
 
         # For every year, we read each contract type
-        first_year = config.data_config.raw_data_config.first_year
-        last_year = config.data_config.raw_data_config.last_year
+        first_year = config.data_config.read_raw_config.first_year
+        last_year = config.data_config.read_raw_config.last_year
         for year in tqdm(range(first_year, last_year + 1)):
             path_year = SOURCE_DATA_DIR_PATH / f"{year}"
 
@@ -146,9 +151,8 @@ class AbstractRawDataHandler(ABC):
                     # Select only relevant columns
                     df = df[list(selected_columns_dict.keys())]
 
-                    # IBX mask
-                    IBX_mask = df["ContractCode"].str.contains(("IBX"), na=False)
-                    df = df[IBX_mask]
+                    # IBX filter
+                    df = self._filter_by_ibex(df=df, contracts_prefixes=contracts_prefixes)
 
                     # Convert data types
                     df = self._convert_data_types(
@@ -169,7 +173,7 @@ class AbstractRawDataHandler(ABC):
         # Save CSV
         RAW_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)
         output_file = RAW_DATA_STEP_DIR_PATH / f"{file_prefix}.csv"
-        data_raw.to_csv(output_file, index=False, encoding="utf-8")
+        data_raw.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
         print(f"\nArchivo guardado en: {output_file}")
         print(f"Total filas finales: {len(data_raw)}")

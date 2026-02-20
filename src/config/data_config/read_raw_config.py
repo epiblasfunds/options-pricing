@@ -1,10 +1,10 @@
 import json
 import typing as t
 
-from src.enums.data_type import DataType
+from src.enums.data_type_enum import DataTypeEnum
 
 
-class RawDataConfig:
+class ReadRawConfig:
     def _load_read_raw_step(self, data_config: t.Dict):
         read_raw_step_name = "read_raw_step"
 
@@ -14,7 +14,7 @@ class RawDataConfig:
         ]
         self.ccontracts_c2_columns_list = list(cconctracts_c2_columns_dict.keys())
         self.ccontracts_c2_columns_selected_dict = {
-            k: DataType[v]
+            k: DataTypeEnum[v]
             for k, v in cconctracts_c2_columns_dict.items()
             if v is not None
         }
@@ -26,7 +26,7 @@ class RawDataConfig:
         tgentrades_columns_dict = data_config[read_raw_step_name]["tgentrades_columns"]
         self.tgentrades_columns_list = list(tgentrades_columns_dict.keys())
         self.tgentrades_columns_selected_dict = {
-            k: DataType[v] for k, v in tgentrades_columns_dict.items() if v is not None
+            k: DataTypeEnum[v] for k, v in tgentrades_columns_dict.items() if v is not None
         }
         self.tgentrades_prefix = data_config[read_raw_step_name]["tgentrades_prefix"]
 
@@ -36,6 +36,9 @@ class RawDataConfig:
 
         self.first_year = data_config["first_year"]
         self.last_year = data_config["last_year"]
+        self.n_characters_futures_code = data_config["n_characters_futures_code"]
+        self.n_characters_options_code = data_config["n_characters_options_code"]
+        self.contracts_prefixes = data_config["contracts_prefixes"]
 
         self._load_read_raw_step(data_config=data_config)
 
