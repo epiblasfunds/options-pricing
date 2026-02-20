@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
+from src.enums.contract_type_enum import ContractTypeEnum
 
 
 def trades_by_contract_type(
@@ -10,15 +11,12 @@ def trades_by_contract_type(
 ) -> dict[str, pd.DataFrame]:
     
     # Read CSV trades with contracts
-    try:
-        df = pd.read_csv(
-            trades_contract_filename,
-            delimiter=";",
-            header=0,
-            dtype="string",
-            )
-    except Exception as e:
-        raise ValueError(f"Error al leer el archivo {trades_contract_filename}: {e}")
+    df = pd.read_csv(
+        trades_contract_filename,
+        delimiter=";",
+        header=0,
+        dtype="string",
+        )
     
     results = {}
     
@@ -26,8 +24,11 @@ def trades_by_contract_type(
     contract_types_config = config.data_config.product_split_config.contract_types
 
     for contract_type, cfg in contract_types_config.items():
-        filtered_df = df[df["ContractCode"].str.startswith(tuple(cfg["prefixes"]), na=False)].copy()
-        filtered_df.rename(columns={"ContractCode": cfg["contract_column_new"]}, inplace=True)
+        filtered_df = df[df[config.data_config.product_split_config.filter_contract_column].str.startswith(tuple(cfg["prefixes"]), na=False)].copy()
+        filtered_df.rename(columns={config.data_config.product_split_config.filter_contract_column: cfg["contract_column_new"]}, inplace=True)
+
+        # Select columns
+        filtered_df = filtered_df[cfg["columns"]]
 
         # Store result
         results[contract_type] = filtered_df

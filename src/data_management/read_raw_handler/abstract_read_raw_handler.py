@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
-from src.enums.data_type import DataType
+from src.enums.data_type_enum import DataTypeEnum
 from src.exceptions.data_exceptions import DataError
 
 
@@ -21,6 +21,10 @@ class AbstractReadRawHandler(ABC):
     @abstractmethod
     def _validate(self) -> t.List[t.Tuple[DataError, str]]:
         raise NotImplementedError("_validate not implemented.")
+    
+    @abstractmethod
+    def _filter_by_ibex(self, df: pd.DataFrame, contracts_prefixes: t.List[str]) -> pd.DataFrame:
+        raise NotImplementedError("_filter_by_ibex not implemented.")
 
     def validate(self):
         error_list = self._validate()
@@ -77,12 +81,12 @@ class AbstractReadRawHandler(ABC):
     def _convert_data_types(
         self,
         df: pd.DataFrame,
-        selected_columns_dict: t.Dict[str, DataType],
+        selected_columns_dict: t.Dict[str, DataTypeEnum],
     ) -> pd.DataFrame:
         for col, dtype in selected_columns_dict.items():
-            if dtype == DataType.DATE:
+            if dtype == DataTypeEnum.DATE:
                 df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
-            elif dtype == DataType.DATETIME:
+            elif dtype == DataTypeEnum.DATETIME:
                 df[col] = (
                     df[col]
                     .str.strip()
@@ -91,18 +95,19 @@ class AbstractReadRawHandler(ABC):
                     .apply(self._prepare_datetime)
                 )
                 df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
-            elif dtype == DataType.FLOAT:
+            elif dtype == DataTypeEnum.FLOAT:
                 df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
-            elif dtype == DataType.INT:
+            elif dtype == DataTypeEnum.INT:
                 df[col] = pd.to_numeric(df[col], downcast="integer")
 
         return df
-
+    
     def build_raw_data(
         self,
         columns_list: t.List[str],
-        selected_columns_dict: t.Dict[str, DataType],
+        selected_columns_dict: t.Dict[str, DataTypeEnum],
         file_prefix: str,
+        contracts_prefixes: t.List[str]
     ) -> pd.DataFrame:
 
         # Data raw
@@ -146,9 +151,8 @@ class AbstractReadRawHandler(ABC):
                     # Select only relevant columns
                     df = df[list(selected_columns_dict.keys())]
 
-                    # IBX mask
-                    IBX_mask = df["ContractCode"].str.contains(("IBX"), na=False)
-                    df = df[IBX_mask]
+                    # IBX filter
+                    df = self._filter_by_ibex(df=df, contracts_prefixes=contracts_prefixes)
 
                     # Convert data types
                     df = self._convert_data_types(

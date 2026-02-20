@@ -4,6 +4,10 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
+from src.data_management.merge_raw_handler.get_contract_type_handler import (
+    get_contract_type,
+)
+from src.enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
 
 
 def merge_trade_with_contracts(
@@ -35,8 +39,11 @@ def merge_trade_with_contracts(
         suffixes=("", "_contract")
     )
 
+    # Add type of contract
+    merged_df[config.data_config.merge_raw_config.contract_type_column] = merged_df[TradeIbexDatabaseEnum.CONTRACT_CODE.value].apply(get_contract_type)
+
     # Select only relevant columns
-    merged_df = merged_df[selected_columns_list]
+    merged_df = merged_df[selected_columns_list + [config.data_config.merge_raw_config.contract_type_column]]
 
     # Save CSV
     MERGE_RAW_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)

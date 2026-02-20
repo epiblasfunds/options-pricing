@@ -7,6 +7,7 @@ class ProductSplitConfig:
         with(open(data_config_file_path, "r") as f):
             data_config = json.load(f)
         product_split_step_name = "product_split_step"
+        self.filter_contract_column = data_config[product_split_step_name]["filter_contract_column"]
         self.contract_types = data_config[product_split_step_name]["contract_types"]
         self.output_filename_contracts = data_config[product_split_step_name]["output_filename_contracts"]
         self.output_filename_relationship = data_config[product_split_step_name]["output_filename_relationship"]

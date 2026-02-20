@@ -1,6 +1,9 @@
 {
     "first_year": 2017,
     "last_year": 2022,
+    "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
+    "n_characters_futures_code": 6,
+    "n_characters_options_code": 12,
     "read_raw_step": {
         "ccontracts_c2_prefix": "CCONTRACTS_C2",
         "ccontracts_c2_columns": {
@@ -50,20 +53,66 @@
             "TradeType",
             "StrikePrice",
             "MaturityDate"
-        ]
+        ],
+        "contract_type_column": "ContractType"
+
     },
     "product_split_step": {
+        "filter_contract_column": "ContractCode",
         "contract_types": {
             "OPTIONS": {
                 "prefixes": ["CIBX", "PIBX"],
-                "contract_column_new": "OptionContractCode"
+                "contract_column_new": "OptionContractCode",
+                "columns": [
+                    "OptionContractCode",
+                    "SessionDate",
+                    "MarketCode",
+                    "TradeExecID",
+                    "ExecTime",
+                    "TradePrice",
+                    "Quantity",
+                    "TradeType",
+                    "StrikePrice",
+                    "MaturityDate"
+                ]
             },
             "FUTURES": {
                 "prefixes": ["FIBX"],
-                "contract_column_new": "FutureContractCode"
+                "contract_column_new": "FutureContractCode",
+                "columns": [
+                    "FutureContractCode",
+                    "SessionDate",
+                    "MarketCode",
+                    "TradeExecID",
+                    "ExecTime",
+                    "TradePrice",
+                    "Quantity",
+                    "TradeType",
+                    "StrikePrice",
+                    "MaturityDate"
+                ]
             }
         },
         "output_filename_contracts": "TRADE_IBEX_DATABASE",
         "output_filename_relationship": "OPTIONS_UNDERLYING_IBEX_DATABASE"
+    },
+    "underlying_step": {
+        "options_trade_underlying_ibex_database_columns": [
+            "OptionContractCode",
+            "FutureContractCode",
+            "UnderelayingPrice",
+            "SessionDate",
+            "MarketCode",
+            "TradeExecID",
+            "ExecTime",
+            "TradePriceOption",
+            "Quantity",
+            "TradeType",
+            "StrikePrice",
+            "MaturityDate",
+            "ExecTime",
+            "UnderelayingExecTime"
+        ],
+        "output_filename": "OPTIONS_TRADE_UNDERLYING_IBEX_DATABASE"
     }
 }

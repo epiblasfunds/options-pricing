@@ -2,7 +2,7 @@ import json
 import typing as t
 
 from src.config.data_config.read_raw_config import ReadRawConfig
-from src.enums.data_type import DataType
+from src.enums.data_type_enum import DataTypeEnum
 
 
 class MergeRawConfig:
@@ -12,6 +12,7 @@ class MergeRawConfig:
         merge_raw_step_name = "merge_raw_step"
         self.merge_columns_list = data_config[merge_raw_step_name]["merge_columns"]
         self.trade_ibex_columns_list = data_config[merge_raw_step_name]["trade_ibex_columns"]
+        self.contract_type_column = data_config[merge_raw_step_name]["contract_type_column"]
         self.output_filename = data_config[merge_raw_step_name]["output_filename"]
 
     def __init__(self, data_config_file_path: str):

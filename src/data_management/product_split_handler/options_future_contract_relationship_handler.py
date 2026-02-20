@@ -3,43 +3,41 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
+from src.enums.futures_trade_ibex_database_enum import FuturesTradeIbexDatabaseEnum
+from src.enums.options_trade_ibex_database_enum import OptionsTradeIbexDatabaseEnum
 
 
 def options_future_contract_relationship(
         options_trades_filename: Path,
-        futures_trades_filename: Path
+        futures_trades_filename: Path,
 ) -> pd.DataFrame:
     
     # Read CSV options trades
-    try:
-        df_options = pd.read_csv(
-            options_trades_filename,
-            delimiter=";",
-            header=0,
-            dtype="string",
-            )
-    except Exception as e:
-        raise ValueError(f"Error al leer OPTIONS ({options_trades_filename}): {e}")
+    df_options = pd.read_csv(
+        options_trades_filename,
+        delimiter=";",
+        header=0,
+        dtype="string",
+        )
 
     # Read CSV futures trades
-    try:
-        df_futures = pd.read_csv(
-            futures_trades_filename,
-            delimiter=";",
-            header=0,
-            dtype="string",
-            )
-    except Exception as e:
-        raise ValueError(f"Error al leer FUTURES ({futures_trades_filename}): {e}")
+    df_futures = pd.read_csv(
+        futures_trades_filename,
+        delimiter=";",
+        header=0,
+        dtype="string",
+        )
     
     # Select relevant columns
     options_df = (
-    df_options[["OptionContractCode", "MaturityDate"]]
+        df_options[[OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value, OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value]]
+        .drop_duplicates(subset=[OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value], keep="first")
         .copy()
-   )
+    )
 
     futures_df = (
-        df_futures[["FutureContractCode", "MaturityDate"]]
+        df_futures[[FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value, FuturesTradeIbexDatabaseEnum.MATURITY_DATE.value]]
+        .drop_duplicates(subset=[FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value], keep="first")
         .copy()
     )
 
@@ -47,7 +45,7 @@ def options_future_contract_relationship(
     df = options_df.merge(
         futures_df,
         how="left",
-        on="MaturityDate",
+        on=OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value,
     )
 
     # Save CSV
