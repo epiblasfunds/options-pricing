@@ -108,4 +108,5 @@ def build_options_trade_underlying(
     print(f"\nArchivo guardado en: {output_file}")
     print(f"Total filas finales: {len(df)}")
 
-    return df      
+    return df
+     
