@@ -14,7 +14,7 @@ from src.exceptions.data_exceptions import DataError
 logger = logging.getLogger(__name__)
 
 
-class AbstractReadRawHandler(ABC):
+class AbstractReadRawLoader(ABC):
     def _check_is_header(self, series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 
@@ -102,7 +102,7 @@ class AbstractReadRawHandler(ABC):
 
         return df
 
-    def build_raw_data(
+    def build_database(
         self,
         columns_list: t.List[Enum],
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],

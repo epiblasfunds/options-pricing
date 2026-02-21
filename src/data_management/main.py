@@ -5,14 +5,14 @@ from src.data_management.read_raw_handler.ccontracts_c2_handler import (
 from src.data_management.read_raw_handler.tgentrades_handler import TgentradesHandler
 
 # CCONTRACTS_C2
-df = CContractsC2Handler().build_raw_data(
+df = CContractsC2Handler().build_database(
     columns_list=config.data_config.read_raw_config.ccontracts_c2_columns_list,
     selected_columns_dict=config.data_config.read_raw_config.ccontracts_c2_columns_selected_dict,
     file_prefix=config.data_config.read_raw_config.cconctracts_c2_prefix,
     contracts_prefixes=config.data_config.read_raw_config.contracts_prefixes,
 )
 # TGENTRADES
-df = TgentradesHandler().build_raw_data(
+df = TgentradesHandler().build_database(
     columns_list=config.data_config.read_raw_config.tgentrades_columns_list,
     selected_columns_dict=config.data_config.read_raw_config.tgentrades_columns_selected_dict,
     file_prefix=config.data_config.read_raw_config.tgentrades_prefix,

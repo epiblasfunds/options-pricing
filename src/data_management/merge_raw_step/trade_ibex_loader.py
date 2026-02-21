@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
-from src.data_management.merge_raw_handler.get_contract_type_handler import (
+from src.data_management.merge_raw_step.get_contract_type_handler import (
     get_contract_type,
 )
 from src.enums.data_enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
@@ -14,7 +14,7 @@ from src.exceptions.data_exceptions import DataError
 logger = logging.getLogger(__name__)
 
 
-class MergeRawHandler:
+class TradeIbexLoader:
     def __init__(
         self,
         trades_filename: str,
@@ -24,7 +24,7 @@ class MergeRawHandler:
     ):
         self._read_trades_and_contracts_dfs(trades_filename, contracts_filename)
         self._validate_sources()
-        self._build(merge_columns, selected_columns_list)
+        self._build_database(merge_columns, selected_columns_list)
 
     # READ
     def _read_trades_and_contracts_dfs(
