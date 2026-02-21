@@ -9,14 +9,12 @@ df = CContractsC2Handler().build_database(
     columns_list=config.data_config.read_raw_config.ccontracts_c2_columns_list,
     selected_columns_dict=config.data_config.read_raw_config.ccontracts_c2_columns_selected_dict,
     file_prefix=config.data_config.read_raw_config.cconctracts_c2_prefix,
-    contracts_prefixes=config.data_config.read_raw_config.contracts_prefixes,
 )
 # TGENTRADES
 df = TgentradesHandler().build_database(
     columns_list=config.data_config.read_raw_config.tgentrades_columns_list,
     selected_columns_dict=config.data_config.read_raw_config.tgentrades_columns_selected_dict,
     file_prefix=config.data_config.read_raw_config.tgentrades_prefix,
-    contracts_prefixes=config.data_config.read_raw_config.contracts_prefixes,
 )
 
 # TRADE_IBEX_DATABASE.csv

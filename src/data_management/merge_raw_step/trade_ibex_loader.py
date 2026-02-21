@@ -8,6 +8,8 @@ from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
 from src.data_management.merge_raw_step.get_contract_type_handler import (
     get_contract_type,
 )
+from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
+from src.enums.data_enums.contract_type_enum import ContractTypeEnum
 from src.enums.data_enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
 from src.exceptions.data_exceptions import DataError
 
@@ -89,11 +91,45 @@ class TradeIbexLoader:
             raise DataError(
                 "MergeRawHandler::_validate_trades_df. There are NAs in trades df."
             )
+        
+    def _validate_maturity(self, contract_type: ContractTypeEnum):
+        contract_code_series = self.contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
+        maturity_series = self.contracts_df[CcontractsC2Enum.MATURITY_DATE.value]
+
+        if contract_type == ContractTypeEnum.OPTIONS:
+            type_len = config.data_config.contract_code_config.options_code_len
+        else:
+            type_len = config.data_config.contract_code_config.futures_code_len
+
+        cc_series = contract_code_series[contract_code_series.str.len == type_len]
+        m_series = maturity_series[contract_code_series.str.len == type_len]
+
+        # Validate months
+        invalid_months = (
+            cc_series.str[-2]
+            .map(config.data_config.contract_code_config.futures_code_month)
+            ==
+            pd.to_datetime(m_series).dt.month
+        )
+        if invalid_months.any():
+            first_invalid_option_code = cc_series[invalid_months].iloc[0]
+            raise DataError(
+                "MergeRawHandler::_validate_contracts_df. There are option contract codes"
+                " with maturity month that does not match the maturity date month. "
+                f"First invalid option code: {first_invalid_option_code}."
+            )
+
+        # Validate years
+        # TODO
+        ...
+
 
     def _validate_contracts_df(self):
+
         # Validate that the maturity extracted from the contract code
         # is the same that the MaturityDate column
-        maturity_calculated = ""
+        self._validate_maturity(ContractTypeEnum.OPTIONS)
+        self._validate_maturity(ContractTypeEnum.FUTURES)
 
         # Unique Primary Keys
         # TODO

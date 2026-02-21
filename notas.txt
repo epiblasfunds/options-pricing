@@ -1,3 +1,4 @@
+- Si se me peta el notebook en vscode: Ctrl+Shift+P → Developer: Reload Window
 - Hemos modificado una línea em TGENTRADES el 2020/03/13 (ctrl+F de 2020031K)
 - El maturity date se puede dejar como YYYYMM ya que solo hay un vencimiento al mes
 - https://www.meff.es/esp/Derivados-Financieros/Futuros-sobre-IBEX35

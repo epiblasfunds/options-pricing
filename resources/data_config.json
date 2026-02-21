@@ -1,9 +1,53 @@
 {
     "first_year": 2017,
     "last_year": 2022,
-    "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
-    "n_characters_futures_code": 6,
-    "n_characters_options_code": 12,
+    "contract_code":{
+        "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
+        "futures_code_len": 6,
+        "options_code_len": 12,
+        "futures_code_month": {
+            "F": 1,
+            "G": 2,
+            "H": 3,
+            "J": 4,
+            "K": 5,
+            "M": 6,
+            "N": 7,
+            "Q": 8,
+            "U": 9,
+            "V": 10,
+            "X": 11,
+            "Z": 12
+        },
+        "call_code_month": {
+            "A": 1,
+            "B": 2,
+            "C": 3,
+            "D": 4,
+            "E": 5,
+            "F": 6,
+            "G": 7,
+            "H": 8,
+            "I": 9,
+            "J": 10,
+            "K": 11,
+            "L": 12
+        },
+        "put_code_month": {
+            "M": 1,
+            "N": 2,
+            "O": 3,
+            "P": 4,
+            "Q": 5,
+            "R": 6,
+            "S": 7,
+            "T": 8,
+            "U": 9,
+            "V": 10,
+            "W": 11,
+            "X": 12
+        }
+    },
     "read_raw_step": {
         "ccontracts_c2_prefix": "CCONTRACTS_C2",
         "ccontracts_c2_columns": {

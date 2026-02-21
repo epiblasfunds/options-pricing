@@ -8,8 +8,9 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
+from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
 from src.enums.data_enums.data_type_enum import DataTypeEnum
-from src.exceptions.data_exceptions import DataError
+from src.enums.data_enums.tgentrades_enum import TgentradesEnum
 
 logger = logging.getLogger(__name__)
 
@@ -22,15 +23,33 @@ class AbstractReadRawLoader(ABC):
     def _custom_process(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError("_custom_process not implemented.")
 
-    @abstractmethod
-    def _validate(self) -> t.List[t.Tuple[DataError, str]]:
-        raise NotImplementedError("_validate not implemented.")
+    def _filter_by_ibex(self, df: pd.DataFrame) -> pd.DataFrame:
+        assert (
+            CcontractsC2Enum.CONTRACT_CODE.value == TgentradesEnum.CONTRACT_CODE.value
+        )
+        contract_code_label = CcontractsC2Enum.CONTRACT_CODE.value
 
-    @abstractmethod
-    def _filter_by_ibex(
-        self, df: pd.DataFrame, contracts_prefixes: t.List[str]
-    ) -> pd.DataFrame:
-        raise NotImplementedError("_filter_by_ibex not implemented.")
+        df = df[
+            df[contract_code_label].str.startswith(
+                tuple(config.data_config.contract_code_config.contracts_prefixes),
+                na=False,
+            )
+        ]
+
+        # Select only futures and options with monthly maturity
+        # We can identify them because their number of characters
+        df = df[
+            df[contract_code_label]
+            .str.len()
+            .isin(
+                [
+                    config.data_config.contract_code_config.futures_code_len,
+                    config.data_config.contract_code_config.options_code_len,
+                ]
+            )
+        ]
+
+        return df
 
     # Process paths
     def _get_unique_files(self, file_list: t.List[Path]) -> t.List[Path]:
@@ -107,7 +126,6 @@ class AbstractReadRawLoader(ABC):
         columns_list: t.List[Enum],
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
         file_prefix: str,
-        contracts_prefixes: t.List[str],
     ) -> pd.DataFrame:
 
         # Data raw
@@ -153,9 +171,7 @@ class AbstractReadRawLoader(ABC):
                     df = df[relevant_columns]
 
                     # IBX filter
-                    df = self._filter_by_ibex(
-                        df=df, contracts_prefixes=contracts_prefixes
-                    )
+                    df = self._filter_by_ibex(df=df)
 
                     # Convert data types
                     df = self._convert_data_types(
