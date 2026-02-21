@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from src.config.data_config.data_config import DataConfig
+from src.config.logging_config.logging_config import LoggingConfig
 
 PROJECT_ROOT_PATH = Path(__file__).resolve().parent.parent.parent
 
@@ -20,6 +21,7 @@ DATA_CONFIG_FILE_PATH = RESOURCES_PATH / "data_config.json"
 class Config:
     def __init__(self):
         self.data_config = DataConfig(data_config_file_path=DATA_CONFIG_FILE_PATH)
+        LoggingConfig.setup_logging()
 
 
 config = Config()

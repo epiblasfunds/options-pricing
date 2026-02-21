@@ -1,3 +1,4 @@
+import logging
 import typing as t
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -8,6 +9,8 @@ from tqdm import tqdm
 from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
 from src.enums.data_type_enum import DataTypeEnum
 from src.exceptions.data_exceptions import DataError
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractReadRawHandler(ABC):
@@ -175,8 +178,7 @@ class AbstractReadRawHandler(ABC):
         output_file = RAW_DATA_STEP_DIR_PATH / f"{file_prefix}.csv"
         data_raw.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
-        print(f"\nArchivo guardado en: {output_file}")
-        print(f"Total filas finales: {len(data_raw)}")
+        logger.info(f"DF (with shape {data_raw.shape}) saved in: {output_file}.")
 
         return data_raw
 
