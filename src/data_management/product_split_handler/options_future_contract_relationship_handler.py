@@ -4,8 +4,12 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
-from src.enums.futures_trade_ibex_database_enum import FuturesTradeIbexDatabaseEnum
-from src.enums.options_trade_ibex_database_enum import OptionsTradeIbexDatabaseEnum
+from src.enums.data_enums.futures_trade_ibex_database_enum import (
+    FuturesTradeIbexDatabaseEnum,
+)
+from src.enums.data_enums.options_trade_ibex_database_enum import (
+    OptionsTradeIbexDatabaseEnum,
+)
 
 logger = logging.getLogger(__name__)
 

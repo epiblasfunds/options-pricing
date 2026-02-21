@@ -1,7 +1,9 @@
 import json
 import typing as t
 
-from src.enums.data_type_enum import DataTypeEnum
+from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
+from src.enums.data_enums.data_type_enum import DataTypeEnum
+from src.enums.data_enums.tgentrades_enum import TgentradesEnum
 
 
 class ReadRawConfig:
@@ -12,9 +14,11 @@ class ReadRawConfig:
         cconctracts_c2_columns_dict = data_config[read_raw_step_name][
             "ccontracts_c2_columns"
         ]
-        self.ccontracts_c2_columns_list = list(cconctracts_c2_columns_dict.keys())
+        self.ccontracts_c2_columns_list = [
+            CcontractsC2Enum(k) for k in cconctracts_c2_columns_dict.keys()
+        ]
         self.ccontracts_c2_columns_selected_dict = {
-            k: DataTypeEnum[v]
+            CcontractsC2Enum(k): DataTypeEnum[v]
             for k, v in cconctracts_c2_columns_dict.items()
             if v is not None
         }
@@ -24,9 +28,13 @@ class ReadRawConfig:
 
         # TGENTRADES
         tgentrades_columns_dict = data_config[read_raw_step_name]["tgentrades_columns"]
-        self.tgentrades_columns_list = list(tgentrades_columns_dict.keys())
+        self.tgentrades_columns_list = [
+            TgentradesEnum(k) for k in tgentrades_columns_dict.keys()
+        ]
         self.tgentrades_columns_selected_dict = {
-            k: DataTypeEnum[v] for k, v in tgentrades_columns_dict.items() if v is not None
+            TgentradesEnum(k): DataTypeEnum[v]
+            for k, v in tgentrades_columns_dict.items()
+            if v is not None
         }
         self.tgentrades_prefix = data_config[read_raw_step_name]["tgentrades_prefix"]
 

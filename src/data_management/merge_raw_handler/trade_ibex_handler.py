@@ -8,7 +8,7 @@ from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
 from src.data_management.merge_raw_handler.get_contract_type_handler import (
     get_contract_type,
 )
-from src.enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
+from src.enums.data_enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,14 @@
 import logging
 import typing as t
 from abc import ABC, abstractmethod
+from enum import Enum
 from pathlib import Path
 
 import pandas as pd
 from tqdm import tqdm
 
 from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
-from src.enums.data_type_enum import DataTypeEnum
+from src.enums.data_enums.data_type_enum import DataTypeEnum
 from src.exceptions.data_exceptions import DataError
 
 logger = logging.getLogger(__name__)
@@ -24,17 +25,12 @@ class AbstractReadRawHandler(ABC):
     @abstractmethod
     def _validate(self) -> t.List[t.Tuple[DataError, str]]:
         raise NotImplementedError("_validate not implemented.")
-    
+
     @abstractmethod
-    def _filter_by_ibex(self, df: pd.DataFrame, contracts_prefixes: t.List[str]) -> pd.DataFrame:
+    def _filter_by_ibex(
+        self, df: pd.DataFrame, contracts_prefixes: t.List[str]
+    ) -> pd.DataFrame:
         raise NotImplementedError("_filter_by_ibex not implemented.")
-
-    def validate(self):
-        error_list = self._validate()
-
-        if error_list:
-            msg = ". ".join([error_msg for _, error_msg in error_list])
-            raise DataError(msg)
 
     # Process paths
     def _get_unique_files(self, file_list: t.List[Path]) -> t.List[Path]:
@@ -84,9 +80,10 @@ class AbstractReadRawHandler(ABC):
     def _convert_data_types(
         self,
         df: pd.DataFrame,
-        selected_columns_dict: t.Dict[str, DataTypeEnum],
+        selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     ) -> pd.DataFrame:
-        for col, dtype in selected_columns_dict.items():
+        for col_enum, dtype in selected_columns_dict.items():
+            col = col_enum.value
             if dtype == DataTypeEnum.DATE:
                 df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
             elif dtype == DataTypeEnum.DATETIME:
@@ -104,13 +101,13 @@ class AbstractReadRawHandler(ABC):
                 df[col] = pd.to_numeric(df[col], downcast="integer")
 
         return df
-    
+
     def build_raw_data(
         self,
-        columns_list: t.List[str],
-        selected_columns_dict: t.Dict[str, DataTypeEnum],
+        columns_list: t.List[Enum],
+        selected_columns_dict: t.Dict[Enum, DataTypeEnum],
         file_prefix: str,
-        contracts_prefixes: t.List[str]
+        contracts_prefixes: t.List[str],
     ) -> pd.DataFrame:
 
         # Data raw
@@ -146,21 +143,23 @@ class AbstractReadRawHandler(ABC):
                         f"unknown_{i+1}"
                         for i in range(max(0, total_columns - len(columns_list)))
                     ]
-                    column_names = columns_list + unknown_names
+                    column_names = [c.value for c in columns_list] + unknown_names
 
                     # Assign
                     df.columns = column_names
 
                     # Select only relevant columns
-                    df = df[list(selected_columns_dict.keys())]
+                    relevant_columns = [c.value for c in selected_columns_dict.keys()]
+                    df = df[relevant_columns]
 
                     # IBX filter
-                    df = self._filter_by_ibex(df=df, contracts_prefixes=contracts_prefixes)
+                    df = self._filter_by_ibex(
+                        df=df, contracts_prefixes=contracts_prefixes
+                    )
 
                     # Convert data types
                     df = self._convert_data_types(
-                        df=df,
-                        selected_columns_dict=selected_columns_dict
+                        df=df, selected_columns_dict=selected_columns_dict
                     )
 
                     # Metadata
@@ -181,7 +180,3 @@ class AbstractReadRawHandler(ABC):
         logger.info(f"DF (with shape {data_raw.shape}) saved in: {output_file}.")
 
         return data_raw
-
-    def build_and_validate_raw_data(self):
-        df = self.build_raw_data()
-        self.validate(df=df)

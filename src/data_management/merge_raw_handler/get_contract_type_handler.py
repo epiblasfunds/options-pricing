@@ -1,7 +1,9 @@
 import pandas as pd
 
 from src.config.config import config
-from src.enums.contract_type_enum import ContractTypeEnum as contract_type_enum
+from src.enums.data_enums.contract_type_enum import (
+    ContractTypeEnum as contract_type_enum,
+)
 
 
 def get_contract_type(

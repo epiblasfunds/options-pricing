@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class TgentradesEnum(Enum):
-    SESSION_DATE = "SessionDate"
     CONTRACT_CODE = "ContractCode"
-    MARKET_CODE = "MarketCode"
-    TRADE_EXEC_ID = "TradeExecID"
     EXEC_TIME = "ExecTime"
-    TRADE_PRICE = "TradePrice"
+    MARKET_CODE = "MarketCode"
     QUANTITY = "Quantity"
+    SESSION_DATE = "SessionDate"
+    SOURCE_FILE = "SourceFile"
+    TRADE_EXEC_ID = "TradeExecID"
+    TRADE_PRICE = "TradePrice"
     TRADE_TYPE = "TradeType"
     YEAR = "Year"
-    SOURCE_FILE = "SourceFile"

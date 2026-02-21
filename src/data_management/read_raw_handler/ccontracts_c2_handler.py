@@ -6,7 +6,7 @@ from src.config.config import config
 from src.data_management.read_raw_handler.abstract_read_raw_handler import (
     AbstractReadRawHandler,
 )
-from src.enums.ccontracts_c2_enum import CcontractsC2Enum
+from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
 from src.exceptions.data_exceptions import DataError
 
 

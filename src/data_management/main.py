@@ -1,18 +1,22 @@
 from config.config import config
+from src.data_management.read_raw_handler.ccontracts_c2_handler import (
+    CContractsC2Handler,
+)
+from src.data_management.read_raw_handler.tgentrades_handler import TgentradesHandler
 
 # CCONTRACTS_C2
-df = build_data_raw(
-    columns_list=config.data_config.raw_data_config.ccontracts_c2_columns_list,
-    selected_columns_dict=config.data_config.raw_data_config.ccontracts_c2_columns_selected_dict,
-    file_prefix=config.data_config.raw_data_config.tgentrades_prefix,
+df = CContractsC2Handler().build_raw_data(
+    columns_list=config.data_config.read_raw_config.ccontracts_c2_columns_list,
+    selected_columns_dict=config.data_config.read_raw_config.ccontracts_c2_columns_selected_dict,
+    file_prefix=config.data_config.read_raw_config.cconctracts_c2_prefix,
+    contracts_prefixes=config.data_config.read_raw_config.contracts_prefixes,
 )
-
 # TGENTRADES
-df = build_data_raw(
-    columns_list=config.data_config.raw_data_config.tgentrades_columns_list,
-    selected_columns_dict=config.data_config.raw_data_config.tgentrades_columns_selected_dict,
-    file_prefix=config.data_config.raw_data_config.tgentrades_prefix,
-    custom_processing_func=tgentrades_custom_process,
+df = TgentradesHandler().build_raw_data(
+    columns_list=config.data_config.read_raw_config.tgentrades_columns_list,
+    selected_columns_dict=config.data_config.read_raw_config.tgentrades_columns_selected_dict,
+    file_prefix=config.data_config.read_raw_config.tgentrades_prefix,
+    contracts_prefixes=config.data_config.read_raw_config.contracts_prefixes,
 )
 
 # TRADE_IBEX_DATABASE.csv
