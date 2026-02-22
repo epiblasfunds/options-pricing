@@ -5,6 +5,12 @@
         "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
         "futures_code_len": 6,
         "options_code_len": 12,
+        "strike_starts": -8,
+        "strike_ends": -3,
+        "month_options_code_idx": -3,
+        "year_options_code_idx": -2,
+        "month_futures_code_idx": -2,
+        "year_futures_code_idx": -1,
         "futures_code_month": {
             "F": 1,
             "G": 2,

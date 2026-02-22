@@ -6,8 +6,9 @@ from src.data_management.read_raw_step.abstract_read_raw_loader import (
 
 
 class TgentradesLoader(AbstractReadRawLoader):
-    def _custom_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        is_header = self._check_is_header(df.iloc[0])
+    @classmethod
+    def _custom_process(cls, df: pd.DataFrame) -> pd.DataFrame:
+        is_header = cls._check_is_header(df.iloc[0])
         if is_header:
             skip_column_list = [
                 c for c, v in df.iloc[0].items() if v.lower().strip() == "secuencia"

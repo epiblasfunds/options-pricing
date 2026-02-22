@@ -4,159 +4,165 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
-from src.data_management.merge_raw_step.get_contract_type_handler import (
+from src.config.config import (
+    MERGE_RAW_DATA_STEP_DIR_PATH,
+    RAW_DATA_STEP_DIR_PATH,
+    config,
+)
+from src.data_management.utils import (
     get_contract_type,
+    validate_maturity_contract_code,
+    validate_strike_contract_code,
 )
 from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
 from src.enums.data_enums.contract_type_enum import ContractTypeEnum
+from src.enums.data_enums.tgentrades_enum import TgentradesEnum
 from src.enums.data_enums.trade_ibex_database_enum import TradeIbexDatabaseEnum
-from src.exceptions.data_exceptions import DataError
+from src.exceptions.data_exceptions import (
+    DuplicatedPrimaryKeysError,
+    MissingValuesError,
+    NegativeQuantityError,
+    NegativeTradePriceError,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class TradeIbexLoader:
-    def __init__(
-        self,
-        trades_filename: str,
-        contracts_filename: str,
-        merge_columns: t.List[str],
-        selected_columns_list: t.List[str],
-    ):
-        self._read_trades_and_contracts_dfs(trades_filename, contracts_filename)
-        self._validate_sources()
-        self._build_database(merge_columns, selected_columns_list)
-
     # READ
-    def _read_trades_and_contracts_dfs(
-        self, trades_filename: str, contracts_filename: str
-    ) -> None:
-        self.trades_df = pd.read_csv(
+    @staticmethod
+    def _read_trades_and_contracts_dfs() -> None:
+        trades_filename = (
+            RAW_DATA_STEP_DIR_PATH
+            / f"{config.data_config.read_raw_config.tgentrades_prefix}.csv"
+        )
+        trades_df = pd.read_csv(
             Path(trades_filename),
             delimiter=";",
             header=0,
             dtype="string",
         )
-        self.contracts_df = pd.read_csv(
+        contracts_filename = (
+            RAW_DATA_STEP_DIR_PATH
+            / f"{config.data_config.read_raw_config.cconctracts_c2_prefix}.csv"
+        )
+        contracts_df = pd.read_csv(
             Path(contracts_filename),
             delimiter=";",
             header=0,
             dtype="string",
         )
 
+        return trades_df, contracts_df
+
     # VALIDATIONS
-    def _validate_trades_df(self):
-        # Format validations
-        if (self.trades_df["ContractCode"].str.len() != 16).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with non expected len in ContractCode column."
-            )
-        if (self.trades_df["MarketCode"].str.len() != 2).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with non expected len in MarketCode column."
-            )
-        if (self.trades_df["TradeExecID"].str.len() != 12).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with non expected len in TradeExecID column."
-            )
-        if (self.trades_df["TradeType"].str.len() != 1).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with non expected len in TradeType column."
-            )
-
-        # Positive number validations
-        if (self.trades_df["TradePrice"].astype("float64") > 0.0).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with negative values in TradePrice column."
-            )
-        if (self.trades_df["Quantity"].astype("float64") > 0.0).any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are rows with negative values in TradePrice column."
-            )
-
-        # Unique Primary Keys
-        dup_mask = self.trades_df.duplicated(subset=["SessionDate", "ContractCode"])
+    @staticmethod
+    def _validate_primary_keys(df: pd.DataFrame, pk_columns: t.List[str]):
+        pk_df = df[pk_columns]
+        dup_mask = pk_df.duplicated()
         if dup_mask.any():
-            first_dup = self.trades_df.loc[
-                dup_mask, ["SessionDate", "ContractCode"]
-            ].iloc[0]
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. Duplicate (SessionDate, ContractCode) pair found: "
-                f"SessionDate={first_dup['SessionDate']}, ContractCode={first_dup['ContractCode']}."
+            first_dup = pk_df[dup_mask].iloc[0]
+            raise DuplicatedPrimaryKeysError(
+                "MergeRawHandler::_validate_contracts_df. Duplicate (SessionDate, ContractCode) pair found: "
+                f"SessionDate={first_dup[CcontractsC2Enum.SESSION_DATE.value]}, "
+                f"ContractCode={first_dup[CcontractsC2Enum.CONTRACT_CODE.value]}."
             )
 
-        # NAs
-        if self.trades_df.isna().any().any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are NAs in trades df."
-            )
-        
-    def _validate_maturity(self, contract_type: ContractTypeEnum):
-        contract_code_series = self.contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
-        maturity_series = self.contracts_df[CcontractsC2Enum.MATURITY_DATE.value]
+    @staticmethod
+    def _validate_maturity(contracts_df: pd.DataFrame, contract_type: ContractTypeEnum):
+        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
+        maturity_series = contracts_df[CcontractsC2Enum.MATURITY_DATE.value]
+        session_date_series = contracts_df[CcontractsC2Enum.SESSION_DATE.value]
 
-        if contract_type == ContractTypeEnum.OPTIONS:
-            type_len = config.data_config.contract_code_config.options_code_len
-        else:
-            type_len = config.data_config.contract_code_config.futures_code_len
-
-        cc_series = contract_code_series[contract_code_series.str.len == type_len]
-        m_series = maturity_series[contract_code_series.str.len == type_len]
-
-        # Validate months
-        invalid_months = (
-            cc_series.str[-2]
-            .map(config.data_config.contract_code_config.futures_code_month)
-            ==
-            pd.to_datetime(m_series).dt.month
+        validate_maturity_contract_code(
+            contract_type=contract_type,
+            contract_code_series=contract_code_series,
+            maturity_series=maturity_series,
+            session_date_series=session_date_series,
         )
-        if invalid_months.any():
-            first_invalid_option_code = cc_series[invalid_months].iloc[0]
-            raise DataError(
-                "MergeRawHandler::_validate_contracts_df. There are option contract codes"
-                " with maturity month that does not match the maturity date month. "
-                f"First invalid option code: {first_invalid_option_code}."
-            )
 
-        # Validate years
-        # TODO
-        ...
+    @staticmethod
+    def _validate_strike(contracts_df: pd.DataFrame):
+        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
+        strike_series = contracts_df[CcontractsC2Enum.STRIKE_PRICE.value]
+        validate_strike_contract_code(
+            contract_code_series=contract_code_series,
+            strike_series=strike_series,
+        )
 
+    @staticmethod
+    def _validate_missing_ccontracts(contracts_df: pd.DataFrame):
+        cc_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
 
-    def _validate_contracts_df(self):
+        options_contracts_mask = cc_series.str.len() == config.data_config.contract_code_config.options_code_len
+        options = contracts_df[options_contracts_mask]
 
-        # Validate that the maturity extracted from the contract code
-        # is the same that the MaturityDate column
-        self._validate_maturity(ContractTypeEnum.OPTIONS)
-        self._validate_maturity(ContractTypeEnum.FUTURES)
+        futures_contracts_mask = cc_series.str.len() == config.data_config.contract_code_config.futures_code_len
+        future_columns = [c for c in contracts_df.columns if c != CcontractsC2Enum.STRIKE_PRICE.value]
+        futures = contracts_df[futures_contracts_mask][future_columns]
+
+        if options.isna().any().any() or futures.isna().any().any():
+            raise MissingValuesError()
+
+    @staticmethod
+    def _validate_trades_df(trades_df):
+        # Format validations
+        if (trades_df["TradePrice"].astype("float64") <= 0.0).any():
+            raise NegativeTradePriceError()
+
+        if (trades_df["Quantity"].astype("float64") <= 0.0).any():
+            raise NegativeQuantityError()
 
         # Unique Primary Keys
-        # TODO
-
-        # Same contract code has same maturities and same strikes
-        # TODO
+        TradeIbexLoader._validate_primary_keys(
+            df=trades_df,
+            pk_columns=[
+                TgentradesEnum.TRADE_EXEC_ID.value,
+            ],
+        )
 
         # NAs
-        if self.trades_df.isna().any().any():
-            raise DataError(
-                "MergeRawHandler::_validate_trades_df. There are NAs in trades df."
-            )
+        if trades_df.isna().any().any():
+            raise MissingValuesError()
 
-    def _validate_sources(self):
-        self._validate_trades_df()
-        self._validate_contracts_df()
+    @staticmethod
+    def _validate_contracts_df(contracts_df):
+        # Unique Primary Keys
+        TradeIbexLoader._validate_primary_keys(
+            df=contracts_df,
+            pk_columns=[
+                CcontractsC2Enum.SESSION_DATE.value,
+                CcontractsC2Enum.CONTRACT_CODE.value,
+            ],
+        )
+
+        # Validate maturity with contract code
+        TradeIbexLoader._validate_maturity(contracts_df, ContractTypeEnum.OPTIONS)
+        TradeIbexLoader._validate_maturity(contracts_df, ContractTypeEnum.FUTURES)
+
+        # Validate strikes with contract code
+        TradeIbexLoader._validate_strike(contracts_df)
+
+        # NAs
+        TradeIbexLoader._validate_missing_ccontracts(contracts_df)
+
+    @staticmethod
+    def _validate_sources(trades_df: pd.DataFrame, contracts_df: pd.DataFrame):
+        TradeIbexLoader._validate_trades_df(trades_df)
+        TradeIbexLoader._validate_contracts_df(contracts_df)
 
     # BUILD
+    @staticmethod
     def _build_database(
-        self,
+        trades_df: pd.DataFrame,
+        contracts_df: pd.DataFrame,
         merge_columns: t.List[str],
         selected_columns_list: t.List[str],
     ) -> pd.DataFrame:
 
         # Merge
-        merged_df = self.trades_df.merge(
-            self.contracts_df, on=merge_columns, how="left", suffixes=("", "_contract")
+        merged_df = trades_df.merge(
+            contracts_df, on=merge_columns, how="left", suffixes=("", "_contract")
         )
 
         # Add type of contract
@@ -179,3 +185,15 @@ class TradeIbexLoader:
         logger.info(f"DF (with shape {merged_df.shape}) saved in: {output_file}.")
 
         return merged_df
+
+    @staticmethod
+    def load(
+        merge_columns: t.List[str],
+        selected_columns_list: t.List[str],
+    ):
+        trades_df, contracts_df = TradeIbexLoader._read_trades_and_contracts_dfs()
+        TradeIbexLoader._validate_sources(trades_df, contracts_df)
+        trade_ibex_db = TradeIbexLoader._build_database(
+            trades_df, contracts_df, merge_columns, selected_columns_list
+        )
+        return trade_ibex_db

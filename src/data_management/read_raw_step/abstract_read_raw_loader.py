@@ -16,14 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractReadRawLoader(ABC):
-    def _check_is_header(self, series: pd.Series) -> bool:
+    @staticmethod
+    def _check_is_header(series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 
+    @classmethod
     @abstractmethod
-    def _custom_process(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _custom_process(cls, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError("_custom_process not implemented.")
 
-    def _filter_by_ibex(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _filter_by_ibex(df: pd.DataFrame) -> pd.DataFrame:
         assert (
             CcontractsC2Enum.CONTRACT_CODE.value == TgentradesEnum.CONTRACT_CODE.value
         )
@@ -52,7 +54,8 @@ class AbstractReadRawLoader(ABC):
         return df
 
     # Process paths
-    def _get_unique_files(self, file_list: t.List[Path]) -> t.List[Path]:
+    @staticmethod
+    def _get_unique_files(file_list: t.List[Path]) -> t.List[Path]:
         unique_files = {}
         for file in file_list:
             name_without_extension = "".join(file.name.split(".")[:-1])
@@ -64,7 +67,8 @@ class AbstractReadRawLoader(ABC):
         return list(unique_files.values())
 
     # Process datetimes
-    def _prepare_datetime(self, time_str: str) -> str:
+    @staticmethod
+    def _prepare_datetime(time_str: str) -> str:
         """
         Possible values for time_str: [
             "01/01/3000 9:00:06",
@@ -96,8 +100,9 @@ class AbstractReadRawLoader(ABC):
         return time_str
 
     # Convert data types
+    @classmethod
     def _convert_data_types(
-        self,
+        cls,
         df: pd.DataFrame,
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     ) -> pd.DataFrame:
@@ -111,7 +116,7 @@ class AbstractReadRawLoader(ABC):
                     .str.strip()
                     .str.split(" ")
                     .str[-1]
-                    .apply(self._prepare_datetime)
+                    .apply(cls._prepare_datetime)
                 )
                 df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
             elif dtype == DataTypeEnum.FLOAT:
@@ -121,8 +126,9 @@ class AbstractReadRawLoader(ABC):
 
         return df
 
-    def build_database(
-        self,
+    @classmethod
+    def load(
+        cls,
         columns_list: t.List[Enum],
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
         file_prefix: str,
@@ -140,7 +146,7 @@ class AbstractReadRawLoader(ABC):
             file_list = list(path_year.glob(f"{file_prefix}_*.TXT")) + list(
                 path_year.glob(f"{file_prefix}_*.M3")
             )
-            unique_file_list = self._get_unique_files(file_list)
+            unique_file_list = cls._get_unique_files(file_list)
 
             for file in unique_file_list:
                 if file.is_file():
@@ -153,7 +159,7 @@ class AbstractReadRawLoader(ABC):
 
                     # Custom process for each case. We can use the default one,
                     # which checks if the first row is a header and removes it if so.
-                    df = self._custom_process(df=df)
+                    df = cls._custom_process(df=df)
 
                     # Columns
                     total_columns = df.shape[1]
@@ -171,10 +177,10 @@ class AbstractReadRawLoader(ABC):
                     df = df[relevant_columns]
 
                     # IBX filter
-                    df = self._filter_by_ibex(df=df)
+                    df = cls._filter_by_ibex(df=df)
 
                     # Convert data types
-                    df = self._convert_data_types(
+                    df = cls._convert_data_types(
                         df=df, selected_columns_dict=selected_columns_dict
                     )
 
