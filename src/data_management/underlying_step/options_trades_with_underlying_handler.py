@@ -4,11 +4,9 @@ from pathlib import Path
 import pandas as pd
 
 from src.config.config import UNDERLYING_DATA_STEP_DIR_PATH, config
-from src.enums.data_enums.contract_type_enum import ContractTypeEnum
-from src.enums.data_enums.futures_trade_ibex_database_enum import (
+from src.enums.data_enums import (
+    ContractTypeEnum,
     FuturesTradeIbexDatabaseEnum,
-)
-from src.enums.data_enums.options_trade_ibex_database_enum import (
     OptionsTradeIbexDatabaseEnum,
 )
 

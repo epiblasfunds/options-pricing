@@ -110,7 +110,7 @@
     "product_split_step": {
         "filter_contract_column": "ContractCode",
         "contract_types": {
-            "OPTIONS": {
+            "options": {
                 "prefixes": ["CIBX", "PIBX"],
                 "contract_column_new": "OptionContractCode",
                 "columns": [
@@ -126,7 +126,7 @@
                     "MaturityDate"
                 ]
             },
-            "FUTURES": {
+            "futures": {
                 "prefixes": ["FIBX"],
                 "contract_column_new": "FutureContractCode",
                 "columns": [

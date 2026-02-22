@@ -1,55 +1,32 @@
 import logging
 import typing as t
-from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 
 import pandas as pd
 from tqdm import tqdm
 
-from src.config.config import RAW_DATA_STEP_DIR_PATH, SOURCE_DATA_DIR_PATH, config
-from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
-from src.enums.data_enums.data_type_enum import DataTypeEnum
-from src.enums.data_enums.tgentrades_enum import TgentradesEnum
+from src.config.config import SOURCE_DATA_DIR_PATH, config
+from src.data_management.builders import CContractsC2Builder, TgentradesBuilder
+from src.enums.data_enums import DataTypeEnum
 
 logger = logging.getLogger(__name__)
 
 
-class AbstractReadRawLoader(ABC):
+class ReadRawStepLoader:
     @staticmethod
     def _check_is_header(series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 
-    @classmethod
-    @abstractmethod
-    def _custom_process(cls, df: pd.DataFrame) -> pd.DataFrame:
-        raise NotImplementedError("_custom_process not implemented.")
-
-    def _filter_by_ibex(df: pd.DataFrame) -> pd.DataFrame:
-        assert (
-            CcontractsC2Enum.CONTRACT_CODE.value == TgentradesEnum.CONTRACT_CODE.value
-        )
-        contract_code_label = CcontractsC2Enum.CONTRACT_CODE.value
-
-        df = df[
-            df[contract_code_label].str.startswith(
-                tuple(config.data_config.contract_code_config.contracts_prefixes),
-                na=False,
-            )
-        ]
-
-        # Select only futures and options with monthly maturity
-        # We can identify them because their number of characters
-        df = df[
-            df[contract_code_label]
-            .str.len()
-            .isin(
-                [
-                    config.data_config.contract_code_config.futures_code_len,
-                    config.data_config.contract_code_config.options_code_len,
+    def _process_headers(df: pd.DataFrame, skip_secuencia: bool) -> pd.DataFrame:
+        is_header = ReadRawStepLoader._check_is_header(df.iloc[0])
+        if is_header:
+            if skip_secuencia:
+                skip_column_list = [
+                    c for c, v in df.iloc[0].items() if v.lower().strip() == "secuencia"
                 ]
-            )
-        ]
+                df.drop(columns=skip_column_list, inplace=True)
+            df = df.iloc[1:, :].reset_index(drop=True)
 
         return df
 
@@ -100,9 +77,8 @@ class AbstractReadRawLoader(ABC):
         return time_str
 
     # Convert data types
-    @classmethod
+    @staticmethod
     def _convert_data_types(
-        cls,
         df: pd.DataFrame,
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     ) -> pd.DataFrame:
@@ -116,7 +92,7 @@ class AbstractReadRawLoader(ABC):
                     .str.strip()
                     .str.split(" ")
                     .str[-1]
-                    .apply(cls._prepare_datetime)
+                    .apply(ReadRawStepLoader._prepare_datetime)
                 )
                 df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
             elif dtype == DataTypeEnum.FLOAT:
@@ -126,12 +102,12 @@ class AbstractReadRawLoader(ABC):
 
         return df
 
-    @classmethod
-    def load(
-        cls,
+    @staticmethod
+    def _read_raw_databases(
         columns_list: t.List[Enum],
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
         file_prefix: str,
+        skip_secuencia: bool,
     ) -> pd.DataFrame:
 
         # Data raw
@@ -146,7 +122,7 @@ class AbstractReadRawLoader(ABC):
             file_list = list(path_year.glob(f"{file_prefix}_*.TXT")) + list(
                 path_year.glob(f"{file_prefix}_*.M3")
             )
-            unique_file_list = cls._get_unique_files(file_list)
+            unique_file_list = ReadRawStepLoader._get_unique_files(file_list)
 
             for file in unique_file_list:
                 if file.is_file():
@@ -157,9 +133,10 @@ class AbstractReadRawLoader(ABC):
                         dtype="string",
                     )
 
-                    # Custom process for each case. We can use the default one,
-                    # which checks if the first row is a header and removes it if so.
-                    df = cls._custom_process(df=df)
+                    # Checks if the first row is a header and removes it if so.
+                    df = ReadRawStepLoader._process_headers(
+                        df, skip_secuencia=skip_secuencia
+                    )
 
                     # Columns
                     total_columns = df.shape[1]
@@ -176,11 +153,8 @@ class AbstractReadRawLoader(ABC):
                     relevant_columns = [c.value for c in selected_columns_dict.keys()]
                     df = df[relevant_columns]
 
-                    # IBX filter
-                    df = cls._filter_by_ibex(df=df)
-
                     # Convert data types
-                    df = cls._convert_data_types(
+                    df = ReadRawStepLoader._convert_data_types(
                         df=df, selected_columns_dict=selected_columns_dict
                     )
 
@@ -194,11 +168,26 @@ class AbstractReadRawLoader(ABC):
         # Concatenate final DataFrame
         data_raw = pd.concat(data_raw, ignore_index=True)
 
-        # Save CSV
-        RAW_DATA_STEP_DIR_PATH.mkdir(parents=True, exist_ok=True)
-        output_file = RAW_DATA_STEP_DIR_PATH / f"{file_prefix}.csv"
-        data_raw.to_csv(output_file, index=False, encoding="utf-8", sep=";")
-
-        logger.info(f"DF (with shape {data_raw.shape}) saved in: {output_file}.")
-
         return data_raw
+
+    @staticmethod
+    def load() -> t.Tuple[pd.DataFrame, pd.DataFrame]:
+        # Ccontracts C2
+        ccontracts_c2_df = ReadRawStepLoader._read_raw_databases(
+            columns_list=config.data_config.read_raw_config.ccontracts_c2_columns_list,
+            selected_columns_dict=config.data_config.read_raw_config.ccontracts_c2_columns_selected_dict,
+            file_prefix=config.data_config.read_raw_config.cconctracts_c2_prefix,
+            skip_secuencia=False,
+        )
+        ccontracts_c2_df = CContractsC2Builder.build(ccontracts_c2_df)
+
+        # Tgentrades
+        tgentrades_df = ReadRawStepLoader._read_raw_databases(
+            columns_list=config.data_config.read_raw_config.tgentrades_columns_list,
+            selected_columns_dict=config.data_config.read_raw_config.tgentrades_columns_selected_dict,
+            file_prefix=config.data_config.read_raw_config.tgentrades_prefix,
+            skip_secuencia=True,
+        )
+        tgentrades_df = TgentradesBuilder.build(tgentrades_df)
+
+        return ccontracts_c2_df, tgentrades_df

@@ -1,9 +1,7 @@
 import json
 import typing as t
 
-from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
-from src.enums.data_enums.data_type_enum import DataTypeEnum
-from src.enums.data_enums.tgentrades_enum import TgentradesEnum
+from src.enums.data_enums import CcontractsC2Enum, DataTypeEnum, TgentradesEnum
 
 
 class ReadRawConfig:

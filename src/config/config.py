@@ -15,12 +15,25 @@ PRODUCT_SPLIT_DATA_STEP_DIR_PATH = DATA_DIR_PATH / "product_split_data"
 UNDERLYING_DATA_STEP_DIR_PATH = DATA_DIR_PATH / "underlying_data"
 
 RESOURCES_PATH = PROJECT_ROOT_PATH / "resources"
-DATA_CONFIG_FILE_PATH = RESOURCES_PATH / "data_config.json"
+
+for pth in [
+    SRC_DIR_PATH,
+    DATA_DIR_PATH,
+    SOURCE_DATA_DIR_PATH,
+    RAW_DATA_STEP_DIR_PATH,
+    MERGE_RAW_DATA_STEP_DIR_PATH,
+    PRODUCT_SPLIT_DATA_STEP_DIR_PATH,
+    UNDERLYING_DATA_STEP_DIR_PATH,
+    RESOURCES_PATH,
+]:
+    pth.mkdir(parents=True, exist_ok=True)
 
 
 class Config:
+    DATA_CONFIG_FILE_PATH = RESOURCES_PATH / "data_config.json"
+
     def __init__(self):
-        self.data_config = DataConfig(data_config_file_path=DATA_CONFIG_FILE_PATH)
+        self.data_config = DataConfig(data_config_file_path=Config.DATA_CONFIG_FILE_PATH)
         LoggingConfig.setup_logging()
 
 

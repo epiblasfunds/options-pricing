@@ -3,13 +3,31 @@ from datetime import date
 import pandas as pd
 
 from src.config.config import config
-from src.enums.data_enums.contract_type_enum import ContractTypeEnum
+from src.enums.data_enums import ContractTypeEnum
 from src.exceptions.data_exceptions import (
     ContractCcodeLengthError,
     ContractCodeMaturityMonthError,
     ContractCodeMaturityYearError,
     ContractCodeStrikeError,
 )
+
+
+def compute_ibex_mask(contract_code_series: pd.Series) -> pd.Series:
+    return contract_code_series.str.startswith(
+            tuple(config.data_config.contract_code_config.contracts_prefixes),
+            na=False,
+        )
+
+
+def compute_monthly_maturity_mask(contract_code_series: pd.Series) -> pd.Series:
+    # Select only futures and options with monthly maturity
+    # We can identify them because their number of characters
+    return contract_code_series.str.len().isin(
+            [
+                config.data_config.contract_code_config.futures_code_len,
+                config.data_config.contract_code_config.options_code_len,
+            ]
+        )
 
 
 def validate_maturity_contract_code_month(
@@ -180,15 +198,17 @@ def calculate_maturity_from_future_contract_code(
 
 def calculate_maturity_from_contract_code(
     contract_code: str,
-    session_date: date,
+    session_date: str,
 ) -> date:
-    if len(contract_code) == config.contract_code_config.options_code_len:
+    session_date = pd.to_datetime(session_date).date()
+
+    if len(contract_code) == config.data_config.contract_code_config.options_code_len:
         # Options
         maturity_date = calculate_maturity_from_option_contract_code(
             contract_code=contract_code,
         )
 
-    elif len(contract_code) == config.contract_code_config.futures_code_len:
+    elif len(contract_code) == config.data_config.contract_code_config.futures_code_len:
         # Futures
         maturity_date = calculate_maturity_from_future_contract_code(
             contract_code=contract_code, session_date=session_date
