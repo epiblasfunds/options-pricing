@@ -89,7 +89,24 @@ class ProductSplitStepLoader:
         ProductSplitStepLoader._validate_strike(trade_ibex_df)
 
         # NAs
-        if trade_ibex_df.isna().any().any():
+        futures_mask = (
+            trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_TYPE.value]
+            == ContractTypeEnum.FUTURES
+        )
+        futures_df = trade_ibex_df.loc[
+            futures_mask,
+            [
+                c
+                for c in trade_ibex_df.columns
+                if c != TradeIbexDatabaseEnum.STRIKE_PRICE.value
+            ],
+        ]
+        options_mask = (
+            trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_TYPE.value]
+            == ContractTypeEnum.OPTIONS
+        )
+        options_df = trade_ibex_df[options_mask]
+        if futures_df.isna().any().any() or options_df.isna().any().any():
             raise MissingValuesError()
 
     @staticmethod

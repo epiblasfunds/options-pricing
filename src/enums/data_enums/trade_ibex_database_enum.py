@@ -12,4 +12,4 @@ class TradeIbexDatabaseEnum(Enum):
     TRADE_TYPE = "TradeType"
     STRIKE_PRICE = "StrikePrice"
     MATURITY_DATE = "MaturityDate"
-    CONTRACT_Type = "ContractType"
+    CONTRACT_TYPE = "ContractType"

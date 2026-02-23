@@ -15,15 +15,20 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractRawBuilder(ABC):
+    @staticmethod
+    @abstractmethod
+    def get_output_filename() -> Path:
+        raise NotImplementedError("get_output_filename not implemented.")
+
     @classmethod
     @abstractmethod
     def _get_contract_code_column(cls) -> str:
         raise NotImplementedError("_get_contract_type not implemented.")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_output_filename() -> Path:
-        raise NotImplementedError("get_output_filename not implemented.")
+    def _get_name(cls) -> str:
+        raise NotImplementedError("_get_name not implemented.")
 
     @classmethod
     def build(cls, tgentrades_df: pd.DataFrame):
@@ -40,7 +45,9 @@ class AbstractRawBuilder(ABC):
         output_file = cls.get_output_filename()
         tgentrades_df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
-        logger.info(f"DF (with shape {tgentrades_df.shape}) saved in: {output_file}.")
+        logger.info(
+            f"{cls._get_name()} (with shape {tgentrades_df.shape}) saved in: {output_file}."
+        )
 
 
 class CContractsC2Builder(AbstractRawBuilder):
@@ -55,6 +62,10 @@ class CContractsC2Builder(AbstractRawBuilder):
     def _get_contract_code_column(cls) -> str:
         return CcontractsC2Enum.CONTRACT_CODE.value
 
+    @classmethod
+    def _get_name(cls) -> str:
+        return "CContractsC2Database"
+
 
 class TgentradesBuilder(AbstractRawBuilder):
     @staticmethod
@@ -67,3 +78,7 @@ class TgentradesBuilder(AbstractRawBuilder):
     @classmethod
     def _get_contract_code_column(cls) -> str:
         return TgentradesEnum.CONTRACT_CODE.value
+
+    @classmethod
+    def _get_name(cls) -> str:
+        return "TgentradesDatabase"

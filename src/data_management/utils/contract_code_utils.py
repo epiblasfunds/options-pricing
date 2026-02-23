@@ -198,16 +198,13 @@ def calculate_maturity_from_future_contract_code(
 
 def calculate_maturity_from_contract_code(
     contract_code: str,
-    session_date: str,
+    session_date: date,
 ) -> date:
-    session_date = pd.to_datetime(session_date).date()
-
     if len(contract_code) == config.data_config.contract_code_config.options_code_len:
         # Options
         maturity_date = calculate_maturity_from_option_contract_code(
             contract_code=contract_code,
         )
-
     elif len(contract_code) == config.data_config.contract_code_config.futures_code_len:
         # Futures
         maturity_date = calculate_maturity_from_future_contract_code(
@@ -222,13 +219,13 @@ def calculate_maturity_from_contract_code(
 
 
 def calculalte_strike_from_contract_code(contract_code: str) -> float:
-    if len(contract_code) == config.contract_code_config.options_code_len:
+    if len(contract_code) == config.data_config.contract_code_config.options_code_len:
         # Options
         strike_starts = config.data_config.contract_code_config.strike_starts
         strike_ends = config.data_config.contract_code_config.strike_ends
         strike_str = contract_code[strike_starts:strike_ends]
         return float(strike_str)
-    elif len(contract_code) == config.contract_code_config.futures_code_len:
+    elif len(contract_code) == config.data_config.contract_code_config.futures_code_len:
         # Futures don't have strike
         return 0.0
     else:

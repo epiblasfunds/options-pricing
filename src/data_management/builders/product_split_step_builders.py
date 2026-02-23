@@ -20,6 +20,11 @@ class AbstractProductTradeIbexBuilder(ABC):
         raise NotImplementedError("_get_contract_type not implemented.")
 
     @classmethod
+    @abstractmethod
+    def _get_name(cls) -> str:
+        raise NotImplementedError("_get_name not implemented.")
+
+    @classmethod
     def get_output_filename(cls) -> Path:
         suffix = config.data_config.product_split_config.output_filename_contracts
         output_filename = f"{cls._get_contract_type().value}_{suffix}"
@@ -48,7 +53,9 @@ class AbstractProductTradeIbexBuilder(ABC):
         output_file = cls.get_output_filename()
         filtered_df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
-        logger.info(f"DF (with shape {filtered_df.shape}) saved in: {output_file}.")
+        logger.info(
+            f"{cls.get_name()} (with shape {filtered_df.shape}) saved in: {output_file}."
+        )
 
         return filtered_df
 
@@ -58,11 +65,19 @@ class OptionsTradeIbexBuilder(AbstractProductTradeIbexBuilder):
     def _get_contract_type(cls) -> ContractTypeEnum:
         return ContractTypeEnum.OPTIONS
 
+    @classmethod
+    def _get_name(cls) -> str:
+        return "OptionsTradeIbexDatabase"
+
 
 class FuturesTradeIbexBuilder(AbstractProductTradeIbexBuilder):
     @classmethod
     def _get_contract_type(cls) -> ContractTypeEnum:
         return ContractTypeEnum.FUTURES
+
+    @classmethod
+    def _get_name(cls) -> str:
+        return "FuturesTradeIbexDatabase"
 
 
 class OptionsUnderlyingIbexBuilder:
@@ -120,7 +135,7 @@ class OptionsUnderlyingIbexBuilder:
         )
 
         logger.info(
-            f"DF (with shape {options_underlying_ibex_db.shape}) saved in: "
+            f"OptionsUnderlyingIbexDatabase (with shape {options_underlying_ibex_db.shape}) saved in: "
             f"{OptionsUnderlyingIbexBuilder.get_output_filename()}."
         )
 
