@@ -54,7 +54,7 @@ class AbstractProductTradeIbexBuilder(ABC):
         filtered_df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
 
         logger.info(
-            f"{cls.get_name()} (with shape {filtered_df.shape}) saved in: {output_file}."
+            f"{cls._get_name()} (with shape {filtered_df.shape}) saved in: {output_file}."
         )
 
         return filtered_df

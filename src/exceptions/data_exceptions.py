@@ -56,3 +56,8 @@ class NegativeTradePriceError(DataError):
 class NegativeQuantityError(DataError):
     def __init__(self, msg: str = "Quantity contains non-positive (<= 0) values."):
         super().__init__(msg)
+
+
+class SessionAfterMaturityError(DataError):
+    def __init__(self, msg: str = "SessionDate occurs after MaturityDate."):
+        super().__init__(msg)

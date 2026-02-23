@@ -22,7 +22,9 @@
         '2018-01-31', '2018-10-01']
         Length: 57, dtype: str
 - Quitar columnas de la configuración y poner enums **UPDATE**: no se puede quitar columnas de la configuración porque necesitamos saber el orden de las columnas, eso no lo podemos saber con un enum.
-- Stopper al imputar los MaturityDates y Strikes restantes:
-        - El contrato FIBXM7 viene informado con dos maturities distintas: como hace referencia al siguiente año que acaba en ese numero, puede repetirse. IDEA: crear la primaryKey en lugar de (SessionDate, ContractCode), definirlo como (SessionDateYear, ContractCode), asi disminuimos el ccontract muchísimo.
-        - El mergeo es muy pesado hay que ver como optimizar
-        - Imputar también es costoso, hay que ver la manera más eficiente
+
+TODO:
+- GithubActions: mirar formato Flake8 y tirar tests.
+- Hacer tests unitarios
+- Mirar environments de python
+- Crear otro step para calcular la volatilidad implícita.

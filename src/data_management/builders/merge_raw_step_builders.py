@@ -93,7 +93,7 @@ class TradeIbexBuilder:
         missing_cc = merged_df.loc[
             mask,
             [
-                TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN,
+                TradeIbexDatabaseEnum.SESSION_DATE.value,
                 TradeIbexDatabaseEnum.CONTRACT_CODE.value,
             ],
         ].drop_duplicates()
@@ -101,7 +101,7 @@ class TradeIbexBuilder:
         logger.info(
             f"There are {mask.sum()} trades with missing maturities,"
             f"corresponding to {missing_cc.shape[0]} different "
-            f"({TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN}, {TradeIbexDatabaseEnum.CONTRACT_CODE.value}) pairs."
+            f"({TradeIbexDatabaseEnum.SESSION_DATE.value}, {TradeIbexDatabaseEnum.CONTRACT_CODE.value}) pairs."
             "Imputing missing maturities based on this pair."
         )
 
@@ -110,9 +110,9 @@ class TradeIbexBuilder:
             lambda row: calculate_maturity_from_contract_code(
                 contract_code=row[TradeIbexDatabaseEnum.CONTRACT_CODE.value],
                 session_date=pd.to_datetime(
-                    row[TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN], format="%Y"
+                    row[TradeIbexDatabaseEnum.SESSION_DATE.value]
                 ).date(),
-            ),
+            ).strftime("%Y-%m-%d"),
             axis=1,
         )
 
@@ -124,7 +124,7 @@ class TradeIbexBuilder:
         merged_df = merged_df.merge(
             missing_cc,
             on=[
-                TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN,
+                TradeIbexDatabaseEnum.SESSION_DATE.value,
                 TradeIbexDatabaseEnum.CONTRACT_CODE.value,
             ],
             how="left",
@@ -154,8 +154,8 @@ class TradeIbexBuilder:
         #           + Strike Price
         #       we have all the info required for building the TradeIbexDB.
         #   - Optimize processing time: there is no need to calculate the maturity for every
-        #       trade, neither for every session date. It is enough to calculate the maturity
-        #       for every (SessionDateYear, ContractCode) that are actually missing.
+        #       trade. It is enough to calculate the maturity
+        #       for every (SessionDate, ContractCode) that are actually missing.
         """
         ccontracts_c2_df[TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN] = pd.to_datetime(
             ccontracts_c2_df[CcontractsC2Enum.SESSION_DATE.value]
@@ -189,11 +189,6 @@ class TradeIbexBuilder:
         # Impute missing maturity dates and strikes
         merged_df = TradeIbexBuilder.impute_missing_maturities(merged_df=merged_df)
         merged_df = TradeIbexBuilder.impute_missing_strikes(merged_df=merged_df)
-
-        # logger.info(
-        #    f"There are {missing_maturity_dates_mask.sum()} missing maturities"
-        #    f" corresponding to {missings_cc} contract codes."
-        # )
 
         # Select only relevant columns
         merged_df = merged_df[

@@ -20,6 +20,7 @@ from src.exceptions.data_exceptions import (
     MissingValuesError,
     NegativeQuantityError,
     NegativeTradePriceError,
+    SessionAfterMaturityError,
 )
 
 logger = logging.getLogger(__name__)
@@ -84,6 +85,15 @@ class ProductSplitStepLoader:
         ProductSplitStepLoader._validate_maturity(
             trade_ibex_df, ContractTypeEnum.FUTURES
         )
+
+        # Validate maturity and session date coherence
+        session = pd.to_datetime(trade_ibex_df[TradeIbexDatabaseEnum.SESSION_DATE.value])
+        maturity = pd.to_datetime(trade_ibex_df[TradeIbexDatabaseEnum.MATURITY_DATE.value])
+
+        mask = session > maturity
+        if mask.any():
+            sample = trade_ibex_df[mask].iloc[0]
+            raise SessionAfterMaturityError(f"SessionDate occurs after MaturityDate.\nExample: {sample}.")
 
         # Validate strikes with contract code
         ProductSplitStepLoader._validate_strike(trade_ibex_df)
