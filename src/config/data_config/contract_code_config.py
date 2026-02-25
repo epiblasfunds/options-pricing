@@ -21,8 +21,6 @@ class ContractCodeConfig:
 
         # cheatsheet
         self.futures_code_month = contract_code_config["futures_code_month"]
-        self.call_code_month = contract_code_config["call_code_month"]
-        self.put_code_month = contract_code_config["put_code_month"]
 
     def __init__(self, data_config_file_path: str):
         self._load_config(data_config_file_path)

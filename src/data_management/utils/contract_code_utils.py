@@ -65,7 +65,7 @@ def validate_maturity_contract_code_year(
         (contract_type == ContractTypeEnum.OPTIONS)
         | (
             # As Futures ContractCode have just one number for the year, it indicates
-            # the next year ending in this number, son can't be further than 10 years
+            # the next year ending in this number, so can't be further than 10 years
             (contract_type == ContractTypeEnum.FUTURES)
             & (
                 pd.to_datetime(m_series).dt.year - pd.to_datetime(sd_series).dt.year
