@@ -1,10 +1,9 @@
 import json
-import typing as t
 
 
 class ProductSplitConfig:
     def _load_config(self, data_config_file_path: str):
-        with(open(data_config_file_path, "r") as f):
+        with (open(data_config_file_path, "r") as f):
             data_config = json.load(f)
         product_split_step_name = "product_split_step"
         self.filter_contract_column = data_config[product_split_step_name]["filter_contract_column"]

@@ -1,9 +1,31 @@
 {
     "first_year": 2017,
     "last_year": 2022,
-    "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
-    "n_characters_futures_code": 6,
-    "n_characters_options_code": 12,
+    "contract_code":{
+        "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
+        "futures_code_len": 6,
+        "options_code_len": 12,
+        "strike_starts": -8,
+        "strike_ends": -3,
+        "month_options_code_idx": -3,
+        "year_options_code_idx": -2,
+        "month_futures_code_idx": -2,
+        "year_futures_code_idx": -1,
+        "futures_code_month": {
+            "F": 1,
+            "G": 2,
+            "H": 3,
+            "J": 4,
+            "K": 5,
+            "M": 6,
+            "N": 7,
+            "Q": 8,
+            "U": 9,
+            "V": 10,
+            "X": 11,
+            "Z": 12
+        }
+    },
     "read_raw_step": {
         "ccontracts_c2_prefix": "CCONTRACTS_C2",
         "ccontracts_c2_columns": {
@@ -55,12 +77,11 @@
             "MaturityDate"
         ],
         "contract_type_column": "ContractType"
-
     },
     "product_split_step": {
         "filter_contract_column": "ContractCode",
         "contract_types": {
-            "OPTIONS": {
+            "options": {
                 "prefixes": ["CIBX", "PIBX"],
                 "contract_column_new": "OptionContractCode",
                 "columns": [
@@ -76,7 +97,7 @@
                     "MaturityDate"
                 ]
             },
-            "FUTURES": {
+            "futures": {
                 "prefixes": ["FIBX"],
                 "contract_column_new": "FutureContractCode",
                 "columns": [
@@ -100,7 +121,7 @@
         "options_trade_underlying_ibex_database_columns": [
             "OptionContractCode",
             "FutureContractCode",
-            "UnderelayingPrice",
+            "UnderlayingPrice",
             "SessionDate",
             "MarketCode",
             "TradeExecID",
@@ -111,7 +132,8 @@
             "StrikePrice",
             "MaturityDate",
             "ExecTime",
-            "UnderelayingExecTime"
+            "ExecDatetime",
+            "UnderlyingExecDatetime"
         ],
         "output_filename": "OPTIONS_TRADE_UNDERLYING_IBEX_DATABASE"
     }

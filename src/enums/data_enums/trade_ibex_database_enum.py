@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class TgentradesEnum(Enum):
+class TradeIbexDatabaseEnum(Enum):
     SESSION_DATE = "SessionDate"
     CONTRACT_CODE = "ContractCode"
     MARKET_CODE = "MarketCode"
@@ -10,5 +10,6 @@ class TgentradesEnum(Enum):
     TRADE_PRICE = "TradePrice"
     QUANTITY = "Quantity"
     TRADE_TYPE = "TradeType"
-    YEAR = "Year"
-    SOURCE_FILE = "SourceFile"
+    STRIKE_PRICE = "StrikePrice"
+    MATURITY_DATE = "MaturityDate"
+    CONTRACT_TYPE = "ContractType"

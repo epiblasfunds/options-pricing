@@ -1,3 +1,4 @@
+- Si se me peta el notebook en vscode: Ctrl+Shift+P → Developer: Reload Window
 - Hemos modificado una línea em TGENTRADES el 2020/03/13 (ctrl+F de 2020031K)
 - El maturity date se puede dejar como YYYYMM ya que solo hay un vencimiento al mes
 - https://www.meff.es/esp/Derivados-Financieros/Futuros-sobre-IBEX35
@@ -20,4 +21,10 @@
         '2017-03-13', '2017-03-14', '2017-03-15', '2017-03-16', '2017-03-20',
         '2018-01-31', '2018-10-01']
         Length: 57, dtype: str
-- Quitar columnas de la configuración y poner enums
+- Quitar columnas de la configuración y poner enums **UPDATE**: no se puede quitar columnas de la configuración porque necesitamos saber el orden de las columnas, eso no lo podemos saber con un enum.
+
+TODO:
+- GithubActions: mirar formato Flake8 y tirar tests.
+- Hacer tests unitarios
+- Mirar environments de python
+- Crear otro step para calcular la volatilidad implícita.
