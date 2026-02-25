@@ -108,10 +108,10 @@ class MergeRawStepLoader:
     @staticmethod
     def _validate_trades_df(trades_df):
         # Format validations
-        if (trades_df["TradePrice"].astype("float64") <= 0.0).any():
+        if (trades_df[TgentradesEnum.TRADE_PRICE.value].astype("float64") <= 0.0).any():
             raise NegativeTradePriceError()
 
-        if (trades_df["Quantity"].astype("float64") <= 0.0).any():
+        if (trades_df[TgentradesEnum.QUANTITY.value].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
 
         # Unique Primary Keys

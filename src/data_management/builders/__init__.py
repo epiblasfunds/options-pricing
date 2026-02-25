@@ -8,6 +8,9 @@ from src.data_management.builders.read_raw_step_builders import (
     CContractsC2Builder,
     TgentradesBuilder,
 )
+from src.data_management.builders.underlying_step_builders import (
+    OptionsTradeUnderlyingIbexBuilder,
+)
 
 __all__ = [
     "CContractsC2Builder",
@@ -16,4 +19,5 @@ __all__ = [
     "OptionsTradeIbexBuilder",
     "FuturesTradeIbexBuilder",
     "OptionsUnderlyingIbexBuilder",
+    "OptionsTradeUnderlyingIbexBuilder",
 ]

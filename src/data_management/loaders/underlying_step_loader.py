@@ -7,16 +7,19 @@ from src.config.config import UNDERLYING_DATA_STEP_DIR_PATH, config
 from src.data_management.builders import (
     FuturesTradeIbexBuilder,
     OptionsTradeIbexBuilder,
-    OptionsUnderlyingIbexBuilder,
-)
-from src.data_management.builders.underlying_step_builders import (
     OptionsTradeUnderlyingIbexBuilder,
+    OptionsUnderlyingIbexBuilder,
 )
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
-from src.enums.data_enums import CcontractsC2Enum, ContractTypeEnum, TgentradesEnum
+from src.enums.data_enums import (
+    CcontractsC2Enum,
+    ContractTypeEnum,
+    FuturesTradeIbexDatabaseEnum,
+    OptionsTradeIbexDatabaseEnum,
+)
 from src.exceptions.data_exceptions import (
     DuplicatedPrimaryKeysError,
     MissingValuesError,
@@ -71,10 +74,21 @@ class UnderlyingStepLoader:
             )
 
     @staticmethod
-    def _validate_maturity(contracts_df: pd.DataFrame, contract_type: ContractTypeEnum):
-        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
-        maturity_series = contracts_df[CcontractsC2Enum.MATURITY_DATE.value]
-        session_date_series = contracts_df[CcontractsC2Enum.SESSION_DATE.value]
+    def _validate_maturity(
+        trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
+    ):
+        if contract_type == ContractTypeEnum.OPTIONS:
+            contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value
+            maturity_date_col = OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value
+            session_date_col = OptionsTradeIbexDatabaseEnum.SESSION_DATE.value
+        else:
+            contract_code_col = FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value
+            maturity_date_col = FuturesTradeIbexDatabaseEnum.MATURITY_DATE.value
+            session_date_col = FuturesTradeIbexDatabaseEnum.SESSION_DATE.value
+
+        contract_code_series = trade_ibex_df[contract_code_col]
+        maturity_series = trade_ibex_df[maturity_date_col]
+        session_date_series = trade_ibex_df[session_date_col]
 
         validate_maturity_contract_code(
             contract_type=contract_type,
@@ -84,77 +98,90 @@ class UnderlyingStepLoader:
         )
 
     @staticmethod
-    def _validate_strike(contracts_df: pd.DataFrame):
-        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
-        strike_series = contracts_df[CcontractsC2Enum.STRIKE_PRICE.value]
+    def _validate_strike(trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum):
+        if contract_type == ContractTypeEnum.FUTURES:
+            return
+
+        contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value
+        strike_col = OptionsTradeIbexDatabaseEnum.STRIKE_PRICE.value
+
+        contract_code_series = trade_ibex_df[contract_code_col]
+        strike_series = trade_ibex_df[strike_col]
         validate_strike_contract_code(
             contract_code_series=contract_code_series,
             strike_series=strike_series,
         )
 
     @staticmethod
-    def _validate_missing_ccontracts(contracts_df: pd.DataFrame):
-        cc_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
+    def _validate_missings(
+        trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
+    ):
+        if contract_type == ContractTypeEnum.FUTURES:
+            selected_cols = [
+                c
+                for c in trade_ibex_df.columns
+                if c != FuturesTradeIbexDatabaseEnum.STRIKE_PRICE.value
+            ]
+            trade_ibex_df = trade_ibex_df[selected_cols]
 
-        options_contracts_mask = (
-            cc_series.str.len()
-            == config.data_config.contract_code_config.options_code_len
-        )
-        options = contracts_df[options_contracts_mask]
-
-        futures_contracts_mask = (
-            cc_series.str.len()
-            == config.data_config.contract_code_config.futures_code_len
-        )
-        future_columns = [
-            c for c in contracts_df.columns if c != CcontractsC2Enum.STRIKE_PRICE.value
-        ]
-        futures = contracts_df[futures_contracts_mask][future_columns]
-
-        if options.isna().any().any() or futures.isna().any().any():
-            raise MissingValuesError()
+        if trade_ibex_df.isna().any().any():
+            raise MissingValuesError("Missing values found for Options.")
+        else:
+            return
 
     @staticmethod
-    def _validate_trades_df(trades_df):
+    def _validate_trade_df(
+        trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
+    ):
+        if contract_type == ContractTypeEnum.OPTIONS:
+            trade_exec_id_col = OptionsTradeIbexDatabaseEnum.TRADE_EXEC_ID.value
+            trade_price_col = OptionsTradeIbexDatabaseEnum.TRADE_PRICE.value
+            quantity_col = OptionsTradeIbexDatabaseEnum.QUANTITY.value
+        else:
+            trade_exec_id_col = FuturesTradeIbexDatabaseEnum.TRADE_EXEC_ID.value
+            trade_price_col = FuturesTradeIbexDatabaseEnum.TRADE_PRICE.value
+            quantity_col = FuturesTradeIbexDatabaseEnum.QUANTITY.value
+
         # Format validations
-        if (trades_df["TradePrice"].astype("float64") <= 0.0).any():
+        if (trade_ibex_df[trade_price_col].astype("float64") <= 0.0).any():
             raise NegativeTradePriceError()
 
-        if (trades_df["Quantity"].astype("float64") <= 0.0).any():
+        if (trade_ibex_df[quantity_col].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
 
         # Unique Primary Keys
-        MergeRawStepLoader._validate_primary_keys(
-            df=trades_df,
+        UnderlyingStepLoader._validate_primary_keys(
+            df=trade_ibex_df,
             pk_columns=[
-                TgentradesEnum.TRADE_EXEC_ID.value,
-            ],
-        )
-
-        # NAs
-        if trades_df.isna().any().any():
-            raise MissingValuesError()
-
-    @staticmethod
-    def _validate_options(contracts_df):
-        # Unique Primary Keys
-        MergeRawStepLoader._validate_primary_keys(
-            df=contracts_df,
-            pk_columns=[
-                CcontractsC2Enum.SESSION_DATE.value,
-                CcontractsC2Enum.CONTRACT_CODE.value,
+                trade_exec_id_col,
             ],
         )
 
         # Validate maturity with contract code
-        MergeRawStepLoader._validate_maturity(contracts_df, ContractTypeEnum.OPTIONS)
-        MergeRawStepLoader._validate_maturity(contracts_df, ContractTypeEnum.FUTURES)
+        UnderlyingStepLoader._validate_maturity(trade_ibex_df, contract_type)
 
         # Validate strikes with contract code
-        MergeRawStepLoader._validate_strike(contracts_df)
+        UnderlyingStepLoader._validate_strike(trade_ibex_df, contract_type)
 
         # NAs
-        MergeRawStepLoader._validate_missing_ccontracts(contracts_df)
+        UnderlyingStepLoader._validate_missings(trade_ibex_df, contract_type)
+
+    @staticmethod
+    def _validate_underlying_candidates(options_underlying_ibex_df: pd.DataFrame):
+        # Unique Primary Keys
+        UnderlyingStepLoader._validate_primary_keys(
+            df=options_underlying_ibex_df,
+            pk_columns=[
+                OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value,
+                FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value,
+            ],
+        )
+
+        # NAs
+        if options_underlying_ibex_df.isna().any().any():
+            raise MissingValuesError(
+                "Missing values found for Options-Underlying candidates."
+            )
 
     @staticmethod
     def _validate_sources(
@@ -162,8 +189,12 @@ class UnderlyingStepLoader:
         futures_trade_ibex_df: pd.DataFrame,
         options_underlying_ibex_df: pd.DataFrame,
     ):
-        UnderlyingStepLoader._validate_options(options_trade_ibex_df)
-        UnderlyingStepLoader._validate_futures(futures_trade_ibex_df)
+        UnderlyingStepLoader._validate_trade_df(
+            options_trade_ibex_df, ContractTypeEnum.OPTIONS
+        )
+        UnderlyingStepLoader._validate_trade_df(
+            futures_trade_ibex_df, ContractTypeEnum.FUTURES
+        )
         UnderlyingStepLoader._validate_underlying_candidates(options_underlying_ibex_df)
 
     @staticmethod

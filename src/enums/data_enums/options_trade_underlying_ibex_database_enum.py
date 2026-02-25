@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class OptionsTradeIbexUnderlyingDatabaseEnum(Enum):
+    EXEC_DATETIME = "ExecDatetime"
     EXEC_TIME = "ExecTime"
     FUTURE_CONTRACT_CODE = "FutureContractCode"
     MARKET_CODE = "MarketCode"
@@ -13,5 +14,5 @@ class OptionsTradeIbexUnderlyingDatabaseEnum(Enum):
     TRADE_EXEC_ID = "TradeExecID"
     TRADE_PRICE_OPTION = "TradePriceOption"
     TRADE_TYPE = "TradeType"
-    UNDERLYING_EXEC_TIME = "UnderelayingExecTime"
-    UNDERLYING_PRICE = "UnderelayingPrice"
+    UNDERLYING_EXEC_DATETIME = "UnderlyingExecDatetime"
+    UNDERLYING_PRICE = "UnderlayingPrice"
