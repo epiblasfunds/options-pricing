@@ -122,7 +122,7 @@ class OptionsUnderlyingIbexBuilder:
         # Merge on MaturityDate
         options_underlying_ibex_db = options_df.merge(
             futures_df,
-            how="left",
+            how="inner",
             on=OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value,
         )
 

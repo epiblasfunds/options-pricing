@@ -61,3 +61,23 @@ class NegativeQuantityError(DataError):
 class SessionAfterMaturityError(DataError):
     def __init__(self, msg: str = "SessionDate occurs after MaturityDate."):
         super().__init__(msg)
+
+
+class UnderlyingExecDatetimeAfterExecDatetimeError(DataError):
+    def __init__(self, msg: str = "UnderlyingExecDatetime occurs after ExecDatetime."):
+        super().__init__(msg)
+
+
+class UnderlyingExecDatetimeOutOfRangeError(DataError):
+    def __init__(self, msg: str = "UnderlyingExecDatetime is outside the valid range."):
+        super().__init__(msg)
+
+
+class RatesOutOfRangeError(DataError):
+    def __init__(self, msg: str = "Interest rates are outside the valid range."):
+        super().__init__(msg)
+
+
+class TimeToMaturityOutOfRangeError(DataError):
+    def __init__(self, msg: str = "Time to maturity is outside the valid range."):
+        super().__init__(msg)

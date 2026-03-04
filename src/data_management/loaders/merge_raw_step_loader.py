@@ -25,14 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class MergeRawStepLoader:
-    OUTPUT_FILENAME = (
-        MERGE_RAW_DATA_STEP_DIR_PATH
-        / f"{config.data_config.merge_raw_config.output_filename}.csv"
-    )
 
     # READ
     @staticmethod
-    def _read_trades_and_contracts_dfs() -> None:
+    def _read_trades_and_contracts_dfs() -> tuple[pd.DataFrame, pd.DataFrame]:
         trades_df = pd.read_csv(
             TgentradesBuilder.get_output_filename(),
             delimiter=";",
