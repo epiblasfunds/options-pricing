@@ -1,8 +1,33 @@
-- Si se me peta el notebook en vscode: Ctrl+Shift+P → Developer: Reload Window
-- Hemos modificado una línea em TGENTRADES el 2020/03/13 (ctrl+F de 2020031K)
-- El maturity date se puede dejar como YYYYMM ya que solo hay un vencimiento al mes
-- https://www.meff.es/esp/Derivados-Financieros/Futuros-sobre-IBEX35
-- Comentar que en las siguientes fechas no tenemos la info de CCONTRACTS: 
+######### TASKS TO DO #########
+1. (~OK revisar DUDAS) Arreglar step del underlying
+2. (~OK) Hacer el step de leer rates raw data + validaciones
+3. (~OK) Hacer el step de generar el free risk rate por trade + validaciones
+4. (~OK y revisar juntos el proceso de volatilidades y resultados) Hacer el step de volatilidad implícita + validaciones
+5. Hacer test unitarios de todas las funcionalidades: Foco en las funciones de utils
+6. Desplegar los WF Actions tras los test y flake 8
+7. Revisar las validaciones y que todas las funcionalidades las tengan
+8. Revisar logging: Entenderlos e incluirlos en todas las funcionalidades
+9. Revisar exceptions: Entenderlos e incluirlos en todas las funcionalidades
+10. Pintar bien el Draw.io
+11. Aplicar EDA en algún punto:
+	- Pintar curvas. Categorizar las superficies como buenas o extrañas (identificando por qué son extrañas con ayuda de Codex)
+	- Analizar si la negociación del subyacente está muy lejana en tiempo de la de la opción
+12. Preparar split
+13. Pedro arreglar lo que decía del enviroment de Python
+14. Revisar toda la parte de data para cerrar
+15. Hacer un primer modelo tonto
+
+
+
+######### DUDAS #########
+- Cuando ejecutamos el main.py de src simplemente sale el resultado al final, ¿Deberíamos meter algún loggin para conocer qué step se está ejecutando?
+- He visto que algún validate tiene columnas con el nombre directamente y no con un ENUM. Revisar y considerar si deberíamos meter el ENUM
+- Los archivos que se generan en product_split_data salen con minúsculas y deberíamos tenerlos en mayúsucula por coherencia. Para ello habría que modificar el ContractTypeEnum pero no sé si impactará en algún otro punto.
+- Hacer reindex de las tablas finales de cada build
+- En el product_split_step, en la tabla que relaciona contract codes de opciones con el contract code de su subyacente he metido un inner join para evitar esas opciones que no vemos sus subyacente. Tenemos que explorar porque hace sentido que tengamos que hacer un left join para no perder ninguno de los 92 contract code de las opciones. Además, en este step, en su build hay un filtro para coger trades de opciones de las que tengamos su subyacente
+- En el underlying_step sale algun campo de maturity con NA
+- Kike proponía tomar como subyacente el IBEX tal cual, siempre que tomemos como fecha de negociación una super cercana a la de la opción. Habrá que valorar esta opción en paralelos
+- Comentar que en las siguientes fechas no tenemos la info de CCONTRACTS. ¿Con esto qué hacemos?: 
         C:\Users\danir\AppData\Local\Temp\ipykernel_24928\4142060285.py:11: DtypeWarning: Columns (0: TradeExecID, 1: MaturityDate) have mixed types. Specify dtype option on import or set low_memory=False.
         df = pd.read_csv(MERGE_RAW_DATA_STEP_DIR_PATH / "TRADE_IBEX_DATABASE.csv", sep=";")
         ContractCode distintos con MaturityDate nulo: 669
@@ -21,10 +46,27 @@
         '2017-03-13', '2017-03-14', '2017-03-15', '2017-03-16', '2017-03-20',
         '2018-01-31', '2018-10-01']
         Length: 57, dtype: str
-- Quitar columnas de la configuración y poner enums **UPDATE**: no se puede quitar columnas de la configuración porque necesitamos saber el orden de las columnas, eso no lo podemos saber con un enum.
+- Tenemos validaciones de que el season date coincide con la fecha de ejecución?
+- Añadir validacion en el step del underlying para que la tabla de relación opciones futuros esté completa. (no sé si ya está)
+- Para medir el tiempo a vencimiento, en el maturity date es a qué hora?
+- Comentar con kike lo siguiente:
+        | Periodo      | Hedge funding          | Tasa correcta |
+        | ------------ | ---------------------- | ------------- |
+        | Pre-2019     | unsecured bank funding | Euribor       |
+        | Post-reforma | collateral overnight   | €STR          |
+- ¿Por que en options uderlying se tiene este campo ExecTime.1?
+- https://data.ecb.europa.eu/data/datasets/FM/FM.M.U2.EUR.4F.MM.R_EURIBOR3MD_.HSTA
+- Por qué las funciones del builder no llevan _?
+- Confirmar el enum de risk free rate
+- Los nuevos nombres me parecen muy largos
+- Esta función la tengo repetida en dos: _read_options_trade_underlying_ibex_database
+- Revisar logging resultado de volatilidad para que sea comparable y homogeneo al de otros steps
+- _validate_primary_keys tiene un raise definido dentro, no debería ir dentro del bloque de exceptions?
+- seguramente haya que crear un utils de validaciones porque muchas funciones son copia pega
 
-TODO:
-- GithubActions: mirar formato Flake8 y tirar tests.
-- Hacer tests unitarios
-- Mirar environments de python
-- Crear otro step para calcular la volatilidad implícita.
+######### DUDAS RESUELTAS #########
+- Si se me peta el notebook en vscode: Ctrl+Shift+P → Developer: Reload Window
+- Hemos modificado una línea em TGENTRADES el 2020/03/13 (ctrl+F de 2020031K)
+- El maturity date se puede dejar como YYYYMM ya que solo hay un vencimiento al mes
+- https://www.meff.es/esp/Derivados-Financieros/Futuros-sobre-IBEX35
+- Quitar columnas de la configuración y poner enums **UPDATE**: no se puede quitar columnas de la configuración porque necesitamos saber el orden de las columnas, eso no lo podemos saber con un enum.
