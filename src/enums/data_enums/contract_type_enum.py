@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
 # Contract type codes
-class ContractTypeEnum(Enum):
+class ContractTypeEnum(StrEnum):
     OPTIONS = "options"
     FUTURES = "futures"

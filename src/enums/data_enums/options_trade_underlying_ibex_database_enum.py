@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OptionsTradeUnderlyingIbexDatabaseEnum(Enum):
-    EXEC_DATETIME = "ExecDatetime"
+class OptionsTradeUnderlyingIbexDatabaseEnum(StrEnum):
+    EXEC_DATETIME = "ExecDateTime"
     EXEC_TIME = "ExecTime"
     FUTURE_CONTRACT_CODE = "FutureContractCode"
     MARKET_CODE = "MarketCode"
@@ -14,5 +14,6 @@ class OptionsTradeUnderlyingIbexDatabaseEnum(Enum):
     TRADE_EXEC_ID = "TradeExecID"
     TRADE_PRICE_OPTION = "TradePriceOption"
     TRADE_TYPE = "TradeType"
-    UNDERLYING_EXEC_DATETIME = "UnderlyingExecDatetime"
+    UNDERLYING_EXEC_DATETIME = "UnderlyingExecDateTime"
     UNDERLYING_PRICE = "UnderlyingPrice"
+    TIME_TO_EXPIRATION = "TimeToExpiration"

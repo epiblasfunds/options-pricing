@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataTypeEnum(Enum):
+class DataTypeEnum(StrEnum):
     DATE = "date"
     DATETIME = "datetime"
     FLOAT = "float"

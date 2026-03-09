@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class TgentradesEnum(Enum):
+class TgentradesEnum(StrEnum):
     CONTRACT_CODE = "ContractCode"
     EXEC_TIME = "ExecTime"
     MARKET_CODE = "MarketCode"

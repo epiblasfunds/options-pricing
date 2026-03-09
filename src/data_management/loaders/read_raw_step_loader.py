@@ -6,8 +6,16 @@ from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 
-from src.config.config import SOURCE_DATA_DIR_PATH, config
-from src.data_management.builders import CContractsC2Builder, TgentradesBuilder
+from src.config.config import (
+    SOURCE_MARKET_DATA_DIR_PATH,
+    SOURCE_RATES_DATA_DIR_PATH,
+    config,
+)
+from src.data_management.builders import (
+    CContractsC2Builder,
+    RatesBuilder,
+    TgentradesBuilder,
+)
 from src.enums.data_enums import DataTypeEnum
 
 logger = logging.getLogger(__name__)
@@ -82,8 +90,7 @@ class ReadRawStepLoader:
         df: pd.DataFrame,
         selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     ) -> pd.DataFrame:
-        for col_enum, dtype in selected_columns_dict.items():
-            col = col_enum.value
+        for col, dtype in selected_columns_dict.items():
             if dtype == DataTypeEnum.DATE:
                 df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
             elif dtype == DataTypeEnum.DATETIME:
@@ -117,7 +124,7 @@ class ReadRawStepLoader:
         first_year = config.data_config.read_raw_config.first_year
         last_year = config.data_config.read_raw_config.last_year
         for year in tqdm(range(first_year, last_year + 1)):
-            path_year = SOURCE_DATA_DIR_PATH / f"{year}"
+            path_year = SOURCE_MARKET_DATA_DIR_PATH / f"{year}"
 
             file_list = list(path_year.glob(f"{file_prefix}_*.TXT")) + list(
                 path_year.glob(f"{file_prefix}_*.M3")
@@ -144,13 +151,13 @@ class ReadRawStepLoader:
                         f"unknown_{i+1}"
                         for i in range(max(0, total_columns - len(columns_list)))
                     ]
-                    column_names = [c.value for c in columns_list] + unknown_names
+                    column_names = [c for c in columns_list] + unknown_names
 
                     # Assign
                     df.columns = column_names
 
                     # Select only relevant columns
-                    relevant_columns = [c.value for c in selected_columns_dict.keys()]
+                    relevant_columns = [c for c in selected_columns_dict.keys()]
                     df = df[relevant_columns]
 
                     # Convert data types
@@ -171,7 +178,7 @@ class ReadRawStepLoader:
         return data_raw
 
     @staticmethod
-    def load() -> t.Tuple[pd.DataFrame, pd.DataFrame]:
+    def _read() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         # Ccontracts C2
         ccontracts_c2_df = ReadRawStepLoader._read_raw_databases(
             columns_list=config.data_config.read_raw_config.ccontracts_c2_columns_list,
@@ -179,7 +186,6 @@ class ReadRawStepLoader:
             file_prefix=config.data_config.read_raw_config.cconctracts_c2_prefix,
             skip_secuencia=False,
         )
-        ccontracts_c2_df = CContractsC2Builder.build(ccontracts_c2_df)
 
         # Tgentrades
         tgentrades_df = ReadRawStepLoader._read_raw_databases(
@@ -188,6 +194,34 @@ class ReadRawStepLoader:
             file_prefix=config.data_config.read_raw_config.tgentrades_prefix,
             skip_secuencia=True,
         )
-        tgentrades_df = TgentradesBuilder.build(tgentrades_df)
 
-        return ccontracts_c2_df, tgentrades_df
+        # EONIA
+        eonia_df = pd.read_csv(
+            SOURCE_RATES_DATA_DIR_PATH / "ECB_EONIA.csv",
+            delimiter=",",
+            header=0,
+            dtype="string",
+        )
+
+        # STR
+        str_df = pd.read_csv(
+            SOURCE_RATES_DATA_DIR_PATH / "ECB_STR.csv",
+            delimiter=",",
+            header=0,
+            dtype="string",
+        )
+
+        return ccontracts_c2_df, tgentrades_df, eonia_df, str_df
+
+    @staticmethod
+    def load() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
+        # Read raw databases
+        ccontracts_c2_df, tgentrades_df, eonia_df, str_df = ReadRawStepLoader._read()
+
+        # Builders
+        ccontracts_c2_df = CContractsC2Builder.build(ccontracts_c2_df)
+        tgentrades_df = TgentradesBuilder.build(tgentrades_df)
+        rates_df = RatesBuilder.build(eonia_df, str_df)
+
+        return ccontracts_c2_df, tgentrades_df, rates_df
+        

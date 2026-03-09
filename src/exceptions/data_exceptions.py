@@ -52,6 +52,9 @@ class NegativeTradePriceError(DataError):
     def __init__(self, msg: str = "TradePrice contains non-positive (<= 0) values."):
         super().__init__(msg)
 
+class NegativeTimeToExpirationError(DataError):
+    def __init__(self, msg: str = "TimeToExpiration contains negative values."):
+        super().__init__(msg)
 
 class NegativeQuantityError(DataError):
     def __init__(self, msg: str = "Quantity contains non-positive (<= 0) values."):
@@ -78,6 +81,6 @@ class RatesOutOfRangeError(DataError):
         super().__init__(msg)
 
 
-class TimeToMaturityOutOfRangeError(DataError):
-    def __init__(self, msg: str = "Time to maturity is outside the valid range."):
+class TimeToExpirationOutOfRangeError(DataError):
+    def __init__(self, msg: str = "Time to expiration is outside the valid range."):
         super().__init__(msg)

@@ -36,6 +36,13 @@ class ReadRawConfig:
         }
         self.tgentrades_prefix = data_config[read_raw_step_name]["tgentrades_prefix"]
 
+        # RATES
+        self.idx_rate_values = data_config[read_raw_step_name]["idx_rate_values"]
+        self.spread_str_eonia = data_config[read_raw_step_name]["spread_str_eonia"]
+        self.cutoff_date_str_eonia = data_config[read_raw_step_name]["cutoff_date_str_eonia"]
+        self.rates_date_column_name = data_config[read_raw_step_name]["rates_date_column_name"]
+        self.rates_output_filename = data_config[read_raw_step_name]["rates_output_filename"]
+
     def _load_config(self, data_config_file_path: str):
         with open(data_config_file_path, "r") as f:
             data_config = json.load(f)

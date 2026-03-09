@@ -45,7 +45,7 @@ def validate_maturity_contract_code_month(
     if invalid_months.any():
         first_invalid = cc_series[invalid_months].iloc[0]
         raise ContractCodeMaturityMonthError(
-            f"There are {contract_type.value} contract codes with maturity month "
+            f"There are {contract_type} contract codes with maturity month "
             "that does not match the maturity date month. "
             f"First invalid option code: {first_invalid}."
         )
@@ -76,7 +76,7 @@ def validate_maturity_contract_code_year(
     if invalid_years.any():
         first_invalid = cc_series[invalid_years].iloc[0]
         raise ContractCodeMaturityYearError(
-            f"There are {contract_type.value} contract codes with maturity year "
+            f"There are {contract_type} contract codes with maturity year "
             "that does not match the maturity date year. "
             f"First invalid option code: {first_invalid}."
         )
@@ -238,8 +238,8 @@ def get_contract_type(code: str) -> str:
     if pd.isna(code):
         return pd.NA
     elif len(code) == config.data_config.contract_code_config.options_code_len:
-        return ContractTypeEnum.OPTIONS.value
+        return ContractTypeEnum.OPTIONS
     elif len(code) == config.data_config.contract_code_config.futures_code_len:
-        return ContractTypeEnum.FUTURES.value
+        return ContractTypeEnum.FUTURES
     else:
         return pd.NA

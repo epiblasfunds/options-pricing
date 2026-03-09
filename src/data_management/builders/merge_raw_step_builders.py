@@ -8,8 +8,12 @@ from src.data_management.utils.contract_code_utils import (
     calculate_maturity_from_contract_code,
     get_contract_type,
 )
-from src.enums.data_enums import CcontractsC2Enum, TgentradesEnum, TradeIbexDatabaseEnum
-from src.enums.data_enums.contract_type_enum import ContractTypeEnum
+from src.enums.data_enums import (
+    CcontractsC2Enum,
+    ContractTypeEnum,
+    TgentradesEnum,
+    TradeIbexDatabaseEnum,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +23,7 @@ class TradeIbexBuilder:
         MERGE_RAW_DATA_STEP_DIR_PATH
         / f"{config.data_config.merge_raw_config.output_filename}.csv"
     )
-    SESSION_DATE_YEAR_COLUMN = f"{TradeIbexDatabaseEnum.SESSION_DATE.value}Year"
+    SESSION_DATE_YEAR_COLUMN = f"{TradeIbexDatabaseEnum.SESSION_DATE}Year"
 
     @staticmethod
     def get_output_filename():
@@ -30,32 +34,32 @@ class TradeIbexBuilder:
         # 2026-02-23 18:09:24,906 | INFO | src.data_management.builders.merge_raw_step_builders |
         # There are 16442721 missing maturities corresponding to 4600 contract codes.
         mask_missing_strike_price = merged_df[
-            TradeIbexDatabaseEnum.STRIKE_PRICE.value
+            TradeIbexDatabaseEnum.STRIKE_PRICE
         ].isna()
         mask_options = (
-            merged_df[TradeIbexDatabaseEnum.CONTRACT_TYPE.value]
-            == ContractTypeEnum.OPTIONS.value
+            merged_df[TradeIbexDatabaseEnum.CONTRACT_TYPE]
+            == ContractTypeEnum.OPTIONS
         )
         mask = mask_missing_strike_price & mask_options
 
         missing_cc = merged_df.loc[
             mask,
             [
-                TradeIbexDatabaseEnum.CONTRACT_CODE.value,
+                TradeIbexDatabaseEnum.CONTRACT_CODE,
             ],
         ].drop_duplicates()
 
         logger.info(
             f"There are {mask.sum()} option trades with missing strike price,"
-            f"corresponding to {missing_cc.shape[0]} different {TradeIbexDatabaseEnum.CONTRACT_CODE.value}."
-            "Imputing missing strikes."
+            f"corresponding to {missing_cc.shape[0]} different {TradeIbexDatabaseEnum.CONTRACT_CODE}."
+            " Imputing missing strikes."
         )
 
         # Compute strikes
-        missing_cc[TradeIbexDatabaseEnum.STRIKE_PRICE.value] = missing_cc.apply(
+        missing_cc[TradeIbexDatabaseEnum.STRIKE_PRICE] = missing_cc.apply(
             lambda row: str(
                 calculalte_strike_from_contract_code(
-                    contract_code=row[TradeIbexDatabaseEnum.CONTRACT_CODE.value],
+                    contract_code=row[TradeIbexDatabaseEnum.CONTRACT_CODE],
                 )
             ),
             axis=1,
@@ -63,21 +67,21 @@ class TradeIbexBuilder:
 
         # Imputing: Merge + fillna + drop extracolumn
         suffix = "_from_missings_cc"
-        column_to_drop = TradeIbexDatabaseEnum.STRIKE_PRICE.value + suffix
+        column_to_drop = TradeIbexDatabaseEnum.STRIKE_PRICE + suffix
 
         # Merge
         merged_df = merged_df.merge(
             missing_cc,
             on=[
-                TradeIbexDatabaseEnum.CONTRACT_CODE.value,
+                TradeIbexDatabaseEnum.CONTRACT_CODE,
             ],
             how="left",
             suffixes=("", suffix),
         )
 
         # Fillna
-        merged_df[TradeIbexDatabaseEnum.STRIKE_PRICE.value] = merged_df[
-            TradeIbexDatabaseEnum.STRIKE_PRICE.value
+        merged_df[TradeIbexDatabaseEnum.STRIKE_PRICE] = merged_df[
+            TradeIbexDatabaseEnum.STRIKE_PRICE
         ].fillna(merged_df[column_to_drop])
 
         # Drop
@@ -89,28 +93,28 @@ class TradeIbexBuilder:
     def impute_missing_maturities(merged_df: pd.DataFrame) -> pd.DataFrame:
         # 2026-02-23 18:09:24,906 | INFO | src.data_management.builders.merge_raw_step_builders |
         # There are 16442721 missing maturities corresponding to 4600 contract codes.
-        mask = merged_df[TradeIbexDatabaseEnum.MATURITY_DATE.value].isna()
+        mask = merged_df[TradeIbexDatabaseEnum.MATURITY_DATE].isna()
         missing_cc = merged_df.loc[
             mask,
             [
-                TradeIbexDatabaseEnum.SESSION_DATE.value,
-                TradeIbexDatabaseEnum.CONTRACT_CODE.value,
+                TradeIbexDatabaseEnum.SESSION_DATE,
+                TradeIbexDatabaseEnum.CONTRACT_CODE,
             ],
         ].drop_duplicates()
 
         logger.info(
             f"There are {mask.sum()} trades with missing maturities,"
             f"corresponding to {missing_cc.shape[0]} different "
-            f"({TradeIbexDatabaseEnum.SESSION_DATE.value}, {TradeIbexDatabaseEnum.CONTRACT_CODE.value}) pairs."
+            f"({TradeIbexDatabaseEnum.SESSION_DATE}, {TradeIbexDatabaseEnum.CONTRACT_CODE}) pairs. "
             "Imputing missing maturities based on this pair."
         )
 
         # Compute maturities
-        missing_cc[TradeIbexDatabaseEnum.MATURITY_DATE.value] = missing_cc.apply(
+        missing_cc[TradeIbexDatabaseEnum.MATURITY_DATE] = missing_cc.apply(
             lambda row: calculate_maturity_from_contract_code(
-                contract_code=row[TradeIbexDatabaseEnum.CONTRACT_CODE.value],
+                contract_code=row[TradeIbexDatabaseEnum.CONTRACT_CODE],
                 session_date=pd.to_datetime(
-                    row[TradeIbexDatabaseEnum.SESSION_DATE.value]
+                    row[TradeIbexDatabaseEnum.SESSION_DATE]
                 ).date(),
             ).strftime("%Y-%m-%d"),
             axis=1,
@@ -118,22 +122,22 @@ class TradeIbexBuilder:
 
         # Imputing: Merge + fillna + drop extracolumn
         suffix = "_from_missings_cc"
-        column_to_drop = TradeIbexDatabaseEnum.MATURITY_DATE.value + suffix
+        column_to_drop = TradeIbexDatabaseEnum.MATURITY_DATE + suffix
 
         # Merge
         merged_df = merged_df.merge(
             missing_cc,
             on=[
-                TradeIbexDatabaseEnum.SESSION_DATE.value,
-                TradeIbexDatabaseEnum.CONTRACT_CODE.value,
+                TradeIbexDatabaseEnum.SESSION_DATE,
+                TradeIbexDatabaseEnum.CONTRACT_CODE,
             ],
             how="left",
             suffixes=("", suffix),
         )
 
         # Fillna
-        merged_df[TradeIbexDatabaseEnum.MATURITY_DATE.value] = merged_df[
-            TradeIbexDatabaseEnum.MATURITY_DATE.value
+        merged_df[TradeIbexDatabaseEnum.MATURITY_DATE] = merged_df[
+            TradeIbexDatabaseEnum.MATURITY_DATE
         ].fillna(merged_df[column_to_drop])
 
         # Drop
@@ -142,7 +146,59 @@ class TradeIbexBuilder:
         return merged_df
 
     @staticmethod
-    def build(tgentrades_df: pd.DataFrame, ccontracts_c2_df: pd.DataFrame):
+    def create_exec_datetime(
+        df: pd.DataFrame, exec_time_col: str, session_date_col: str
+    ) -> pd.Series:
+        # Extract only the time component in case the column contains a full datetime
+        df[exec_time_col] = df[exec_time_col].astype(str).str.split().str[-1]
+
+        # Ensure microseconds are present by appending ".000000" when missing
+        df[exec_time_col] = df[exec_time_col].apply(
+            lambda x: x if "." in x else x + ".000000"
+        )
+
+        # Combine date and time and convert to pandas datetime
+        new_col = pd.to_datetime(
+            df[session_date_col].astype(str) + " " + df[exec_time_col],
+            format="%Y-%m-%d %H:%M:%S.%f",
+        )
+
+        df[TradeIbexDatabaseEnum.EXEC_DATETIME] = new_col
+
+        return df
+    
+    @staticmethod
+    def create_time_to_expiration_column(
+        df: pd.DataFrame
+    ) -> pd.DataFrame:
+        
+        # Convert time columns to datetime
+        df[TradeIbexDatabaseEnum.EXEC_DATETIME] = pd.to_datetime(df[TradeIbexDatabaseEnum.EXEC_DATETIME], format='ISO8601')
+        df[TradeIbexDatabaseEnum.MATURITY_DATE] = pd.to_datetime(
+            df[TradeIbexDatabaseEnum.MATURITY_DATE].astype(str) + config.data_config.merge_raw_config.maturity_hour_expiration,
+            format="%Y-%m-%d %H:%M:%S.%f"
+        )
+
+        # Calculate time to expiration in days with decimals
+        time_delta = df[TradeIbexDatabaseEnum.MATURITY_DATE] - df[TradeIbexDatabaseEnum.EXEC_DATETIME]
+        df[TradeIbexDatabaseEnum.TIME_TO_EXPIRATION] = time_delta.dt.total_seconds() / (24 * 3600)
+
+        return df
+    
+    @staticmethod
+    def create_new_columns(df: pd.DataFrame) -> pd.DataFrame:
+
+        df = TradeIbexBuilder.create_exec_datetime(
+            df=df,
+            exec_time_col=TgentradesEnum.EXEC_TIME,
+            session_date_col=TgentradesEnum.SESSION_DATE
+        )
+        df = TradeIbexBuilder.create_time_to_expiration_column(df=df)
+
+        return df
+
+    @staticmethod
+    def build(tgentrades_df: pd.DataFrame, ccontracts_c2_df: pd.DataFrame) -> pd.DataFrame:
         """
         # This building process requires to merge to dataframes and to
         # fill missing values. That means that the process has to:
@@ -158,17 +214,17 @@ class TradeIbexBuilder:
         #       for every (SessionDate, ContractCode) that are actually missing.
         """
         ccontracts_c2_df[TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN] = pd.to_datetime(
-            ccontracts_c2_df[CcontractsC2Enum.SESSION_DATE.value]
+            ccontracts_c2_df[CcontractsC2Enum.SESSION_DATE]
         ).dt.year.astype("str")
 
         tgentrades_df[TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN] = pd.to_datetime(
-            tgentrades_df[TgentradesEnum.SESSION_DATE.value]
+            tgentrades_df[TgentradesEnum.SESSION_DATE]
         ).dt.year.astype("str")
-
+        
         final_cols = [
-            CcontractsC2Enum.CONTRACT_CODE.value,
-            CcontractsC2Enum.STRIKE_PRICE.value,
-            CcontractsC2Enum.MATURITY_DATE.value,
+            CcontractsC2Enum.CONTRACT_CODE,
+            CcontractsC2Enum.STRIKE_PRICE,
+            CcontractsC2Enum.MATURITY_DATE,
             TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN,
         ]
         ccontracts_c2_df = ccontracts_c2_df[final_cols]
@@ -176,14 +232,14 @@ class TradeIbexBuilder:
 
         # Merge
         merge_columns = [
-            TradeIbexDatabaseEnum.CONTRACT_CODE.value,
+            TradeIbexDatabaseEnum.CONTRACT_CODE,
             TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN,
-        ]  # config.data_config.merge_raw_config.merge_columns_list
+        ]
         merged_df = tgentrades_df.merge(ccontracts_c2_df, on=merge_columns, how="left")
 
         # Add type of contract
         merged_df[config.data_config.merge_raw_config.contract_type_column] = merged_df[
-            TradeIbexDatabaseEnum.CONTRACT_CODE.value
+            TradeIbexDatabaseEnum.CONTRACT_CODE
         ].apply(get_contract_type)
 
         # Impute missing maturity dates and strikes
@@ -195,6 +251,9 @@ class TradeIbexBuilder:
             config.data_config.merge_raw_config.trade_ibex_columns_list
             + [config.data_config.merge_raw_config.contract_type_column]
         ]
+
+        # Create new columns
+        merged_df = TradeIbexBuilder.create_new_columns(df=merged_df)
 
         # Save CSV
         merged_df.to_csv(

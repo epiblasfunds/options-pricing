@@ -20,11 +20,16 @@ from src.enums.data_enums import (
     FuturesTradeIbexDatabaseEnum,
     OptionsTradeIbexDatabaseEnum,
 )
+from src.enums.data_enums.options_underlying_ibex_database_enum import (
+    OptionsUnderlyingIbexDatabaseEnum,
+)
 from src.exceptions.data_exceptions import (
     DuplicatedPrimaryKeysError,
     MissingValuesError,
     NegativeQuantityError,
+    NegativeTimeToExpirationError,
     NegativeTradePriceError,
+    SessionAfterMaturityError,
 )
 
 logger = logging.getLogger(__name__)
@@ -62,29 +67,17 @@ class UnderlyingStepLoader:
 
     # VALIDATIONS
     @staticmethod
-    def _validate_primary_keys(df: pd.DataFrame, pk_columns: t.List[str]):
-        pk_df = df[pk_columns]
-        dup_mask = pk_df.duplicated()
-        if dup_mask.any():
-            first_dup = pk_df[dup_mask].iloc[0]
-            raise DuplicatedPrimaryKeysError(
-                "MergeRawHandler::_validate_contracts_df. Duplicate (SessionDate, ContractCode) pair found: "
-                f"SessionDate={first_dup[CcontractsC2Enum.SESSION_DATE.value]}, "
-                f"ContractCode={first_dup[CcontractsC2Enum.CONTRACT_CODE.value]}."
-            )
-
-    @staticmethod
     def _validate_maturity(
         trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
     ):
         if contract_type == ContractTypeEnum.OPTIONS:
-            contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value
-            maturity_date_col = OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value
-            session_date_col = OptionsTradeIbexDatabaseEnum.SESSION_DATE.value
+            contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE
+            maturity_date_col = OptionsTradeIbexDatabaseEnum.MATURITY_DATE
+            session_date_col = OptionsTradeIbexDatabaseEnum.SESSION_DATE
         else:
-            contract_code_col = FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value
-            maturity_date_col = FuturesTradeIbexDatabaseEnum.MATURITY_DATE.value
-            session_date_col = FuturesTradeIbexDatabaseEnum.SESSION_DATE.value
+            contract_code_col = FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE
+            maturity_date_col = FuturesTradeIbexDatabaseEnum.MATURITY_DATE
+            session_date_col = FuturesTradeIbexDatabaseEnum.SESSION_DATE
 
         contract_code_series = trade_ibex_df[contract_code_col]
         maturity_series = trade_ibex_df[maturity_date_col]
@@ -102,8 +95,8 @@ class UnderlyingStepLoader:
         if contract_type == ContractTypeEnum.FUTURES:
             return
 
-        contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value
-        strike_col = OptionsTradeIbexDatabaseEnum.STRIKE_PRICE.value
+        contract_code_col = OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE
+        strike_col = OptionsTradeIbexDatabaseEnum.STRIKE_PRICE
 
         contract_code_series = trade_ibex_df[contract_code_col]
         strike_series = trade_ibex_df[strike_col]
@@ -120,7 +113,7 @@ class UnderlyingStepLoader:
             selected_cols = [
                 c
                 for c in trade_ibex_df.columns
-                if c != FuturesTradeIbexDatabaseEnum.STRIKE_PRICE.value
+                if c != FuturesTradeIbexDatabaseEnum.STRIKE_PRICE
             ]
             trade_ibex_df = trade_ibex_df[selected_cols]
 
@@ -134,13 +127,17 @@ class UnderlyingStepLoader:
         trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
     ):
         if contract_type == ContractTypeEnum.OPTIONS:
-            trade_exec_id_col = OptionsTradeIbexDatabaseEnum.TRADE_EXEC_ID.value
-            trade_price_col = OptionsTradeIbexDatabaseEnum.TRADE_PRICE.value
-            quantity_col = OptionsTradeIbexDatabaseEnum.QUANTITY.value
+            maturity_col = OptionsTradeIbexDatabaseEnum.MATURITY_DATE
+            session_date_col = OptionsTradeIbexDatabaseEnum.SESSION_DATE
+            trade_price_col = OptionsTradeIbexDatabaseEnum.TRADE_PRICE
+            quantity_col = OptionsTradeIbexDatabaseEnum.QUANTITY
+            time_to_expiration_col = OptionsTradeIbexDatabaseEnum.TIME_TO_EXPIRATION
         else:
-            trade_exec_id_col = FuturesTradeIbexDatabaseEnum.TRADE_EXEC_ID.value
-            trade_price_col = FuturesTradeIbexDatabaseEnum.TRADE_PRICE.value
-            quantity_col = FuturesTradeIbexDatabaseEnum.QUANTITY.value
+            maturity_col = FuturesTradeIbexDatabaseEnum.MATURITY_DATE
+            session_date_col = FuturesTradeIbexDatabaseEnum.SESSION_DATE
+            trade_price_col = FuturesTradeIbexDatabaseEnum.TRADE_PRICE
+            quantity_col = FuturesTradeIbexDatabaseEnum.QUANTITY
+            time_to_expiration_col = FuturesTradeIbexDatabaseEnum.TIME_TO_EXPIRATION
 
         # Format validations
         if (trade_ibex_df[trade_price_col].astype("float64") <= 0.0).any():
@@ -148,34 +145,41 @@ class UnderlyingStepLoader:
 
         if (trade_ibex_df[quantity_col].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
-
-        # Unique Primary Keys
-        UnderlyingStepLoader._validate_primary_keys(
-            df=trade_ibex_df,
-            pk_columns=[
-                trade_exec_id_col,
-            ],
-        )
+        
+        if (trade_ibex_df[time_to_expiration_col].astype("float64") < 0.0).any():
+            raise NegativeTimeToExpirationError()
 
         # Validate maturity with contract code
         UnderlyingStepLoader._validate_maturity(trade_ibex_df, contract_type)
 
+        # Validate maturity and session date coherence
+        session = pd.to_datetime(trade_ibex_df[session_date_col])
+        maturity = pd.to_datetime(trade_ibex_df[maturity_col])
+
+        mask = session > maturity
+        if mask.any():
+            sample = trade_ibex_df[mask].iloc[0]
+            raise SessionAfterMaturityError(f"SessionDate occurs after MaturityDate.\nExample: {sample}.")
+
         # Validate strikes with contract code
         UnderlyingStepLoader._validate_strike(trade_ibex_df, contract_type)
-
+        
         # NAs
         UnderlyingStepLoader._validate_missings(trade_ibex_df, contract_type)
 
     @staticmethod
     def _validate_underlying_candidates(options_underlying_ibex_df: pd.DataFrame):
-        # Unique Primary Keys
-        UnderlyingStepLoader._validate_primary_keys(
-            df=options_underlying_ibex_df,
-            pk_columns=[
-                OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value,
-                FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value,
-            ],
-        )
+        # Duplicates
+        if options_underlying_ibex_df.duplicated(
+            subset=[
+                OptionsUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE,
+                OptionsUnderlyingIbexDatabaseEnum.MATURITY_DATE,
+                OptionsUnderlyingIbexDatabaseEnum.FUTURE_CONTRACT_CODE,
+            ]
+        ).any():
+            raise DuplicatedPrimaryKeysError(
+                "Duplicated primary keys found for Options-Underlying candidates."
+            )
 
         # NAs
         if options_underlying_ibex_df.isna().any().any():

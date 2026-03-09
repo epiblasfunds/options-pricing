@@ -22,24 +22,6 @@ class OptionsTradeUnderlyingIbexBuilder:
             / f"{config.data_config.underlying_config.output_filename}.csv"
         )
 
-    @staticmethod
-    def create_exec_datetime(
-        df: pd.DataFrame, exec_time_col: str, session_date_col: str
-    ) -> pd.Series:
-        # Extract only the time component in case the column contains a full datetime
-        df[exec_time_col] = df[exec_time_col].astype(str).str.split().str[-1]
-
-        # Ensure microseconds are present by appending ".000000" when missing
-        df[exec_time_col] = df[exec_time_col].apply(
-            lambda x: x if "." in x else x + ".000000"
-        )
-
-        # Combine date and time and convert to pandas datetime
-        return pd.to_datetime(
-            df[session_date_col].astype(str) + " " + df[exec_time_col],
-            format="%Y-%m-%d %H:%M:%S.%f",
-        )
-
     @classmethod
     def build(
         cls,
@@ -48,94 +30,78 @@ class OptionsTradeUnderlyingIbexBuilder:
         options_underlying_ibex_df: pd.DataFrame,
     ) -> pd.DataFrame:
 
-        # ---------------------------------------------------------------------
-        # Pre‑filter underlying lookup table
-        # Some option-to-future relationships may lack a maturity or future code;
-        # dropping them now prevents carrying invalid rows forward (which would
-        # later manifest as NaNs when we merge or perform the as-of join).
-        options_underlying_ibex_df = options_underlying_ibex_df.dropna(
-            subset=[OptionsUnderlyingIbexDatabaseEnum.MATURITY_DATE.value]
-        )
-
-        # Keep only option trades for which we have a (remaining) underlying
+        # Keep only option trades for which we have a underlying
         valid_option_codes = (
-            options_underlying_ibex_df[OptionsUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE.value]
+            options_underlying_ibex_df[OptionsUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE]
             .unique()
         )
         mask_options_with_underlying = (
-            options_df[OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value]
+            options_df[OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE]
             .isin(valid_option_codes)
         )
         options_df = options_df[mask_options_with_underlying]
 
-        # drop option trades where maturity is missing – they cannot be matched to
-        # an underlying future contract later and only introduce NaNs
-        options_df = options_df.dropna(subset=[OptionsTradeIbexDatabaseEnum.MATURITY_DATE.value])
-
-        # Create exec_datetime (SessionDate + ExecTime)
-        exec_datetime_col = OptionsTradeUnderlyingIbexDatabaseEnum.EXEC_DATETIME.value
-        underlying_exec_datetime_col = (
-            OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_EXEC_DATETIME.value
-        )
-        options_df[exec_datetime_col] = cls.create_exec_datetime(
-            df=options_df,
-            exec_time_col=OptionsTradeIbexDatabaseEnum.EXEC_TIME.value,
-            session_date_col=OptionsTradeIbexDatabaseEnum.SESSION_DATE.value,
-        )
-        futures_df[underlying_exec_datetime_col] = cls.create_exec_datetime(
-            df=futures_df,
-            exec_time_col=FuturesTradeIbexDatabaseEnum.EXEC_TIME.value,
-            session_date_col=FuturesTradeIbexDatabaseEnum.SESSION_DATE.value,
-        )
-
         # Join option with its underlying future
         options_trade_ibex_df = options_df.merge(
             options_underlying_ibex_df,
-            on=OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE.value,
+            on=OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE,
             how="left",
+        )
+
+        # Convert EXEC_DATETIME to datetime for merge_asof
+        options_trade_ibex_df[OptionsTradeIbexDatabaseEnum.EXEC_DATETIME] = pd.to_datetime(
+            options_trade_ibex_df[OptionsTradeIbexDatabaseEnum.EXEC_DATETIME], format='mixed')
+        futures_trade_ibex_df = futures_df.copy()
+        futures_trade_ibex_df[FuturesTradeIbexDatabaseEnum.EXEC_DATETIME] = pd.to_datetime(
+            futures_trade_ibex_df[FuturesTradeIbexDatabaseEnum.EXEC_DATETIME], format='mixed')
+        
+        # Rename EXEC_DATETIME in futures to UNDERLYING_EXEC_DATETIME for maintaining both in the merged df
+        futures_trade_ibex_df[OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_EXEC_DATETIME] = (
+            futures_trade_ibex_df[FuturesTradeIbexDatabaseEnum.EXEC_DATETIME]
         )
 
         # Order by exec_datetime
         options_trade_ibex_df = options_trade_ibex_df.sort_values(
-            exec_datetime_col
+            OptionsTradeIbexDatabaseEnum.EXEC_DATETIME
         ).reset_index(drop=True)
-        futures_trade_ibex_df = futures_df.sort_values(
-            underlying_exec_datetime_col
+        futures_trade_ibex_df = futures_trade_ibex_df.sort_values(
+            FuturesTradeIbexDatabaseEnum.EXEC_DATETIME
         ).reset_index(drop=True)
 
         # As-of join: Last trade of the underlying FUTURE with exec_datetime <= exec_datetime of the option
         df = pd.merge_asof(
             options_trade_ibex_df,
             futures_trade_ibex_df,
-            by=FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE.value,
-            left_on=exec_datetime_col,
-            right_on=underlying_exec_datetime_col,
+            by=FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE,
+            left_on=OptionsTradeIbexDatabaseEnum.EXEC_DATETIME,
+            right_on=OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_EXEC_DATETIME,
             direction="backward",
             suffixes=("", "_future"),
         )
 
         # Rename columns
-        trade_price_option = (
-            OptionsTradeUnderlyingIbexDatabaseEnum.TRADE_PRICE_OPTION.value
-        )
-        underlying_price = OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_PRICE.value
         df = df.rename(
             columns={
-                OptionsTradeIbexDatabaseEnum.TRADE_PRICE.value: trade_price_option,
-                f"{FuturesTradeIbexDatabaseEnum.TRADE_PRICE.value}_future": underlying_price,
+                OptionsTradeIbexDatabaseEnum.TRADE_PRICE: OptionsTradeUnderlyingIbexDatabaseEnum.TRADE_PRICE_OPTION,
+                f"{FuturesTradeIbexDatabaseEnum.TRADE_PRICE}_future": OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_PRICE,
             }
         )
-
-        # remove rows where we failed to match a past future trade
-        df = df.dropna(subset=[underlying_exec_datetime_col])
 
         df = df[
             config.data_config.underlying_config.options_trade_underlying_ibex_database_columns
         ]
 
+        # Delete rows with missing underlying price (i.e. no underlying trade found before option trade)
+        df = df.dropna(subset=[OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_PRICE])
+
         # Save CSV
         output_file = cls.get_output_filename()
-        df.to_csv(output_file, index=False, encoding="utf-8", sep=";")
+        df.to_csv(
+            output_file,
+            index=False,
+            encoding="utf-8",
+            sep=";"
+        )
 
         logger.info(
             f"OptionsTradeUnderlyingIbexDatabase (with shape {df.shape}) saved in: {output_file}."

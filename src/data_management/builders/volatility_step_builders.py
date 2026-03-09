@@ -3,12 +3,16 @@ import math
 
 import numpy as np
 import pandas as pd
-from py_vollib.black.implied_volatility import implied_volatility as iv_lib
+from tqdm import tqdm
 
 from src.config.config import VOLATILITY_DATA_STEP_DIR_PATH, config
-from src.enums.data_enums.options_trade_underlying_rates_ibex_database_enum import (
-    OptionsTradeUnderlyingRatesIbexDatabaseEnum,
+from src.enums.data_enums.options_trade_underlying_ibex_database_enum import (
+    OptionsTradeUnderlyingIbexDatabaseEnum,
 )
+from src.enums.data_enums.options_trade_volatility_ibex_database_enum import (
+    OptionsTradeVolatilityIbexDatabaseEnum,
+)
+from src.enums.data_enums.rates_enum import RatesEnum
 
 logger = logging.getLogger(__name__)
 
@@ -21,28 +25,93 @@ class OptionsTradeVolatilityIbexBuilder:
     @staticmethod
     def get_output_filename():
         return OptionsTradeVolatilityIbexBuilder.OUTPUT_FILENAME
+    
+    @staticmethod
+    def calculate_compounded_rate(
+        exec_date: pd.Timestamp,
+        maturity_date: pd.Timestamp,
+        time_to_expiration: float,
+        rates_df: pd.DataFrame
+    ) -> float:
+        """
+        Calculate the compounded ESTR average rate based on the formula:
+        
+        Compound interest = [∏(1 + r_i × n_i / N) - 1] × N / d_c
+        
+        where:
+        - d_b = number of TARGET2 business days in the interest period
+        - d_c = number of calendar days in the interest period (time_to_expiration)
+        - r_i = ESTR rate published on business day i
+        - n_i = number of calendar days for which rate r_i applies (usually 1, 
+                except on each Monday within the interest period when it will be 3
+                to account for the weekend)
+        - N = number of days in the year (360 for European money market)
+        """
+        N = 360  # European money market convention
+        d_c = time_to_expiration
+        
+        if d_c <= 0:
+            return 0.0
+        
+        # Get business days between exec_date and maturity_date
+        business_days = pd.bdate_range(start=exec_date.date(), end=maturity_date.date(), freq='B')
+        
+        if len(business_days) == 0:
+            return 0.0
+        
+        # Calculate the compounded product
+        compound_product = 1.0
+        
+        for business_day in business_days:
+            date_rate = business_day.date()
+
+            while date_rate not in rates_df.index:
+                date_rate -= pd.Timedelta(days=1)
+            r_i = float(rates_df.loc[date_rate, RatesEnum.RATE])
+            
+            # Calculate n_i: number of calendar days this rate applies to
+            # If it's Monday (weekday==0), it covers 3 days (Sat, Sun, Mon)
+            # Otherwise, it's 1 day
+            if business_day.weekday() == 0:  # Monday
+                n_i = 3
+            else:
+                n_i = 1
+            
+            # Apply the formula: multiply by (1 + r_i × n_i / N)
+            compound_product *= (1 + (r_i * n_i / N))
+        
+        # Final calculation: [product - 1] × N / d_c
+        compounded_rate = (compound_product - 1) * (N / d_c)
+        
+        return compounded_rate
+    
+    @staticmethod
+    def create_rate_column(
+        df: pd.DataFrame,
+        rates_df: pd.DataFrame
+    ) -> pd.DataFrame:      
+        
+        # Ensure rates_df SessionDate is datetime and index
+        rates_df[RatesEnum.SESSION_DATE] = pd.to_datetime(
+            rates_df[RatesEnum.SESSION_DATE]
+        )
+        rates_df = rates_df.set_index(RatesEnum.SESSION_DATE)
+        
+        df[OptionsTradeUnderlyingIbexDatabaseEnum.RATE] = df.apply(
+            lambda row: OptionsTradeVolatilityIbexBuilder.calculate_compounded_rate(
+                exec_date=pd.to_datetime(row[OptionsTradeUnderlyingIbexDatabaseEnum.EXEC_DATETIME]),
+                maturity_date=pd.to_datetime(row[OptionsTradeUnderlyingIbexDatabaseEnum.MATURITY_DATE]),
+                time_to_expiration=float(row[OptionsTradeUnderlyingIbexDatabaseEnum.TIME_TO_EXPIRATION]),
+                rates_df=rates_df
+            ),
+            axis=1
+        )
+        
+        return df
 
     @staticmethod
     def norm_cdf(x: float) -> float:
         return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
-
-    @staticmethod
-    def _no_arbitrage_bounds(
-        F: float,
-        K: float,
-        T: float,
-        r: float,
-        c_type: str
-    ) -> tuple[float, float]:
-        # Calculate no-arbitrage bounds for option price based on Black-76 model
-        discount = math.exp(-r * T)
-        if c_type == "c":
-            lower = max(discount * (F - K), 0.0)
-            upper = discount * F
-        else:
-            lower = max(discount * (K - F), 0.0)
-            upper = discount * K
-        return lower, upper
 
     @staticmethod
     def black76_price(
@@ -99,9 +168,6 @@ class OptionsTradeVolatilityIbexBuilder:
         if abs(f_mid) < tol or abs(high - low) < tol:
             return mid, mid, f_mid, f_mid, True
         
-        if f_mid == 0:
-            return mid, mid, f_mid, f_mid, True
-        
         if f_low * f_mid < 0:
             high = mid
             f_high = f_mid
@@ -112,34 +178,22 @@ class OptionsTradeVolatilityIbexBuilder:
         return low, high, f_low, f_high, False
 
     @staticmethod
-    def implied_vol_fallback(
+    def implied_vol(
         price: float,
         F: float,
         K: float,
         T: float,
         r: float,
         c_type: str,
-    ) -> tuple[float, dict]:
+    ) -> float:
         """
-        Fallback bisection method. 
-        Returns (implied_vol, metadata) where metadata contains convergence info.
+        Bisection method. 
+        Returns implied volatility.
         """
-        metadata = {
-            "method": "fallback_bisection",
-            "converged": False,
-            "iterations": 0,
-            "no_arbitrage_violated": False,
-        }
         
         # Define objective function for finding root
         def objective(sigma: float) -> float:
             return OptionsTradeVolatilityIbexBuilder.black76_price(F, K, T, r, sigma, c_type) - price
-
-        # Validate no-arbitrage bounds
-        lower_bound, upper_bound = OptionsTradeVolatilityIbexBuilder._no_arbitrage_bounds(F, K, T, r, c_type)
-        if price < lower_bound - 1e-4 or price > upper_bound + 1e-4:
-            metadata["no_arbitrage_violated"] = True
-            return np.nan, metadata
 
         # Set bounds for implied volatility
         low = config.data_config.volatility_config.solver_min_sigma
@@ -149,23 +203,17 @@ class OptionsTradeVolatilityIbexBuilder:
 
         # Check if the function values at the bounds are valid
         if not OptionsTradeVolatilityIbexBuilder._validate_bisection_bounds(f_low, f_high):
-            return np.nan, metadata
+            return np.nan
         
         tol = config.data_config.volatility_config.solver_tol
-        max_iter = config.data_config.volatility_config.solver_max_iter
         
         # Bisection method to find implied volatility
-        for iteration in range(max_iter):
+        converged = False
+        while not converged:
             low, high, f_low, f_high, converged = OptionsTradeVolatilityIbexBuilder._bisection_iteration(
                 objective, low, high, f_low, f_high, tol
             )
-            metadata["iterations"] = iteration + 1
-            
-            if converged:
-                metadata["converged"] = True
-                return low, metadata
-
-        return 0.5 * (low + high), metadata
+        return low
 
     @staticmethod
     def implied_vol_engine(
@@ -175,13 +223,11 @@ class OptionsTradeVolatilityIbexBuilder:
         T: float,
         r: float,
         c_type: str,
-    ) -> tuple[float, dict]:
+    ) -> float:
         '''
-        Calculates the implied volatility of an option using the Black-76 model.
-        It first attempts to use the py_vollib library for calculation, and if the result is not valid,
-        it falls back to a custom implementation based on the bisection method.
+        Calculates the implied volatility of an option using the Black-76 model
+        and a custom implementation based on the bisection method.
         '''
-        metadata = {"method": None, "converged": False, "iterations": 0}
 
         # Validate inputs
         if  any(
@@ -198,81 +244,68 @@ class OptionsTradeVolatilityIbexBuilder:
                 c_type not in {"c", "p"},
             ]
         ):
-            return np.nan, metadata
+            return np.nan
         
-        # Calculate implied volatility using py_vollib
-        try:
-            iv = iv_lib(price, F, K, r, T, c_type)
-
-            if(
-                np.isfinite(iv)
-                and iv >= config.data_config.volatility_config.solver_min_sigma
-                and iv <= config.data_config.volatility_config.pyvollib_max_sigma
-                ):
-                metadata["method"] = "pyvollib"
-                metadata["converged"] = True
-                return iv, metadata
-        except Exception:
-            pass
-        
-        # Fall back to bisection
-        iv, fallback_metadata = OptionsTradeVolatilityIbexBuilder.implied_vol_fallback(
+        # Calculate implied volatility
+        iv = OptionsTradeVolatilityIbexBuilder.implied_vol(
             price, F, K, T, r, c_type
         )
-        metadata.update(fallback_metadata)
-        return iv, metadata
+        
+        return iv
      
     @staticmethod
     def build(
-        options_trade_underlying_rates_ibex_df: pd.DataFrame,
+        options_trade_underlying_ibex_df: pd.DataFrame,
+        rates_df: pd.DataFrame,
+
     ) -> pd.DataFrame:
         
         # Select columns
-        price_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.TRADE_PRICE_OPTION.value
-        underlying_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.UNDERLYING_PRICE.value
-        strike_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.STRIKE_PRICE.value
-        risk_free_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.RISK_FREE_RATE.value
-        time_to_maturity_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.TIME_TO_MATURITY.value
-        option_contract_code_col_name = OptionsTradeUnderlyingRatesIbexDatabaseEnum.OPTION_CONTRACT_CODE.value
+        price_col_name = OptionsTradeUnderlyingIbexDatabaseEnum.TRADE_PRICE_OPTION
+        underlying_col_name = OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_PRICE
+        strike_col_name = OptionsTradeUnderlyingIbexDatabaseEnum.STRIKE_PRICE
+        time_to_expiration_col_name = OptionsTradeUnderlyingIbexDatabaseEnum.TIME_TO_EXPIRATION
+        option_contract_code_col_name = OptionsTradeUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE
         
-        # Convert to numeric
+        # Convert formats
         for col in [
             price_col_name,
             underlying_col_name,
             strike_col_name,
-            risk_free_col_name,
-            time_to_maturity_col_name,
+            time_to_expiration_col_name,
         ]:
-            options_trade_underlying_rates_ibex_df[col] = pd.to_numeric(
-                options_trade_underlying_rates_ibex_df[col]
+            options_trade_underlying_ibex_df[col] = pd.to_numeric(
+                options_trade_underlying_ibex_df[col]
             )
+        rates_df.index = pd.to_datetime(rates_df.index).date
+
+        # Calculate compound rate
+        options_trade_volatility_ibex_df = OptionsTradeVolatilityIbexBuilder.create_rate_column(df=options_trade_underlying_ibex_df, rates_df=rates_df)
+        rate_col_name = OptionsTradeVolatilityIbexDatabaseEnum.RATE
         
-        # Calculate time to maturity in years, risk-free rate in decimals, and contract type
-        t_in_years = options_trade_underlying_rates_ibex_df[time_to_maturity_col_name] / 365.0
-        r_in_decimals = options_trade_underlying_rates_ibex_df[risk_free_col_name] / 100.0
-        contract_type = options_trade_underlying_rates_ibex_df[option_contract_code_col_name].astype(str).str[0].str.lower()
+        # Calculate time to expiration in years, rate in decimals, and contract type
+        t_in_years = options_trade_volatility_ibex_df[time_to_expiration_col_name] / 365.0
+        r_in_decimals = options_trade_volatility_ibex_df[rate_col_name] / 100.0
+        contract_type = options_trade_volatility_ibex_df[option_contract_code_col_name].astype(str).str[0].str.lower()
 
         # Calculate implied volatility
         iv_values: list[float] = []
-        stats = {
-            "total_rows": len(options_trade_underlying_rates_ibex_df),
-            "pyvollib_success": 0,
-            "fallback_converged": 0,
-            "fallback_max_iter": 0,
-            "no_arbitrage_violated": 0,
-            "invalid_inputs": 0,
-        }
         
-        for row in zip(
-            options_trade_underlying_rates_ibex_df[price_col_name].values,
-            options_trade_underlying_rates_ibex_df[underlying_col_name].values,
-            options_trade_underlying_rates_ibex_df[strike_col_name].values,
-            t_in_years.values,
-            r_in_decimals.values,
-            contract_type.values,
+        total_rows = len(options_trade_volatility_ibex_df)
+        for row in tqdm(
+            zip(
+                options_trade_volatility_ibex_df[price_col_name].values,
+                options_trade_volatility_ibex_df[underlying_col_name].values,
+                options_trade_volatility_ibex_df[strike_col_name].values,
+                t_in_years.values,
+                r_in_decimals.values,
+                contract_type.values,
+            ),
+            total=total_rows,
+            desc="Calculating implied volatility"
         ):
             price, F, K, T, r, c_type = row
-            iv, metadata = OptionsTradeVolatilityIbexBuilder.implied_vol_engine(
+            iv = OptionsTradeVolatilityIbexBuilder.implied_vol_engine(
                 price=price,
                 F=F,
                 K=K,
@@ -281,22 +314,9 @@ class OptionsTradeVolatilityIbexBuilder:
                 c_type=c_type,
             )
             iv_values.append(iv)
-            
-            # Update statistics
-            if metadata["method"] is None:
-                stats["invalid_inputs"] += 1
-            elif metadata["method"] == "pyvollib":
-                stats["pyvollib_success"] += 1
-            elif metadata["method"] == "fallback_bisection":
-                if metadata.get("no_arbitrage_violated"):
-                    stats["no_arbitrage_violated"] += 1
-                elif metadata["converged"]:
-                    stats["fallback_converged"] += 1
-                else:
-                    stats["fallback_max_iter"] += 1
 
         # Create output DataFrame
-        options_trade_volatility_ibex_df = options_trade_underlying_rates_ibex_df.copy()
+        options_trade_volatility_ibex_df = options_trade_volatility_ibex_df.copy()
         options_trade_volatility_ibex_df[config.data_config.volatility_config.implied_volatility_column] = iv_values
 
         # Save CSV
@@ -308,17 +328,10 @@ class OptionsTradeVolatilityIbexBuilder:
         logger.info(
             f"OptionsTradeVolatilityIbex (with shape {options_trade_volatility_ibex_df.shape}) saved in: {OptionsTradeVolatilityIbexBuilder.get_output_filename()}."
         )
-        logger.info(
-            f"IV Calculation Statistics: "
-            f"Total={stats['total_rows']}, "
-            f"PyVolLib={stats['pyvollib_success']}, "
-            f"Fallback_Converged={stats['fallback_converged']}, "
-            f"Fallback_MaxIter={stats['fallback_max_iter']}, "
-            f"NoArbitrage_Violated={stats['no_arbitrage_violated']}, "
-            f"Invalid_Inputs={stats['invalid_inputs']}"
-        )
 
         return options_trade_volatility_ibex_df
         
+
+
 
 

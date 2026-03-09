@@ -56,7 +56,12 @@
             "TradePrice": "FLOAT",
             "Quantity": "INT",
             "TradeType": "TEXT"
-        }
+        },
+        "idx_rate_values": 1, 
+        "spread_str_eonia": 0.00085,
+        "cutoff_date_str_eonia": "2019-10-02",
+        "rates_date_column_name": "DATE",
+        "rates_output_filename": "RATES_DATABASE"
     },
     "merge_raw_step": {
         "output_filename": "TRADE_IBEX_DATABASE",
@@ -76,6 +81,7 @@
             "StrikePrice",
             "MaturityDate"
         ],
+        "maturity_hour_expiration": " 21:00:00.000000",
         "contract_type_column": "ContractType"
     },
     "product_split_step": {
@@ -94,7 +100,9 @@
                     "Quantity",
                     "TradeType",
                     "StrikePrice",
-                    "MaturityDate"
+                    "MaturityDate",
+                    "ExecDateTime",
+                    "TimeToExpiration"
                 ]
             },
             "futures": {
@@ -110,7 +118,9 @@
                     "Quantity",
                     "TradeType",
                     "StrikePrice",
-                    "MaturityDate"
+                    "MaturityDate",
+                    "ExecDateTime",
+                    "TimeToExpiration"
                 ]
             }
         },
@@ -125,47 +135,21 @@
             "SessionDate",
             "MarketCode",
             "TradeExecID",
-            "ExecTime",
             "TradePriceOption",
             "Quantity",
             "TradeType",
             "StrikePrice",
             "MaturityDate",
             "ExecTime",
-            "ExecDatetime",
-            "UnderlyingExecDatetime"
+            "ExecDateTime",
+            "TimeToExpiration",
+            "UnderlyingExecDateTime"
         ],
         "output_filename": "OPTIONS_TRADE_UNDERLYING_IBEX_DATABASE"
-    },
-    "read_rates_raw_step": {
-        "EONIA_prefix" : "EONIA",
-        "STR_prefix" : "STR",
-        "EURIBOR3M_prefix" : "EURIBOR3M",
-        "EURIBOR6M_prefix" : "EURIBOR6M",
-        "EURIBOR12M_prefix" : "EURIBOR12M",
-        "idx_date_column": 0,
-        "idx_rate_column": -1,
-        "index_rates_column_name": "DATE",
-        "unified_overnight_rate_column_name": "OVERNIGHTRATE",
-        "spread_str_eonia": 0.00085,
-        "cutoff_date_str_eonia": "2019-10-01",
-        "free_risk_rates_columns": [
-            "OvernightRate",
-            "Euribor3MRate",
-            "Euribor6MRate",
-            "Euribor12MRate"
-        ],
-        "output_filename": "RISK_FREE_RATES"
-    },
-    "underlying_rates_step": {
-        "tenors_days": [1, 90, 180, 360],
-        "output_filename": "OPTIONS_TRADE_UNDERLYING_RATES_IBEX_DATABASE"
     },
     "volatility_step": {
         "solver_min_sigma":1e-8,
         "solver_max_sigma": 10.0,
-        "solver_max_iter": 300,
-        "pyvollib_max_sigma": 10.0,
         "solver_tol": 1e-8,
         "implied_volatility_column": "ImpliedVolatility",
         "output_filename": "OPTIONS_TRADE_VOLATILITY_IBEX_DATABASE"
