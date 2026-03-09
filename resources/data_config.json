@@ -1,8 +1,12 @@
 {
     "first_year": 2017,
     "last_year": 2022,
-    "contract_code":{
-        "contracts_prefixes": ["CIBX", "PIBX","FIBX"],
+    "contract_code": {
+        "contracts_prefixes": [
+            "CIBX",
+            "PIBX",
+            "FIBX"
+        ],
         "futures_code_len": 6,
         "options_code_len": 12,
         "strike_starts": -8,
@@ -57,14 +61,14 @@
             "Quantity": "INT",
             "TradeType": "TEXT"
         },
-        "idx_rate_values": 1, 
+        "idx_rate_values": 1,
         "spread_str_eonia": 0.00085,
         "cutoff_date_str_eonia": "2019-10-02",
         "rates_date_column_name": "DATE",
         "rates_output_filename": "RATES_DATABASE"
     },
     "merge_raw_step": {
-        "output_filename": "TRADE_IBEX_DATABASE",
+        "output_filename": "TRADE_IBEX_DB",
         "merge_columns": [
             "SessionDate",
             "ContractCode"
@@ -88,7 +92,10 @@
         "filter_contract_column": "ContractCode",
         "contract_types": {
             "options": {
-                "prefixes": ["CIBX", "PIBX"],
+                "prefixes": [
+                    "CIBX",
+                    "PIBX"
+                ],
                 "contract_column_new": "OptionContractCode",
                 "columns": [
                     "OptionContractCode",
@@ -106,7 +113,9 @@
                 ]
             },
             "futures": {
-                "prefixes": ["FIBX"],
+                "prefixes": [
+                    "FIBX"
+                ],
                 "contract_column_new": "FutureContractCode",
                 "columns": [
                     "FutureContractCode",
@@ -124,34 +133,34 @@
                 ]
             }
         },
-        "output_filename_contracts": "TRADE_IBEX_DATABASE",
-        "output_filename_relationship": "OPTIONS_UNDERLYING_IBEX_DATABASE"
+        "output_filename_contracts": "TRADES_DB",
+        "output_filename_relationship": "OPTION_UNDERLYING_DB"
     },
     "underlying_step": {
-        "options_trade_underlying_ibex_database_columns": [
-            "OptionContractCode",
-            "FutureContractCode",
-            "UnderlyingPrice",
-            "SessionDate",
-            "MarketCode",
-            "TradeExecID",
-            "TradePriceOption",
-            "Quantity",
-            "TradeType",
-            "StrikePrice",
-            "MaturityDate",
-            "ExecTime",
-            "ExecDateTime",
-            "TimeToExpiration",
-            "UnderlyingExecDateTime"
-        ],
-        "output_filename": "OPTIONS_TRADE_UNDERLYING_IBEX_DATABASE"
+        "option_trades_underlying_db_columns": {
+            "OptionContractCode": "TEXT",
+            "FutureContractCode": "TEXT",
+            "UnderlyingPrice": "FLOAT",
+            "SessionDate": "DATE",
+            "MarketCode": "TEXT",
+            "TradeExecID": "TEXT",
+            "TradePriceOption": "FLOAT",
+            "Quantity": "INT",
+            "TradeType": "TEXT",
+            "StrikePrice": "FLOAT",
+            "MaturityDate": "DATE",
+            "ExecTime": "DATETIME",
+            "ExecDateTime": "DATETIME",
+            "TimeToExpiration": "INT",
+            "UnderlyingExecDateTime": "DATETIME"
+        },
+        "output_filename": "OPTION_TRADES_UNDERLYING_DB"
     },
     "volatility_step": {
-        "solver_min_sigma":1e-8,
+        "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
         "implied_volatility_column": "ImpliedVolatility",
-        "output_filename": "OPTIONS_TRADE_VOLATILITY_IBEX_DATABASE"
+        "output_filename": "VOLATILITY_DB"
     }
 }

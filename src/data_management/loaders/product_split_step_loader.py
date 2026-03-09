@@ -6,17 +6,16 @@ import pandas as pd
 
 from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
 from src.data_management.builders import (
-    FuturesTradeIbexBuilder,
-    OptionsTradeIbexBuilder,
-    OptionsUnderlyingIbexBuilder,
+    FutureTradesBuilder,
+    OptionTradesBuilder,
+    OptionUnderlyingBuilder,
     TradeIbexBuilder,
 )
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
-from src.enums.data_enums import ContractTypeEnum, TradeIbexDatabaseEnum
-from src.enums.data_enums.ccontracts_c2_enum import CcontractsC2Enum
+from src.enums.data_enums import ContractTypeEnum, TradeIbexDBEnum
 from src.exceptions.data_exceptions import (
     MissingValuesError,
     NegativeQuantityError,
@@ -51,9 +50,9 @@ class ProductSplitStepLoader:
     def _validate_maturity(
         trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
     ):
-        contract_code_series = trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_CODE]
-        maturity_series = trade_ibex_df[TradeIbexDatabaseEnum.MATURITY_DATE]
-        session_date_series = trade_ibex_df[TradeIbexDatabaseEnum.SESSION_DATE]
+        contract_code_series = trade_ibex_df[TradeIbexDBEnum.CONTRACT_CODE]
+        maturity_series = trade_ibex_df[TradeIbexDBEnum.MATURITY_DATE]
+        session_date_series = trade_ibex_df[TradeIbexDBEnum.SESSION_DATE]
 
         validate_maturity_contract_code(
             contract_type=contract_type,
@@ -64,8 +63,8 @@ class ProductSplitStepLoader:
 
     @staticmethod
     def _validate_strike(trade_ibex_df: pd.DataFrame):
-        contract_code_series = trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_CODE]
-        strike_series = trade_ibex_df[TradeIbexDatabaseEnum.STRIKE_PRICE]
+        contract_code_series = trade_ibex_df[TradeIbexDBEnum.CONTRACT_CODE]
+        strike_series = trade_ibex_df[TradeIbexDBEnum.STRIKE_PRICE]
         validate_strike_contract_code(
             contract_code_series=contract_code_series,
             strike_series=strike_series,
@@ -74,13 +73,13 @@ class ProductSplitStepLoader:
     @staticmethod
     def _validate_source(trade_ibex_df: pd.DataFrame):
         # Format validations
-        if (trade_ibex_df[TradeIbexDatabaseEnum.TRADE_PRICE].astype("float64") <= 0.0).any():
+        if (trade_ibex_df[TradeIbexDBEnum.TRADE_PRICE].astype("float64") <= 0.0).any():
             raise NegativeTradePriceError()
 
-        if (trade_ibex_df[TradeIbexDatabaseEnum.QUANTITY].astype("float64") <= 0.0).any():
+        if (trade_ibex_df[TradeIbexDBEnum.QUANTITY].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
         
-        if (trade_ibex_df[TradeIbexDatabaseEnum.TIME_TO_EXPIRATION].astype("float64") < 0.0).any():
+        if (trade_ibex_df[TradeIbexDBEnum.TIME_TO_EXPIRATION].astype("float64") < 0.0).any():
             raise NegativeTimeToExpirationError()
 
         # Validate maturity with contract code
@@ -88,8 +87,8 @@ class ProductSplitStepLoader:
         ProductSplitStepLoader._validate_maturity(trade_ibex_df, ContractTypeEnum.FUTURES)
 
         # Validate maturity and session date coherence
-        session = pd.to_datetime(trade_ibex_df[TradeIbexDatabaseEnum.SESSION_DATE])
-        maturity = pd.to_datetime(trade_ibex_df[TradeIbexDatabaseEnum.MATURITY_DATE])
+        session = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.SESSION_DATE])
+        maturity = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.MATURITY_DATE])
 
         mask = session > maturity
         if mask.any():
@@ -100,7 +99,7 @@ class ProductSplitStepLoader:
         ProductSplitStepLoader._validate_strike(trade_ibex_df)
 
         futures_mask = (
-            trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_TYPE]
+            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE]
             == ContractTypeEnum.FUTURES
         )
         futures_df = trade_ibex_df.loc[
@@ -108,11 +107,11 @@ class ProductSplitStepLoader:
             [
                 c
                 for c in trade_ibex_df.columns
-                if c != TradeIbexDatabaseEnum.STRIKE_PRICE
+                if c != TradeIbexDBEnum.STRIKE_PRICE
             ],
         ]
         options_mask = (
-            trade_ibex_df[TradeIbexDatabaseEnum.CONTRACT_TYPE]
+            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE]
             == ContractTypeEnum.OPTIONS
         )
         options_df = trade_ibex_df[options_mask]
@@ -124,9 +123,9 @@ class ProductSplitStepLoader:
         trade_ibex_df = ProductSplitStepLoader._read_trade_ibex_database()
         ProductSplitStepLoader._validate_source(trade_ibex_df)
 
-        options_trade_ibex_db = OptionsTradeIbexBuilder._build_database(trade_ibex_df)
-        futures_trade_ibex_db = FuturesTradeIbexBuilder._build_database(trade_ibex_df)
-        options_underlying_ibex_db = OptionsUnderlyingIbexBuilder.build(
+        options_trade_ibex_db = OptionTradesBuilder._build_database(trade_ibex_df)
+        futures_trade_ibex_db = FutureTradesBuilder._build_database(trade_ibex_df)
+        options_underlying_ibex_db = OptionUnderlyingBuilder.build(
             options_trade_ibex_db=options_trade_ibex_db,
             futures_trade_ibex_db=futures_trade_ibex_db,
         )

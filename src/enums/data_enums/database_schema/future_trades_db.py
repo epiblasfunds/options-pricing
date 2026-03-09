@@ -1,8 +1,8 @@
 from enum import StrEnum
 
 
-class OptionsTradeIbexDatabaseEnum(StrEnum):
-    OPTION_CONTRACT_CODE = "OptionContractCode"
+class FuturesTradeIbexDBEnum(StrEnum):
+    FUTURE_CONTRACT_CODE = "FutureContractCode"
     SESSION_DATE = "SessionDate"
     MARKET_CODE = "MarketCode"
     TRADE_EXEC_ID = "TradeExecID"

@@ -7,8 +7,8 @@ import pandas as pd
 from src.config.config import PRODUCT_SPLIT_DATA_STEP_DIR_PATH, config
 from src.enums.data_enums import (
     ContractTypeEnum,
-    FuturesTradeIbexDatabaseEnum,
-    OptionsTradeIbexDatabaseEnum,
+    FuturesTradeIbexDBEnum,
+    OptionsTradeIbexDBEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class AbstractProductTradeIbexBuilder(ABC):
         return filtered_df
 
 
-class OptionsTradeIbexBuilder(AbstractProductTradeIbexBuilder):
+class OptionTradesBuilder(AbstractProductTradeIbexBuilder):
     @classmethod
     def _get_contract_type(cls) -> ContractTypeEnum:
         return ContractTypeEnum.OPTIONS
@@ -71,7 +71,7 @@ class OptionsTradeIbexBuilder(AbstractProductTradeIbexBuilder):
         return "OptionsTradeIbexDatabase"
 
 
-class FuturesTradeIbexBuilder(AbstractProductTradeIbexBuilder):
+class FutureTradesBuilder(AbstractProductTradeIbexBuilder):
     @classmethod
     def _get_contract_type(cls) -> ContractTypeEnum:
         return ContractTypeEnum.FUTURES
@@ -81,7 +81,7 @@ class FuturesTradeIbexBuilder(AbstractProductTradeIbexBuilder):
         return "FuturesTradeIbexDatabase"
 
 
-class OptionsUnderlyingIbexBuilder:
+class OptionUnderlyingBuilder:
     @staticmethod
     def get_output_filename() -> Path:
         output_filename = (
@@ -95,12 +95,12 @@ class OptionsUnderlyingIbexBuilder:
         options_df = (
             options_trade_ibex_db[
                 [
-                    OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE,
-                    OptionsTradeIbexDatabaseEnum.MATURITY_DATE,
+                    OptionsTradeIbexDBEnum.OPTION_CONTRACT_CODE,
+                    OptionsTradeIbexDBEnum.MATURITY_DATE,
                 ]
             ]
             .drop_duplicates(
-                subset=[OptionsTradeIbexDatabaseEnum.OPTION_CONTRACT_CODE],
+                subset=[OptionsTradeIbexDBEnum.OPTION_CONTRACT_CODE],
                 keep="first",
             )
             .copy()
@@ -109,12 +109,12 @@ class OptionsUnderlyingIbexBuilder:
         futures_df = (
             futures_trade_ibex_db[
                 [
-                    FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE,
-                    FuturesTradeIbexDatabaseEnum.MATURITY_DATE,
+                    FuturesTradeIbexDBEnum.FUTURE_CONTRACT_CODE,
+                    FuturesTradeIbexDBEnum.MATURITY_DATE,
                 ]
             ]
             .drop_duplicates(
-                subset=[FuturesTradeIbexDatabaseEnum.FUTURE_CONTRACT_CODE],
+                subset=[FuturesTradeIbexDBEnum.FUTURE_CONTRACT_CODE],
                 keep="first",
             )
             .copy()
@@ -123,13 +123,13 @@ class OptionsUnderlyingIbexBuilder:
         # Merge on MaturityDate
         options_underlying_ibex_db = options_df.merge(
             futures_df,
-            how="inner", # Take only options with a matching future maturity
-            on=OptionsTradeIbexDatabaseEnum.MATURITY_DATE,
+            how="inner",  # Take only options with a matching future maturity
+            on=OptionsTradeIbexDBEnum.MATURITY_DATE,
         )
 
         # Save CSV
         options_underlying_ibex_db.to_csv(
-            OptionsUnderlyingIbexBuilder.get_output_filename(),
+            OptionUnderlyingBuilder.get_output_filename(),
             index=False,
             encoding="utf-8",
             sep=";",
@@ -137,7 +137,7 @@ class OptionsUnderlyingIbexBuilder:
 
         logger.info(
             f"OptionsUnderlyingIbexDatabase (with shape {options_underlying_ibex_db.shape}) saved in: "
-            f"{OptionsUnderlyingIbexBuilder.get_output_filename()}."
+            f"{OptionUnderlyingBuilder.get_output_filename()}."
         )
 
         return options_underlying_ibex_db

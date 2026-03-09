@@ -3,21 +3,16 @@ import logging
 import pandas as pd
 
 from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH
-from src.data_management.builders.read_raw_step_builders import RatesBuilder
-from src.data_management.builders.underlying_step_builders import (
-    OptionsTradeUnderlyingIbexBuilder,
-)
-from src.data_management.builders.volatility_step_builders import (
-    OptionsTradeVolatilityIbexBuilder,
+from src.data_management.builders import (
+    OptionTradesUnderlyingBuilder,
+    RatesBuilder,
+    VolatilityBuilder,
 )
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
-from src.enums.data_enums.contract_type_enum import ContractTypeEnum
-from src.enums.data_enums.options_trade_underlying_ibex_database_enum import (
-    OptionsTradeUnderlyingIbexDatabaseEnum,
-)
+from src.enums.data_enums import ContractTypeEnum, OptionTradesUnderlyingDBEnum
 from src.exceptions.data_exceptions import (
     MissingValuesError,
     NegativeQuantityError,
@@ -36,7 +31,7 @@ class VolatilityStepLoader:
     # READ
     @staticmethod
     def _read_options_trade_underlying_ibex_database() -> pd.DataFrame:
-        file_path = OptionsTradeUnderlyingIbexBuilder.get_output_filename()
+        file_path = OptionTradesUnderlyingBuilder.get_output_filename()
         df = pd.read_csv(
             file_path,
             sep=";",
@@ -61,9 +56,9 @@ class VolatilityStepLoader:
     def _validate_maturity(
         options_trade_underlying_ibex_df: pd.DataFrame
     ):
-        contract_code_col = OptionsTradeUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE
-        maturity_date_col = OptionsTradeUnderlyingIbexDatabaseEnum.MATURITY_DATE
-        session_date_col = OptionsTradeUnderlyingIbexDatabaseEnum.SESSION_DATE
+        contract_code_col = OptionTradesUnderlyingDBEnum.OPTION_CONTRACT_CODE
+        maturity_date_col = OptionTradesUnderlyingDBEnum.MATURITY_DATE
+        session_date_col = OptionTradesUnderlyingDBEnum.SESSION_DATE
 
         contract_code_series = options_trade_underlying_ibex_df[contract_code_col]
         maturity_series = options_trade_underlying_ibex_df[maturity_date_col]
@@ -81,8 +76,8 @@ class VolatilityStepLoader:
         options_trade_underlying_ibex_df: pd.DataFrame
     ):
 
-        strike_col = OptionsTradeUnderlyingIbexDatabaseEnum.STRIKE_PRICE
-        contract_code_col = OptionsTradeUnderlyingIbexDatabaseEnum.OPTION_CONTRACT_CODE
+        strike_col = OptionTradesUnderlyingDBEnum.STRIKE_PRICE
+        contract_code_col = OptionTradesUnderlyingDBEnum.OPTION_CONTRACT_CODE
         
         contract_code_series = options_trade_underlying_ibex_df[contract_code_col]
         strike_series = options_trade_underlying_ibex_df[strike_col]
@@ -105,8 +100,8 @@ class VolatilityStepLoader:
         options_trade_underlying_ibex_df: pd.DataFrame
     ):
         
-        exec_datetime_col = OptionsTradeUnderlyingIbexDatabaseEnum.EXEC_DATETIME
-        underlying_exec_datetime_col = OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_EXEC_DATETIME
+        exec_datetime_col = OptionTradesUnderlyingDBEnum.EXEC_DATETIME
+        underlying_exec_datetime_col = OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME
         
         # Convert to datetime
         exec_datetime = pd.to_datetime(options_trade_underlying_ibex_df[exec_datetime_col], format='mixed')
@@ -124,8 +119,8 @@ class VolatilityStepLoader:
     def _validate_underlying_exec_datetime_range(
         options_trade_underlying_ibex_df: pd.DataFrame
     ):
-        session_date_col = OptionsTradeUnderlyingIbexDatabaseEnum.SESSION_DATE
-        underlying_exec_datetime_col = OptionsTradeUnderlyingIbexDatabaseEnum.UNDERLYING_EXEC_DATETIME
+        session_date_col = OptionTradesUnderlyingDBEnum.SESSION_DATE
+        underlying_exec_datetime_col = OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME
         
         # Convert to datetime
         session_date = pd.to_datetime(options_trade_underlying_ibex_df[session_date_col], format='mixed')
@@ -147,7 +142,7 @@ class VolatilityStepLoader:
     def _validate_time_to_expiration(
         options_trade_underlying_ibex_df: pd.DataFrame
     ):
-        time_to_expiration_col = OptionsTradeUnderlyingIbexDatabaseEnum.TIME_TO_EXPIRATION
+        time_to_expiration_col = OptionTradesUnderlyingDBEnum.TIME_TO_EXPIRATION
         time_to_expiration = options_trade_underlying_ibex_df[time_to_expiration_col].astype("float64")
         
         # Check non-negative
@@ -157,8 +152,8 @@ class VolatilityStepLoader:
     @staticmethod
     def _validate_options_trade_underlying_ibex_df(options_trade_underlying_ibex_df: pd.DataFrame):
         # Format of main columns
-        trade_price_col = OptionsTradeUnderlyingIbexDatabaseEnum.TRADE_PRICE_OPTION
-        quantity_col = OptionsTradeUnderlyingIbexDatabaseEnum.QUANTITY
+        trade_price_col = OptionTradesUnderlyingDBEnum.TRADE_PRICE_OPTION
+        quantity_col = OptionTradesUnderlyingDBEnum.QUANTITY
         if (options_trade_underlying_ibex_df[trade_price_col].astype("float64") <= 0.0).any():
             raise NegativeTradePriceError()
 
@@ -195,5 +190,5 @@ class VolatilityStepLoader:
         options_trade_underlying_ibex_df = VolatilityStepLoader._read_options_trade_underlying_ibex_database()
         rates_df = VolatilityStepLoader._read_rates()
         VolatilityStepLoader._validate_sources(options_trade_underlying_ibex_df, rates_df)
-        options_trade_volatility_ibex_df = OptionsTradeVolatilityIbexBuilder.build(options_trade_underlying_ibex_df, rates_df)
+        options_trade_volatility_ibex_df = VolatilityBuilder.build(options_trade_underlying_ibex_df, rates_df)
         return options_trade_volatility_ibex_df
