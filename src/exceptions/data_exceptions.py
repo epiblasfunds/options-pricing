@@ -84,3 +84,8 @@ class RatesOutOfRangeError(DataError):
 class TimeToExpirationOutOfRangeError(DataError):
     def __init__(self, msg: str = "Time to expiration is outside the valid range."):
         super().__init__(msg)
+
+
+class DataTypeConversionError(DataError):
+    def __init__(self, msg: str = "Error trying to convert the type of some data."):
+        super().__init__(msg)

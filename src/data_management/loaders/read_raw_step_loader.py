@@ -16,6 +16,7 @@ from src.data_management.builders import (
     RatesBuilder,
     TgentradesBuilder,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.enums.data_enums import DataTypeEnum
 
 logger = logging.getLogger(__name__)
@@ -50,64 +51,6 @@ class ReadRawStepLoader:
             if file.name not in unique_files:
                 unique_files[date] = file
         return list(unique_files.values())
-
-    # Process datetimes
-    @staticmethod
-    def _prepare_datetime(time_str: str) -> str:
-        """
-        Possible values for time_str: [
-            "01/01/3000 9:00:06",
-            "01/01/3000 09:00:06",
-            "09:00:00.000000",
-            "09:00:00:000",
-            "08:00:16.002360"
-        ]
-        """
-        time_str = time_str.split(" ")[-1]
-        time_str_split = time_str.split(":")
-        time_str_split[0] = (
-            f"0{time_str_split[0]}"
-            if len(time_str_split[0]) == 1
-            else time_str_split[0]
-        )
-
-        if len(time_str_split) == 4:
-            time_str = f"{time_str_split[0]}:{time_str_split[1]}:{time_str_split[2]}.{time_str_split[3]}"
-        elif len(time_str_split) != 3:
-            raise ValueError(f"Unexpected time format: {time_str}")
-        else:
-            time_str = ":".join(time_str_split)
-
-        time_str_split = time_str.split(".")
-        if len(time_str_split) == 1:
-            time_str = f"{time_str_split[0]}.000000"
-
-        return time_str
-
-    # Convert data types
-    @staticmethod
-    def _convert_data_types(
-        df: pd.DataFrame,
-        selected_columns_dict: t.Dict[Enum, DataTypeEnum],
-    ) -> pd.DataFrame:
-        for col, dtype in selected_columns_dict.items():
-            if dtype == DataTypeEnum.DATE:
-                df[col] = pd.to_datetime(df[col], format="%Y%m%d").dt.date
-            elif dtype == DataTypeEnum.DATETIME:
-                df[col] = (
-                    df[col]
-                    .str.strip()
-                    .str.split(" ")
-                    .str[-1]
-                    .apply(ReadRawStepLoader._prepare_datetime)
-                )
-                df[col] = pd.to_datetime(df[col], format="%H:%M:%S.%f")
-            elif dtype == DataTypeEnum.FLOAT:
-                df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
-            elif dtype == DataTypeEnum.INT:
-                df[col] = pd.to_numeric(df[col], downcast="integer")
-
-        return df
 
     @staticmethod
     def _read_raw_databases(
@@ -161,7 +104,7 @@ class ReadRawStepLoader:
                     df = df[relevant_columns]
 
                     # Convert data types
-                    df = ReadRawStepLoader._convert_data_types(
+                    df = convert_data_types(
                         df=df, selected_columns_dict=selected_columns_dict
                     )
 
@@ -224,4 +167,3 @@ class ReadRawStepLoader:
         rates_df = RatesBuilder.build(eonia_df, str_df)
 
         return ccontracts_c2_df, tgentrades_df, rates_df
-        

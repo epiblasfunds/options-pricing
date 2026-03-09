@@ -102,7 +102,7 @@ class RatesBuilder:
         rates_date_col_name = config.data_config.read_raw_config.rates_date_column_name
         eonia_df.set_index(rates_date_col_name, inplace=True)
         str_df.set_index(rates_date_col_name, inplace=True)
-        
+
         idx_rate_values = config.data_config.read_raw_config.idx_rate_values
         eonia_series = eonia_df.iloc[:, idx_rate_values]
         str_series = str_df.iloc[:, idx_rate_values]
@@ -118,17 +118,17 @@ class RatesBuilder:
         cutoff_date_str_eonia = config.data_config.read_raw_config.cutoff_date_str_eonia
 
         filtered_eonia_series = eonia_series[
-            pd.to_datetime(eonia_series.index)
-            < pd.to_datetime(cutoff_date_str_eonia)
+            pd.to_datetime(eonia_series.index) < pd.to_datetime(cutoff_date_str_eonia)
         ].copy()
         filtered_eonia_series = pd.to_numeric(filtered_eonia_series) - spread_str_eonia
         filtered_str_series = str_series[
-            pd.to_datetime(str_series.index)
-            >= pd.to_datetime(cutoff_date_str_eonia)
+            pd.to_datetime(str_series.index) >= pd.to_datetime(cutoff_date_str_eonia)
         ].copy()
         filtered_str_series = pd.to_numeric(filtered_str_series)
 
-        rates_series = pd.concat([filtered_eonia_series, filtered_str_series], ignore_index=False)
+        rates_series = pd.concat(
+            [filtered_eonia_series, filtered_str_series], ignore_index=False
+        )
         rates_series.name = RatesEnum.RATE
 
         # Save CSV

@@ -96,7 +96,7 @@ class OptionUnderlyingBuilder:
             options_trade_ibex_db[
                 [
                     OptionsTradeIbexDBEnum.OPTION_CONTRACT_CODE,
-                    OptionsTradeIbexDBEnum.MATURITY_DATE,
+                    OptionsTradeIbexDBEnum.MATURITY_DATETIME,
                 ]
             ]
             .drop_duplicates(
@@ -110,7 +110,7 @@ class OptionUnderlyingBuilder:
             futures_trade_ibex_db[
                 [
                     FuturesTradeIbexDBEnum.FUTURE_CONTRACT_CODE,
-                    FuturesTradeIbexDBEnum.MATURITY_DATE,
+                    FuturesTradeIbexDBEnum.MATURITY_DATETIME,
                 ]
             ]
             .drop_duplicates(
@@ -124,7 +124,7 @@ class OptionUnderlyingBuilder:
         options_underlying_ibex_db = options_df.merge(
             futures_df,
             how="inner",  # Take only options with a matching future maturity
-            on=OptionsTradeIbexDBEnum.MATURITY_DATE,
+            on=OptionsTradeIbexDBEnum.MATURITY_DATETIME,
         )
 
         # Save CSV

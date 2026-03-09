@@ -33,13 +33,13 @@
     "read_raw_step": {
         "ccontracts_c2_prefix": "CCONTRACTS_C2",
         "ccontracts_c2_columns": {
-            "SessionDate": "DATE",
+            "SessionDate": "date",
             "ClearingHouseCode": null,
-            "ContractCode": "TEXT",
+            "ContractCode": "text",
             "ContractGroupCode": null,
             "ContractTypeCode": null,
-            "StrikePrice": "FLOAT",
-            "MaturityDate": "DATE",
+            "StrikePrice": "float",
+            "MaturityDate": "date",
             "TradingEndDate": null,
             "ExerciseUnderlyingContractCode": null,
             "MarginUnderlyingContractCode": null,
@@ -52,18 +52,22 @@
         },
         "tgentrades_prefix": "TGENTRADES",
         "tgentrades_columns": {
-            "SessionDate": "DATE",
-            "MarketCode": "TEXT",
-            "TradeExecID": "TEXT",
-            "ContractCode": "TEXT",
-            "ExecTime": "DATETIME",
-            "TradePrice": "FLOAT",
-            "Quantity": "INT",
-            "TradeType": "TEXT"
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ContractCode": "text",
+            "ExecTime": "datetime",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text"
         },
         "idx_rate_values": 1,
         "spread_str_eonia": 0.00085,
         "cutoff_date_str_eonia": "2019-10-02",
+        "rates_columns": {
+            "SessionDate": "date",
+            "Rate": "float"
+        },
         "rates_date_column_name": "DATE",
         "rates_output_filename": "RATES_DATABASE"
     },
@@ -83,7 +87,7 @@
             "Quantity",
             "TradeType",
             "StrikePrice",
-            "MaturityDate"
+            "MaturityDatetime"
         ],
         "maturity_hour_expiration": " 21:00:00.000000",
         "contract_type_column": "ContractType"
@@ -107,8 +111,8 @@
                     "Quantity",
                     "TradeType",
                     "StrikePrice",
-                    "MaturityDate",
-                    "ExecDateTime",
+                    "MaturityDatetime",
+                    "ExecDatetime",
                     "TimeToExpiration"
                 ]
             },
@@ -127,8 +131,8 @@
                     "Quantity",
                     "TradeType",
                     "StrikePrice",
-                    "MaturityDate",
-                    "ExecDateTime",
+                    "MaturityDatetime",
+                    "ExecDatetime",
                     "TimeToExpiration"
                 ]
             }
@@ -138,21 +142,21 @@
     },
     "underlying_step": {
         "option_trades_underlying_db_columns": {
-            "OptionContractCode": "TEXT",
-            "FutureContractCode": "TEXT",
-            "UnderlyingPrice": "FLOAT",
-            "SessionDate": "DATE",
-            "MarketCode": "TEXT",
-            "TradeExecID": "TEXT",
-            "TradePriceOption": "FLOAT",
-            "Quantity": "INT",
-            "TradeType": "TEXT",
-            "StrikePrice": "FLOAT",
-            "MaturityDate": "DATE",
-            "ExecTime": "DATETIME",
-            "ExecDateTime": "DATETIME",
-            "TimeToExpiration": "INT",
-            "UnderlyingExecDateTime": "DATETIME"
+            "OptionContractCode": "text",
+            "FutureContractCode": "text",
+            "UnderlyingPrice": "float",
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "TradePriceOption": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecTime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "int",
+            "UnderlyingExecDatetime": "datetime"
         },
         "output_filename": "OPTION_TRADES_UNDERLYING_DB"
     },
@@ -160,7 +164,6 @@
         "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
-        "implied_volatility_column": "ImpliedVolatility",
         "output_filename": "VOLATILITY_DB"
     }
 }

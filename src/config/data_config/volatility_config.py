@@ -12,7 +12,6 @@ class VolatilityConfig:
         self.solver_min_sigma = volatility_config["solver_min_sigma"]
         self.solver_max_sigma = volatility_config["solver_max_sigma"]
         self.solver_tol = volatility_config["solver_tol"]
-        self.implied_volatility_column = volatility_config["implied_volatility_column"]
         self.output_filename = volatility_config["output_filename"]
         
     def __init__(self, data_config_file_path: str):

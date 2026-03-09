@@ -90,7 +90,7 @@ class TradeIbexBuilder:
     def impute_missing_maturities(merged_df: pd.DataFrame) -> pd.DataFrame:
         # 2026-02-23 18:09:24,906 | INFO | src.data_management.builders.merge_raw_step_builders |
         # There are 16442721 missing maturities corresponding to 4600 contract codes.
-        mask = merged_df[TradeIbexDBEnum.MATURITY_DATE].isna()
+        mask = merged_df[TradeIbexDBEnum.MATURITY_DATETIME].isna()
         missing_cc = merged_df.loc[
             mask,
             [
@@ -107,7 +107,7 @@ class TradeIbexBuilder:
         )
 
         # Compute maturities
-        missing_cc[TradeIbexDBEnum.MATURITY_DATE] = missing_cc.apply(
+        missing_cc[TradeIbexDBEnum.MATURITY_DATETIME] = missing_cc.apply(
             lambda row: calculate_maturity_from_contract_code(
                 contract_code=row[TradeIbexDBEnum.CONTRACT_CODE],
                 session_date=pd.to_datetime(row[TradeIbexDBEnum.SESSION_DATE]).date(),
@@ -117,7 +117,7 @@ class TradeIbexBuilder:
 
         # Imputing: Merge + fillna + drop extracolumn
         suffix = "_from_missings_cc"
-        column_to_drop = TradeIbexDBEnum.MATURITY_DATE + suffix
+        column_to_drop = TradeIbexDBEnum.MATURITY_DATETIME + suffix
 
         # Merge
         merged_df = merged_df.merge(
@@ -131,8 +131,8 @@ class TradeIbexBuilder:
         )
 
         # Fillna
-        merged_df[TradeIbexDBEnum.MATURITY_DATE] = merged_df[
-            TradeIbexDBEnum.MATURITY_DATE
+        merged_df[TradeIbexDBEnum.MATURITY_DATETIME] = merged_df[
+            TradeIbexDBEnum.MATURITY_DATETIME
         ].fillna(merged_df[column_to_drop])
 
         # Drop
@@ -169,15 +169,15 @@ class TradeIbexBuilder:
         df[TradeIbexDBEnum.EXEC_DATETIME] = pd.to_datetime(
             df[TradeIbexDBEnum.EXEC_DATETIME], format="ISO8601"
         )
-        df[TradeIbexDBEnum.MATURITY_DATE] = pd.to_datetime(
-            df[TradeIbexDBEnum.MATURITY_DATE].astype(str)
+        df[TradeIbexDBEnum.MATURITY_DATETIME] = pd.to_datetime(
+            df[TradeIbexDBEnum.MATURITY_DATETIME].astype(str)
             + config.data_config.merge_raw_config.maturity_hour_expiration,
             format="%Y-%m-%d %H:%M:%S.%f",
         )
 
         # Calculate time to expiration in days with decimals
         time_delta = (
-            df[TradeIbexDBEnum.MATURITY_DATE] - df[TradeIbexDBEnum.EXEC_DATETIME]
+            df[TradeIbexDBEnum.MATURITY_DATETIME] - df[TradeIbexDBEnum.EXEC_DATETIME]
         )
         df[TradeIbexDBEnum.TIME_TO_EXPIRATION] = time_delta.dt.total_seconds() / (
             24 * 3600
@@ -238,6 +238,9 @@ class TradeIbexBuilder:
             TradeIbexBuilder.SESSION_DATE_YEAR_COLUMN,
         ]
         merged_df = tgentrades_df.merge(ccontracts_c2_df, on=merge_columns, how="left")
+        merged_df = merged_df.rename(
+            columns={CcontractsC2Enum.MATURITY_DATE: TradeIbexDBEnum.MATURITY_DATETIME}
+        )
 
         # Add type of contract
         merged_df[config.data_config.merge_raw_config.contract_type_column] = merged_df[

@@ -69,11 +69,11 @@ class UnderlyingStepLoader:
     ):
         if contract_type == ContractTypeEnum.OPTIONS:
             contract_code_col = OptionsTradeIbexDBEnum.OPTION_CONTRACT_CODE
-            maturity_date_col = OptionsTradeIbexDBEnum.MATURITY_DATE
+            maturity_date_col = OptionsTradeIbexDBEnum.MATURITY_DATETIME
             session_date_col = OptionsTradeIbexDBEnum.SESSION_DATE
         else:
             contract_code_col = FuturesTradeIbexDBEnum.FUTURE_CONTRACT_CODE
-            maturity_date_col = FuturesTradeIbexDBEnum.MATURITY_DATE
+            maturity_date_col = FuturesTradeIbexDBEnum.MATURITY_DATETIME
             session_date_col = FuturesTradeIbexDBEnum.SESSION_DATE
 
         contract_code_series = trade_ibex_df[contract_code_col]
@@ -124,13 +124,13 @@ class UnderlyingStepLoader:
         trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
     ):
         if contract_type == ContractTypeEnum.OPTIONS:
-            maturity_col = OptionsTradeIbexDBEnum.MATURITY_DATE
+            maturity_col = OptionsTradeIbexDBEnum.MATURITY_DATETIME
             session_date_col = OptionsTradeIbexDBEnum.SESSION_DATE
             trade_price_col = OptionsTradeIbexDBEnum.TRADE_PRICE
             quantity_col = OptionsTradeIbexDBEnum.QUANTITY
             time_to_expiration_col = OptionsTradeIbexDBEnum.TIME_TO_EXPIRATION
         else:
-            maturity_col = FuturesTradeIbexDBEnum.MATURITY_DATE
+            maturity_col = FuturesTradeIbexDBEnum.MATURITY_DATETIME
             session_date_col = FuturesTradeIbexDBEnum.SESSION_DATE
             trade_price_col = FuturesTradeIbexDBEnum.TRADE_PRICE
             quantity_col = FuturesTradeIbexDBEnum.QUANTITY
@@ -172,7 +172,7 @@ class UnderlyingStepLoader:
         if options_underlying_ibex_df.duplicated(
             subset=[
                 OptionUnderlyingDBEnum.OPTION_CONTRACT_CODE,
-                OptionUnderlyingDBEnum.MATURITY_DATE,
+                OptionUnderlyingDBEnum.MATURITY_DATETIME,
                 OptionUnderlyingDBEnum.FUTURE_CONTRACT_CODE,
             ]
         ).any():

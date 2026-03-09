@@ -51,7 +51,7 @@ class ProductSplitStepLoader:
         trade_ibex_df: pd.DataFrame, contract_type: ContractTypeEnum
     ):
         contract_code_series = trade_ibex_df[TradeIbexDBEnum.CONTRACT_CODE]
-        maturity_series = trade_ibex_df[TradeIbexDBEnum.MATURITY_DATE]
+        maturity_series = trade_ibex_df[TradeIbexDBEnum.MATURITY_DATETIME]
         session_date_series = trade_ibex_df[TradeIbexDBEnum.SESSION_DATE]
 
         validate_maturity_contract_code(
@@ -88,7 +88,7 @@ class ProductSplitStepLoader:
 
         # Validate maturity and session date coherence
         session = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.SESSION_DATE])
-        maturity = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.MATURITY_DATE])
+        maturity = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.MATURITY_DATETIME])
 
         mask = session > maturity
         if mask.any():
