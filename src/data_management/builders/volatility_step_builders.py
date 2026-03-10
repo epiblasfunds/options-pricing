@@ -65,9 +65,12 @@ class VolatilityBuilder:
         for business_day in business_days:
             date_rate = business_day.date()
 
-            while date_rate not in rates_df[RatesEnum.SESSION_DATE]:
+            mask = (rates_df[RatesEnum.SESSION_DATE] == date_rate)
+            while not mask.any():
                 date_rate -= pd.Timedelta(days=1)
-            r_i = float(rates_df.loc[date_rate, RatesEnum.RATE])
+                mask = (rates_df[RatesEnum.SESSION_DATE] == date_rate)
+
+            r_i = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0])
 
             # Calculate n_i: number of calendar days this rate applies to
             # If it's Monday (weekday==0), it covers 3 days (Sat, Sun, Mon)
