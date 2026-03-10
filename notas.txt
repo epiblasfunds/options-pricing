@@ -70,7 +70,8 @@ Resources:
 - seguramente haya que crear un utils de validaciones porque muchas funciones son copia pega (validaciones de maturities, strike y nas principalmente)
 - Ensure rates_df SessionDate is datetime and index iría donde está o en el loader?
 - Revisar cuando ponemos los format, del pd_todatetime para confirmar que lo hacemos bien
-- Revisar los buisness dates de rates
+- Revisar los buisness dates de rates (posibilidad de crear un método propio) y ver qué días no tenemos (analizar si hay alguno que se vaya mucho)
+- Tenemos que depurar las columans finales del volatility
 - Posibles archivos a incluir:
         * pyproject.toml: Es la definción para python de cómo se configura el proyecto: define el proyecto, configura herramientas (test, lint formateo types) y usa herramientas tipo poetry setuptools o hatch
         * pre-commit-config.yaml: Sirve para antes de hacer el commit chekear ciertas cosas tipo: formatear, revisar estilo, detectar errores, valdiar imports o comprobar tipos.

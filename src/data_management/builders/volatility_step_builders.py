@@ -3,6 +3,7 @@ import math
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from src.config.config import VOLATILITY_DATA_STEP_DIR_PATH, config
 from src.enums.data_enums import (
@@ -90,9 +91,14 @@ class VolatilityBuilder:
 
     @staticmethod
     def create_rate_column(df: pd.DataFrame, rates_df: pd.DataFrame) -> pd.DataFrame:
-        # Ensure rates_df SessionDate is datetime and index
-        df[OptionTradesUnderlyingDBEnum.RATE] = df.apply(
-            lambda row: VolatilityBuilder.calculate_compounded_rate(
+        rate_values: list[float] = []
+        for _, row in tqdm(
+            df.iterrows(),
+            total=len(df),
+            desc="Calculating compounded rate",
+            unit="row",
+        ):
+            compounded_rate = VolatilityBuilder.calculate_compounded_rate(
                 exec_date=pd.to_datetime(
                     row[OptionTradesUnderlyingDBEnum.EXEC_DATETIME]
                 ),
@@ -103,9 +109,10 @@ class VolatilityBuilder:
                     row[OptionTradesUnderlyingDBEnum.TIME_TO_EXPIRATION]
                 ),
                 rates_df=rates_df,
-            ),
-            axis=1,
-        )
+            )
+            rate_values.append(compounded_rate)
+
+        df[VolatilityDBEnum.RATE] = rate_values
 
         return df
 
@@ -253,7 +260,12 @@ class VolatilityBuilder:
             r_in_decimals_col,
             option_type_col,
         ]
-        for row in volatility_df[subset_cols].iterrows():
+        for _, row in tqdm(
+            volatility_df[subset_cols].iterrows(),
+            total=len(volatility_df),
+            desc="Calculating implied volatility",
+            unit="row",
+        ):
             iv = VolatilityBuilder.implied_vol(
                 price=row[OptionTradesUnderlyingDBEnum.TRADE_PRICE_OPTION],
                 F=row[OptionTradesUnderlyingDBEnum.UNDERLYING_PRICE],
