@@ -141,61 +141,65 @@ class TradeIbexBuilder:
         return merged_df
 
     @staticmethod
-    def create_exec_datetime(
-        df: pd.DataFrame, exec_time_col: str, session_date_col: str
-    ) -> pd.Series:
-        # Extract only the time component in case the column contains a full datetime
-        df[exec_time_col] = df[exec_time_col].astype(str).str.split().str[-1]
+    def create_exec_datetime(df: pd.DataFrame) -> pd.Series:
+        # Extract only the time component as the column has this format: "1900-01-01 %H:%M:%S.%f"
+        exec_time = df[TgentradesEnum.EXEC_TIME].astype(str).str.split().str[-1]
 
-        # Ensure microseconds are present by appending ".000000" when missing
-        df[exec_time_col] = df[exec_time_col].apply(
-            lambda x: x if "." in x else x + ".000000"
-        )
+        # Oldest trades does not have milliseconds informed
+        exec_time = exec_time.apply(lambda x: x if "." in x else x + ".000000")
 
-        # Combine date and time and convert to pandas datetime
-        new_col = pd.to_datetime(
-            df[session_date_col].astype(str) + " " + df[exec_time_col],
+        return pd.to_datetime(
+            df[TgentradesEnum.SESSION_DATE].astype(str) + " " + exec_time,
             format="%Y-%m-%d %H:%M:%S.%f",
         )
 
-        df[TradeIbexDBEnum.EXEC_DATETIME] = new_col
-
-        return df
-
     @staticmethod
-    def create_time_to_expiration_column(df: pd.DataFrame) -> pd.DataFrame:
-
-        # Convert time columns to datetime
-        df[TradeIbexDBEnum.EXEC_DATETIME] = pd.to_datetime(
-            df[TradeIbexDBEnum.EXEC_DATETIME], format="ISO8601"
-        )
-        df[TradeIbexDBEnum.MATURITY_DATETIME] = pd.to_datetime(
+    def create_maturity_datetime(df: pd.DataFrame) -> pd.Series:
+        return pd.to_datetime(
             df[TradeIbexDBEnum.MATURITY_DATETIME].astype(str)
             + config.data_config.merge_raw_config.maturity_hour_expiration,
             format="%Y-%m-%d %H:%M:%S.%f",
         )
 
+    @staticmethod
+    def create_time_to_expiration_column(df: pd.DataFrame) -> pd.Series:
         # Calculate time to expiration in days with decimals
         time_delta = (
             df[TradeIbexDBEnum.MATURITY_DATETIME] - df[TradeIbexDBEnum.EXEC_DATETIME]
         )
-        df[TradeIbexDBEnum.TIME_TO_EXPIRATION] = time_delta.dt.total_seconds() / (
-            24 * 3600
-        )
-
-        return df
+        return time_delta.dt.total_seconds() / (24 * 3600)
 
     @staticmethod
     def create_new_columns(df: pd.DataFrame) -> pd.DataFrame:
-
-        df = TradeIbexBuilder.create_exec_datetime(
-            df=df,
-            exec_time_col=TgentradesEnum.EXEC_TIME,
-            session_date_col=TgentradesEnum.SESSION_DATE,
+        df[TradeIbexDBEnum.EXEC_DATETIME] = TradeIbexBuilder.create_exec_datetime(df)
+        df[TradeIbexDBEnum.MATURITY_DATETIME] = (
+            TradeIbexBuilder.create_maturity_datetime(df)
         )
-        df = TradeIbexBuilder.create_time_to_expiration_column(df=df)
-
+        df[TradeIbexDBEnum.TIME_TO_EXPIRATION] = (
+            TradeIbexBuilder.create_time_to_expiration_column(df)
+        )
         return df
+
+    @staticmethod
+    def _to_csv(df: pd.DataFrame):
+        df = df.copy()
+
+        # Format Datetimes
+        for col in [
+            TradeIbexDBEnum.EXEC_DATETIME,
+            TradeIbexDBEnum.MATURITY_DATETIME,
+        ]:
+            df[col] = df[col].dt.strftime(date_format="%Y-%m-%d %H:%M:%S.%f")
+
+        df.to_csv(
+            TradeIbexBuilder.get_output_filename(),
+            index=False,
+            encoding="utf-8",
+            sep=";",
+        )
+        logger.info(
+            f"TradeIbexDatabase (with shape {df.shape}) saved in: {TradeIbexBuilder.get_output_filename()}."
+        )
 
     @staticmethod
     def build(
@@ -261,14 +265,6 @@ class TradeIbexBuilder:
         merged_df = TradeIbexBuilder.create_new_columns(df=merged_df)
 
         # Save CSV
-        merged_df.to_csv(
-            TradeIbexBuilder.get_output_filename(),
-            index=False,
-            encoding="utf-8",
-            sep=";",
-        )
-        logger.info(
-            f"TradeIbexDatabase (with shape {merged_df.shape}) saved in: {TradeIbexBuilder.get_output_filename()}."
-        )
+        TradeIbexBuilder._to_csv(merged_df)
 
         return merged_df

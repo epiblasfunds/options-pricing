@@ -8,7 +8,7 @@ from src.exceptions.data_exceptions import DataTypeConversionError
 
 
 # Process datetimes
-def prepare_datetime(time_str: str) -> str:
+def prepare_time(time_str: str) -> str:
     """
     Possible values for time_str: [
         "01/01/3000 9:00:06",
@@ -43,26 +43,25 @@ def convert_data_types(
     df: pd.DataFrame,
     selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     format_date="%Y%m%d",
-    format_datetime="%H:%M:%S.%f",
+    format_datetime="%Y-%m-%d %H:%M:%S",
+    format_time="%H:%M:%S.%f"
 ) -> pd.DataFrame:
     for col, dtype in selected_columns_dict.items():
         try:
             if dtype == DataTypeEnum.DATE.value:
                 df[col] = pd.to_datetime(df[col], format=format_date).dt.date
             elif dtype == DataTypeEnum.DATETIME:
-                df[col] = (
-                    df[col]
-                    .str.strip()
-                    .str.split(" ")
-                    .str[-1]
-                    .apply(prepare_datetime)
-                )
                 df[col] = pd.to_datetime(df[col], format=format_datetime)
+            elif dtype == DataTypeEnum.TIME:
+                df[col] = df[col].str.strip().str.split(" ").str[-1].apply(prepare_time)
+                df[col] = pd.to_datetime(df[col], format=format_time)
             elif dtype == DataTypeEnum.FLOAT.value:
                 df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
             elif dtype == DataTypeEnum.INT.value:
                 df[col] = pd.to_numeric(df[col], downcast="integer")
-        except Exception:
-            raise DataTypeConversionError(f"DataTypeConversionError: {col} cannot be converted to {dtype}")
+        except Exception as e:
+            raise DataTypeConversionError(
+                f"DataTypeConversionError: {col} cannot be converted to {dtype}"
+            ) from e
 
     return df

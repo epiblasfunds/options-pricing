@@ -210,7 +210,8 @@ class VolatilityStepLoader:
         option_trades_underlying_df = convert_data_types(
             df=option_trades_underlying_df,
             selected_columns_dict=config.data_config.underlying_config.option_trades_underlying_db_columns,
-            format_date="%Y-%m-%d"
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f"
         )
         rates_df = convert_data_types(
             df=rates_df,
