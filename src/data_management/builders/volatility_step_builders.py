@@ -284,10 +284,11 @@ class VolatilityBuilder:
             VolatilityBuilder.get_output_filename(),
             encoding="utf-8",
             sep=";",
+            index=False
         )
         logger.info(
             f"OptionsTradeVolatilityIbex (with shape {volatility_df.shape}) "
-            + "saved in: {OptionsTradeVolatilityIbexBuilder.get_output_filename()}."
+            + f"saved in: {VolatilityBuilder.get_output_filename()}."
         )
 
         return volatility_df
