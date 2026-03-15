@@ -1,12 +1,12 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OptionsTradeIbexUnderlyingDatabaseEnum(Enum):
+class VolatilityDBEnum(StrEnum):
     EXEC_DATETIME = "ExecDatetime"
     EXEC_TIME = "ExecTime"
     FUTURE_CONTRACT_CODE = "FutureContractCode"
     MARKET_CODE = "MarketCode"
-    MATURITY_DATE = "MaturityDate"
+    MATURITY_DATETIME = "MaturityDatetime"
     OPTION_CONTRACT_CODE = "OptionContractCode"
     QUANTITY = "Quantity"
     SESSION_DATE = "SessionDate"
@@ -15,4 +15,7 @@ class OptionsTradeIbexUnderlyingDatabaseEnum(Enum):
     TRADE_PRICE_OPTION = "TradePriceOption"
     TRADE_TYPE = "TradeType"
     UNDERLYING_EXEC_DATETIME = "UnderlyingExecDatetime"
-    UNDERLYING_PRICE = "UnderlayingPrice"
+    UNDERLYING_PRICE = "UnderlyingPrice"
+    TIME_TO_EXPIRATION = "TimeToExpiration"
+    RATE = "Rate"
+    IMPLIED_VOLATILITY = "ImpliedVolatility"

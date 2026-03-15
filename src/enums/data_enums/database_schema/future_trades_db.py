@@ -1,14 +1,16 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OptionsTradeIbexDatabaseEnum(Enum):
-    OPTION_CONTRACT_CODE = "OptionContractCode"
+class FuturesTradeIbexDBEnum(StrEnum):
+    FUTURE_CONTRACT_CODE = "FutureContractCode"
     SESSION_DATE = "SessionDate"
     MARKET_CODE = "MarketCode"
     TRADE_EXEC_ID = "TradeExecID"
     EXEC_TIME = "ExecTime"
+    EXEC_DATETIME = "ExecDatetime"
     TRADE_PRICE = "TradePrice"
     QUANTITY = "Quantity"
     TRADE_TYPE = "TradeType"
     STRIKE_PRICE = "StrikePrice"
-    MATURITY_DATE = "MaturityDate"
+    MATURITY_DATETIME = "MaturityDatetime"
+    TIME_TO_EXPIRATION = "TimeToExpiration"

@@ -3,7 +3,7 @@ import typing as t
 
 import pandas as pd
 
-from src.config.config import MERGE_RAW_DATA_STEP_DIR_PATH, config
+from src.config.config import config
 from src.data_management.builders import (
     CContractsC2Builder,
     TgentradesBuilder,
@@ -25,14 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class MergeRawStepLoader:
-    OUTPUT_FILENAME = (
-        MERGE_RAW_DATA_STEP_DIR_PATH
-        / f"{config.data_config.merge_raw_config.output_filename}.csv"
-    )
 
     # READ
     @staticmethod
-    def _read_trades_and_contracts_dfs() -> None:
+    def _read_trades_and_contracts_dfs() -> tuple[pd.DataFrame, pd.DataFrame]:
         trades_df = pd.read_csv(
             TgentradesBuilder.get_output_filename(),
             delimiter=";",
@@ -57,15 +53,15 @@ class MergeRawStepLoader:
             first_dup = pk_df[dup_mask].iloc[0]
             raise DuplicatedPrimaryKeysError(
                 "MergeRawHandler::_validate_contracts_df. Duplicate (SessionDate, ContractCode) pair found: "
-                f"SessionDate={first_dup[CcontractsC2Enum.SESSION_DATE.value]}, "
-                f"ContractCode={first_dup[CcontractsC2Enum.CONTRACT_CODE.value]}."
+                f"SessionDate={first_dup[CcontractsC2Enum.SESSION_DATE]}, "
+                f"ContractCode={first_dup[CcontractsC2Enum.CONTRACT_CODE]}."
             )
 
     @staticmethod
     def _validate_maturity(contracts_df: pd.DataFrame, contract_type: ContractTypeEnum):
-        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
-        maturity_series = contracts_df[CcontractsC2Enum.MATURITY_DATE.value]
-        session_date_series = contracts_df[CcontractsC2Enum.SESSION_DATE.value]
+        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE]
+        maturity_series = contracts_df[CcontractsC2Enum.MATURITY_DATE]
+        session_date_series = contracts_df[CcontractsC2Enum.SESSION_DATE]
 
         validate_maturity_contract_code(
             contract_type=contract_type,
@@ -76,8 +72,8 @@ class MergeRawStepLoader:
 
     @staticmethod
     def _validate_strike(contracts_df: pd.DataFrame):
-        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
-        strike_series = contracts_df[CcontractsC2Enum.STRIKE_PRICE.value]
+        contract_code_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE]
+        strike_series = contracts_df[CcontractsC2Enum.STRIKE_PRICE]
         validate_strike_contract_code(
             contract_code_series=contract_code_series,
             strike_series=strike_series,
@@ -85,7 +81,7 @@ class MergeRawStepLoader:
 
     @staticmethod
     def _validate_missing_ccontracts(contracts_df: pd.DataFrame):
-        cc_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE.value]
+        cc_series = contracts_df[CcontractsC2Enum.CONTRACT_CODE]
 
         options_contracts_mask = (
             cc_series.str.len()
@@ -98,7 +94,7 @@ class MergeRawStepLoader:
             == config.data_config.contract_code_config.futures_code_len
         )
         future_columns = [
-            c for c in contracts_df.columns if c != CcontractsC2Enum.STRIKE_PRICE.value
+            c for c in contracts_df.columns if c != CcontractsC2Enum.STRIKE_PRICE
         ]
         futures = contracts_df[futures_contracts_mask][future_columns]
 
@@ -108,17 +104,17 @@ class MergeRawStepLoader:
     @staticmethod
     def _validate_trades_df(trades_df):
         # Format validations
-        if (trades_df[TgentradesEnum.TRADE_PRICE.value].astype("float64") <= 0.0).any():
+        if (trades_df[TgentradesEnum.TRADE_PRICE].astype("float64") <= 0.0).any():
             raise NegativeTradePriceError()
 
-        if (trades_df[TgentradesEnum.QUANTITY.value].astype("float64") <= 0.0).any():
+        if (trades_df[TgentradesEnum.QUANTITY].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
 
         # Unique Primary Keys
         MergeRawStepLoader._validate_primary_keys(
             df=trades_df,
             pk_columns=[
-                TgentradesEnum.TRADE_EXEC_ID.value,
+                TgentradesEnum.TRADE_EXEC_ID,
             ],
         )
 
@@ -132,8 +128,8 @@ class MergeRawStepLoader:
         MergeRawStepLoader._validate_primary_keys(
             df=contracts_df,
             pk_columns=[
-                CcontractsC2Enum.SESSION_DATE.value,
-                CcontractsC2Enum.CONTRACT_CODE.value,
+                CcontractsC2Enum.SESSION_DATE,
+                CcontractsC2Enum.CONTRACT_CODE,
             ],
         )
 

@@ -52,6 +52,9 @@ class NegativeTradePriceError(DataError):
     def __init__(self, msg: str = "TradePrice contains non-positive (<= 0) values."):
         super().__init__(msg)
 
+class NegativeTimeToExpirationError(DataError):
+    def __init__(self, msg: str = "TimeToExpiration contains negative values."):
+        super().__init__(msg)
 
 class NegativeQuantityError(DataError):
     def __init__(self, msg: str = "Quantity contains non-positive (<= 0) values."):
@@ -60,4 +63,29 @@ class NegativeQuantityError(DataError):
 
 class SessionAfterMaturityError(DataError):
     def __init__(self, msg: str = "SessionDate occurs after MaturityDate."):
+        super().__init__(msg)
+
+
+class UnderlyingExecDatetimeAfterExecDatetimeError(DataError):
+    def __init__(self, msg: str = "UnderlyingExecDatetime occurs after ExecDatetime."):
+        super().__init__(msg)
+
+
+class UnderlyingExecDatetimeOutOfRangeError(DataError):
+    def __init__(self, msg: str = "UnderlyingExecDatetime is outside the valid range."):
+        super().__init__(msg)
+
+
+class RatesOutOfRangeError(DataError):
+    def __init__(self, msg: str = "Interest rates are outside the valid range."):
+        super().__init__(msg)
+
+
+class TimeToExpirationOutOfRangeError(DataError):
+    def __init__(self, msg: str = "Time to expiration is outside the valid range."):
+        super().__init__(msg)
+
+
+class DataTypeConversionError(DataError):
+    def __init__(self, msg: str = "Error trying to convert the type of some data."):
         super().__init__(msg)

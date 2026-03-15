@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CcontractsC2Enum(Enum):
+class CcontractsC2Enum(StrEnum):
     ARRAY_CODE = "ArrayCode"
     CLEARING_HOUSE_CODE = "ClearingHouseCode"
     CONTRACT_CODE = "ContractCode"

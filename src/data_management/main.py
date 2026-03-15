@@ -3,6 +3,7 @@ from src.data_management.loaders import (
     ProductSplitStepLoader,
     ReadRawStepLoader,
     UnderlyingStepLoader,
+    VolatilityStepLoader,
 )
 
 
@@ -12,6 +13,7 @@ def run_data_pipeline():
         MergeRawStepLoader,
         ProductSplitStepLoader,
         UnderlyingStepLoader,
+        VolatilityStepLoader
     ]:
         loader.load()
 

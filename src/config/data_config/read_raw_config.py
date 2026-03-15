@@ -16,7 +16,7 @@ class ReadRawConfig:
             CcontractsC2Enum(k) for k in cconctracts_c2_columns_dict.keys()
         ]
         self.ccontracts_c2_columns_selected_dict = {
-            CcontractsC2Enum(k): DataTypeEnum[v]
+            CcontractsC2Enum(k): DataTypeEnum(v)
             for k, v in cconctracts_c2_columns_dict.items()
             if v is not None
         }
@@ -30,11 +30,19 @@ class ReadRawConfig:
             TgentradesEnum(k) for k in tgentrades_columns_dict.keys()
         ]
         self.tgentrades_columns_selected_dict = {
-            TgentradesEnum(k): DataTypeEnum[v]
+            TgentradesEnum(k): DataTypeEnum(v)
             for k, v in tgentrades_columns_dict.items()
             if v is not None
         }
         self.tgentrades_prefix = data_config[read_raw_step_name]["tgentrades_prefix"]
+
+        # RATES
+        self.idx_rate_values = data_config[read_raw_step_name]["idx_rate_values"]
+        self.spread_str_eonia = data_config[read_raw_step_name]["spread_str_eonia"]
+        self.cutoff_date_str_eonia = data_config[read_raw_step_name]["cutoff_date_str_eonia"]
+        self.rates_columns = data_config[read_raw_step_name]["rates_columns"]
+        self.rates_date_column_name = data_config[read_raw_step_name]["rates_date_column_name"]
+        self.rates_output_filename = data_config[read_raw_step_name]["rates_output_filename"]
 
     def _load_config(self, data_config_file_path: str):
         with open(data_config_file_path, "r") as f:
