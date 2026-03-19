@@ -66,10 +66,10 @@ class VolatilityBuilder:
         for business_day in business_days:
             date_rate = business_day.date()
 
-            mask = (rates_df[RatesEnum.SESSION_DATE] == date_rate)
+            mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
             while not mask.any():
                 date_rate -= pd.Timedelta(days=1)
-                mask = (rates_df[RatesEnum.SESSION_DATE] == date_rate)
+                mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
 
             r_i = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0])
 
@@ -197,6 +197,7 @@ class VolatilityBuilder:
         Bisection method.
         Returns implied volatility.
         """
+
         # Define objective function for finding root
         def objective(sigma: float) -> float:
             return VolatilityBuilder.black76_price(F, K, T, r, sigma, c_type) - price
@@ -222,6 +223,28 @@ class VolatilityBuilder:
                 )
             )
         return low
+
+    @staticmethod
+    def _to_csv(df: pd.DataFrame):
+        df.to_csv(
+            VolatilityBuilder.get_output_filename(),
+            encoding="utf-8",
+            sep=";",
+            index=False,
+        )
+
+        # Format Datetimes
+        for col in [
+            VolatilityDBEnum.EXEC_DATETIME,
+            VolatilityDBEnum.UNDERLYING_EXEC_DATETIME,
+            VolatilityDBEnum.MATURITY_DATETIME,
+        ]:
+            df[col] = df[col].dt.strftime(date_format="%Y-%m-%d %H:%M:%S.%f")
+
+        logger.info(
+            f"OptionsTradeVolatilityIbex (with shape {df.shape}) "
+            + f"saved in: {VolatilityBuilder.get_output_filename()}."
+        )
 
     @staticmethod
     def build(
@@ -280,15 +303,6 @@ class VolatilityBuilder:
         volatility_df[VolatilityDBEnum.IMPLIED_VOLATILITY] = iv_values
 
         # Save CSV
-        volatility_df.to_csv(
-            VolatilityBuilder.get_output_filename(),
-            encoding="utf-8",
-            sep=";",
-            index=False
-        )
-        logger.info(
-            f"OptionsTradeVolatilityIbex (with shape {volatility_df.shape}) "
-            + f"saved in: {VolatilityBuilder.get_output_filename()}."
-        )
+        VolatilityBuilder._to_csv(volatility_df)
 
         return volatility_df
