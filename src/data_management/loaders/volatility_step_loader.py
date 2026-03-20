@@ -240,7 +240,7 @@ class VolatilityStepLoader:
 
     @staticmethod
     def load(force_reload=False):
-        if force_reload or VolatilityBuilder.get_output_filename().exists():
+        if force_reload or not VolatilityBuilder.get_output_filename().exists():
             # Read
             option_trades_underlying_df = (
                 VolatilityStepLoader._read_option_trades_underlying_db()
