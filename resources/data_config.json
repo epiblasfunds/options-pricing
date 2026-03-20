@@ -164,6 +164,24 @@
         "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
-        "output_filename": "VOLATILITY_DB"
+        "output_filename": "VOLATILITY_DB",
+        "volatility_db_columns": {
+            "SessionDate": "date",
+            "OptionContractCode": "text",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "TradePriceOption": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float",
+            "Rate": "float",
+            "FutureContractCode": "text",
+            "UnderlyingPrice": "float",
+            "UnderlyingExecDatetime": "datetime",
+            "ImpliedVolatility": "float"
+        }
     }
 }

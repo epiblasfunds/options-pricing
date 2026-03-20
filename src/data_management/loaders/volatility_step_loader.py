@@ -16,7 +16,6 @@ from src.data_management.utils.data_type_utils import convert_data_types
 from src.enums.data_enums import ContractTypeEnum, OptionTradesUnderlyingDBEnum
 from src.exceptions.data_exceptions import (
     MissingValuesError,
-    NegativeQuantityError,
     NegativeTradePriceError,
     TimeToExpirationOutOfRangeError,
     UnderlyingExecDatetimeAfterExecDatetimeError,
@@ -211,35 +210,54 @@ class VolatilityStepLoader:
             df=option_trades_underlying_df,
             selected_columns_dict=config.data_config.underlying_config.option_trades_underlying_db_columns,
             format_date="%Y-%m-%d",
-            format_datetime="%Y-%m-%d %H:%M:%S.%f"
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
         )
         rates_df = convert_data_types(
             df=rates_df,
             selected_columns_dict=config.data_config.read_raw_config.rates_columns,
-            format_date="%Y-%m-%d"
+            format_date="%Y-%m-%d",
         )
 
         return option_trades_underlying_df, rates_df
 
     @staticmethod
-    def load():
-        # Read
-        option_trades_underlying_df = (
-            VolatilityStepLoader._read_option_trades_underlying_db()
-        )
-        rates_df = VolatilityStepLoader._read_rates()
-
-        # Validate
-        VolatilityStepLoader._validate_sources(option_trades_underlying_df, rates_df)
-
-        # Conversion Type
-        option_trades_underlying_df, rates_df = VolatilityStepLoader._convert_types(
-            option_trades_underlying_df, rates_df
+    def _load_prebuilt_db():
+        options_trade_volatility_ibex_df = pd.read_csv(
+            VolatilityBuilder.get_output_filename(),
+            sep=";",
+            header=0,
+            dtype="string",
         )
 
-        # Build
-        options_trade_volatility_ibex_df = VolatilityBuilder.build(
-            option_trades_underlying_df, rates_df
+        options_trade_volatility_ibex_df = convert_data_types(
+            df=options_trade_volatility_ibex_df,
+            selected_columns_dict=config.data_config.volatility_config.volatility_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
         )
 
         return options_trade_volatility_ibex_df
+
+    @staticmethod
+    def load(force_reload=False):
+        if force_reload or not VolatilityBuilder.get_output_filename().exists():
+            # Read
+            option_trades_underlying_df = (
+                VolatilityStepLoader._read_option_trades_underlying_db()
+            )
+            rates_df = VolatilityStepLoader._read_rates()
+
+            # Validate
+            VolatilityStepLoader._validate_sources(option_trades_underlying_df, rates_df)
+
+            # Conversion Type
+            option_trades_underlying_df, rates_df = VolatilityStepLoader._convert_types(
+                option_trades_underlying_df, rates_df
+            )
+
+            # Build
+            VolatilityBuilder.build(
+                option_trades_underlying_df, rates_df
+            )
+
+        return VolatilityStepLoader._load_prebuilt_db()
