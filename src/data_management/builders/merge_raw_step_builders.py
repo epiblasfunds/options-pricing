@@ -255,14 +255,13 @@ class TradeIbexBuilder:
         merged_df = TradeIbexBuilder.impute_missing_maturities(merged_df=merged_df)
         merged_df = TradeIbexBuilder.impute_missing_strikes(merged_df=merged_df)
 
-        # Select only relevant columns
-        merged_df = merged_df[
-            config.data_config.merge_raw_config.trade_ibex_columns_list
-            + [config.data_config.merge_raw_config.contract_type_column]
-        ]
-
         # Create new columns
         merged_df = TradeIbexBuilder.create_new_columns(df=merged_df)
+
+        # Select and order columns from typed output schema
+        merged_df = merged_df[
+            list(config.data_config.merge_raw_config.trade_ibex_db_columns.keys())
+        ]
 
         # Save CSV
         TradeIbexBuilder._to_csv(merged_df)

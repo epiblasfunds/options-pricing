@@ -7,8 +7,8 @@ class MergeRawConfig:
             data_config = json.load(f)
         merge_raw_step_name = "merge_raw_step"
         self.merge_columns_list = data_config[merge_raw_step_name]["merge_columns"]
-        self.trade_ibex_columns_list = data_config[merge_raw_step_name][
-            "trade_ibex_columns"
+        self.trade_ibex_db_columns = data_config[merge_raw_step_name][
+            "trade_ibex_db_columns"
         ]
         self.contract_type_column = data_config[merge_raw_step_name][
             "contract_type_column"

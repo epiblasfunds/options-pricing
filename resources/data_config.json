@@ -77,64 +77,72 @@
             "SessionDate",
             "ContractCode"
         ],
-        "trade_ibex_columns": [
-            "SessionDate",
-            "MarketCode",
-            "TradeExecID",
-            "ContractCode",
-            "ExecTime",
-            "TradePrice",
-            "Quantity",
-            "TradeType",
-            "StrikePrice",
-            "MaturityDatetime"
-        ],
-        "maturity_hour_expiration": " 21:00:00.000000",
+        "trade_ibex_db_columns": {
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ContractCode": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ContractType": "text",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "maturity_hour_expiration": " 17:30:00.000000",
         "contract_type_column": "ContractType"
     },
     "product_split_step": {
         "filter_contract_column": "ContractCode",
+        "options_trades_db_columns": {
+            "OptionContractCode": "text",
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "futures_trades_db_columns": {
+            "FutureContractCode": "text",
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "option_underlying_db_columns": {
+            "OptionContractCode": "text",
+            "MaturityDatetime": "datetime",
+            "FutureContractCode": "text"
+        },
         "contract_types": {
             "options": {
                 "prefixes": [
                     "CIBX",
                     "PIBX"
                 ],
-                "contract_column_new": "OptionContractCode",
-                "columns": [
-                    "OptionContractCode",
-                    "SessionDate",
-                    "MarketCode",
-                    "TradeExecID",
-                    "ExecTime",
-                    "TradePrice",
-                    "Quantity",
-                    "TradeType",
-                    "StrikePrice",
-                    "MaturityDatetime",
-                    "ExecDatetime",
-                    "TimeToExpiration"
-                ]
+                "contract_column_new": "OptionContractCode"
             },
             "futures": {
                 "prefixes": [
                     "FIBX"
                 ],
-                "contract_column_new": "FutureContractCode",
-                "columns": [
-                    "FutureContractCode",
-                    "SessionDate",
-                    "MarketCode",
-                    "TradeExecID",
-                    "ExecTime",
-                    "TradePrice",
-                    "Quantity",
-                    "TradeType",
-                    "StrikePrice",
-                    "MaturityDatetime",
-                    "ExecDatetime",
-                    "TimeToExpiration"
-                ]
+                "contract_column_new": "FutureContractCode"
             }
         },
         "output_filename_contracts": "TRADES_DB",

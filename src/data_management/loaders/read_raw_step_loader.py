@@ -24,6 +24,56 @@ logger = logging.getLogger(__name__)
 
 class ReadRawStepLoader:
     @staticmethod
+    def read_step_databases(
+        build_if_missing: bool = True,
+    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        output_files = [
+            CContractsC2Builder.get_output_filename(),
+            TgentradesBuilder.get_output_filename(),
+            RatesBuilder.get_output_filename(),
+        ]
+
+        if build_if_missing and not all(path.exists() for path in output_files):
+            ReadRawStepLoader.load()
+
+        ccontracts_c2_df = pd.read_csv(
+            CContractsC2Builder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        tgentrades_df = pd.read_csv(
+            TgentradesBuilder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        rates_df = pd.read_csv(
+            RatesBuilder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+
+        ccontracts_c2_df = convert_data_types(
+            df=ccontracts_c2_df,
+            selected_columns_dict=config.data_config.read_raw_config.ccontracts_c2_columns_selected_dict,
+            format_date="%Y-%m-%d",
+        )
+        tgentrades_df = convert_data_types(
+            df=tgentrades_df,
+            selected_columns_dict=config.data_config.read_raw_config.tgentrades_columns_selected_dict,
+            format_date="%Y-%m-%d",
+        )
+        rates_df = convert_data_types(
+            df=rates_df,
+            selected_columns_dict=config.data_config.read_raw_config.rates_columns,
+            format_date="%Y-%m-%d",
+        )
+
+        return ccontracts_c2_df, tgentrades_df, rates_df
+
+    @staticmethod
     def _check_is_header(series: pd.Series) -> bool:
         return series.str.match(r"^[A-Za-z_]+$").all()
 

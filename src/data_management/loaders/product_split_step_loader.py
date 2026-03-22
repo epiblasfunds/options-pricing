@@ -11,6 +11,7 @@ from src.data_management.builders import (
     OptionUnderlyingBuilder,
     TradeIbexBuilder,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
@@ -28,10 +29,62 @@ logger = logging.getLogger(__name__)
 
 
 class ProductSplitStepLoader:
+    @staticmethod
+    def read_step_databases(
+        build_if_missing: bool = True,
+    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        output_files = [
+            OptionTradesBuilder.get_output_filename(),
+            FutureTradesBuilder.get_output_filename(),
+            OptionUnderlyingBuilder.get_output_filename(),
+        ]
+
+        if build_if_missing and not all(path.exists() for path in output_files):
+            ProductSplitStepLoader.load()
+
+        options_trade_ibex_df = pd.read_csv(
+            OptionTradesBuilder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        futures_trade_ibex_df = pd.read_csv(
+            FutureTradesBuilder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        options_underlying_ibex_df = pd.read_csv(
+            OptionUnderlyingBuilder.get_output_filename(),
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+
+        options_trade_ibex_df = convert_data_types(
+            df=options_trade_ibex_df,
+            selected_columns_dict=config.data_config.product_split_config.options_trades_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+        futures_trade_ibex_df = convert_data_types(
+            df=futures_trade_ibex_df,
+            selected_columns_dict=config.data_config.product_split_config.futures_trades_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+        options_underlying_ibex_df = convert_data_types(
+            df=options_underlying_ibex_df,
+            selected_columns_dict=config.data_config.product_split_config.option_underlying_db_columns,
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+
+        return options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
+
     @classmethod
     def get_output_filename(cls) -> Path:
         suffix = config.data_config.product_split_config.output_filename_contracts
-        output_filename = f"{cls._get_contract_type()}_{suffix}"
+        output_filename = f"{cls._get_contract_type().name}_{suffix}"
         return PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"{output_filename}.csv"
 
     # READ

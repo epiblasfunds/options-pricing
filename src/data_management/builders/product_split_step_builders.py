@@ -28,13 +28,19 @@ class AbstractProductTradeIbexBuilder(ABC):
     @classmethod
     def get_output_filename(cls) -> Path:
         suffix = config.data_config.product_split_config.output_filename_contracts
-        output_filename = f"{cls._get_contract_type()}_{suffix}"
+        output_filename = f"{cls._get_contract_type().name}_{suffix}"
         return PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"{output_filename}.csv"
 
     @classmethod
     def _build_database(cls, trade_ibex_df: pd.DataFrame) -> pd.DataFrame:
         contract_types_config = config.data_config.product_split_config.contract_types
         specific_cfg = contract_types_config[cls._get_contract_type()]
+
+        schema_by_contract_type = {
+            ContractTypeEnum.OPTIONS: config.data_config.product_split_config.options_trades_db_columns,
+            ContractTypeEnum.FUTURES: config.data_config.product_split_config.futures_trades_db_columns,
+        }
+        output_columns = list(schema_by_contract_type[cls._get_contract_type()].keys())
 
         filter_col = config.data_config.product_split_config.filter_contract_column
         filtered_df = trade_ibex_df[
@@ -48,7 +54,7 @@ class AbstractProductTradeIbexBuilder(ABC):
         )
 
         # Select columns
-        filtered_df = filtered_df[specific_cfg["columns"]]
+        filtered_df = filtered_df[output_columns]
 
         # Save CSV
         output_file = cls.get_output_filename()

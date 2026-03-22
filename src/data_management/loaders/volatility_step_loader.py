@@ -27,6 +27,29 @@ logger = logging.getLogger(__name__)
 
 class VolatilityStepLoader:
 
+    @staticmethod
+    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+        output_file = VolatilityBuilder.get_output_filename()
+
+        if build_if_missing and not output_file.exists():
+            VolatilityStepLoader.load()
+
+        options_trade_volatility_ibex_df = pd.read_csv(
+            output_file,
+            sep=";",
+            header=0,
+            dtype="string",
+        )
+
+        options_trade_volatility_ibex_df = convert_data_types(
+            df=options_trade_volatility_ibex_df,
+            selected_columns_dict=config.data_config.volatility_config.volatility_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+
+        return options_trade_volatility_ibex_df
+
     # READ
     @staticmethod
     def _read_option_trades_underlying_db() -> pd.DataFrame:
@@ -221,24 +244,6 @@ class VolatilityStepLoader:
         return option_trades_underlying_df, rates_df
 
     @staticmethod
-    def _load_prebuilt_db():
-        options_trade_volatility_ibex_df = pd.read_csv(
-            VolatilityBuilder.get_output_filename(),
-            sep=";",
-            header=0,
-            dtype="string",
-        )
-
-        options_trade_volatility_ibex_df = convert_data_types(
-            df=options_trade_volatility_ibex_df,
-            selected_columns_dict=config.data_config.volatility_config.volatility_db_columns,
-            format_date="%Y-%m-%d",
-            format_datetime="%Y-%m-%d %H:%M:%S.%f",
-        )
-
-        return options_trade_volatility_ibex_df
-
-    @staticmethod
     def load(force_reload=False):
         if force_reload or not VolatilityBuilder.get_output_filename().exists():
             # Read
@@ -260,4 +265,4 @@ class VolatilityStepLoader:
                 option_trades_underlying_df, rates_df
             )
 
-        return VolatilityStepLoader._load_prebuilt_db()
+        return VolatilityStepLoader.read_step_databases(build_if_missing=False)
