@@ -62,7 +62,7 @@
             "TradeType": "text"
         },
         "idx_rate_values": 1,
-        "spread_str_eonia": 0.00085,
+        "spread_str_eonia": 0.085,
         "cutoff_date_str_eonia": "2019-10-02",
         "rates_columns": {
             "SessionDate": "date",
@@ -164,7 +164,8 @@
             "ExecTime": "time",
             "ExecDatetime": "datetime",
             "TimeToExpiration": "int",
-            "UnderlyingExecDatetime": "datetime"
+            "UnderlyingExecDatetime": "datetime",
+            "UnderlyingLagMinutes": "float"
         },
         "output_filename": "OPTION_TRADES_UNDERLYING_DB"
     },
@@ -172,10 +173,12 @@
         "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
+        "underlying_lag_max_minutes": 180,
         "output_filename": "VOLATILITY_DB",
         "volatility_db_columns": {
             "SessionDate": "date",
             "OptionContractCode": "text",
+            "OptionType": "text",
             "MarketCode": "text",
             "TradeExecID": "text",
             "TradePriceOption": "float",
@@ -189,6 +192,7 @@
             "FutureContractCode": "text",
             "UnderlyingPrice": "float",
             "UnderlyingExecDatetime": "datetime",
+            "UnderlyingLagMinutes": "float",
             "ImpliedVolatility": "float"
         }
     }

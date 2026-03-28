@@ -8,6 +8,7 @@ from tqdm import tqdm
 from src.config.config import VOLATILITY_DATA_STEP_DIR_PATH, config
 from src.enums.data_enums import (
     OptionTradesUnderlyingDBEnum,
+    OptionTypeEnum,
     RatesEnum,
     VolatilityDBEnum,
 )
@@ -16,6 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class VolatilityBuilder:
+    T_IN_YEARS_COL = "t_in_years"
+    R_IN_DECIMALS_COL = "r_in_decimals"
+
     OUTPUT_FILENAME = (
         VOLATILITY_DATA_STEP_DIR_PATH
         / f"{config.data_config.volatility_config.output_filename}.csv"
@@ -51,6 +55,27 @@ class VolatilityBuilder:
 
         if d_c <= 0:
             return 0.0
+
+        # Intraday treatment: for periods shorter than one calendar day,
+        # use the applicable overnight rate proportionally and convert it
+        # to an equivalent annualized rate to avoid short-tenor blow-ups.
+        if d_c < 1.0:
+            date_rate = exec_date.date()
+            mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
+            while not mask.any():
+                date_rate -= pd.Timedelta(days=1)
+                mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
+
+            r_on = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0])
+            year_fraction = d_c / N
+            one_plus_rate = 1.0 + (r_on * year_fraction)
+
+            if one_plus_rate <= 0.0:
+                return r_on
+
+            discount_factor = 1.0 / one_plus_rate
+            equivalent_rate = -math.log(discount_factor) / year_fraction
+            return equivalent_rate
 
         # Get business days between exec_date and maturity_date
         business_days = pd.bdate_range(
@@ -116,7 +141,6 @@ class VolatilityBuilder:
 
         return df
 
-    @staticmethod
     def norm_cdf(x: float) -> float:
         return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
@@ -127,7 +151,7 @@ class VolatilityBuilder:
         T: float,
         r: float,
         sigma: float,
-        c_type: str,
+        option_type: OptionTypeEnum,
     ) -> float:
 
         # Validate inputs
@@ -141,20 +165,20 @@ class VolatilityBuilder:
         discount = math.exp(-r * T)
 
         # Calculate option price based on contract type
-        if c_type == "c":
+        if option_type == OptionTypeEnum.CALL:
             return discount * (
                 F * VolatilityBuilder.norm_cdf(d1) - K * VolatilityBuilder.norm_cdf(d2)
             )
-        else:
-            return discount * (
-                K * VolatilityBuilder.norm_cdf(-d2)
-                - F * VolatilityBuilder.norm_cdf(-d1)
-            )
+
+        return discount * (
+            K * VolatilityBuilder.norm_cdf(-d2)
+            - F * VolatilityBuilder.norm_cdf(-d1)
+        )
 
     @staticmethod
     def _validate_bisection_bounds(f_low: float, f_high: float) -> bool:
         """Check if bisection bounds are valid."""
-        return np.isfinite(f_low) and np.isfinite(f_high) and f_low * f_high < 0
+        return np.isfinite(f_low) and np.isfinite(f_high) and f_low * f_high <= 0
 
     @staticmethod
     def _bisection_iteration(
@@ -191,7 +215,7 @@ class VolatilityBuilder:
         K: float,
         T: float,
         r: float,
-        c_type: str,
+        option_type: OptionTypeEnum,
     ) -> float:
         """
         Bisection method.
@@ -200,7 +224,12 @@ class VolatilityBuilder:
 
         # Define objective function for finding root
         def objective(sigma: float) -> float:
-            return VolatilityBuilder.black76_price(F, K, T, r, sigma, c_type) - price
+            return (
+                VolatilityBuilder.black76_price(
+                    F, K, T, r, sigma, option_type=option_type
+                )
+                - price
+            )
 
         # Set bounds for implied volatility
         low = config.data_config.volatility_config.solver_min_sigma
@@ -208,11 +237,18 @@ class VolatilityBuilder:
         f_low = objective(low)
         f_high = objective(high)
 
+        tol = config.data_config.volatility_config.solver_tol
+
+        # Handle roots exactly at the solver bounds.
+        # Without this, valid boundary solutions can be incorrectly returned as NaN.
+        if np.isfinite(f_low) and abs(f_low) <= tol:
+            return low
+        if np.isfinite(f_high) and abs(f_high) <= tol:
+            return high
+
         # Check if the function values at the bounds are valid
         if not VolatilityBuilder._validate_bisection_bounds(f_low, f_high):
             return np.nan
-
-        tol = config.data_config.volatility_config.solver_tol
 
         # Bisection method to find implied volatility
         converged = False
@@ -226,13 +262,6 @@ class VolatilityBuilder:
 
     @staticmethod
     def _to_csv(df: pd.DataFrame):
-        df.to_csv(
-            VolatilityBuilder.get_output_filename(),
-            encoding="utf-8",
-            sep=";",
-            index=False,
-        )
-
         # Format Datetimes
         for col in [
             VolatilityDBEnum.EXEC_DATETIME,
@@ -240,6 +269,13 @@ class VolatilityBuilder:
             VolatilityDBEnum.MATURITY_DATETIME,
         ]:
             df[col] = df[col].dt.strftime(date_format="%Y-%m-%d %H:%M:%S.%f")
+
+        df.to_csv(
+            VolatilityBuilder.get_output_filename(),
+            encoding="utf-8",
+            sep=";",
+            index=False,
+        )
 
         logger.info(
             f"OptionsTradeVolatilityIbex (with shape {df.shape}) "
@@ -256,20 +292,21 @@ class VolatilityBuilder:
             df=options_trades_underlying_df, rates_df=rates_df
         )
 
-        # Add auxiliar columns for calculating the volatility
-        t_in_years_col = "t_in_years"
-        r_in_decimals_col = "r_in_decimals"
-        option_type_col = "option_type"
+        # Add helper columns for calculating implied volatility
+        t_in_years_col = VolatilityBuilder.T_IN_YEARS_COL
+        r_in_decimals_col = VolatilityBuilder.R_IN_DECIMALS_COL
 
         volatility_df[t_in_years_col] = (
             volatility_df[OptionTradesUnderlyingDBEnum.TIME_TO_EXPIRATION] / 365.0
         )
         volatility_df[r_in_decimals_col] = volatility_df[VolatilityDBEnum.RATE] / 100.0
-        volatility_df[option_type_col] = (
+        
+        # Add OptionType column by extracting OptionContractCode prefix (C/P)
+        volatility_df[VolatilityDBEnum.OPTION_TYPE] = (
             volatility_df[OptionTradesUnderlyingDBEnum.OPTION_CONTRACT_CODE]
             .astype(str)
             .str[0]
-            .str.lower()
+            .str.upper()
         )
 
         # Calculate implied volatility
@@ -281,7 +318,7 @@ class VolatilityBuilder:
             OptionTradesUnderlyingDBEnum.STRIKE_PRICE,
             t_in_years_col,
             r_in_decimals_col,
-            option_type_col,
+            VolatilityDBEnum.OPTION_TYPE,
         ]
         for _, row in tqdm(
             volatility_df[subset_cols].iterrows(),
@@ -295,12 +332,28 @@ class VolatilityBuilder:
                 K=row[OptionTradesUnderlyingDBEnum.STRIKE_PRICE],
                 T=row[t_in_years_col],
                 r=row[r_in_decimals_col],
-                c_type=row[option_type_col],
+                option_type=OptionTypeEnum(str(row[VolatilityDBEnum.OPTION_TYPE])),
             )
             iv_values.append(iv)
 
         # Create output DataFrame
         volatility_df[VolatilityDBEnum.IMPLIED_VOLATILITY] = iv_values
+
+        # Drop rows where implied volatility could not be solved (no Black-76 root in bounds)
+        n_before = len(volatility_df)
+        volatility_df = volatility_df.dropna(subset=[VolatilityDBEnum.IMPLIED_VOLATILITY])
+        n_dropped_iv = n_before - len(volatility_df)
+        if n_dropped_iv > 0:
+            pct_dropped_iv = n_dropped_iv / n_before * 100
+            logger.warning(
+                "Dropping %s/%s rows (%.2f%%) where implied volatility has no Black-76 solution.",
+                n_dropped_iv,
+                n_before,
+                pct_dropped_iv,
+            )
+
+        # Remove temporary helper columns before persisting the final dataset
+        volatility_df.drop(columns=[t_in_years_col, r_in_decimals_col], inplace=True)
 
         # Save CSV
         VolatilityBuilder._to_csv(volatility_df)

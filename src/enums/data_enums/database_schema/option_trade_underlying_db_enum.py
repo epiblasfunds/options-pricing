@@ -15,5 +15,6 @@ class OptionTradesUnderlyingDBEnum(StrEnum):
     TRADE_PRICE_OPTION = "TradePriceOption"
     TRADE_TYPE = "TradeType"
     UNDERLYING_EXEC_DATETIME = "UnderlyingExecDatetime"
+    UNDERLYING_LAG_MINUTES = "UnderlyingLagMinutes"
     UNDERLYING_PRICE = "UnderlyingPrice"
     TIME_TO_EXPIRATION = "TimeToExpiration"

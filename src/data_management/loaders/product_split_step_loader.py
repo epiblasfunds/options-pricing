@@ -11,11 +11,11 @@ from src.data_management.builders import (
     OptionUnderlyingBuilder,
     TradeIbexBuilder,
 )
-from src.data_management.utils.data_type_utils import convert_data_types
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.enums.data_enums import ContractTypeEnum, TradeIbexDBEnum
 from src.exceptions.data_exceptions import (
     MissingValuesError,
@@ -98,6 +98,30 @@ class ProductSplitStepLoader:
         )
         return trade_ibex_df
 
+    @staticmethod
+    def _clean_futures_negative_expiration(trade_ibex_df: pd.DataFrame) -> pd.DataFrame:
+        cleaned_df = trade_ibex_df.copy()
+
+        futures_mask = (
+            cleaned_df[TradeIbexDBEnum.CONTRACT_TYPE] == ContractTypeEnum.FUTURES
+        )
+
+        # Drop only futures with negative time to expiration
+        time_to_expiration = pd.to_numeric(
+            cleaned_df[TradeIbexDBEnum.TIME_TO_EXPIRATION],
+            downcast="float"
+        )
+        negative_expiration_mask = futures_mask & (time_to_expiration < 0.0)
+
+        if int(negative_expiration_mask.sum()) > 0:
+            logger.warning(
+                "Dropping %s futures trades with negative TimeToExpiration.",
+                int(negative_expiration_mask.sum()),
+            )
+            cleaned_df = cleaned_df.loc[~negative_expiration_mask].copy()
+
+        return cleaned_df
+
     # VALIDATIONS
     @staticmethod
     def _validate_maturity(
@@ -174,6 +198,7 @@ class ProductSplitStepLoader:
     @staticmethod
     def load() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         trade_ibex_df = ProductSplitStepLoader._read_trade_ibex_database()
+        trade_ibex_df = ProductSplitStepLoader._clean_futures_negative_expiration(trade_ibex_df)
         ProductSplitStepLoader._validate_source(trade_ibex_df)
 
         options_trade_ibex_db = OptionTradesBuilder._build_database(trade_ibex_df)

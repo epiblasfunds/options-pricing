@@ -53,15 +53,6 @@ class OptionTradesUnderlyingBuilder:
         options_underlying_df: pd.DataFrame,
     ) -> pd.DataFrame:
 
-        # Keep only option trades for which we have a underlying
-        valid_option_codes = options_underlying_df[
-            OptionUnderlyingDBEnum.OPTION_CONTRACT_CODE
-        ].unique()
-        mask_options_with_underlying = options_df[
-            OptionsTradeIbexDBEnum.OPTION_CONTRACT_CODE
-        ].isin(valid_option_codes)
-        options_df = options_df[mask_options_with_underlying]
-
         # Join option with its underlying future
         option_trades_df = options_df.merge(
             options_underlying_df,
@@ -109,13 +100,21 @@ class OptionTradesUnderlyingBuilder:
         }
         df = df.rename(columns=renamed_columns)
 
+        # Compute underlying lag in absolute minutes
+        df[OptionTradesUnderlyingDBEnum.UNDERLYING_LAG_MINUTES] = (
+            (
+                df[OptionsTradeIbexDBEnum.EXEC_DATETIME]
+                - df[OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME]
+            )
+            .dt.total_seconds()
+            .abs()
+            / 60.0
+        )
+
         columns = list(
             config.data_config.underlying_config.option_trades_underlying_db_columns.keys()
         )
         df = df[columns]
-
-        # Delete rows with missing underlying price (i.e. no underlying trade found before option trade)
-        df = df.dropna(subset=[OptionTradesUnderlyingDBEnum.UNDERLYING_PRICE])
 
         # Save CSV
         OptionTradesUnderlyingBuilder._to_csv(df)
