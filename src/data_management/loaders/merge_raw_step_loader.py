@@ -9,6 +9,7 @@ from src.data_management.builders import (
     TgentradesBuilder,
     TradeIbexBuilder,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
@@ -25,6 +26,26 @@ logger = logging.getLogger(__name__)
 
 
 class MergeRawStepLoader:
+    @staticmethod
+    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+        output_file = TradeIbexBuilder.get_output_filename()
+
+        if build_if_missing and not output_file.exists():
+            MergeRawStepLoader.load()
+
+        trade_ibex_df = pd.read_csv(
+            output_file,
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        trade_ibex_df = convert_data_types(
+            df=trade_ibex_df,
+            selected_columns_dict=config.data_config.merge_raw_config.trade_ibex_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+        return trade_ibex_df
 
     # READ
     @staticmethod

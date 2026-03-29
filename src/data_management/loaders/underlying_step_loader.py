@@ -14,6 +14,7 @@ from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.enums.data_enums import (
     ContractTypeEnum,
     FuturesTradeIbexDBEnum,
@@ -37,6 +38,27 @@ class UnderlyingStepLoader:
         UNDERLYING_DATA_STEP_DIR_PATH
         / f"{config.data_config.underlying_config.output_filename}.csv"
     )
+
+    @staticmethod
+    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+        output_file = OptionTradesUnderlyingBuilder.get_output_filename()
+
+        if build_if_missing and not output_file.exists():
+            UnderlyingStepLoader.load()
+
+        options_trade_underlying_ibex_df = pd.read_csv(
+            output_file,
+            delimiter=";",
+            header=0,
+            dtype="string",
+        )
+        options_trade_underlying_ibex_df = convert_data_types(
+            df=options_trade_underlying_ibex_df,
+            selected_columns_dict=config.data_config.underlying_config.option_trades_underlying_db_columns,
+            format_date="%Y-%m-%d",
+            format_datetime="%Y-%m-%d %H:%M:%S.%f",
+        )
+        return options_trade_underlying_ibex_df
 
     # READ
     @staticmethod

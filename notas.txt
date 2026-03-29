@@ -1,40 +1,45 @@
 ######### TASKS TO DO #########
-1. (Funcionalidades y validaciones OK) En el merge step ha quedado la creación de ExecDateTime y TimeToExpiration (DRC: Me parece raro ahí porque luego no se usa dentro, pero si no lo vemos, lo llevamos al paso de volatilidad con el cálculo del rate)
+1. DATA
+        i) Revisar y confirmar funcionalidades Read Raw step
+        ii) Revisar y confirmar funcionalidades Merge Raw step
+        iii) Revisar y confirmar funcionalidades Product Split step
+        iv) Revisar y confirmar funcionalidades Underlying step
+        v) Revisar y confirmar funcionalidades Volatility step (proceso rate compound + revisar los format_mixed a la hora de leer las fechas + / 365.0 revisar si tiene que ser 365 o 360 + control sobre rate imputados + valorar crear función de bussiness days)
+        vi) Pintar bien el diagrama
+        vii) Homogeneizar las validaciones
+        viii) Homogeneizar los loggings
+        ix) Homogeneizar las excepciones
+        x) Identificar dónde hay que hacer comentarios de NAs y de ciertos elementos que eliminamos para graficar y comentar en LaTex
+                - Pintar curvas y superficies, viendo cómo podemos clasificarlas.
+                - Analizar tiempo del subaycente
 
-Resources:
-    
-    2. ESTYO VIENDO LOS NAS del penultimo step
+2. MODELO RED
+        i) Preparar dataset
+        ii) Probar diversas arquitecturas
+        iii) Modificar inputs
+        iv) Modificar output
 
+3. EXPLICABILIDAD
 
+4. LATEX
+        i) (OK) Identificar dónde vamos a hacerlo
+        ii) (OK) Hacer índice
+        iii) Completar primera parte de data de forma general
+                - Comentar lo siguiente:         | Periodo      | Hedge funding          | Tasa correcta |
+                                                 | ------------ | ---------------------- | ------------- |
+                                                 | Pre-2019     | unsecured bank funding | Euribor       |
+                                                 | Post-reforma | collateral overnight   | €STR          |
 
+5. OTROS
+        i) Desplegar WF Actions (foco tests y flake8)
+        ii) Desarrollar tests unitarios (foco utils)
 
+6. CLOUD
 
-1. Rate: Hay que considerar días naturales o business dates? Asegurar que el proceso de generar el rate compund es correcto + considerar: while rate_date not in rates_df.index:. Analizar resultados de los rates imputados.
-2. (~OK revisar DUDAS) Arreglar step del underlying - Revisar los problemas de leer milisegundos porque iugal hay que crear una función utils + en la salida hay NAs
-3. (~OK y revisar juntos el proceso de volatilidades y resultados) Hacer el step de volatilidad implícita + validaciones + revisar los format_mixed a la hora de leer las fechas + / 365.0 revisar si tiene que ser 365 o 360
-4. Hacer test unitarios de todas las funcionalidades: Foco en las funciones de utils
-5. Desplegar los WF Actions tras los test y flake 8
-6. Revisar las validaciones y que todas las funcionalidades las tengan
-7. Revisar logging: Entenderlos e incluirlos en todas las funcionalidades
-8. Revisar exceptions: Entenderlos e incluirlos en todas las funcionalidades
-9. Pintar bien el Draw.io
-10. Aplicar EDA en algún punto:
-	- Pintar curvas. Categorizar las superficies como buenas o extrañas (identificando por qué son extrañas con ayuda de Codex)
-	- Analizar si la negociación del subyacente está muy lejana en tiempo de la de la opción
-11. Preparar split
-12. Pedro arreglar lo que decía del enviroment de Python
-13. Revisar toda la parte de data para cerrar
-14. Documentar esta parte de data
-15. Hacer un primer modelo tonto
+7. QUANTUM INSPIRED
 
 
 ######### DUDAS #########
-- Cuando ejecutamos el main.py de src simplemente sale el resultado al final, ¿Deberíamos meter algún loggin para conocer qué step se está ejecutando?
-- Los archivos que se generan en product_split_data salen con minúsculas y deberíamos tenerlos en mayúsucula por coherencia. Para ello habría que modificar el ContractTypeEnum pero no sé si impactará en algún otro punto.
-- Hacer reindex de las tablas finales de cada build
-- En el product_split_step, en la tabla que relaciona contract codes de opciones con el contract code de su subyacente he metido un inner join para evitar esas opciones que no vemos sus subyacente. Tenemos que explorar porque hace sentido que tengamos que hacer un left join para no perder ninguno de los 92 contract code de las opciones. Además, en este step, en su build hay un filtro para coger trades de opciones de las que tengamos su subyacente
-- En el underlying_step sale algun campo de maturity con NA
-- Kike proponía tomar como subyacente el IBEX tal cual, siempre que tomemos como fecha de negociación una super cercana a la de la opción. Habrá que valorar esta opción en paralelos
 - Comentar que en las siguientes fechas no tenemos la info de CCONTRACTS. ¿Con esto qué hacemos?: 
         C:\Users\danir\AppData\Local\Temp\ipykernel_24928\4142060285.py:11: DtypeWarning: Columns (0: TradeExecID, 1: MaturityDate) have mixed types. Specify dtype option on import or set low_memory=False.
         df = pd.read_csv(MERGE_RAW_DATA_STEP_DIR_PATH / "TRADE_IBEX_DATABASE.csv", sep=";")
@@ -54,24 +59,24 @@ Resources:
         '2017-03-13', '2017-03-14', '2017-03-15', '2017-03-16', '2017-03-20',
         '2018-01-31', '2018-10-01']
         Length: 57, dtype: str
+- En el merge step se ha quedado la creación de ExecDateTime y TimeToExpiration pero realmente no se usa hasta el final. Es raro, valorar mover de step
+- Hacer reindex de las tablas finales de cada build ¿?
+- Cuando ejecutamos el main.py de src simplemente sale el resultado al final, ¿Deberíamos meter algún loggin para conocer qué step se está ejecutando? ¿Esto en realidad cuándo lo vamos a ejecutar?
+- En algún momento, tenemos que valorar si depuramos las columnas que seleccionamos
+- Revisar cuando dentro de los builders y los loaders ponemos _ o no
+- Hacer que en cada load() se tome directamente el load del paso anterior para los ficheros del step anterior
+- Arreglar enums y cómo se usan en los builders y loaders porque en ocasiones no tiene sentido cómo se usan, tomando diferentes enums de ficheros anteriores y propios del step
 - Tenemos validaciones de que el season date coincide con la fecha de ejecución?
 - Añadir validacion en el step del underlying para que la tabla de relación opciones futuros esté completa. (no sé si ya está)
-- Para medir el tiempo a vencimiento, en el maturity date es a qué hora (hemos puesto las 21:00)?
-- Comentar con kike lo siguiente:
-        | Periodo      | Hedge funding          | Tasa correcta |
-        | ------------ | ---------------------- | ------------- |
-        | Pre-2019     | unsecured bank funding | Euribor       |
-        | Post-reforma | collateral overnight   | €STR          |
-- ¿Por que en options uderlying se tiene este campo ExecTime.1?
-- Por qué las funciones del builder no llevan _?
-- Esta función la tengo repetida en dos: _read_options_trade_underlying_ibex_database
-- Revisar logging resultado de volatilidad para que sea comparable y homogeneo al de otros steps
+- UTILS: Valorar si alguna función, sobre todo de loader debe pasar a utils, ejemplo: _read_options_trade_underlying_ibex_database y de validaciones
 - _validate_primary_keys tiene un raise definido dentro, no debería ir dentro del bloque de exceptions?
-- seguramente haya que crear un utils de validaciones porque muchas funciones son copia pega (validaciones de maturities, strike y nas principalmente)
+- Comentar el inner join de product_split_step
+- Considerar Trade Type
+- Evaluar si tiene sentido eliminar el trade con un underlying muy anterior
+- Al crear los read_step, se ha generado duplicidad de código?
+- En el CCONTRACTS_C2 enum tenemos las columnas de los archivos base pero en el resto de enums ponemos de las tablas finales, esto deberíamos adaptarlo?
 - Ensure rates_df SessionDate is datetime and index iría donde está o en el loader?
-- Revisar cuando ponemos los format, del pd_todatetime para confirmar que lo hacemos bien
-- Revisar los buisness dates de rates (posibilidad de crear un método propio) y ver qué días no tenemos (analizar si hay alguno que se vaya mucho)
-- Tenemos que depurar las columans finales del volatility
+- KIKE: Pendiente de que nos dé el Futuro de IBEX continuo
 - Posibles archivos a incluir:
         * pyproject.toml: Es la definción para python de cómo se configura el proyecto: define el proyecto, configura herramientas (test, lint formateo types) y usa herramientas tipo poetry setuptools o hatch
         * pre-commit-config.yaml: Sirve para antes de hacer el commit chekear ciertas cosas tipo: formatear, revisar estilo, detectar errores, valdiar imports o comprobar tipos.
@@ -86,8 +91,6 @@ Resources:
         * Mejorar README
 
 
-
-
 ######### DUDAS RESUELTAS #########
 - Si se me peta el notebook en vscode: Ctrl+Shift+P → Developer: Reload Window
 - Hemos modificado una línea em TGENTRADES el 2020/03/13 (ctrl+F de 2020031K)
@@ -95,4 +98,3 @@ Resources:
 - https://www.meff.es/esp/Derivados-Financieros/Futuros-sobre-IBEX35
 - Quitar columnas de la configuración y poner enums **UPDATE**: no se puede quitar columnas de la configuración porque necesitamos saber el orden de las columnas, eso no lo podemos saber con un enum.
 - https://www.ecb.europa.eu/stats/euro-short-term-rates/interest_rate_benchmarks/WG_euro_risk-free_rates/shared/pdf/ecb.Compounded_euro_short-term_rate_calculation_rules.en.pdf
-- Cambiar StrEnum por Enum: HECHO!

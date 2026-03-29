@@ -62,7 +62,7 @@
             "TradeType": "text"
         },
         "idx_rate_values": 1,
-        "spread_str_eonia": 0.00085,
+        "spread_str_eonia": 0.085,
         "cutoff_date_str_eonia": "2019-10-02",
         "rates_columns": {
             "SessionDate": "date",
@@ -77,64 +77,72 @@
             "SessionDate",
             "ContractCode"
         ],
-        "trade_ibex_columns": [
-            "SessionDate",
-            "MarketCode",
-            "TradeExecID",
-            "ContractCode",
-            "ExecTime",
-            "TradePrice",
-            "Quantity",
-            "TradeType",
-            "StrikePrice",
-            "MaturityDatetime"
-        ],
-        "maturity_hour_expiration": " 21:00:00.000000",
+        "trade_ibex_db_columns": {
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ContractCode": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ContractType": "text",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "maturity_hour_expiration": " 17:30:00.000000",
         "contract_type_column": "ContractType"
     },
     "product_split_step": {
         "filter_contract_column": "ContractCode",
+        "options_trades_db_columns": {
+            "OptionContractCode": "text",
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "futures_trades_db_columns": {
+            "FutureContractCode": "text",
+            "SessionDate": "date",
+            "MarketCode": "text",
+            "TradeExecID": "text",
+            "ExecTime": "time",
+            "TradePrice": "float",
+            "Quantity": "int",
+            "TradeType": "text",
+            "StrikePrice": "float",
+            "MaturityDatetime": "datetime",
+            "ExecDatetime": "datetime",
+            "TimeToExpiration": "float"
+        },
+        "option_underlying_db_columns": {
+            "OptionContractCode": "text",
+            "MaturityDatetime": "datetime",
+            "FutureContractCode": "text"
+        },
         "contract_types": {
             "options": {
                 "prefixes": [
                     "CIBX",
                     "PIBX"
                 ],
-                "contract_column_new": "OptionContractCode",
-                "columns": [
-                    "OptionContractCode",
-                    "SessionDate",
-                    "MarketCode",
-                    "TradeExecID",
-                    "ExecTime",
-                    "TradePrice",
-                    "Quantity",
-                    "TradeType",
-                    "StrikePrice",
-                    "MaturityDatetime",
-                    "ExecDatetime",
-                    "TimeToExpiration"
-                ]
+                "contract_column_new": "OptionContractCode"
             },
             "futures": {
                 "prefixes": [
                     "FIBX"
                 ],
-                "contract_column_new": "FutureContractCode",
-                "columns": [
-                    "FutureContractCode",
-                    "SessionDate",
-                    "MarketCode",
-                    "TradeExecID",
-                    "ExecTime",
-                    "TradePrice",
-                    "Quantity",
-                    "TradeType",
-                    "StrikePrice",
-                    "MaturityDatetime",
-                    "ExecDatetime",
-                    "TimeToExpiration"
-                ]
+                "contract_column_new": "FutureContractCode"
             }
         },
         "output_filename_contracts": "TRADES_DB",
@@ -156,7 +164,8 @@
             "ExecTime": "time",
             "ExecDatetime": "datetime",
             "TimeToExpiration": "int",
-            "UnderlyingExecDatetime": "datetime"
+            "UnderlyingExecDatetime": "datetime",
+            "UnderlyingLagMinutes": "float"
         },
         "output_filename": "OPTION_TRADES_UNDERLYING_DB"
     },
@@ -164,10 +173,12 @@
         "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
+        "underlying_lag_max_minutes": 180,
         "output_filename": "VOLATILITY_DB",
         "volatility_db_columns": {
             "SessionDate": "date",
             "OptionContractCode": "text",
+            "OptionType": "text",
             "MarketCode": "text",
             "TradeExecID": "text",
             "TradePriceOption": "float",
@@ -181,6 +192,7 @@
             "FutureContractCode": "text",
             "UnderlyingPrice": "float",
             "UnderlyingExecDatetime": "datetime",
+            "UnderlyingLagMinutes": "float",
             "ImpliedVolatility": "float"
         }
     }

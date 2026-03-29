@@ -7,6 +7,15 @@ class ProductSplitConfig:
             data_config = json.load(f)
         product_split_step_name = "product_split_step"
         self.filter_contract_column = data_config[product_split_step_name]["filter_contract_column"]
+        self.options_trades_db_columns = data_config[product_split_step_name][
+            "options_trades_db_columns"
+        ]
+        self.futures_trades_db_columns = data_config[product_split_step_name][
+            "futures_trades_db_columns"
+        ]
+        self.option_underlying_db_columns = data_config[product_split_step_name][
+            "option_underlying_db_columns"
+        ]
         self.contract_types = data_config[product_split_step_name]["contract_types"]
         self.output_filename_contracts = data_config[product_split_step_name]["output_filename_contracts"]
         self.output_filename_relationship = data_config[product_split_step_name]["output_filename_relationship"]
