@@ -153,6 +153,8 @@ class VolatilityBuilder:
         sigma: float,
         option_type: OptionTypeEnum,
     ) -> float:
+        if not isinstance(option_type, OptionTypeEnum):
+            raise ValueError("option_type must be an instance of OptionTypeEnum")
 
         # Validate inputs
         if any([sigma <= 0, T <= 0, F <= 0, K <= 0]):
