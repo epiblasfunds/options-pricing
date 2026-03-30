@@ -24,18 +24,7 @@ logger = logging.getLogger(__name__)
 
 class ReadRawStepLoader:
     @staticmethod
-    def read_step_databases(
-        build_if_missing: bool = True,
-    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        output_files = [
-            CContractsC2Builder.get_output_filename(),
-            TgentradesBuilder.get_output_filename(),
-            RatesBuilder.get_output_filename(),
-        ]
-
-        if build_if_missing and not all(path.exists() for path in output_files):
-            ReadRawStepLoader.load()
-
+    def read_step_databases() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         ccontracts_c2_df = pd.read_csv(
             CContractsC2Builder.get_output_filename(),
             delimiter=";",
@@ -207,13 +196,21 @@ class ReadRawStepLoader:
         return ccontracts_c2_df, tgentrades_df, eonia_df, str_df
 
     @staticmethod
-    def load() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
-        # Read raw databases
-        ccontracts_c2_df, tgentrades_df, eonia_df, str_df = ReadRawStepLoader._read()
+    def load(force_reload=False) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
+        if (
+            force_reload
+            or not CContractsC2Builder.get_output_filename().exists()
+            or not TgentradesBuilder.get_output_filename().exists()
+            or not RatesBuilder.get_output_filename().exists()
+        ):
+            # Read raw databases
+            ccontracts_c2_df, tgentrades_df, eonia_df, str_df = (
+                ReadRawStepLoader._read()
+            )
 
-        # Builders
-        ccontracts_c2_df = CContractsC2Builder.build(ccontracts_c2_df)
-        tgentrades_df = TgentradesBuilder.build(tgentrades_df)
-        rates_df = RatesBuilder.build(eonia_df, str_df)
+            # Builders
+            ccontracts_c2_df = CContractsC2Builder.build(ccontracts_c2_df)
+            tgentrades_df = TgentradesBuilder.build(tgentrades_df)
+            RatesBuilder.build(eonia_df, str_df)
 
-        return ccontracts_c2_df, tgentrades_df, rates_df
+        return ReadRawStepLoader.read_step_databases()

@@ -171,8 +171,7 @@ class VolatilityBuilder:
             )
 
         return discount * (
-            K * VolatilityBuilder.norm_cdf(-d2)
-            - F * VolatilityBuilder.norm_cdf(-d1)
+            K * VolatilityBuilder.norm_cdf(-d2) - F * VolatilityBuilder.norm_cdf(-d1)
         )
 
     @staticmethod
@@ -300,7 +299,7 @@ class VolatilityBuilder:
             volatility_df[OptionTradesUnderlyingDBEnum.TIME_TO_EXPIRATION] / 365.0
         )
         volatility_df[r_in_decimals_col] = volatility_df[VolatilityDBEnum.RATE] / 100.0
-        
+
         # Add OptionType column by extracting OptionContractCode prefix (C/P)
         volatility_df[VolatilityDBEnum.OPTION_TYPE] = (
             volatility_df[OptionTradesUnderlyingDBEnum.OPTION_CONTRACT_CODE]
@@ -341,7 +340,9 @@ class VolatilityBuilder:
 
         # Drop rows where implied volatility could not be solved (no Black-76 root in bounds)
         n_before = len(volatility_df)
-        volatility_df = volatility_df.dropna(subset=[VolatilityDBEnum.IMPLIED_VOLATILITY])
+        volatility_df = volatility_df.dropna(
+            subset=[VolatilityDBEnum.IMPLIED_VOLATILITY]
+        )
         n_dropped_iv = n_before - len(volatility_df)
         if n_dropped_iv > 0:
             pct_dropped_iv = n_dropped_iv / n_before * 100

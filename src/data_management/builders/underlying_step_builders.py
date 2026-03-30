@@ -8,7 +8,6 @@ from src.enums.data_enums import (
     FuturesTradeIbexDBEnum,
     OptionsTradeIbexDBEnum,
     OptionTradesUnderlyingDBEnum,
-    OptionUnderlyingDBEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,7 +29,7 @@ class OptionTradesUnderlyingBuilder:
         for col in [
             OptionTradesUnderlyingDBEnum.EXEC_DATETIME,
             OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME,
-            # OptionTradesUnderlyingDBEnum.MATURITY_DATETIME,
+            OptionTradesUnderlyingDBEnum.MATURITY_DATETIME,
         ]:
             df[col] = df[col].dt.strftime(date_format="%Y-%m-%d %H:%M:%S.%f")
 
@@ -62,11 +61,13 @@ class OptionTradesUnderlyingBuilder:
 
         # Convert EXEC_DATETIME to datetime for merge_asof
         option_trades_df[OptionsTradeIbexDBEnum.EXEC_DATETIME] = pd.to_datetime(
-            option_trades_df[OptionsTradeIbexDBEnum.EXEC_DATETIME], format="%Y-%m-%d %H:%M:%S.%f"
+            option_trades_df[OptionsTradeIbexDBEnum.EXEC_DATETIME],
+            format="%Y-%m-%d %H:%M:%S.%f",
         )
         future_trades_df = futures_df.copy()
         future_trades_df[FuturesTradeIbexDBEnum.EXEC_DATETIME] = pd.to_datetime(
-            future_trades_df[FuturesTradeIbexDBEnum.EXEC_DATETIME], format="%Y-%m-%d %H:%M:%S.%f"
+            future_trades_df[FuturesTradeIbexDBEnum.EXEC_DATETIME],
+            format="%Y-%m-%d %H:%M:%S.%f",
         )
 
         # Rename EXEC_DATETIME in futures to UNDERLYING_EXEC_DATETIME for maintaining both in the merged df
@@ -102,14 +103,9 @@ class OptionTradesUnderlyingBuilder:
 
         # Compute underlying lag in absolute minutes
         df[OptionTradesUnderlyingDBEnum.UNDERLYING_LAG_MINUTES] = (
-            (
-                df[OptionsTradeIbexDBEnum.EXEC_DATETIME]
-                - df[OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME]
-            )
-            .dt.total_seconds()
-            .abs()
-            / 60.0
-        )
+            df[OptionsTradeIbexDBEnum.EXEC_DATETIME]
+            - df[OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME]
+        ).dt.total_seconds().abs() / 60.0
 
         columns = list(
             config.data_config.underlying_config.option_trades_underlying_db_columns.keys()
