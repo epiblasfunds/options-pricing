@@ -1,15 +1,10 @@
 import logging
-import typing as t
 
 import pandas as pd
 
-from src.config.config import UNDERLYING_DATA_STEP_DIR_PATH, config
-from src.data_management.builders import (
-    FutureTradesBuilder,
-    OptionTradesBuilder,
-    OptionTradesUnderlyingBuilder,
-    OptionUnderlyingBuilder,
-)
+from src.config.config import config
+from src.data_management.builders import OptionTradesUnderlyingBuilder
+from src.data_management.loaders.product_split_step_loader import ProductSplitStepLoader
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
@@ -34,17 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 class UnderlyingStepLoader:
-    OUTPUT_FILENAME = (
-        UNDERLYING_DATA_STEP_DIR_PATH
-        / f"{config.data_config.underlying_config.output_filename}.csv"
-    )
 
     @staticmethod
-    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+    def read_step_databases() -> pd.DataFrame:
         output_file = OptionTradesUnderlyingBuilder.get_output_filename()
-
-        if build_if_missing and not output_file.exists():
-            UnderlyingStepLoader.load()
 
         options_trade_underlying_ibex_df = pd.read_csv(
             output_file,
@@ -59,30 +47,6 @@ class UnderlyingStepLoader:
             format_datetime="%Y-%m-%d %H:%M:%S.%f",
         )
         return options_trade_underlying_ibex_df
-
-    # READ
-    @staticmethod
-    def _read_source_dfs() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        options_trade_ibex_df = pd.read_csv(
-            OptionTradesBuilder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-        futures_trade_ibex_df = pd.read_csv(
-            FutureTradesBuilder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-        options_underlying_ibex_df = pd.read_csv(
-            OptionUnderlyingBuilder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-
-        return options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
 
     # VALIDATIONS
     @staticmethod
@@ -223,14 +187,21 @@ class UnderlyingStepLoader:
         UnderlyingStepLoader._validate_underlying_candidates(options_underlying_ibex_df)
 
     @staticmethod
-    def load():
-        options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df = (
-            UnderlyingStepLoader._read_source_dfs()
-        )
-        UnderlyingStepLoader._validate_sources(
-            options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
-        )
-        options_trade_underlying_ibex_db = OptionTradesUnderlyingBuilder.build(
-            options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
-        )
-        return options_trade_underlying_ibex_db
+    def load(force_reload=False):
+        if (
+            force_reload
+            or not OptionTradesUnderlyingBuilder.get_output_filename().exists()
+        ):
+            options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df = (
+                ProductSplitStepLoader.load()
+            )
+
+            UnderlyingStepLoader._validate_sources(
+                options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
+            )
+
+            OptionTradesUnderlyingBuilder.build(
+                options_trade_ibex_df, futures_trade_ibex_df, options_underlying_ibex_df
+            )
+
+        return UnderlyingStepLoader.read_step_databases()

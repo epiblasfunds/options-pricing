@@ -9,8 +9,8 @@ from src.data_management.builders import (
     FutureTradesBuilder,
     OptionTradesBuilder,
     OptionUnderlyingBuilder,
-    TradeIbexBuilder,
 )
+from src.data_management.loaders.merge_raw_step_loader import MergeRawStepLoader
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
@@ -30,18 +30,7 @@ logger = logging.getLogger(__name__)
 
 class ProductSplitStepLoader:
     @staticmethod
-    def read_step_databases(
-        build_if_missing: bool = True,
-    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        output_files = [
-            OptionTradesBuilder.get_output_filename(),
-            FutureTradesBuilder.get_output_filename(),
-            OptionUnderlyingBuilder.get_output_filename(),
-        ]
-
-        if build_if_missing and not all(path.exists() for path in output_files):
-            ProductSplitStepLoader.load()
-
+    def read_step_databases() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         options_trade_ibex_df = pd.read_csv(
             OptionTradesBuilder.get_output_filename(),
             delimiter=";",
@@ -87,17 +76,6 @@ class ProductSplitStepLoader:
         output_filename = f"{cls._get_contract_type().name}_{suffix}"
         return PRODUCT_SPLIT_DATA_STEP_DIR_PATH / f"{output_filename}.csv"
 
-    # READ
-    @staticmethod
-    def _read_trade_ibex_database():
-        trade_ibex_df = pd.read_csv(
-            TradeIbexBuilder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-        return trade_ibex_df
-
     @staticmethod
     def _clean_futures_negative_expiration(trade_ibex_df: pd.DataFrame) -> pd.DataFrame:
         cleaned_df = trade_ibex_df.copy()
@@ -108,13 +86,12 @@ class ProductSplitStepLoader:
 
         # Drop only futures with negative time to expiration
         time_to_expiration = pd.to_numeric(
-            cleaned_df[TradeIbexDBEnum.TIME_TO_EXPIRATION],
-            downcast="float"
+            cleaned_df[TradeIbexDBEnum.TIME_TO_EXPIRATION], downcast="float"
         )
         negative_expiration_mask = futures_mask & (time_to_expiration < 0.0)
 
         if int(negative_expiration_mask.sum()) > 0:
-            logger.warning(
+            logger.info(
                 "Dropping %s futures trades with negative TimeToExpiration.",
                 int(negative_expiration_mask.sum()),
             )
@@ -155,13 +132,19 @@ class ProductSplitStepLoader:
 
         if (trade_ibex_df[TradeIbexDBEnum.QUANTITY].astype("float64") <= 0.0).any():
             raise NegativeQuantityError()
-        
-        if (trade_ibex_df[TradeIbexDBEnum.TIME_TO_EXPIRATION].astype("float64") < 0.0).any():
+
+        if (
+            trade_ibex_df[TradeIbexDBEnum.TIME_TO_EXPIRATION].astype("float64") < 0.0
+        ).any():
             raise NegativeTimeToExpirationError()
 
         # Validate maturity with contract code
-        ProductSplitStepLoader._validate_maturity(trade_ibex_df, ContractTypeEnum.OPTIONS)
-        ProductSplitStepLoader._validate_maturity(trade_ibex_df, ContractTypeEnum.FUTURES)
+        ProductSplitStepLoader._validate_maturity(
+            trade_ibex_df, ContractTypeEnum.OPTIONS
+        )
+        ProductSplitStepLoader._validate_maturity(
+            trade_ibex_df, ContractTypeEnum.FUTURES
+        )
 
         # Validate maturity and session date coherence
         session = pd.to_datetime(trade_ibex_df[TradeIbexDBEnum.SESSION_DATE])
@@ -170,42 +153,46 @@ class ProductSplitStepLoader:
         mask = session > maturity
         if mask.any():
             sample = trade_ibex_df[mask].iloc[0]
-            raise SessionAfterMaturityError(f"SessionDate occurs after MaturityDate.\nExample: {sample}.")
+            raise SessionAfterMaturityError(
+                f"SessionDate occurs after MaturityDate.\nExample: {sample}."
+            )
 
         # Validate strikes with contract code
         ProductSplitStepLoader._validate_strike(trade_ibex_df)
 
         futures_mask = (
-            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE]
-            == ContractTypeEnum.FUTURES
+            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE] == ContractTypeEnum.FUTURES
         )
         futures_df = trade_ibex_df.loc[
             futures_mask,
-            [
-                c
-                for c in trade_ibex_df.columns
-                if c != TradeIbexDBEnum.STRIKE_PRICE
-            ],
+            [c for c in trade_ibex_df.columns if c != TradeIbexDBEnum.STRIKE_PRICE],
         ]
         options_mask = (
-            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE]
-            == ContractTypeEnum.OPTIONS
+            trade_ibex_df[TradeIbexDBEnum.CONTRACT_TYPE] == ContractTypeEnum.OPTIONS
         )
         options_df = trade_ibex_df[options_mask]
         if futures_df.isna().any().any() or options_df.isna().any().any():
             raise MissingValuesError()
 
     @staticmethod
-    def load() -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        trade_ibex_df = ProductSplitStepLoader._read_trade_ibex_database()
-        trade_ibex_df = ProductSplitStepLoader._clean_futures_negative_expiration(trade_ibex_df)
-        ProductSplitStepLoader._validate_source(trade_ibex_df)
+    def load(force_reload=False) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        if (
+            force_reload
+            or not OptionTradesBuilder.get_output_filename().exists()
+            or not FutureTradesBuilder.get_output_filename().exists()
+            or not OptionUnderlyingBuilder.get_output_filename().exists()
+        ):
+            trade_ibex_df = MergeRawStepLoader.load()
+            trade_ibex_df = ProductSplitStepLoader._clean_futures_negative_expiration(
+                trade_ibex_df
+            )
+            ProductSplitStepLoader._validate_source(trade_ibex_df)
 
-        options_trade_ibex_db = OptionTradesBuilder._build_database(trade_ibex_df)
-        futures_trade_ibex_db = FutureTradesBuilder._build_database(trade_ibex_df)
-        options_underlying_ibex_db = OptionUnderlyingBuilder.build(
-            options_trade_ibex_db=options_trade_ibex_db,
-            futures_trade_ibex_db=futures_trade_ibex_db,
-        )
+            options_trade_ibex_db = OptionTradesBuilder.build(trade_ibex_df)
+            futures_trade_ibex_db = FutureTradesBuilder.build(trade_ibex_df)
+            OptionUnderlyingBuilder.build(
+                options_trade_ibex_db=options_trade_ibex_db,
+                futures_trade_ibex_db=futures_trade_ibex_db,
+            )
 
-        return options_trade_ibex_db, futures_trade_ibex_db, options_underlying_ibex_db
+        return ProductSplitStepLoader.read_step_databases()

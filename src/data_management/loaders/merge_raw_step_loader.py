@@ -4,16 +4,13 @@ import typing as t
 import pandas as pd
 
 from src.config.config import config
-from src.data_management.builders import (
-    CContractsC2Builder,
-    TgentradesBuilder,
-    TradeIbexBuilder,
-)
-from src.data_management.utils.data_type_utils import convert_data_types
+from src.data_management.builders import TradeIbexBuilder
+from src.data_management.loaders.read_raw_step_loader import ReadRawStepLoader
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
 )
+from src.data_management.utils.data_type_utils import convert_data_types
 from src.enums.data_enums import CcontractsC2Enum, ContractTypeEnum, TgentradesEnum
 from src.exceptions.data_exceptions import (
     DuplicatedPrimaryKeysError,
@@ -27,11 +24,8 @@ logger = logging.getLogger(__name__)
 
 class MergeRawStepLoader:
     @staticmethod
-    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+    def read_step_databases() -> pd.DataFrame:
         output_file = TradeIbexBuilder.get_output_filename()
-
-        if build_if_missing and not output_file.exists():
-            MergeRawStepLoader.load()
 
         trade_ibex_df = pd.read_csv(
             output_file,
@@ -46,24 +40,6 @@ class MergeRawStepLoader:
             format_datetime="%Y-%m-%d %H:%M:%S.%f",
         )
         return trade_ibex_df
-
-    # READ
-    @staticmethod
-    def _read_trades_and_contracts_dfs() -> tuple[pd.DataFrame, pd.DataFrame]:
-        trades_df = pd.read_csv(
-            TgentradesBuilder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-        contracts_df = pd.read_csv(
-            CContractsC2Builder.get_output_filename(),
-            delimiter=";",
-            header=0,
-            dtype="string",
-        )
-
-        return trades_df, contracts_df
 
     # VALIDATIONS
     @staticmethod
@@ -170,8 +146,9 @@ class MergeRawStepLoader:
         MergeRawStepLoader._validate_contracts_df(contracts_df)
 
     @staticmethod
-    def load():
-        trades_df, contracts_df = MergeRawStepLoader._read_trades_and_contracts_dfs()
-        MergeRawStepLoader._validate_sources(trades_df, contracts_df)
-        trade_ibex_db = TradeIbexBuilder.build(trades_df, contracts_df)
-        return trade_ibex_db
+    def load(force_reload=False):
+        if force_reload or not TradeIbexBuilder.get_output_filename().exists():
+            contracts_df, trades_df, _ = ReadRawStepLoader.load()
+            MergeRawStepLoader._validate_sources(trades_df, contracts_df)
+            TradeIbexBuilder.build(trades_df, contracts_df)
+        return MergeRawStepLoader.read_step_databases()

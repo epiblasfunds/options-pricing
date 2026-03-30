@@ -3,11 +3,9 @@ import logging
 import pandas as pd
 
 from src.config.config import config
-from src.data_management.builders import (
-    OptionTradesUnderlyingBuilder,
-    RatesBuilder,
-    VolatilityBuilder,
-)
+from src.data_management.builders import VolatilityBuilder
+from src.data_management.loaders.read_raw_step_loader import ReadRawStepLoader
+from src.data_management.loaders.underlying_step_loader import UnderlyingStepLoader
 from src.data_management.utils.contract_code_utils import (
     validate_maturity_contract_code,
     validate_strike_contract_code,
@@ -28,11 +26,8 @@ logger = logging.getLogger(__name__)
 class VolatilityStepLoader:
 
     @staticmethod
-    def read_step_databases(build_if_missing: bool = True) -> pd.DataFrame:
+    def read_step_databases() -> pd.DataFrame:
         output_file = VolatilityBuilder.get_output_filename()
-
-        if build_if_missing and not output_file.exists():
-            VolatilityStepLoader.load()
 
         options_trade_volatility_ibex_df = pd.read_csv(
             output_file,
@@ -50,79 +45,61 @@ class VolatilityStepLoader:
 
         return options_trade_volatility_ibex_df
 
-    # READ
     @staticmethod
-    def _read_option_trades_underlying_db() -> pd.DataFrame:
-        df = pd.read_csv(
-            OptionTradesUnderlyingBuilder.get_output_filename(),
-            sep=";",
-            header=0,
-            dtype="string",
-        )
-        return df
-
-    @staticmethod
-    def _read_rates() -> pd.DataFrame:
-        df = pd.read_csv(
-            RatesBuilder.get_output_filename(),
-            sep=";",
-            header=0,
-            dtype="string",
-        )
-        return df
-
-    @staticmethod
-    def _clean_trades_without_underlying_info(
-        option_trades_underlying_df: pd.DataFrame,
-    ) -> pd.DataFrame:
-        cleaned_df = option_trades_underlying_df.copy()
-
+    def _clean_trades_wo_underlying(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Clean trades without underlying info
+        """
         missing_underlying_info_mask = (
-            cleaned_df[OptionTradesUnderlyingDBEnum.FUTURE_CONTRACT_CODE].isna()
-            | cleaned_df[OptionTradesUnderlyingDBEnum.UNDERLYING_PRICE].isna()
-            | cleaned_df[OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME].isna()
+            df[OptionTradesUnderlyingDBEnum.FUTURE_CONTRACT_CODE].isna()
+            | df[OptionTradesUnderlyingDBEnum.UNDERLYING_PRICE].isna()
+            | df[OptionTradesUnderlyingDBEnum.UNDERLYING_EXEC_DATETIME].isna()
         )
 
-        total_rows = len(cleaned_df)
+        total_rows = len(df)
         n_dropped = int(missing_underlying_info_mask.sum())
         if n_dropped > 0:
             pct_dropped = (n_dropped / total_rows * 100) if total_rows > 0 else 0.0
-            logger.warning(
+            logger.info(
                 "Dropping %s/%s option trades (%.2f%%) without future/underlying information.",
                 n_dropped,
                 total_rows,
                 pct_dropped,
             )
-            cleaned_df = cleaned_df.loc[~missing_underlying_info_mask].copy()
+            df = df.loc[~missing_underlying_info_mask].copy()
 
-        return cleaned_df
+        return df
 
     @staticmethod
     def _filter_high_lag(
-        option_trades_underlying_df: pd.DataFrame,
+        df: pd.DataFrame,
     ) -> pd.DataFrame:
-        filtered_df = option_trades_underlying_df.copy()
         lag_max = float(config.data_config.volatility_config.underlying_lag_max_minutes)
 
-        lag_mask = (
-            filtered_df[OptionTradesUnderlyingDBEnum.UNDERLYING_LAG_MINUTES]
-            > lag_max
-        )
+        lag_mask = df[OptionTradesUnderlyingDBEnum.UNDERLYING_LAG_MINUTES] > lag_max
 
-        total_rows = len(filtered_df)
+        total_rows = len(df)
         n_dropped = int(lag_mask.sum())
         if n_dropped > 0:
             pct_dropped = (n_dropped / total_rows * 100) if total_rows > 0 else 0.0
-            logger.warning(
+            logger.info(
                 "Dropping %s/%s option trades (%.2f%%) with underlying lag > %.0f minutes.",
                 n_dropped,
                 total_rows,
                 pct_dropped,
                 lag_max,
             )
-            filtered_df = filtered_df.loc[~lag_mask].copy()
+            df = df.loc[~lag_mask].copy()
 
-        return filtered_df
+        return df
+
+    @staticmethod
+    def _clean_trades(
+        df: pd.DataFrame,
+    ):
+        df = VolatilityStepLoader._clean_trades_wo_underlying(df=df)
+        df = VolatilityStepLoader._clean_trades_wo_underlying(df=df)
+        return df
 
     # VALIDATIONS
     @staticmethod
@@ -266,7 +243,6 @@ class VolatilityStepLoader:
 
     @staticmethod
     def _validate_rates_df(rates_df: pd.DataFrame):
-        # Validate missing values
         VolatilityStepLoader._validate_missings(rates_df)
 
     @staticmethod
@@ -279,55 +255,23 @@ class VolatilityStepLoader:
         VolatilityStepLoader._validate_rates_df(rates_df)
 
     @staticmethod
-    def _convert_types(
-        option_trades_underlying_df: pd.DataFrame, rates_df: pd.DataFrame
-    ):
-        option_trades_underlying_df = convert_data_types(
-            df=option_trades_underlying_df,
-            selected_columns_dict=config.data_config.underlying_config.option_trades_underlying_db_columns,
-            format_date="%Y-%m-%d",
-            format_datetime="%Y-%m-%d %H:%M:%S.%f",
-        )
-        rates_df = convert_data_types(
-            df=rates_df,
-            selected_columns_dict=config.data_config.read_raw_config.rates_columns,
-            format_date="%Y-%m-%d",
-        )
-
-        return option_trades_underlying_df, rates_df
-
-    @staticmethod
     def load(force_reload=False):
         if force_reload or not VolatilityBuilder.get_output_filename().exists():
             # Read
-            option_trades_underlying_df = (
-                VolatilityStepLoader._read_option_trades_underlying_db()
-            )
-            rates_df = VolatilityStepLoader._read_rates()
+            option_trades_underlying_df = UnderlyingStepLoader.load()
+            _, _, rates_df = ReadRawStepLoader.load()
 
-            # Clean
-            option_trades_underlying_df = (
-                VolatilityStepLoader._clean_trades_without_underlying_info(
-                    option_trades_underlying_df
-                )
-            )
-
-            # Conversion Type
-            option_trades_underlying_df, rates_df = VolatilityStepLoader._convert_types(
-                option_trades_underlying_df, rates_df
-            )
-
-            # Filter trades with stale underlying (lag > threshold)
-            option_trades_underlying_df = VolatilityStepLoader._filter_high_lag(
+            # Clean and Filter trades with stale underlying (lag > threshold)
+            option_trades_underlying_df = VolatilityStepLoader._clean_trades(
                 option_trades_underlying_df
             )
 
             # Validate
-            VolatilityStepLoader._validate_sources(option_trades_underlying_df, rates_df)
-
-            # Build
-            VolatilityBuilder.build(
+            VolatilityStepLoader._validate_sources(
                 option_trades_underlying_df, rates_df
             )
 
-        return VolatilityStepLoader.read_step_databases(build_if_missing=False)
+            # Build
+            VolatilityBuilder.build(option_trades_underlying_df, rates_df)
+
+        return VolatilityStepLoader.read_step_databases()
