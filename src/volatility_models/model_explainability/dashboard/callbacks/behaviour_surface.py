@@ -40,8 +40,11 @@ def register_behaviour_callbacks(app, services) -> None:
         if not model_id:
             return (_empty_figure(),) * 6 + ("Select a model.",)
 
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
+            dashboard_model = services.prediction_service.load_dashboard_model(model_id)
+            if anchor_index is None and dashboard_model.behaviour_anchor_indices:
+                anchor_index = dashboard_model.behaviour_anchor_indices[0]
             if anchor_index is not None and anchor_index in dataset.index:
                 anchor = dataset.loc[
                     anchor_index, list(services.settings.model_input_features)

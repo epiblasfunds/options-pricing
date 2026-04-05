@@ -1,4 +1,4 @@
-"""Model discovery utilities."""
+"""Model discovery utilities for dashboard-ready explainability bundles."""
 
 from __future__ import annotations
 
@@ -9,12 +9,11 @@ from src.enums.volatility_model_enums import ModelFormatEnum
 from src.python_models.explainable_model import (
     AbstractModelMetadata,
     ExplainableModelMetadata,
-    SingleModelMetadata,
 )
 
 
 class ModelRegistry:
-    """Discover explainable-model bundles and standalone Keras artifacts."""
+    """Discover explainable-model bundles exported with dashboard artifacts."""
 
     def __init__(self, model_dir: Path) -> None:
         self.model_dir = model_dir
@@ -37,38 +36,16 @@ class ModelRegistry:
     def _build_discovered_model(
         self, artifact: Path
     ) -> AbstractModelMetadata | None:
-        if artifact.is_dir() and self._looks_like_explainable_model_directory(artifact):
+        if artifact.is_dir() and self._looks_like_dashboard_bundle_directory(artifact):
             return ExplainableModelMetadata.load(artifact)
-
-        if artifact.is_file() and artifact.suffix.lower() in {".keras", ".h5"}:
-            format_name = ModelFormatEnum(artifact.suffix.lower().lstrip("."))
-        else:
-            return None
-
-        metadata = self._load_metadata(artifact)
-        model_id = artifact.relative_to(self.model_dir).as_posix()
-        return SingleModelMetadata(
-            model_id=model_id,
-            name=artifact.stem,
-            path=artifact,
-            format=format_name,
-            metadata=metadata,
-        )
+        return None
 
     @staticmethod
-    def _looks_like_explainable_model_directory(path: Path) -> bool:
+    def _looks_like_dashboard_bundle_directory(path: Path) -> bool:
         metadata_path = ExplainableModelMetadata.get_root_metadata_path(path)
         if not metadata_path.exists():
             return False
         payload = json.loads(metadata_path.read_text(encoding="utf-8"))
-        return payload.get("format") == ModelFormatEnum.EXPLAINABLE_MODEL.value
-
-    def _load_metadata(self, artifact: Path) -> dict:
-        candidates = [
-            artifact.with_suffix(".metadata.json"),
-            artifact.parent / f"{artifact.stem}.metadata.json",
-        ]
-        for candidate in candidates:
-            if candidate.exists():
-                return json.loads(candidate.read_text(encoding="utf-8"))
-        return {}
+        if payload.get("format") != ModelFormatEnum.EXPLAINABLE_MODEL.value:
+            return False
+        return (path / "dashboard_model" / "metadata.json").exists()

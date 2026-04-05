@@ -188,21 +188,6 @@ def _global_tab():
                                 "Understand which transformed inputs drive the volatility model globally and inspect the precomputed surrogate trees that summarize its logic.",
                                 style=HELP_TEXT_STYLE,
                             ),
-                            html.Div(
-                                style=CONTROL_ROW_STYLE,
-                                children=[
-                                    html.Div(
-                                        children=[
-                                            html.Label("Dependence Feature"),
-                                            dcc.Dropdown(id=IDS.GLOBAL_DEPENDENCE_FEATURE),
-                                            html.P(
-                                                "Choose the transformed feature to inspect its SHAP dependence profile.",
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                        ]
-                                    )
-                                ],
-                            ),
                             html.H3("SHAP Explainability", style=SECTION_TITLE_STYLE),
                             html.P(
                                 "Native SHAP plots over the selected model and dataset sample.",
@@ -254,6 +239,17 @@ def _global_tab():
                                             html.P(
                                                 "SHAP dependence plot for the selected feature, relating its value to its local contribution.",
                                                 style=HELP_TEXT_STYLE,
+                                            ),
+                                            html.Div(
+                                                style={"marginBottom": "12px"},
+                                                children=[
+                                                    html.Label("Dependence Feature"),
+                                                    dcc.Dropdown(id=IDS.GLOBAL_DEPENDENCE_FEATURE),
+                                                    html.P(
+                                                        "Choose the transformed feature to inspect its SHAP dependence profile.",
+                                                        style=HELP_TEXT_STYLE,
+                                                    ),
+                                                ],
                                             ),
                                             _bounded_image(IDS.GLOBAL_DEPENDENCE_GRAPH),
                                         ],

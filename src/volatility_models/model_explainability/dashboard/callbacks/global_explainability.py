@@ -49,7 +49,7 @@ def register_global_callbacks(app, services) -> None:
     def render_global_explainability(model_id, selected_feature):
         if not model_id:
             return _empty_image(), _empty_image(), _empty_image(), _empty_image(), "Select a model."
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
             result = services.cache.get_or_compute(
                 "shap_global",

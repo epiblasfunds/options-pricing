@@ -72,6 +72,10 @@ def build_services() -> Services:
         dataset_path=DEFAULT_SETTINGS.volatility_dataset_path,
         feature_schema=DEFAULT_FEATURE_SCHEMA,
     )
+    data_provider.bind_model_runtime(
+        model_registry=model_registry,
+        model_loader=model_loader,
+    )
     prediction_service = PredictionService(
         model_registry=model_registry,
         model_loader=model_loader,

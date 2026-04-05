@@ -11,7 +11,6 @@ from src.volatility_models.model_explainability.plots.local_plots import (
     neighbors_distance_figure,
 )
 from src.volatility_models.model_explainability.plots.shap_plots import waterfall_image
-from src.volatility_models.model_explainability.utils.feature_utils import add_derived_features
 
 
 def _empty_figure():
@@ -106,7 +105,7 @@ def register_sample_callbacks(app, services) -> None:
     def render_manual_form(mode, _model_id):
         if mode != "manual":
             return html.Div()
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         return html.Div(
             style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))", "gap": "10px", "margin": "16px 0"},
@@ -131,7 +130,7 @@ def register_sample_callbacks(app, services) -> None:
     def analyze_sample(_, model_id, mode, sample_index, manual_ids, manual_values):
         if not model_id:
             return "Select a model.", None, html.Div(), _empty_figure()
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
             if mode == "dataset":
                 if sample_index is None:
@@ -152,8 +151,41 @@ def register_sample_callbacks(app, services) -> None:
                         html.Div(),
                         _empty_figure(),
                     )
-                sample_frame = pd.DataFrame([sample_payload], index=["manual"])
-                sample_frame = add_derived_features(sample_frame, services.feature_schema)
+                api_result = services.prediction_service.call_manual_prediction_api(
+                    model_id,
+                    sample_payload,
+                )
+                reference_index = api_result.get("reference_sample_index")
+                reference_sample = (
+                    dataset.loc[[reference_index]].copy()
+                    if reference_index is not None and reference_index in dataset.index
+                    else dataset.head(1).copy()
+                )
+                explanation = services.shap_service.explain_sample(
+                    model_id,
+                    reference_sample,
+                    dataset,
+                )
+                neighbors = services.neighbors_service.find_neighbors(
+                    model_id,
+                    dataset,
+                    reference_sample,
+                    k=10,
+                )
+                comparison = neighbors_distance_figure(neighbors)
+                sample_summary = html.Div(
+                    [
+                        html.H3("Manual Input"),
+                        html.P(f"Predicted volatility (API stub): {float(api_result['prediction']):.4f}"),
+                        html.P(str(api_result.get("summary", ""))),
+                    ]
+                )
+                return (
+                    sample_summary,
+                    waterfall_image(explanation, reference_sample.index[0], services.feature_schema),
+                    _neighbors_table(neighbors),
+                    comparison,
+                )
 
             prediction = float(services.prediction_service.predict_frame(model_id, sample_frame).iloc[0])
             explanation = services.shap_service.explain_sample(model_id, sample_frame, dataset)

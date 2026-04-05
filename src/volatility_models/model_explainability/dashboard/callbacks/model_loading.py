@@ -47,16 +47,14 @@ def register_model_loading_callbacks(app, services) -> None:
         Input(IDS.MODEL_SELECTOR, "value"),
     )
     def update_shared_context(model_id):
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
         sampled = sample_frame(
             dataset,
             max_rows=250,
             random_state=services.settings.random_state,
         )
-        sample_options = [
-            {"label": build_sample_label(row), "value": int(index)}
-            for index, row in sampled.iterrows()
-        ]
+        sample_options = []
+        anchor_options = []
         ice_options = [
             {"label": feature.label, "value": feature.name}
             for feature in services.feature_schema.numerical_features(raw_only=False)
@@ -68,6 +66,10 @@ def register_model_loading_callbacks(app, services) -> None:
         tree_value = None
 
         if not model_id:
+            sample_options = [
+                {"label": build_sample_label(row), "value": int(index)}
+                for index, row in sampled.iterrows()
+            ]
             return (
                 html.Div(
                     "No model selected. Add explainable-model bundles to src/volatility_models/saved_models/ and select one.",
@@ -85,6 +87,17 @@ def register_model_loading_callbacks(app, services) -> None:
 
         model = services.model_registry.get_model(model_id)
         metadata = model.metadata if model else {}
+        bundle = services.prediction_service.load_bundle(model_id)
+        sample_options = [
+            {"label": build_sample_label(dataset.loc[index]), "value": int(index)}
+            for index in bundle.dashboard_model.sample_indices
+            if index in dataset.index
+        ]
+        anchor_options = [
+            {"label": build_sample_label(dataset.loc[index]), "value": int(index)}
+            for index in bundle.dashboard_model.behaviour_anchor_indices
+            if index in dataset.index
+        ]
         model_features = metadata.get("model_input_features", list(services.settings.model_input_features))
         shap_feature_names = metadata.get("transformed_feature_names", model_features)
         shap_options = [
@@ -116,7 +129,7 @@ def register_model_loading_callbacks(app, services) -> None:
             shap_options[0]["value"] if shap_options else None,
             ice_options,
             ice_options[0]["value"] if ice_options else None,
-            sample_options,
+            anchor_options,
             sample_options,
             tree_tabs,
             tree_value,

@@ -4,13 +4,12 @@ This package provides a Dash dashboard for explainability of IBEX option implied
 
 ## What It Does
 
-- Discovers explainable-model bundles exported with `src.python_models.explainable_model`, plus legacy `.keras` and `.h5` files.
+- Discovers explainable-model bundles exported with `src.python_models.explainable_model` and `src.python_models.dashboard_models`.
 - Loads the project volatility dataset from `data/volatility_data/VOLATILITY_DB.csv`.
 - Derives explainability features such as `Moneyness`, `LogMoneyness`, `ExecHour`, and `ExecWeekday`.
-- Exposes five sections:
-  - Equivalent explainable models
-  - Global explainability
+- Exposes four dashboard tabs:
   - Behaviour and surface
+  - Global explainability
   - Sample explainability
   - Diagnosis
 
@@ -74,15 +73,20 @@ ERROR_METRICS = ["rmse", "mae", "r2", "mape"]
 
 ## Model Loading
 
-The loader prefers explainable-model bundle directories with:
+The dashboard only loads explainable-model bundle directories that include precomputed dashboard artifacts:
 
 - `metadata.json`
-- `epi_blas_model/model.keras`
-- `epi_blas_model/train_stats.joblib`
-- `tree_model/model_tree.joblib`
-- `tree_model/feature_importances.csv`
-- `tree_model/fidelity_frame.csv`
-- `tree_model/attributes.json`
+- `dashboard_model/metadata.json`
+- `dashboard_model/dataset_frame.joblib`
+- `dashboard_model/global_shap.joblib`
+- `dashboard_model/local_shap.joblib`
+- `dashboard_model/neighbors_frame.joblib`
+- `dashboard_model/surfaces_frame.joblib`
+- `dashboard_model/ice_frame.joblib`
+- `dashboard_model/ale_frame.joblib`
+- `dashboard_model/diagnosis.joblib`
+- `dashboard_model/manual_api_stub.joblib`
+- `dashboard_model/tree_models/depth_*/...`
 
 Optional bundle sidecar artifacts:
 
@@ -92,7 +96,7 @@ Optional bundle sidecar artifacts:
 - `validation_predictions.csv`
 - `test_predictions.csv`
 
-Legacy standalone `.keras` and `.h5` models are still discovered. If one of those models requires categorical preprocessing and no preprocessor or categorical mapping metadata is provided, the dashboard raises a clear runtime error instead of inventing a pipeline.
+The dashboard does not execute Keras models at runtime. If a bundle does not contain `dashboard_model/`, it is ignored by discovery and must be regenerated.
 
 ## Data Access
 
@@ -112,13 +116,12 @@ The app starts on `http://127.0.0.1:8050`.
 
 ## Limitations
 
-- The current SHAP implementation is a model-agnostic Monte Carlo Shapley approximation, not the `shap` package backend.
-- Saved Keras models with non-trivial preprocessing should include a sidecar preprocessor artifact or explicit categorical mappings in metadata.
 - The financial checks are heuristic continuity and spike checks, not full no-arbitrage validation.
+- Manual input currently calls a stubbed API contract and displays a placeholder response.
 
-## Recommended Model Metadata
+## Recommended Bundle Metadata
 
-For smooth deployment, store a sibling metadata file with fields like:
+For smooth deployment, persist bundle metadata with fields like:
 
 ```json
 {
@@ -132,9 +135,9 @@ For smooth deployment, store a sibling metadata file with fields like:
     "ExecWeekday"
   ],
   "error_metrics": ["rmse", "mae", "r2"],
-  "preprocessor_path": "path/to/preprocessor.joblib",
-  "categorical_mappings": {
-    "OptionType": {"C": 0, "P": 1}
+  "available_surrogate_depths": [2, 4, 8, 16],
+  "artifact_files": {
+    "dashboard_model": "dashboard_model"
   }
 }
 ```

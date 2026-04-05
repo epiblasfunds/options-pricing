@@ -33,7 +33,7 @@ def register_diagnosis_callbacks(app, services) -> None:
         if not model_id:
             return "Select a model.", _empty_figure(), _empty_figure(), _empty_figure(), _empty_figure(), ""
 
-        dataset = services.data_provider.load_dataset()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
             diagnosis = services.cache.get_or_compute(
                 "diagnosis",

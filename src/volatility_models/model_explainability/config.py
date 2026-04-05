@@ -60,6 +60,7 @@ class ExplainabilitySettings:
     target_column: str
     error_metrics: tuple[str, ...]
     random_state: int = 42
+    surrogate_depths: tuple[int, ...] = (2, 4, 8, 16)
     surrogate_max_depth: int = 4
     surrogate_min_samples_leaf: int = 80
     surrogate_sample_size: int = 12000

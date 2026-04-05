@@ -9,15 +9,11 @@ from src.volatility_models.model_explainability.services.shared.prediction_servi
 
 
 class EquivalentModelsService:
-    """Expose the persisted surrogate tree for explainable bundles."""
+    """Expose the persisted surrogate trees from dashboard bundles."""
 
     def __init__(self, prediction_service: PredictionService) -> None:
         self.prediction_service = prediction_service
 
     def load_surrogates(self, model_id: str) -> dict[int, SurrogateTreeModel]:
         bundle = self.prediction_service.load_bundle(model_id)
-        if bundle.explainable_model is None:
-            raise ValueError(
-                "The selected model is not an explainable bundle with persisted surrogate trees."
-            )
-        return dict(sorted(bundle.explainable_model.tree_models.items()))
+        return dict(sorted(bundle.dashboard_model.tree_models.items()))

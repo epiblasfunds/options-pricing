@@ -351,21 +351,6 @@ class ExplainableModel:
             if loaded:
                 return loaded
 
-        """
-        # Backward compatibility for bundles persisted with a single surrogate tree.
-        legacy_path = metadata.get_legacy_tree_model_path()
-        if legacy_path.exists():
-            legacy_tree = SurrogateTreeModel.load(
-                metadata=SingleModelMetadata(
-                    model_id=f"{metadata.model_id}_tree_model",
-                    name=f"{metadata.name}_tree_model",
-                    path=legacy_path,
-                    format=metadata.tree_format,
-                    metadata=metadata.metadata,
-                )
-            )
-            return {int(legacy_tree.tree_depth): legacy_tree}
-        """
         raise FileNotFoundError(
             f"No persisted surrogate trees were found under '{tree_models_path}'."
         )
