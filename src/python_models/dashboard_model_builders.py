@@ -13,7 +13,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.tree import DecisionTreeRegressor, export_text
 
 from src.python_models.explainable_model import SurrogateTreeModel
-from src.volatility_models.model_explainability.config import (
+from src.volatility_models.model_explainability.runtime import (
     DEFAULT_FEATURE_SCHEMA,
     DEFAULT_METRICS_REGISTRY,
     DEFAULT_SETTINGS,

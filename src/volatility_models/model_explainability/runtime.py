@@ -1,4 +1,4 @@
-"""Central configuration for the model explainability package."""
+"""Runtime objects for the explainability dashboard."""
 
 from __future__ import annotations
 
@@ -18,37 +18,10 @@ from src.volatility_models.model_explainability.services.shared.metrics_registry
     MetricsRegistry,
 )
 
-MODEL_INPUT_FEATURES = [
-    "TimeToExpiration",
-    "Rate",
-    "UnderlyingPrice",
-    "StrikePrice",
-    "OptionType",
-    "ExecHour",
-    "ExecWeekday",
-]
-
-CATEGORICAL_FEATURES = ["OptionType", "ExecWeekday"]
-NUMERICAL_FEATURES = [
-    "TimeToExpiration",
-    "Rate",
-    "UnderlyingPrice",
-    "StrikePrice",
-    "ExecHour",
-]
-OPTIONAL_DERIVED_EXPLAINABILITY_FEATURES = [
-    "Moneyness",
-    "LogMoneyness",
-    "AbsLogMoneyness",
-    "UnderlyingLagMinutes",
-]
-TARGET_COLUMN = "ImpliedVolatility"
-ERROR_METRICS = ["rmse", "mae", "r2"]
-
 
 @dataclass(frozen=True)
-class ExplainabilitySettings:
-    """High-level runtime configuration."""
+class ExplainabilityRuntimeSettings:
+    """High-level runtime settings resolved from project configuration."""
 
     project_root: Path
     model_dir: Path
@@ -59,20 +32,20 @@ class ExplainabilitySettings:
     optional_derived_explainability_features: tuple[str, ...]
     target_column: str
     error_metrics: tuple[str, ...]
-    random_state: int = 42
-    surrogate_depths: tuple[int, ...] = (2, 4, 8, 16)
-    surrogate_max_depth: int = 4
-    surrogate_min_samples_leaf: int = 80
-    surrogate_sample_size: int = 12000
-    shap_background_size: int = 24
-    shap_explain_size: int = 48
-    shap_permutations: int = 20
-    neighbors_sample_size: int = 20000
-    diagnosis_sample_size: int = 10000
-    surface_grid_size: int = 24
-    ice_sample_size: int = 24
-    curve_points: int = 25
-    cache_entries: int = 64
+    random_state: int
+    surrogate_depths: tuple[int, ...]
+    surrogate_max_depth: int
+    surrogate_min_samples_leaf: int
+    surrogate_sample_size: int
+    shap_background_size: int
+    shap_explain_size: int
+    shap_permutations: int
+    neighbors_sample_size: int
+    diagnosis_sample_size: int
+    surface_grid_size: int
+    ice_sample_size: int
+    curve_points: int
+    cache_entries: int
 
 
 def _r2_score(y_true, y_pred) -> float:
@@ -84,7 +57,39 @@ def _r2_score(y_true, y_pred) -> float:
     return 1.0 - residual_sum / total_sum
 
 
-def _build_default_feature_schema() -> FeatureSchema:
+def build_runtime_settings() -> ExplainabilityRuntimeSettings:
+    dashboard_config = project_config.dashboard_models_config
+    return ExplainabilityRuntimeSettings(
+        project_root=PROJECT_ROOT_PATH,
+        model_dir=SRC_DIR_PATH / "volatility_models" / "saved_models",
+        volatility_dataset_path=VOLATILITY_DATA_STEP_DIR_PATH
+        / f"{project_config.data_config.volatility_config.output_filename}.csv",
+        model_input_features=tuple(dashboard_config.model_input_features),
+        categorical_features=tuple(dashboard_config.categorical_features),
+        numerical_features=tuple(dashboard_config.numerical_features),
+        optional_derived_explainability_features=tuple(
+            dashboard_config.optional_derived_explainability_features
+        ),
+        target_column=str(dashboard_config.target_column),
+        error_metrics=tuple(dashboard_config.error_metrics),
+        random_state=int(dashboard_config.random_state),
+        surrogate_depths=tuple(int(depth) for depth in dashboard_config.surrogate_depths),
+        surrogate_max_depth=int(dashboard_config.surrogate_max_depth),
+        surrogate_min_samples_leaf=int(dashboard_config.surrogate_min_samples_leaf),
+        surrogate_sample_size=int(dashboard_config.surrogate_sample_size),
+        shap_background_size=int(dashboard_config.shap_background_size),
+        shap_explain_size=int(dashboard_config.shap_explain_size),
+        shap_permutations=int(dashboard_config.shap_permutations),
+        neighbors_sample_size=int(dashboard_config.neighbors_sample_size),
+        diagnosis_sample_size=int(dashboard_config.diagnosis_sample_size),
+        surface_grid_size=int(dashboard_config.surface_grid_size),
+        ice_sample_size=int(dashboard_config.ice_sample_size),
+        curve_points=int(dashboard_config.curve_points),
+        cache_entries=int(dashboard_config.cache_entries),
+    )
+
+
+def build_feature_schema(settings: ExplainabilityRuntimeSettings) -> FeatureSchema:
     features = [
         FeatureDefinition(
             name="TimeToExpiration",
@@ -193,10 +198,10 @@ def _build_default_feature_schema() -> FeatureSchema:
             widget="number",
         ),
     ]
-    return FeatureSchema(features=features, target_column=TARGET_COLUMN)
+    return FeatureSchema(features=features, target_column=settings.target_column)
 
 
-def _build_default_metrics_registry() -> MetricsRegistry:
+def build_metrics_registry() -> MetricsRegistry:
     registry = MetricsRegistry()
     registry.register(
         MetricDefinition(
@@ -221,7 +226,7 @@ def _build_default_metrics_registry() -> MetricsRegistry:
     registry.register(
         MetricDefinition(
             name="r2",
-            label="R²",
+            label="R2",
             function=lambda y_true, y_pred: _r2_score(y_true, y_pred),
             higher_is_better=True,
             formatter=lambda value: f"{value:,.4f}",
@@ -231,20 +236,6 @@ def _build_default_metrics_registry() -> MetricsRegistry:
     return registry
 
 
-DEFAULT_SETTINGS = ExplainabilitySettings(
-    project_root=PROJECT_ROOT_PATH,
-    model_dir=SRC_DIR_PATH / "volatility_models" / "saved_models",
-    volatility_dataset_path=VOLATILITY_DATA_STEP_DIR_PATH
-    / f"{project_config.data_config.volatility_config.output_filename}.csv",
-    model_input_features=tuple(MODEL_INPUT_FEATURES),
-    categorical_features=tuple(CATEGORICAL_FEATURES),
-    numerical_features=tuple(NUMERICAL_FEATURES),
-    optional_derived_explainability_features=tuple(
-        OPTIONAL_DERIVED_EXPLAINABILITY_FEATURES
-    ),
-    target_column=TARGET_COLUMN,
-    error_metrics=tuple(ERROR_METRICS),
-)
-
-DEFAULT_FEATURE_SCHEMA = _build_default_feature_schema()
-DEFAULT_METRICS_REGISTRY = _build_default_metrics_registry()
+DEFAULT_SETTINGS = build_runtime_settings()
+DEFAULT_FEATURE_SCHEMA = build_feature_schema(DEFAULT_SETTINGS)
+DEFAULT_METRICS_REGISTRY = build_metrics_registry()

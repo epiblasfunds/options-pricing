@@ -1,6 +1,6 @@
 """Explainability dashboard package for volatility models."""
 
-from src.volatility_models.model_explainability.config import (
+from src.volatility_models.model_explainability.runtime import (
     DEFAULT_FEATURE_SCHEMA,
     DEFAULT_METRICS_REGISTRY,
     DEFAULT_SETTINGS,

@@ -15,7 +15,7 @@ This package provides a Dash dashboard for explainability of IBEX option implied
 
 ## Package Structure
 
-- `config.py`: central configuration, default feature schema, default metrics registry, runtime settings.
+- `runtime.py`: runtime settings, feature schema factory, and metrics registry factory built on top of project configuration.
 - `services/shared/`: shared runtime services such as discovery, loading, prediction, dataset access, feature schema, metrics, and cache.
 - `services/equivalent_models/`: services for the equivalent-models dashboard tab.
 - `services/global_explainability/`: services for the global explainability dashboard tab.
@@ -28,7 +28,7 @@ This package provides a Dash dashboard for explainability of IBEX option implied
 
 ## Configuration-Driven Design
 
-The main configuration points are in `config.py`.
+The dashboard defaults are defined in `resources/dashboard_models_config.json` and loaded through `src.config.config.config.dashboard_models_config`. `src/volatility_models/model_explainability/runtime.py` builds the runtime objects from that source.
 
 - `MODEL_INPUT_FEATURES`
 - `CATEGORICAL_FEATURES`
@@ -41,7 +41,7 @@ The rest of the package reads from the schema and metric registry instead of sca
 
 ### Add A New Metric
 
-1. Register it in `_build_default_metrics_registry()` in `config.py`.
+1. Register it in `build_metrics_registry()` in `runtime.py`.
 2. Add its key to `ERROR_METRICS`.
 
 Example:
@@ -63,12 +63,12 @@ ERROR_METRICS = ["rmse", "mae", "r2", "mape"]
 
 1. Update `MODEL_INPUT_FEATURES`.
 2. Update `CATEGORICAL_FEATURES` and `NUMERICAL_FEATURES`.
-3. Add or edit the corresponding `FeatureDefinition` in `_build_default_feature_schema()`.
+3. Add or edit the corresponding `FeatureDefinition` in `build_feature_schema()`.
 
 ### Add A Derived Explainability Feature
 
 1. Add its name to `OPTIONAL_DERIVED_EXPLAINABILITY_FEATURES`.
-2. Add a `FeatureDefinition` for it in `_build_default_feature_schema()`.
+2. Add a `FeatureDefinition` for it in `build_feature_schema()`.
 3. Extend `utils/feature_utils.py` so the feature is derived from the real dataset without altering the raw model inputs.
 
 ## Model Loading

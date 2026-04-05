@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from src.config.dashboard_models_config.dashboard_models_config import DashboardModelsConfig
 from src.config.data_config.data_config import DataConfig
 from src.config.logging_config.logging_config import LoggingConfig
 
@@ -35,9 +36,13 @@ for pth in [
 
 class Config:
     DATA_CONFIG_FILE_PATH = RESOURCES_PATH / "data_config.json"
+    DASHBOARD_MODELS_CONFIG_FILE_PATH = RESOURCES_PATH / "dashboard_models_config.json"
 
     def __init__(self):
         self.data_config = DataConfig(data_config_file_path=Config.DATA_CONFIG_FILE_PATH)
+        self.dashboard_models_config = DashboardModelsConfig(
+            dashboard_models_config_file_path=Config.DASHBOARD_MODELS_CONFIG_FILE_PATH
+        )
         LoggingConfig.setup_logging()
 
 

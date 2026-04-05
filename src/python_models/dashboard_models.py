@@ -18,7 +18,7 @@ from src.python_models.explainable_model import (
     ExplainableModel,
     SurrogateTreeModel,
 )
-from src.volatility_models.model_explainability.config import DEFAULT_SETTINGS
+from src.volatility_models.model_explainability.runtime import DEFAULT_SETTINGS
 
 
 @dataclass(frozen=True)
