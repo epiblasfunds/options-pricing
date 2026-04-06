@@ -29,6 +29,7 @@ class IDS:
 
     SAMPLE_MODE = "sample-mode"
     SAMPLE_INDEX = "sample-index"
+    SAMPLE_INDEX_CONTAINER = "sample-index-container"
     SAMPLE_MANUAL_FORM = "sample-manual-form"
     SAMPLE_RUN_BUTTON = "sample-run-button"
     SAMPLE_OUTPUT = "sample-output"

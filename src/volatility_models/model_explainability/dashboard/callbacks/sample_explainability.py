@@ -99,20 +99,29 @@ def register_sample_callbacks(app, services) -> None:
 
     @app.callback(
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),
+        Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
         Input(IDS.MODEL_SELECTOR, "value"),
     )
     def render_manual_form(mode, _model_id):
         if mode != "manual":
-            return html.Div()
+            return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
-        return html.Div(
-            style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))", "gap": "10px", "margin": "16px 0"},
-            children=[
-                _manual_field(feature, defaults.get(feature.name))
-                for feature in services.feature_schema.raw_input_features()
-            ],
+        return (
+            html.Div(
+                style={
+                    "display": "grid",
+                    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
+                    "gap": "10px",
+                    "margin": "16px 0",
+                },
+                children=[
+                    _manual_field(feature, defaults.get(feature.name))
+                    for feature in services.feature_schema.raw_input_features()
+                ],
+            ),
+            {"display": "none"},
         )
 
     @app.callback(

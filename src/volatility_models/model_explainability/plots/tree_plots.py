@@ -10,28 +10,60 @@ import plotly.express as px
 from sklearn import tree
 
 from src.python_models.explainable_model import SurrogateTreeModel
-
+from src.volatility_models.model_explainability.plots.plot_style import (
+    HOVERLABEL_STYLE,
+    STANDARD_MARGIN,
+    STANDARD_TEMPLATE,
+)
 
 def feature_importance_figure(result: SurrogateTreeModel):
     frame = result.feature_importances.rename("importance").reset_index()
     frame.columns = ["feature", "importance"]
-    return px.bar(
+    fig = px.bar(
         frame,
         x="importance",
         y="feature",
         orientation="h",
         title="Surrogate Feature Importances",
     )
+    fig.update_traces(
+        hovertemplate=(
+            "Feature: %{y}<br>"
+            "Relative importance: %{x:.4f}<extra></extra>"
+        )
+    )
+    fig.update_layout(
+        template=STANDARD_TEMPLATE,
+        margin=STANDARD_MARGIN,
+        xaxis_title="Relative importance",
+        yaxis_title="Feature",
+        hoverlabel=HOVERLABEL_STYLE,
+    )
+    return fig
 
 
 def fidelity_figure(result: SurrogateTreeModel):
-    return px.scatter(
+    fig = px.scatter(
         result.fidelity_frame,
         x="model_prediction",
         y="surrogate_prediction",
         title="Surrogate Fidelity",
         opacity=0.6,
     )
+    fig.update_traces(
+        hovertemplate=(
+            "Original model prediction: %{x:.4f}<br>"
+            "Surrogate prediction: %{y:.4f}<extra></extra>"
+        )
+    )
+    fig.update_layout(
+        template=STANDARD_TEMPLATE,
+        margin=STANDARD_MARGIN,
+        xaxis_title="Original model prediction",
+        yaxis_title="Surrogate prediction",
+        hoverlabel=HOVERLABEL_STYLE,
+    )
+    return fig
 
 
 def tree_png_base64(result: SurrogateTreeModel) -> str:

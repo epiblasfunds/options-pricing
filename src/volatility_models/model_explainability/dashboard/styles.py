@@ -60,12 +60,73 @@ SECTION_TITLE_STYLE = {
     "color": "#17304f",
 }
 
+TITLE_WITH_INFO_STYLE = {
+    "display": "flex",
+    "alignItems": "center",
+    "gap": "8px",
+    "marginBottom": "10px",
+}
+
+INFO_ICON_STYLE = {
+    "display": "inline-flex",
+    "alignItems": "center",
+    "justifyContent": "center",
+    "width": "18px",
+    "height": "18px",
+    "borderRadius": "999px",
+    "border": "1px solid #2f5d8a",
+    "background": "#edf5ff",
+    "color": "#17304f",
+    "fontSize": "0.78rem",
+    "fontWeight": "700",
+    "cursor": "help",
+    "lineHeight": "18px",
+    "textAlign": "center",
+    "userSelect": "none",
+}
+
 SUBCARD_STYLE = {
     "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
     "border": "1px solid rgba(33,75,122,0.12)",
     "borderRadius": "14px",
     "padding": "16px",
     "marginTop": "14px",
+}
+
+SECTION_PANEL_STYLE = {
+    "background": "linear-gradient(180deg, #fdfefe 0%, #f4f8fd 100%)",
+    "border": "1px solid rgba(23,48,79,0.12)",
+    "borderRadius": "18px",
+    "padding": "18px",
+    "marginTop": "18px",
+    "boxShadow": "0 10px 24px rgba(22,40,68,0.05)",
+}
+
+SECTION_PANEL_HEADER_STYLE = {
+    "display": "flex",
+    "justifyContent": "space-between",
+    "alignItems": "flex-start",
+    "gap": "18px",
+    "flexWrap": "wrap",
+    "marginBottom": "6px",
+}
+
+SECTION_PANEL_INTRO_STYLE = {
+    "margin": "0",
+    "fontSize": "0.95rem",
+    "lineHeight": "1.5",
+    "color": "#4a5a73",
+    "maxWidth": "780px",
+}
+
+SECTION_CONTROL_CARD_STYLE = {
+    "minWidth": "280px",
+    "maxWidth": "360px",
+    "padding": "14px 16px",
+    "borderRadius": "14px",
+    "border": "1px solid rgba(33,75,122,0.14)",
+    "background": "#ffffff",
+    "boxShadow": "0 8px 18px rgba(22,40,68,0.05)",
 }
 
 IMAGE_STYLE = {

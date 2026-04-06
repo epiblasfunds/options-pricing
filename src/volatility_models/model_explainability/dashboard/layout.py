@@ -11,10 +11,16 @@ from src.volatility_models.model_explainability.dashboard.styles import (
     CONTROL_ROW_STYLE,
     HEADER_STYLE,
     HELP_TEXT_STYLE,
+    INFO_ICON_STYLE,
     IMAGE_STYLE,
     PAGE_STYLE,
+    SECTION_CONTROL_CARD_STYLE,
+    SECTION_PANEL_HEADER_STYLE,
+    SECTION_PANEL_INTRO_STYLE,
+    SECTION_PANEL_STYLE,
     SECTION_TITLE_STYLE,
     SUBCARD_STYLE,
+    TITLE_WITH_INFO_STYLE,
 )
 
 
@@ -36,10 +42,31 @@ def _bounded_image(image_id: str):
     )
 
 
-def _bounded_graph(graph_id: str, height: str = "520px"):
+def _bounded_graph(
+    graph_id: str,
+    height: str = "520px",
+    max_width: str = "860px",
+):
     return html.Div(
-        style={"maxWidth": "860px", "margin": "0 auto"},
+        style={"maxWidth": max_width, "width": "100%", "margin": "0 auto"},
         children=[dcc.Graph(id=graph_id, style={"height": height})],
+    )
+
+
+def _section_title_with_info(title: str, info_text: str, level: int = 4):
+    header_class = getattr(html, f"H{level}")
+    title_style = {"margin": "0"} if level == 4 else SECTION_TITLE_STYLE
+    return html.Div(
+        style=TITLE_WITH_INFO_STYLE,
+        children=[
+            header_class(title, style=title_style),
+            html.Span(
+                "i",
+                title=info_text,
+                style=INFO_ICON_STYLE,
+                **{"aria-label": f"Information about {title}"},
+            ),
+        ],
     )
 
 
@@ -57,114 +84,188 @@ def _behaviour_tab():
                                 style=HELP_TEXT_STYLE,
                             ),
                             html.Div(
-                                style=CONTROL_ROW_STYLE,
+                                style=SECTION_PANEL_STYLE,
                                 children=[
                                     html.Div(
+                                        style=SECTION_PANEL_HEADER_STYLE,
                                         children=[
-                                            html.Label("Anchor Sample"),
-                                            dcc.Dropdown(id=IDS.BEHAVIOUR_ANCHOR_INDEX),
-                                            html.P(
-                                                "Reference observation used to build local smiles, terms and nearby surface slices.",
-                                                style=HELP_TEXT_STYLE,
+                                            html.Div(
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Local Surface Analysis",
+                                                        "This block groups every visualization driven by the selected anchor observation. "
+                                                        "Changing the anchor sample updates the local volatility heatmap, the 3D surface, "
+                                                        "the smile slices, the term structure slices and the associated financial checks.",
+                                                        level=3,
+                                                    ),
+                                                    html.P(
+                                                        "Analyse one representative sample and inspect the full local volatility surface built around it, including its smile and term-structure cross-sections.",
+                                                        style=SECTION_PANEL_INTRO_STYLE,
+                                                    ),
+                                                ]
                                             ),
-                                        ]
+                                            html.Div(
+                                                style=SECTION_CONTROL_CARD_STYLE,
+                                                children=[
+                                                    html.Label("Anchor Sample"),
+                                                    dcc.Dropdown(id=IDS.BEHAVIOUR_ANCHOR_INDEX),
+                                                    html.P(
+                                                        "Reference observation used to build the local surface views in this block.",
+                                                        style=HELP_TEXT_STYLE,
+                                                    ),
+                                                ],
+                                            ),
+                                        ],
                                     ),
                                     html.Div(
+                                        style={
+                                            "display": "grid",
+                                            "gridTemplateColumns": "repeat(auto-fit, minmax(560px, 1fr))",
+                                            "gap": "16px",
+                                        },
                                         children=[
-                                            html.Label("ICE/ALE Feature"),
-                                            dcc.Dropdown(id=IDS.BEHAVIOUR_ICE_FEATURE),
-                                            html.P(
-                                                "Feature perturbed for individual conditional expectation and accumulated local effects.",
-                                                style=HELP_TEXT_STYLE,
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Surface Heatmap",
+                                                        "2D local volatility surface predicted by the selected model on a grid of moneyness and time to expiration. "
+                                                        "Use it to identify level, skew and curvature patterns. The axes and color scale are aligned with the 3D surface "
+                                                        "and the smile and term-structure slices so visual comparisons are directly consistent.",
+                                                    ),
+                                                    _bounded_graph(
+                                                        IDS.SURFACE_HEATMAP,
+                                                        height="520px",
+                                                        max_width="100%",
+                                                    ),
+                                                ],
                                             ),
-                                        ]
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Local Surface Slice",
+                                                        "Three-dimensional rendering of the same local volatility surface around the selected anchor sample. "
+                                                        "This view is useful for assessing smoothness, slope changes and interaction effects between moneyness and maturity "
+                                                        "while preserving the exact same volatility scale used by the heatmap and related slices.",
+                                                    ),
+                                                    _bounded_graph(
+                                                        IDS.LOCAL_SURFACE_GRAPH,
+                                                        height="520px",
+                                                        max_width="100%",
+                                                    ),
+                                                ],
+                                            ),
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Smile Curve",
+                                                        "Cross-sections of the local surface at fixed maturities. Each line shows how predicted volatility changes across "
+                                                        "moneyness, making it easier to inspect smile shape, skew asymmetry and differences in volatility level between expiries.",
+                                                    ),
+                                                    _bounded_graph(
+                                                        IDS.SMILE_GRAPH,
+                                                        height="460px",
+                                                        max_width="100%",
+                                                    ),
+                                                ],
+                                            ),
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Term Structure",
+                                                        "Cross-sections of the local surface at fixed moneyness levels. This chart shows how predicted volatility evolves with "
+                                                        "time to expiration and helps detect maturity-dependent regimes, slope changes and non-linear term-structure behaviour.",
+                                                    ),
+                                                    _bounded_graph(
+                                                        IDS.TERM_GRAPH,
+                                                        height="460px",
+                                                        max_width="100%",
+                                                    ),
+                                                ],
+                                            ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        style=SUBCARD_STYLE,
+                                        children=[
+                                            _section_title_with_info(
+                                                "Surface Checks",
+                                                "Automatic heuristic checks applied to the generated local surface to detect abrupt smile jumps, maturity discontinuities or other "
+                                                "signs of financially implausible local behaviour.",
+                                            ),
+                                            html.Div(id=IDS.BEHAVIOUR_WARNINGS),
+                                        ],
                                     ),
                                 ],
                             ),
                             html.Div(
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "repeat(auto-fit, minmax(520px, 1fr))",
-                                    "gap": "16px",
-                                },
+                                style=SECTION_PANEL_STYLE,
                                 children=[
                                     html.Div(
-                                        style=SUBCARD_STYLE,
+                                        style=SECTION_PANEL_HEADER_STYLE,
                                         children=[
-                                            html.H4("Surface Heatmap", style={"marginTop": "0"}),
-                                            html.P(
-                                                "2D volatility surface predicted by the model over a grid of moneyness and time to expiration.",
-                                                style=HELP_TEXT_STYLE,
+                                            html.Div(
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Feature Response Analysis",
+                                                        "This block contains only the feature-response diagnostics driven by the ICE/ALE feature selector. "
+                                                        "Changing the feature here updates the ICE and ALE views without affecting the local surface charts.",
+                                                        level=3,
+                                                    ),
+                                                    html.P(
+                                                        "Study how the model reacts when one explanatory variable changes, both at the individual-observation level and on average.",
+                                                        style=SECTION_PANEL_INTRO_STYLE,
+                                                    ),
+                                                ]
                                             ),
-                                            _bounded_graph(IDS.SURFACE_HEATMAP, height="520px"),
+                                            html.Div(
+                                                style=SECTION_CONTROL_CARD_STYLE,
+                                                children=[
+                                                    html.Label("ICE/ALE Feature"),
+                                                    dcc.Dropdown(id=IDS.BEHAVIOUR_ICE_FEATURE),
+                                                    html.P(
+                                                        "Feature perturbed for the response-analysis charts in this block.",
+                                                        style=HELP_TEXT_STYLE,
+                                                    ),
+                                                ],
+                                            ),
                                         ],
                                     ),
                                     html.Div(
-                                        style=SUBCARD_STYLE,
+                                        style={
+                                            "display": "grid",
+                                            "gridTemplateColumns": "repeat(auto-fit, minmax(420px, 1fr))",
+                                            "gap": "16px",
+                                        },
                                         children=[
-                                            html.H4("Local Surface Slice", style={"marginTop": "0"}),
-                                            html.P(
-                                                "3D local view of the predicted surface around the selected anchor sample.",
-                                                style=HELP_TEXT_STYLE,
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "ICE",
+                                                        "Individual Conditional Expectation curves for the selected feature. Each line isolates one observation and shows how the "
+                                                        "prediction changes when that feature is perturbed while the remaining inputs stay fixed, which reveals local heterogeneity "
+                                                        "and potential interaction effects hidden by aggregate averages.",
+                                                    ),
+                                                    _bounded_graph(IDS.ICE_GRAPH, height="460px"),
+                                                ],
                                             ),
-                                            _bounded_graph(IDS.LOCAL_SURFACE_GRAPH, height="520px"),
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "ALE",
+                                                        "Accumulated Local Effects for the selected feature. This chart summarizes the average local sensitivity of the model while "
+                                                        "respecting the observed data distribution, which makes the interpretation more robust when explanatory variables are correlated.",
+                                                    ),
+                                                    _bounded_graph(IDS.ALE_GRAPH, height="460px"),
+                                                ],
+                                            ),
                                         ],
                                     ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            html.H4("Smile Curve", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Cross-section showing how predicted volatility changes across moneyness at fixed maturities.",
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            _bounded_graph(IDS.SMILE_GRAPH, height="460px"),
-                                        ],
-                                    ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            html.H4("Term Structure", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Cross-section showing the evolution of predicted volatility across maturities.",
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            _bounded_graph(IDS.TERM_GRAPH, height="460px"),
-                                        ],
-                                    ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            html.H4("ICE", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Individual Conditional Expectation curves for the selected feature across sampled observations.",
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            _bounded_graph(IDS.ICE_GRAPH, height="460px"),
-                                        ],
-                                    ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            html.H4("ALE", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Accumulated Local Effects summarizing the average local sensitivity to the selected feature.",
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            _bounded_graph(IDS.ALE_GRAPH, height="460px"),
-                                        ],
-                                    ),
-                                ],
-                            ),
-                            html.Div(
-                                style=SUBCARD_STYLE,
-                                children=[
-                                    html.H4("Surface Checks", style={"marginTop": "0"}),
-                                    html.P(
-                                        "Automatic financial consistency checks over the generated surface.",
-                                        style=HELP_TEXT_STYLE,
-                                    ),
-                                    html.Div(id=IDS.BEHAVIOUR_WARNINGS),
                                 ],
                             ),
                         ],
@@ -204,10 +305,10 @@ def _global_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Summary", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Beeswarm plot showing the distribution of SHAP contributions for the most relevant features across the sampled observations.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Summary",
+                                                "SHAP beeswarm summary across the sampled observations. It shows both the direction and dispersion of local feature contributions, "
+                                                "which helps identify the most influential drivers of the model and how their impact varies across the dataset.",
                                             ),
                                             _bounded_image(IDS.GLOBAL_SUMMARY_GRAPH),
                                         ],
@@ -215,10 +316,10 @@ def _global_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Feature Importance", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Mean absolute SHAP impact per feature, useful to rank the global drivers of the model.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Feature Importance",
+                                                "Ranking of features by mean absolute SHAP value. This offers a global view of which transformed inputs contribute most strongly "
+                                                "to the model predictions on average.",
                                             ),
                                             _bounded_image(IDS.GLOBAL_BAR_GRAPH),
                                         ],
@@ -235,10 +336,10 @@ def _global_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Dependence", style={"marginTop": "0"}),
-                                            html.P(
-                                                "SHAP dependence plot for the selected feature, relating its value to its local contribution.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Dependence",
+                                                "SHAP dependence plot for the selected transformed feature. It relates feature value to local contribution and is useful for "
+                                                "spotting non-linear response patterns, threshold effects and interactions with other predictors.",
                                             ),
                                             html.Div(
                                                 style={"marginBottom": "12px"},
@@ -257,10 +358,10 @@ def _global_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Heatmap", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Observation-by-observation SHAP heatmap to compare attribution patterns across the sampled dataset.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Heatmap",
+                                                "Observation-level SHAP heatmap used to compare attribution patterns across the sampled dataset. It highlights clusters of "
+                                                "observations that share similar explanatory structure and regions where the model relies on distinct combinations of features.",
                                             ),
                                             _bounded_image(IDS.GLOBAL_INTERACTION_GRAPH),
                                         ],
@@ -305,7 +406,7 @@ def _sample_tab():
                                 style=HELP_TEXT_STYLE,
                             ),
                             html.Div(
-                                style=CONTROL_ROW_STYLE,
+                                style={"maxWidth": "520px"},
                                 children=[
                                     html.Div(
                                         children=[
@@ -323,15 +424,17 @@ def _sample_tab():
                                                 "Choose between an existing dataset row or a manually defined input sample.",
                                                 style=HELP_TEXT_STYLE,
                                             ),
-                                        ]
-                                    ),
-                                    html.Div(
-                                        children=[
-                                            html.Label("Dataset Sample"),
-                                            dcc.Dropdown(id=IDS.SAMPLE_INDEX),
-                                            html.P(
-                                                "Observation index used when the dataset mode is selected.",
-                                                style=HELP_TEXT_STYLE,
+                                            html.Div(
+                                                id=IDS.SAMPLE_INDEX_CONTAINER,
+                                                style={"marginTop": "14px"},
+                                                children=[
+                                                    html.Label("Dataset Sample"),
+                                                    dcc.Dropdown(id=IDS.SAMPLE_INDEX),
+                                                    html.P(
+                                                        "Observation index used when the dataset mode is selected.",
+                                                        style=HELP_TEXT_STYLE,
+                                                    ),
+                                                ],
                                             ),
                                         ]
                                     ),
@@ -343,24 +446,24 @@ def _sample_tab():
                             html.Div(
                                 style=SUBCARD_STYLE,
                                 children=[
-                                    html.H4("Local SHAP Waterfall", style={"marginTop": "0"}),
-                                    html.P(
-                                        "Waterfall decomposition of the selected prediction into baseline value plus feature contributions.",
-                                        style=HELP_TEXT_STYLE,
+                                    _section_title_with_info(
+                                        "Local SHAP Waterfall",
+                                        "Waterfall decomposition of one prediction into baseline value plus signed feature contributions. It explains, in order of magnitude, "
+                                        "which inputs pushed the final volatility estimate upward or downward for the selected sample.",
                                     ),
                                     _bounded_image(IDS.SAMPLE_WATERFALL),
                                 ],
                             ),
-                            html.H4("Nearest Neighbours", style=SECTION_TITLE_STYLE),
-                            html.P(
-                                "Closest historical observations to the selected sample in the explainability feature space.",
-                                style=HELP_TEXT_STYLE,
+                            _section_title_with_info(
+                                "Nearest Neighbours",
+                                "Closest historical observations to the selected sample in the explainability feature space. These rows provide local context and help assess "
+                                "whether the explanation is supported by genuinely similar cases from the dataset.",
                             ),
                             html.Div(id=IDS.SAMPLE_NEIGHBORS),
-                            html.H4("Neighbour Distance Comparison", style=SECTION_TITLE_STYLE),
-                            html.P(
-                                "Distance profile of the retrieved neighbours to understand how isolated the sample is.",
-                                style=HELP_TEXT_STYLE,
+                            _section_title_with_info(
+                                "Neighbour Distance Comparison",
+                                "Distance profile of the retrieved neighbours relative to the selected sample. Lower values indicate stronger local support, while larger gaps may "
+                                "suggest the sample lies in a sparse or less represented region of the feature space.",
                             ),
                             dcc.Graph(id=IDS.SAMPLE_COMPARISON),
                         ],
@@ -387,10 +490,10 @@ def _diagnosis_tab():
                             html.Div(
                                 style=SUBCARD_STYLE,
                                 children=[
-                                    html.H4("Performance Summary", style={"marginTop": "0"}),
-                                    html.P(
-                                        "Headline error metrics for the selected model over the diagnosis sample.",
-                                        style=HELP_TEXT_STYLE,
+                                    _section_title_with_info(
+                                        "Performance Summary",
+                                        "Headline diagnostic metrics for the selected model over the sampled evaluation set. This panel provides a compact overview of average "
+                                        "predictive accuracy before drilling down into residual structure and localized error concentration.",
                                     ),
                                     html.Div(id=IDS.DIAGNOSIS_METRICS),
                                 ],
@@ -405,10 +508,10 @@ def _diagnosis_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Predicted vs Actual", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Scatter plot comparing model outputs with observed implied volatilities.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Predicted vs Actual",
+                                                "Scatter comparison between observed implied volatility and model prediction. The closer the cloud is to the diagonal, the more "
+                                                "accurate and better calibrated the model is across the evaluated observations.",
                                             ),
                                             dcc.Graph(id=IDS.DIAGNOSIS_SCATTER),
                                         ],
@@ -416,10 +519,10 @@ def _diagnosis_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Residual Heatmap", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Heatmap of average residuals over the moneyness and maturity grid.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Residual Heatmap",
+                                                "Heatmap of average absolute error across the joint moneyness and maturity grid. It is designed to reveal where model accuracy "
+                                                "deteriorates systematically on the surface and whether that deterioration is linked to specific smile or term-structure regimes.",
                                             ),
                                             dcc.Graph(id=IDS.DIAGNOSIS_HEATMAP),
                                         ],
@@ -427,10 +530,10 @@ def _diagnosis_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Error by Moneyness", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Residual pattern across moneyness to detect smile-related under or overestimation.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Error by Moneyness",
+                                                "Residual pattern across moneyness. This view helps identify whether the model systematically overestimates or underestimates "
+                                                "volatility in in-the-money, at-the-money or out-of-the-money regions, which is particularly relevant for smile diagnostics.",
                                             ),
                                             dcc.Graph(id=IDS.DIAGNOSIS_MONEYNESS),
                                         ],
@@ -438,10 +541,10 @@ def _diagnosis_tab():
                                     html.Div(
                                         style=SUBCARD_STYLE,
                                         children=[
-                                            html.H4("Error by Maturity", style={"marginTop": "0"}),
-                                            html.P(
-                                                "Residual pattern across time to expiration to detect term-structure biases.",
-                                                style=HELP_TEXT_STYLE,
+                                            _section_title_with_info(
+                                                "Error by Maturity",
+                                                "Residual pattern across time to expiration. It helps detect short-end versus long-end calibration issues and broader term-structure "
+                                                "biases in the model predictions.",
                                             ),
                                             dcc.Graph(id=IDS.DIAGNOSIS_MATURITY),
                                         ],
@@ -451,10 +554,10 @@ def _diagnosis_tab():
                             html.Div(
                                 style=SUBCARD_STYLE,
                                 children=[
-                                    html.H4("Financial Warnings", style={"marginTop": "0"}),
-                                    html.P(
-                                        "Consistency checks derived from the generated local volatility surface.",
-                                        style=HELP_TEXT_STYLE,
+                                    _section_title_with_info(
+                                        "Financial Warnings",
+                                        "Consistency messages derived from the generated local volatility surface. They summarize whether the heuristic validation detected abrupt "
+                                        "local discontinuities or other behaviour worth reviewing before trusting the surface economically.",
                                     ),
                                     html.Div(id=IDS.DIAGNOSIS_WARNINGS),
                                 ],
