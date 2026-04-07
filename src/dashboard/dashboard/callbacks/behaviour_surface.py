@@ -76,10 +76,10 @@ def register_behaviour_callbacks(app, services) -> None:
             term_frame = surface[surface["Moneyness"].isin(keep_moneyness)].copy()
             selected_feature = feature_name or "Moneyness"
             ice_frame = services.surface_service.compute_ice_curves(
-                model_id, dataset, selected_feature
+                model_id, selected_feature
             )
             ale_frame = services.surface_service.compute_ale(
-                model_id, dataset, selected_feature
+                model_id, selected_feature
             )
             warnings = html.Ul(
                 [
@@ -100,8 +100,8 @@ def register_behaviour_callbacks(app, services) -> None:
         volatility_range = safe_color_range(surface["PredictedVolatility"].tolist())
         return (
             heatmap_figure(surface, volatility_range=volatility_range),
-            smile_figure(smile_frame, volatility_range=volatility_range),
-            term_figure(term_frame, volatility_range=volatility_range),
+            smile_figure(smile_frame),
+            term_figure(term_frame),
             ice_figure(ice_frame, feature_label),
             ale_figure(ale_frame, feature_label),
             local_surface_figure(surface, volatility_range=volatility_range),

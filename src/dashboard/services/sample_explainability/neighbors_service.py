@@ -20,7 +20,6 @@ class NeighborsService:
     def find_neighbors(
         self,
         model_id: str,
-        dataset: pd.DataFrame,
         sample: pd.DataFrame,
         k: int = 10,
     ) -> pd.DataFrame:

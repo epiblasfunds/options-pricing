@@ -20,24 +20,6 @@ class ShapExplanationResult:
     mean_abs_shap: pd.Series
     feature_names: list[str]
 
-    @property
-    def shap_values(self) -> pd.DataFrame:
-        values = self.explanation.values
-        if getattr(values, "ndim", 1) == 1:
-            values = values.reshape(1, -1)
-        return pd.DataFrame(
-            values, index=self.explain_frame.index, columns=self.feature_names
-        )
-
-    @property
-    def base_value(self) -> float:
-        base_values = self.explanation.base_values
-        if hasattr(base_values, "__len__") and not isinstance(
-            base_values, (str, bytes)
-        ):
-            return float(pd.Series(base_values).astype(float).mean())
-        return float(base_values)
-
 
 class ShapService:
     """Serve SHAP explanations persisted inside dashboard_model artifacts."""

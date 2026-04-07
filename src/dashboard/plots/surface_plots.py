@@ -195,7 +195,7 @@ def heatmap_figure(surface_frame, volatility_range=None):
     return fig
 
 
-def smile_figure(surface_frame, volatility_range=None):
+def smile_figure(surface_frame):
     time_range = safe_color_range(surface_frame["TimeToExpiration"].tolist())
     fig = go.Figure()
     ordered_frame = surface_frame.sort_values(["TimeToExpiration", "Moneyness"])
@@ -279,7 +279,7 @@ def smile_figure(surface_frame, volatility_range=None):
     return fig
 
 
-def term_figure(surface_frame, volatility_range=None):
+def term_figure(surface_frame):
     moneyness_range = safe_color_range(surface_frame["Moneyness"].tolist())
     fig = go.Figure()
     ordered_frame = surface_frame.sort_values(["Moneyness", "TimeToExpiration"])

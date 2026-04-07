@@ -25,8 +25,6 @@ class SurfaceService:
         self,
         model_id: str,
         anchor: pd.Series,
-        moneyness_points: int | None = None,
-        maturity_points: int | None = None,
     ) -> pd.DataFrame:
         bundle = self.prediction_service.load_bundle(model_id)
         anchor_index = (
@@ -47,7 +45,6 @@ class SurfaceService:
     def compute_ice_curves(
         self,
         model_id: str,
-        frame: pd.DataFrame,
         feature_name: str,
     ) -> pd.DataFrame:
         bundle = self.prediction_service.load_bundle(model_id)
@@ -61,9 +58,7 @@ class SurfaceService:
     def compute_ale(
         self,
         model_id: str,
-        frame: pd.DataFrame,
         feature_name: str,
-        bins: int = 12,
     ) -> pd.DataFrame:
         bundle = self.prediction_service.load_bundle(model_id)
         cached = bundle.dashboard_model.ale_for_feature(feature_name)

@@ -195,7 +195,6 @@ def register_sample_callbacks(app, services) -> None:
                 )
                 neighbors = services.neighbors_service.find_neighbors(
                     model_id,
-                    dataset,
                     reference_sample,
                     k=10,
                 )
@@ -225,7 +224,7 @@ def register_sample_callbacks(app, services) -> None:
             )
             explanation = services.shap_service.explain_sample(model_id, sample_frame)
             neighbors = services.neighbors_service.find_neighbors(
-                model_id, dataset, sample_frame, k=10
+                model_id, sample_frame, k=10
             )
             comparison = neighbors_distance_figure(neighbors)
             actual = (

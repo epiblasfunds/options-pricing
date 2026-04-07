@@ -203,14 +203,6 @@ class ExplainableModel:
         self.tree_models = {int(depth): model for depth, model in tree_models.items()}
         self.metadata = metadata
 
-    @property
-    def tree_model(self) -> SurrogateTreeModel:
-        if not self.tree_models:
-            raise ValueError(
-                "The explainable model does not contain persisted surrogate trees."
-            )
-        return self.tree_models[max(self.tree_models)]
-
     @classmethod
     def load(cls, metadata: ExplainableModelMetadata) -> "ExplainableModel":
         main_model = TrainedModel.load(metadata=metadata.get_trained_model_metadata())

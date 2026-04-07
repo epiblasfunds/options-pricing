@@ -7,9 +7,8 @@ from src.volatility_models import add_dashboard_derived_features, apply_feature_
 
 
 def add_derived_features(
-    frame: pd.DataFrame, feature_schema: FeatureSchema
+    frame: pd.DataFrame, _feature_schema: FeatureSchema
 ) -> pd.DataFrame:
-    del feature_schema
     return add_dashboard_derived_features(frame)
 
 

@@ -1,6 +1,5 @@
 """Lazy loading for dashboard-ready explainable-model bundles."""
 
-import json
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -32,22 +31,15 @@ class ModelLoader:
     def load(self, discovered_model: AbstractModelMetadata) -> LoadedModelBundle:
         return self._load_cached(
             discovered_model.path.as_posix(),
-            discovered_model.model_id,
-            discovered_model.name,
             discovered_model.format.value,
-            json.dumps(discovered_model.metadata, sort_keys=True, default=str),
         )
 
     def _load_uncached(
         self,
         model_path_str: str,
-        model_id: str,
-        name: str,
         model_format: str,
-        metadata_json: str,
     ) -> LoadedModelBundle:
         model_path = Path(model_path_str)
-        metadata = json.loads(metadata_json)
         format_enum = ModelFormatEnum(model_format)
 
         if format_enum != ModelFormatEnum.EXPLAINABLE_MODEL:
