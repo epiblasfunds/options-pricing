@@ -98,9 +98,7 @@ def register_behaviour_callbacks(app, services) -> None:
             if selected_feature in services.feature_schema.names()
             else selected_feature
         )
-        volatility_range = safe_color_range(
-            surface["PredictedVolatility"].tolist()
-        )
+        volatility_range = safe_color_range(surface["PredictedVolatility"].tolist())
         return (
             heatmap_figure(surface, volatility_range=volatility_range),
             smile_figure(smile_frame, volatility_range=volatility_range),
@@ -110,4 +108,3 @@ def register_behaviour_callbacks(app, services) -> None:
             local_surface_figure(surface, volatility_range=volatility_range),
             warnings,
         )
-

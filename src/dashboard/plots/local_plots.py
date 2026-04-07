@@ -21,10 +21,7 @@ def neighbors_distance_figure(neighbors_frame):
         title="Nearest Neighbour Distances",
     )
     fig.update_traces(
-        hovertemplate=(
-            "Neighbour row: %{x}<br>"
-            "Distance: %{y:.4f}<extra></extra>"
-        )
+        hovertemplate=("Neighbour row: %{x}<br>" "Distance: %{y:.4f}<extra></extra>")
     )
     fig.update_layout(
         template=STANDARD_TEMPLATE,
@@ -34,4 +31,3 @@ def neighbors_distance_figure(neighbors_frame):
         hoverlabel=HOVERLABEL_STYLE,
     )
     return fig
-

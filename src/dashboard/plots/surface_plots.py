@@ -160,11 +160,15 @@ def _add_curve_key(fig, text: str):
 
 
 def heatmap_figure(surface_frame, volatility_range=None):
-    pivot = surface_frame.pivot_table(
-        index="TimeToExpiration",
-        columns="Moneyness",
-        values="PredictedVolatility",
-    ).sort_index().sort_index(axis=1)
+    pivot = (
+        surface_frame.pivot_table(
+            index="TimeToExpiration",
+            columns="Moneyness",
+            values="PredictedVolatility",
+        )
+        .sort_index()
+        .sort_index(axis=1)
+    )
     color_range = _surface_color_range(surface_frame, volatility_range)
     fig = px.imshow(
         pivot,
@@ -412,11 +416,15 @@ def ale_figure(ale_frame, feature_label: str):
 
 
 def local_surface_figure(surface_frame, volatility_range=None):
-    pivot = surface_frame.pivot_table(
-        index="TimeToExpiration",
-        columns="Moneyness",
-        values="PredictedVolatility",
-    ).sort_index().sort_index(axis=1)
+    pivot = (
+        surface_frame.pivot_table(
+            index="TimeToExpiration",
+            columns="Moneyness",
+            values="PredictedVolatility",
+        )
+        .sort_index()
+        .sort_index(axis=1)
+    )
     color_range = _surface_color_range(surface_frame, volatility_range)
     fig = go.Figure(
         data=[
@@ -454,4 +462,3 @@ def local_surface_figure(surface_frame, volatility_range=None):
         ),
     )
     return fig
-

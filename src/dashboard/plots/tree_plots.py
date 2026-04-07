@@ -29,8 +29,7 @@ def feature_importance_figure(result: SurrogateTreeModel):
     )
     fig.update_traces(
         hovertemplate=(
-            "Feature: %{y}<br>"
-            "Relative importance: %{x:.4f}<extra></extra>"
+            "Feature: %{y}<br>" "Relative importance: %{x:.4f}<extra></extra>"
         )
     )
     fig.update_layout(
@@ -84,4 +83,3 @@ def tree_png_base64(result: SurrogateTreeModel) -> str:
     figure.savefig(buffer, format="png", dpi=170, bbox_inches="tight")
     plt.close(figure)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
-

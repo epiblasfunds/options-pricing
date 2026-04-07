@@ -74,4 +74,3 @@ def register_global_callbacks(app, services) -> None:
             heatmap_image(result, services.feature_schema),
             note,
         )
-

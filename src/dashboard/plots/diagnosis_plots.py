@@ -80,11 +80,15 @@ def residual_by_feature_figure(frame, feature_name: str, title: str):
 
 
 def error_heatmap_figure(error_heatmap):
-    pivot = error_heatmap.pivot_table(
-        index="maturity_bin",
-        columns="moneyness_bin",
-        values="AbsoluteError",
-    ).sort_index().sort_index(axis=1)
+    pivot = (
+        error_heatmap.pivot_table(
+            index="maturity_bin",
+            columns="moneyness_bin",
+            values="AbsoluteError",
+        )
+        .sort_index()
+        .sort_index(axis=1)
+    )
     fig = px.imshow(
         pivot,
         aspect="auto",
@@ -108,4 +112,3 @@ def error_heatmap_figure(error_heatmap):
         coloraxis_colorbar=dict(title="Absolute error"),
         hoverlabel=HOVERLABEL_STYLE,
     )
-

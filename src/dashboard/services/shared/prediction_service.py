@@ -66,4 +66,3 @@ class PredictionService:
         if frame.empty:
             return False
         return pd.Index(frame.index).isin(dashboard_model.dataset_frame.index).all()
-

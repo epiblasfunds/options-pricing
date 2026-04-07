@@ -36,4 +36,3 @@ class NeighborsService:
                 f"No precomputed neighbors were exported for sample index {row_index!r}."
             )
         return neighbors.head(k).copy()
-

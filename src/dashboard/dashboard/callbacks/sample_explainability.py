@@ -18,8 +18,13 @@ def _empty_figure():
 def _manual_field(feature, default_value):
     component_id = {"type": "manual-feature", "feature": feature.name}
     if feature.widget == "dropdown" and feature.allowed_values:
-        options = [{"label": str(value), "value": value} for value in feature.allowed_values or ()]
-        input_component = dcc.Dropdown(id=component_id, options=options, value=default_value)
+        options = [
+            {"label": str(value), "value": value}
+            for value in feature.allowed_values or ()
+        ]
+        input_component = dcc.Dropdown(
+            id=component_id, options=options, value=default_value
+        )
     elif feature.dtype == "datetime":
         input_component = dcc.Input(
             id=component_id,
@@ -77,7 +82,11 @@ def _neighbors_table(frame: pd.DataFrame):
         html.Tr(
             [
                 html.Td(
-                    f"{row[column]:,.4f}" if isinstance(row[column], float) else row[column],
+                    (
+                        f"{row[column]:,.4f}"
+                        if isinstance(row[column], float)
+                        else row[column]
+                    ),
                     style=cell_style,
                 )
                 for column in present_columns
@@ -156,11 +165,18 @@ def register_sample_callbacks(app, services) -> None:
                     component_id["feature"]: value
                     for component_id, value in zip(manual_ids, manual_values)
                 }
-                sample_payload = services.feature_schema.normalize_sample(sample_payload)
+                sample_payload = services.feature_schema.normalize_sample(
+                    sample_payload
+                )
                 errors = services.feature_schema.validate_sample(sample_payload)
                 if errors:
                     return (
-                        html.Ul([html.Li(f"{key}: {message}") for key, message in errors.items()]),
+                        html.Ul(
+                            [
+                                html.Li(f"{key}: {message}")
+                                for key, message in errors.items()
+                            ]
+                        ),
                         None,
                         html.Div(),
                         _empty_figure(),
@@ -190,20 +206,32 @@ def register_sample_callbacks(app, services) -> None:
                 sample_summary = html.Div(
                     [
                         html.H3("Manual Input"),
-                        html.P(f"Predicted volatility (API stub): {float(api_result['prediction']):.4f}"),
+                        html.P(
+                            f"Predicted volatility (API stub): {float(api_result['prediction']):.4f}"
+                        ),
                         html.P(str(api_result.get("summary", ""))),
                     ]
                 )
                 return (
                     sample_summary,
-                    waterfall_image(explanation, reference_sample.index[0], services.feature_schema),
+                    waterfall_image(
+                        explanation, reference_sample.index[0], services.feature_schema
+                    ),
                     _neighbors_table(neighbors),
                     comparison,
                 )
 
-            prediction = float(services.prediction_service.predict_frame(model_id, sample_frame).iloc[0])
-            explanation = services.shap_service.explain_sample(model_id, sample_frame, dataset)
-            neighbors = services.neighbors_service.find_neighbors(model_id, dataset, sample_frame, k=10)
+            prediction = float(
+                services.prediction_service.predict_frame(model_id, sample_frame).iloc[
+                    0
+                ]
+            )
+            explanation = services.shap_service.explain_sample(
+                model_id, sample_frame, dataset
+            )
+            neighbors = services.neighbors_service.find_neighbors(
+                model_id, dataset, sample_frame, k=10
+            )
             comparison = neighbors_distance_figure(neighbors)
             actual = (
                 f" | actual IV: {float(sample_frame['ImpliedVolatility'].iloc[0]):.4f}"
@@ -218,10 +246,16 @@ def register_sample_callbacks(app, services) -> None:
             )
             return (
                 sample_summary,
-                waterfall_image(explanation, sample_frame.index[0], services.feature_schema),
+                waterfall_image(
+                    explanation, sample_frame.index[0], services.feature_schema
+                ),
                 _neighbors_table(neighbors),
                 comparison,
             )
         except Exception as exc:  # pragma: no cover - defensive UI path
-            return html.Div(str(exc), style={"color": "#8a1c1c"}), None, html.Div(), _empty_figure()
-
+            return (
+                html.Div(str(exc), style={"color": "#8a1c1c"}),
+                None,
+                html.Div(),
+                _empty_figure(),
+            )

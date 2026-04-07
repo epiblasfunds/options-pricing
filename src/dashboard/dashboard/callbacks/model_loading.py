@@ -30,7 +30,11 @@ def register_model_loading_callbacks(app, services) -> None:
             for model in models
         ]
         valid_values = {option["value"] for option in options}
-        value = current_value if current_value in valid_values else (options[0]["value"] if options else None)
+        value = (
+            current_value
+            if current_value in valid_values
+            else (options[0]["value"] if options else None)
+        )
         return options, value
 
     @app.callback(
@@ -57,7 +61,8 @@ def register_model_loading_callbacks(app, services) -> None:
         ice_options = [
             {"label": feature.label, "value": feature.name}
             for feature in services.feature_schema.numerical_features(raw_only=False)
-            if feature.name in ANALYSIS_FEATURE_NAMES and feature.name in dataset.columns
+            if feature.name in ANALYSIS_FEATURE_NAMES
+            and feature.name in dataset.columns
         ]
 
         shap_options = []
@@ -101,7 +106,9 @@ def register_model_loading_callbacks(app, services) -> None:
         shap_feature_names = metadata.get("transformed_feature_names", model_features)
         shap_options = [
             {
-                "label": display_feature_label(str(feature_name), services.feature_schema),
+                "label": display_feature_label(
+                    str(feature_name), services.feature_schema
+                ),
                 "value": str(feature_name),
             }
             for feature_name in shap_feature_names
@@ -119,7 +126,11 @@ def register_model_loading_callbacks(app, services) -> None:
             html.P(f"Inputs: {', '.join(model_features)}"),
             html.P(
                 "Metadata metrics: "
-                + ", ".join(metadata.get("error_metrics", config.dashboard_models_config.error_metrics))
+                + ", ".join(
+                    metadata.get(
+                        "error_metrics", config.dashboard_models_config.error_metrics
+                    )
+                )
             ),
         ]
         return (
@@ -133,4 +144,3 @@ def register_model_loading_callbacks(app, services) -> None:
             tree_tabs,
             tree_value,
         )
-

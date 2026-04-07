@@ -31,7 +31,8 @@ class DiagnosisService:
             "diagnosis_frame": bundle.dashboard_model.dataset_frame.copy(),
             "plot_frame": bundle.dashboard_model.diagnosis.plot_frame.copy(),
             "error_heatmap": bundle.dashboard_model.diagnosis.error_heatmap.copy(),
-            "financial_warnings": list(bundle.dashboard_model.diagnosis.financial_warnings),
+            "financial_warnings": list(
+                bundle.dashboard_model.diagnosis.financial_warnings
+            ),
             "local_surface": pd.DataFrame(),
         }
-

@@ -41,7 +41,9 @@ class SurfaceService:
             )
         )
         if anchor_index is None:
-            raise KeyError("No precomputed behaviour anchors were exported for this model.")
+            raise KeyError(
+                "No precomputed behaviour anchors were exported for this model."
+            )
         return bundle.dashboard_model.surface_for_anchor(anchor_index)
 
     def compute_ice_curves(
@@ -53,7 +55,9 @@ class SurfaceService:
         bundle = self.prediction_service.load_bundle(model_id)
         cached = bundle.dashboard_model.ice_for_feature(feature_name)
         if cached.empty:
-            raise KeyError(f"No precomputed ICE curves were exported for feature: {feature_name}")
+            raise KeyError(
+                f"No precomputed ICE curves were exported for feature: {feature_name}"
+            )
         return cached
 
     def compute_ale(
@@ -66,7 +70,9 @@ class SurfaceService:
         bundle = self.prediction_service.load_bundle(model_id)
         cached = bundle.dashboard_model.ale_for_feature(feature_name)
         if cached.empty:
-            raise KeyError(f"No precomputed ALE data were exported for feature: {feature_name}")
+            raise KeyError(
+                f"No precomputed ALE data were exported for feature: {feature_name}"
+            )
         return cached
 
     def financial_checks(self, surface_frame: pd.DataFrame) -> list[str]:
@@ -93,4 +99,3 @@ class SurfaceService:
                 "No large discontinuities were detected by the heuristic checks."
             )
         return warnings
-

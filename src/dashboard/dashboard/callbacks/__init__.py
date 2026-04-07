@@ -27,4 +27,3 @@ def register_callbacks(app, services) -> None:
     register_behaviour_callbacks(app, services)
     register_sample_callbacks(app, services)
     register_diagnosis_callbacks(app, services)
-
