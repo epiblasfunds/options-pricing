@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dash import Input, Output, html
 import plotly.graph_objects as go
+from dash import Input, Output, html
 
 from src.dashboard.dashboard.ids import IDS
 from src.dashboard.plots.diagnosis_plots import (
@@ -31,7 +31,14 @@ def register_diagnosis_callbacks(app, services) -> None:
     )
     def render_diagnosis(model_id):
         if not model_id:
-            return "Select a model.", _empty_figure(), _empty_figure(), _empty_figure(), _empty_figure(), ""
+            return (
+                "Select a model.",
+                _empty_figure(),
+                _empty_figure(),
+                _empty_figure(),
+                _empty_figure(),
+                "",
+            )
 
         dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
@@ -41,10 +48,22 @@ def register_diagnosis_callbacks(app, services) -> None:
                 lambda: services.diagnosis_service.diagnose(model_id, dataset),
             )
         except Exception as exc:  # pragma: no cover - defensive UI path
-            return html.Div(str(exc), style={"color": "#8a1c1c"}), _empty_figure(), _empty_figure(), _empty_figure(), _empty_figure(), ""
+            return (
+                html.Div(str(exc), style={"color": "#8a1c1c"}),
+                _empty_figure(),
+                _empty_figure(),
+                _empty_figure(),
+                _empty_figure(),
+                "",
+            )
 
         metric_cards = html.Div(
-            style={"display": "flex", "gap": "12px", "flexWrap": "wrap", "marginBottom": "8px"},
+            style={
+                "display": "flex",
+                "gap": "12px",
+                "flexWrap": "wrap",
+                "marginBottom": "8px",
+            },
             children=[
                 html.Div(
                     style={
@@ -55,8 +74,14 @@ def register_diagnosis_callbacks(app, services) -> None:
                         "border": "1px solid rgba(23,48,79,0.08)",
                     },
                     children=[
-                        html.Div(services.metrics_registry.get(name).label, style={"fontWeight": "700", "marginBottom": "4px"}),
-                        html.Div(services.metrics_registry.format_metric(name, value), style={"fontSize": "1.05rem"}),
+                        html.Div(
+                            services.metrics_registry.get(name).label,
+                            style={"fontWeight": "700", "marginBottom": "4px"},
+                        ),
+                        html.Div(
+                            services.metrics_registry.format_metric(name, value),
+                            style={"fontSize": "1.05rem"},
+                        ),
                     ],
                 )
                 for name, value in diagnosis["metrics"].items()
@@ -66,7 +91,10 @@ def register_diagnosis_callbacks(app, services) -> None:
         warnings = (
             html.Ul([html.Li(message) for message in diagnosis["financial_warnings"]])
             if diagnosis["financial_warnings"]
-            else html.P("No financial consistency warnings detected.", style={"margin": "0", "color": "#355070"})
+            else html.P(
+                "No financial consistency warnings detected.",
+                style={"margin": "0", "color": "#355070"},
+            )
         )
         return (
             metric_cards,
@@ -84,4 +112,3 @@ def register_diagnosis_callbacks(app, services) -> None:
             error_heatmap_figure(diagnosis["error_heatmap"]),
             warnings,
         )
-

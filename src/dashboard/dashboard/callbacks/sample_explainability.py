@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from dash import ALL, Input, Output, State, dcc, html
 import pandas as pd
 import plotly.graph_objects as go
+from dash import ALL, Input, Output, State, dcc, html
 
 from src.dashboard.dashboard.ids import IDS
-from src.dashboard.plots.local_plots import (
-    neighbors_distance_figure,
-)
+from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
 
 

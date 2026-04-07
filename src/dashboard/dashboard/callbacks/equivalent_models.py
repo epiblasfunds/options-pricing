@@ -29,7 +29,9 @@ def register_equivalent_callbacks(app, services) -> None:
             return html.Div(str(exc), style={"color": "#8a1c1c"})
 
         if not results:
-            return html.Div("No persisted surrogate trees are available for this model.")
+            return html.Div(
+                "No persisted surrogate trees are available for this model."
+            )
 
         requested_depth = (
             int(selected_depth)
@@ -103,19 +105,27 @@ def register_equivalent_callbacks(app, services) -> None:
                                         html.Div(f"Leaves: {result.n_leaves}"),
                                     ],
                                 ),
-                                html.H4("Feature Importance", style={"margin": "16px 0 8px 0"}),
+                                html.H4(
+                                    "Feature Importance",
+                                    style={"margin": "16px 0 8px 0"},
+                                ),
                                 html.P(
-                                    "Relative importance of each surrogate split feature in the selected decision tree.",
+                                    "Relative importance of each surrogate split feature in "
+                                    + "the selected decision tree.",
                                     style={"marginTop": "0", "color": "#4a5a73"},
                                 ),
                                 dcc.Graph(figure=feature_importance_figure(result)),
-                                html.H4("Surrogate Fidelity", style={"margin": "16px 0 8px 0"}),
+                                html.H4(
+                                    "Surrogate Fidelity",
+                                    style={"margin": "16px 0 8px 0"},
+                                ),
                                 html.P(
-                                    "Agreement between the neural model prediction and the surrogate tree prediction on the sampled points.",
+                                    "Agreement between the neural model prediction and the surrogate tree prediction on"
+                                    + " the sampled points.",
                                     style={"marginTop": "0", "color": "#4a5a73"},
                                 ),
                                 dcc.Graph(figure=fidelity_figure(result)),
-                            ]
+                            ],
                         ),
                         html.Div(
                             style={
@@ -127,7 +137,8 @@ def register_equivalent_callbacks(app, services) -> None:
                             children=[
                                 html.H4("Decision Tree", style={"margin": "0 0 8px 0"}),
                                 html.P(
-                                    "Scrollable surrogate tree rendering. Increase zoom to inspect deep branches without compressing the node layout.",
+                                    "Scrollable surrogate tree rendering. Increase zoom to inspect deep branches"
+                                    + "without compressing the node layout.",
                                     style={"marginTop": "0", "color": "#4a5a73"},
                                 ),
                                 html.Label("Tree Zoom"),
@@ -165,7 +176,9 @@ def register_equivalent_callbacks(app, services) -> None:
                                         )
                                     ],
                                 ),
-                                html.H4("Decision Rules", style={"margin": "0 0 8px 0"}),
+                                html.H4(
+                                    "Decision Rules", style={"margin": "0 0 8px 0"}
+                                ),
                                 html.P(
                                     "Text export of the same tree to read split conditions sequentially.",
                                     style={"marginTop": "0", "color": "#4a5a73"},
@@ -181,7 +194,7 @@ def register_equivalent_callbacks(app, services) -> None:
                                         "overflowX": "auto",
                                     },
                                 ),
-                            ]
+                            ],
                         ),
                     ],
                 )
@@ -200,4 +213,3 @@ def register_equivalent_callbacks(app, services) -> None:
             "maxWidth": "none",
             "display": "block",
         }
-

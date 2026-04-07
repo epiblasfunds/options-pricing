@@ -6,4 +6,3 @@ from src.dashboard.services.global_explainability.shap_service import (
 )
 
 __all__ = ["ShapExplanationResult", "ShapService"]
-

@@ -3,9 +3,7 @@
 from src.dashboard.dashboard.callbacks.behaviour_surface import (
     register_behaviour_callbacks,
 )
-from src.dashboard.dashboard.callbacks.diagnosis import (
-    register_diagnosis_callbacks,
-)
+from src.dashboard.dashboard.callbacks.diagnosis import register_diagnosis_callbacks
 from src.dashboard.dashboard.callbacks.equivalent_models import (
     register_equivalent_callbacks,
 )

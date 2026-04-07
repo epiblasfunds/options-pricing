@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from sklearn import tree
 
-from src.python_models.explainable_model import SurrogateTreeModel
 from src.dashboard.plots.plot_style import (
     HOVERLABEL_STYLE,
     STANDARD_MARGIN,
     STANDARD_TEMPLATE,
 )
+from src.python_models.explainable_model import SurrogateTreeModel
+
 
 def feature_importance_figure(result: SurrogateTreeModel):
     frame = result.feature_importances.rename("importance").reset_index()

@@ -7,9 +7,7 @@ import plotly.graph_objects as go
 from dash import Input, Output, html
 
 from src.dashboard.dashboard.ids import IDS
-from src.dashboard.plots.plot_style import (
-    safe_color_range,
-)
+from src.dashboard.plots.plot_style import safe_color_range
 from src.dashboard.plots.surface_plots import (
     ale_figure,
     heatmap_figure,

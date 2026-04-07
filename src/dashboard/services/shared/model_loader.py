@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from functools import lru_cache
-import json
 from pathlib import Path
 
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.python_models.dashboard_models import DashboardModel
-from src.python_models.explainable_model import AbstractModelMetadata
-from src.python_models.explainable_model import ExplainableModelMetadata
+from src.python_models.dashboard.dashboard_models import DashboardModel
+from src.python_models.explainable_model import (
+    AbstractModelMetadata,
+    ExplainableModelMetadata,
+)
 
 
 @dataclass(frozen=True)

@@ -11,8 +11,7 @@ from src.dashboard.services.shared.feature_schema import FeatureSchema
 from src.dashboard.services.shared.model_loader import ModelLoader
 from src.dashboard.services.shared.model_registry import ModelRegistry
 from src.dashboard.utils.validation import ensure_non_empty_frame
-from src.volatility_models import build_model_dataset
-from src.volatility_models import select_trade_columns
+from src.volatility_models import build_model_dataset, select_trade_columns
 
 try:
     from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader

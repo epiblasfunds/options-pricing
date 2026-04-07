@@ -3,47 +3,36 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
+import keras
 import pandas as pd
+from keras import callbacks, layers, models, optimizers, regularizers
 from sklearn.preprocessing import StandardScaler
 
-try:
-    from tensorflow import keras
-    from tensorflow.keras import callbacks, layers, models, optimizers, regularizers
-except ImportError:  # pragma: no cover - depends on runtime env
-    keras = None
-    callbacks = None
-    layers = None
-    models = None
-    optimizers = None
-    regularizers = None
-
-from src.config.config import DASHBOARD_SAVED_MODELS_DIR_PATH
-from src.config.config import VOLATILITY_MODEL_DATA_DIR_PATH
-from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
-from src.config.config import config
+from src.config.config import (
+    DASHBOARD_SAVED_MODELS_DIR_PATH,
+    VOLATILITY_MODEL_DATA_DIR_PATH,
+    VOLATILITY_TRAINED_MODELS_DIR_PATH,
+    config,
+)
 from src.dashboard.domain import build_metrics_registry
+from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.volatility_models import MODEL_FEATURE_NAMES
-from src.volatility_models import TARGET_COLUMN
-from src.volatility_models import build_feature_frame_from_trades
-from src.volatility_models import select_trade_columns
-from src.volatility_models.trained_model import TrainingHistory
-from src.volatility_models.trained_model import TrainedModel
-from src.volatility_models.trained_model import TrainedModelMetadata
-
-try:
-    from src.python_models.dashboard_models import DashboardModel
-except ImportError:  # pragma: no cover - depends on runtime env
-    DashboardModel = None
-
-from src.python_models.explainable_model import ExplainableModel
-from src.python_models.explainable_model import ExplainableModelMetadata
-
-try:
-    from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
-except ImportError:  # pragma: no cover - depends on runtime env
-    VolatilityStepLoader = None
+from src.python_models.dashboard.dashboard_models import DashboardModel
+from src.python_models.explainable_model import (
+    ExplainableModel,
+    ExplainableModelMetadata,
+)
+from src.volatility_models import (
+    MODEL_FEATURE_NAMES,
+    TARGET_COLUMN,
+    build_feature_frame_from_trades,
+    select_trade_columns,
+)
+from src.volatility_models.trained_model import (
+    TrainedModel,
+    TrainedModelMetadata,
+    TrainingHistory,
+)
 
 METRICS_REGISTRY = build_metrics_registry()
 
@@ -118,7 +107,7 @@ def save_dataset_splits(
 
 def build_training_matrices(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     X = build_feature_frame_from_trades(frame)
-    y = pd.to_numeric(frame[str(TARGET_COLUMN)], errors="coerce").astype("float64")
+    y = pd.to_numeric(frame[str(TARGET_COLUMN)]).astype("float64")
     return X.loc[:, MODEL_FEATURE_NAMES], y
 
 

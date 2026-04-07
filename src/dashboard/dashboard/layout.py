@@ -11,8 +11,8 @@ from src.dashboard.dashboard.styles import (
     CONTROL_ROW_STYLE,
     HEADER_STYLE,
     HELP_TEXT_STYLE,
-    INFO_ICON_STYLE,
     IMAGE_STYLE,
+    INFO_ICON_STYLE,
     PAGE_STYLE,
     SECTION_CONTROL_CARD_STYLE,
     SECTION_PANEL_HEADER_STYLE,
@@ -108,7 +108,9 @@ def _behaviour_tab():
                                                 style=SECTION_CONTROL_CARD_STYLE,
                                                 children=[
                                                     html.Label("Anchor Sample"),
-                                                    dcc.Dropdown(id=IDS.BEHAVIOUR_ANCHOR_INDEX),
+                                                    dcc.Dropdown(
+                                                        id=IDS.BEHAVIOUR_ANCHOR_INDEX
+                                                    ),
                                                     html.P(
                                                         "Reference observation used to build the local surface views in this block.",
                                                         style=HELP_TEXT_STYLE,
@@ -225,7 +227,9 @@ def _behaviour_tab():
                                                 style=SECTION_CONTROL_CARD_STYLE,
                                                 children=[
                                                     html.Label("ICE/ALE Feature"),
-                                                    dcc.Dropdown(id=IDS.BEHAVIOUR_ICE_FEATURE),
+                                                    dcc.Dropdown(
+                                                        id=IDS.BEHAVIOUR_ICE_FEATURE
+                                                    ),
                                                     html.P(
                                                         "Feature perturbed for the response-analysis charts in this block.",
                                                         style=HELP_TEXT_STYLE,
@@ -250,7 +254,9 @@ def _behaviour_tab():
                                                         "prediction changes when that feature is perturbed while the remaining inputs stay fixed, which reveals local heterogeneity "
                                                         "and potential interaction effects hidden by aggregate averages.",
                                                     ),
-                                                    _bounded_graph(IDS.ICE_GRAPH, height="460px"),
+                                                    _bounded_graph(
+                                                        IDS.ICE_GRAPH, height="460px"
+                                                    ),
                                                 ],
                                             ),
                                             html.Div(
@@ -261,7 +267,9 @@ def _behaviour_tab():
                                                         "Accumulated Local Effects for the selected feature. This chart summarizes the average local sensitivity of the model while "
                                                         "respecting the observed data distribution, which makes the interpretation more robust when explanatory variables are correlated.",
                                                     ),
-                                                    _bounded_graph(IDS.ALE_GRAPH, height="460px"),
+                                                    _bounded_graph(
+                                                        IDS.ALE_GRAPH, height="460px"
+                                                    ),
                                                 ],
                                             ),
                                         ],
@@ -345,7 +353,9 @@ def _global_tab():
                                                 style={"marginBottom": "12px"},
                                                 children=[
                                                     html.Label("Dependence Feature"),
-                                                    dcc.Dropdown(id=IDS.GLOBAL_DEPENDENCE_FEATURE),
+                                                    dcc.Dropdown(
+                                                        id=IDS.GLOBAL_DEPENDENCE_FEATURE
+                                                    ),
                                                     html.P(
                                                         "Choose the transformed feature to inspect its SHAP dependence profile.",
                                                         style=HELP_TEXT_STYLE,
@@ -363,7 +373,9 @@ def _global_tab():
                                                 "Observation-level SHAP heatmap used to compare attribution patterns across the sampled dataset. It highlights clusters of "
                                                 "observations that share similar explanatory structure and regions where the model relies on distinct combinations of features.",
                                             ),
-                                            _bounded_image(IDS.GLOBAL_INTERACTION_GRAPH),
+                                            _bounded_image(
+                                                IDS.GLOBAL_INTERACTION_GRAPH
+                                            ),
                                         ],
                                     ),
                                 ],
@@ -372,10 +384,16 @@ def _global_tab():
                             html.Div(
                                 style=SUBCARD_STYLE,
                                 children=[
-                                    html.H3("Equivalent Explainable Models", style=SECTION_TITLE_STYLE),
+                                    html.H3(
+                                        "Equivalent Explainable Models",
+                                        style=SECTION_TITLE_STYLE,
+                                    ),
                                     html.P(
                                         "Precomputed surrogate trees for the selected model. Choose the depth to inspect the decision logic.",
-                                        style={"margin": "0 0 14px 0", "opacity": "0.78"},
+                                        style={
+                                            "margin": "0 0 14px 0",
+                                            "opacity": "0.78",
+                                        },
                                     ),
                                     dcc.Tabs(id=IDS.GLOBAL_EQUIVALENT_DEPTH_TABS),
                                     html.Div(
@@ -414,8 +432,14 @@ def _sample_tab():
                                             dcc.RadioItems(
                                                 id=IDS.SAMPLE_MODE,
                                                 options=[
-                                                    {"label": "Dataset sample", "value": "dataset"},
-                                                    {"label": "Manual input", "value": "manual"},
+                                                    {
+                                                        "label": "Dataset sample",
+                                                        "value": "dataset",
+                                                    },
+                                                    {
+                                                        "label": "Manual input",
+                                                        "value": "manual",
+                                                    },
                                                 ],
                                                 value="dataset",
                                                 inline=True,
@@ -579,7 +603,9 @@ def build_layout():
             html.Div(
                 style=HEADER_STYLE,
                 children=[
-                    html.H1("Volatility Model Explainability", style={"margin": "0 0 8px 0"}),
+                    html.H1(
+                        "Volatility Model Explainability", style={"margin": "0 0 8px 0"}
+                    ),
                     html.P(
                         "Configuration-driven explainability for IBEX option volatility models.",
                         style={"margin": "0", "opacity": "0.88"},
@@ -630,4 +656,3 @@ def build_layout():
             ),
         ],
     )
-

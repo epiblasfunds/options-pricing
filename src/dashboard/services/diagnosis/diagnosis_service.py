@@ -4,15 +4,9 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src.dashboard.services.behaviour_surface.surface_service import (
-    SurfaceService,
-)
-from src.dashboard.services.shared.metrics_registry import (
-    MetricsRegistry,
-)
-from src.dashboard.services.shared.prediction_service import (
-    PredictionService,
-)
+from src.dashboard.services.behaviour_surface.surface_service import SurfaceService
+from src.dashboard.services.shared.metrics_registry import MetricsRegistry
+from src.dashboard.services.shared.prediction_service import PredictionService
 
 
 class DiagnosisService:

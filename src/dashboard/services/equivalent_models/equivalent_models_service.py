@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
+from src.dashboard.services.shared.prediction_service import PredictionService
 from src.python_models.explainable_model import SurrogateTreeModel
-from src.dashboard.services.shared.prediction_service import (
-    PredictionService,
-)
 
 
 class EquivalentModelsService:
@@ -17,4 +15,3 @@ class EquivalentModelsService:
     def load_surrogates(self, model_id: str) -> dict[int, SurrogateTreeModel]:
         bundle = self.prediction_service.load_bundle(model_id)
         return dict(sorted(bundle.dashboard_model.tree_models.items()))
-

@@ -11,9 +11,7 @@ from src.dashboard.plots.shap_plots import (
     dependence_image,
     heatmap_image,
 )
-from src.dashboard.utils.feature_utils import (
-    display_feature_label,
-)
+from src.dashboard.utils.feature_utils import display_feature_label
 
 
 def _empty_image():
@@ -65,7 +63,8 @@ def register_global_callbacks(app, services) -> None:
             for name in result.mean_abs_shap.head(5).index.tolist()
         ]
         note = (
-            f"Method: {result.method}. Dependence feature: {display_feature_label(feature_name, services.feature_schema)}. Top drivers: "
+            f"Method: {result.method}. Dependence feature: "
+            + f"{display_feature_label(feature_name, services.feature_schema)}. Top drivers: "
             + ", ".join(top_driver_labels)
         )
         return (

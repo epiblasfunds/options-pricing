@@ -6,10 +6,7 @@ from dash import Input, Output, State, dcc, html
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
-from src.dashboard.utils.feature_utils import (
-    build_sample_label,
-    display_feature_label,
-)
+from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
 from src.volatility_models import ANALYSIS_FEATURE_NAMES
 

@@ -11,8 +11,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.volatility_models.trained_model import TrainedModel
-from src.volatility_models.trained_model import TrainedModelMetadata
+from src.volatility_models.trained_model import TrainedModel, TrainedModelMetadata
 
 
 @dataclass

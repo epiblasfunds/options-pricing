@@ -4,17 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-try:
-    from dash import Dash
-except ImportError:  # pragma: no cover - depends on runtime env
-    Dash = None
+from dash import Dash
 
-from src.config.config import VOLATILITY_MODEL_DATA_DIR_PATH
-from src.config.config import config
+from src.config.config import VOLATILITY_MODEL_DATA_DIR_PATH, config
 from src.dashboard.dashboard.callbacks import register_callbacks
 from src.dashboard.dashboard.layout import build_layout
-from src.dashboard.domain import build_feature_schema
-from src.dashboard.domain import build_metrics_registry
+from src.dashboard.domain import build_feature_schema, build_metrics_registry
 from src.dashboard.services.behaviour_surface import SurfaceService
 from src.dashboard.services.diagnosis import DiagnosisService
 from src.dashboard.services.equivalent_models import EquivalentModelsService

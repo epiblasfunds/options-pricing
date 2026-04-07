@@ -4,12 +4,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src.dashboard.services.shared.feature_schema import (
-    FeatureSchema,
-)
-from src.dashboard.services.shared.prediction_service import (
-    PredictionService,
-)
+from src.dashboard.services.shared.feature_schema import FeatureSchema
+from src.dashboard.services.shared.prediction_service import PredictionService
 
 
 class SurfaceService:

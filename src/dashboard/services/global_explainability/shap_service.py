@@ -7,13 +7,9 @@ from dataclasses import dataclass
 import pandas as pd
 import shap
 
-from src.python_models.dashboard_artifacts import StoredShapExplanation
-from src.dashboard.services.shared.feature_schema import (
-    FeatureSchema,
-)
-from src.dashboard.services.shared.prediction_service import (
-    PredictionService,
-)
+from src.dashboard.services.shared.feature_schema import FeatureSchema
+from src.dashboard.services.shared.prediction_service import PredictionService
+from src.python_models.dashboard.dashboard_artifacts import StoredShapExplanation
 
 
 @dataclass

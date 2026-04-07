@@ -10,6 +10,7 @@ from src.dashboard.plots.plot_style import (
     STANDARD_TEMPLATE,
 )
 
+
 def neighbors_distance_figure(neighbors_frame):
     frame = neighbors_frame.copy()
     frame["row_id"] = frame.index.astype(str)

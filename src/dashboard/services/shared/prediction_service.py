@@ -6,16 +6,11 @@ from typing import Any
 
 import pandas as pd
 
-from src.dashboard.services.shared.feature_schema import (
-    FeatureSchema,
-)
-from src.dashboard.services.shared.model_loader import (
-    LoadedModelBundle,
-    ModelLoader,
-)
-from src.dashboard.services.shared.model_registry import (
-    ModelRegistry,
-)
+from src.dashboard.services.shared.feature_schema import FeatureSchema
+from src.dashboard.services.shared.model_loader import LoadedModelBundle, ModelLoader
+from src.dashboard.services.shared.model_registry import ModelRegistry
+
+
 class PredictionPipelineError(RuntimeError):
     """Raised when the dashboard requests data outside the precalculated bundle."""
 

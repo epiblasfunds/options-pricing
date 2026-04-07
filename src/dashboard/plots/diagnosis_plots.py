@@ -13,6 +13,7 @@ from src.dashboard.plots.plot_style import (
     safe_color_range,
 )
 
+
 def real_vs_predicted_figure(frame):
     fig = px.scatter(
         frame,

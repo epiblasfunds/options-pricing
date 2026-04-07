@@ -5,9 +5,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.enums.data_enums import OptionTypeEnum
-from src.enums.data_enums import VolatilityDBEnum
-
+from src.enums.data_enums import OptionTypeEnum, VolatilityDBEnum
 
 SELECTED_TRADE_COLUMNS = [
     VolatilityDBEnum.EXEC_DATETIME,
@@ -171,11 +169,6 @@ def build_feature_frame_from_trades(frame: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(index=frame.index, columns=MODEL_FEATURE_NAMES, dtype="float64")
 
     normalized = trades.copy()
-    normalized[VolatilityDBEnum.EXEC_DATETIME] = pd.to_datetime(
-        normalized[VolatilityDBEnum.EXEC_DATETIME],
-        format="mixed",
-        errors="coerce",
-    )
 
     rows = [build_features_from_trade(row) for _, row in normalized.iterrows()]
     features = pd.DataFrame(rows, index=normalized.index)
