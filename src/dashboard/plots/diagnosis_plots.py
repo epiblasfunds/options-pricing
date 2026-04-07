@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -90,7 +91,9 @@ def error_heatmap_figure(error_heatmap):
         .sort_index(axis=1)
     )
     fig = px.imshow(
-        pivot,
+        pivot.to_numpy(),
+        x=[_bin_label(value) for value in pivot.columns],
+        y=[_bin_label(value) for value in pivot.index],
         aspect="auto",
         origin="lower",
         color_continuous_scale=ERROR_COLORSCALE,
@@ -112,3 +115,9 @@ def error_heatmap_figure(error_heatmap):
         coloraxis_colorbar=dict(title="Absolute error"),
         hoverlabel=HOVERLABEL_STYLE,
     )
+
+
+def _bin_label(value) -> str:
+    if isinstance(value, pd.Interval):
+        return str(value)
+    return str(value)
