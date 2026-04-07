@@ -1,6 +1,4 @@
-﻿"""Plotly figures for model diagnostics."""
-
-from __future__ import annotations
+"""Plotly figures for model diagnostics."""
 
 import pandas as pd
 import plotly.express as px

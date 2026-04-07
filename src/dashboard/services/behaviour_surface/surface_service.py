@@ -1,6 +1,4 @@
-﻿"""Surface, slice, ICE, and ALE access backed by dashboard artifacts."""
-
-from __future__ import annotations
+"""Surface, slice, ICE, and ALE access backed by dashboard artifacts."""
 
 import pandas as pd
 

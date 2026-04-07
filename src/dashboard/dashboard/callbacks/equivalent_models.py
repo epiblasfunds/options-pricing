@@ -1,6 +1,5 @@
-﻿"""Callbacks for equivalent explainable decision trees."""
+"""Callbacks for equivalent explainable decision trees."""
 
-from __future__ import annotations
 
 from dash import Input, Output, dcc, html
 

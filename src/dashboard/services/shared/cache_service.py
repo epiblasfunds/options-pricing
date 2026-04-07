@@ -1,7 +1,5 @@
 """Small in-memory cache for expensive explainability computations."""
 
-from __future__ import annotations
-
 import hashlib
 import json
 from collections import OrderedDict

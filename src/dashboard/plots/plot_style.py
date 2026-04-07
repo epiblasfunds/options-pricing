@@ -1,7 +1,5 @@
 """Shared styling helpers for Plotly figures."""
 
-from __future__ import annotations
-
 import math
 from collections.abc import Iterable
 

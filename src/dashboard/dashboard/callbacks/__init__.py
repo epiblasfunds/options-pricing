@@ -1,4 +1,4 @@
-﻿"""Callback registration."""
+"""Callback registration."""
 
 from src.dashboard.dashboard.callbacks.behaviour_surface import (
     register_behaviour_callbacks,

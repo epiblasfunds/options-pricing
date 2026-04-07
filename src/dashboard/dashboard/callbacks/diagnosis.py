@@ -1,6 +1,5 @@
-﻿"""Callbacks for model diagnosis."""
+"""Callbacks for model diagnosis."""
 
-from __future__ import annotations
 
 import plotly.graph_objects as go
 from dash import Input, Output, html
@@ -40,12 +39,11 @@ def register_diagnosis_callbacks(app, services) -> None:
                 "",
             )
 
-        dataset = services.data_provider.load_dataset(model_id=model_id)
         try:
             diagnosis = services.cache.get_or_compute(
                 "diagnosis",
                 {"model_id": model_id},
-                lambda: services.diagnosis_service.diagnose(model_id, dataset),
+                lambda: services.diagnosis_service.diagnose(model_id),
             )
         except Exception as exc:  # pragma: no cover - defensive UI path
             return (

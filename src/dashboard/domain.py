@@ -1,15 +1,18 @@
-from __future__ import annotations
-
 from src.config.config import config
-from src.dashboard.services.shared.feature_schema import FeatureDefinition
-from src.dashboard.services.shared.feature_schema import FeatureSchema
-from src.dashboard.services.shared.metrics_registry import MetricDefinition
-from src.dashboard.services.shared.metrics_registry import MetricsRegistry
-from src.enums.data_enums import OptionTypeEnum
-from src.enums.data_enums import VolatilityDBEnum
-from src.volatility_models.feature_engineering import MODEL_FEATURE_NAMES
-from src.volatility_models.feature_engineering import RAW_INPUT_FEATURES
-from src.volatility_models.feature_engineering import TRADE_TYPE_TO_FEATURE
+from src.dashboard.services.shared.feature_schema import (
+    FeatureDefinition,
+    FeatureSchema,
+)
+from src.dashboard.services.shared.metrics_registry import (
+    MetricDefinition,
+    MetricsRegistry,
+)
+from src.enums.data_enums import OptionTypeEnum, VolatilityDBEnum
+from src.volatility_models.feature_engineering import (
+    MODEL_FEATURE_NAMES,
+    RAW_INPUT_FEATURES,
+    TRADE_TYPE_TO_FEATURE,
+)
 
 
 def _r2_score(y_true, y_pred) -> float:
@@ -266,7 +269,9 @@ def build_metrics_registry() -> MetricsRegistry:
         MetricDefinition(
             name="rmse",
             label="RMSE",
-            function=lambda y_true, y_pred: float((((y_true - y_pred) ** 2).mean()) ** 0.5),
+            function=lambda y_true, y_pred: float(
+                (((y_true - y_pred) ** 2).mean()) ** 0.5
+            ),
             higher_is_better=False,
             formatter=lambda value: f"{value:,.4f}",
             description="Root mean squared error.",

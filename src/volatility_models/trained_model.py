@@ -1,30 +1,13 @@
-from __future__ import annotations
-
 import json
 import typing as t
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import joblib
+from keras import models as keras_models
 from sklearn.base import TransformerMixin
 
 from src.enums.volatility_model_enums import ModelFormatEnum
-
-try:
-    from tensorflow.keras import models as keras_models
-except ImportError:
-    try:
-        from keras import models as keras_models
-    except ImportError:  # pragma: no cover - depends on runtime env
-        keras_models = None
-
-
-def _require_keras_models():
-    if keras_models is None:
-        raise ImportError(
-            "TensorFlow/Keras is required to load persisted trained models."
-        )
-    return keras_models
 
 
 @dataclass(frozen=True)
@@ -167,7 +150,7 @@ class TrainedModel:
 
     @classmethod
     def load(cls, metadata: TrainedModelMetadata) -> "TrainedModel":
-        model = _require_keras_models().load_model(
+        model = keras_models.load_model(
             cls.get_model_path(metadata.path, metadata.format)
         )
         preprocessor_path = cls.get_preprocessor_path(metadata.path)

@@ -1,6 +1,4 @@
-﻿"""Dashboard layout construction."""
-
-from __future__ import annotations
+"""Dashboard layout construction."""
 
 from dash import dcc, html
 

@@ -1,15 +1,14 @@
 """Feature helpers shared by the dashboard and bundle exporter."""
 
-from __future__ import annotations
-
 import pandas as pd
 
 from src.dashboard.services.shared.feature_schema import FeatureSchema
-from src.volatility_models import add_dashboard_derived_features
-from src.volatility_models import apply_feature_override
+from src.volatility_models import add_dashboard_derived_features, apply_feature_override
 
 
-def add_derived_features(frame: pd.DataFrame, feature_schema: FeatureSchema) -> pd.DataFrame:
+def add_derived_features(
+    frame: pd.DataFrame, feature_schema: FeatureSchema
+) -> pd.DataFrame:
     del feature_schema
     return add_dashboard_derived_features(frame)
 

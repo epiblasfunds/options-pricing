@@ -1,22 +1,15 @@
 """Access to persisted dashboard data."""
 
-from __future__ import annotations
-
 import logging
 from pathlib import Path
 
 import pandas as pd
 
-from src.dashboard.services.shared.feature_schema import FeatureSchema
 from src.dashboard.services.shared.model_loader import ModelLoader
 from src.dashboard.services.shared.model_registry import ModelRegistry
 from src.dashboard.utils.validation import ensure_non_empty_frame
+from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
 from src.volatility_models import build_model_dataset, select_trade_columns
-
-try:
-    from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
-except ImportError:  # pragma: no cover - depends on runtime env
-    VolatilityStepLoader = None
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +17,8 @@ logger = logging.getLogger(__name__)
 class VolatilityDataProvider:
     """Read and cache the dashboard reference dataset."""
 
-    def __init__(self, dataset_path: Path, feature_schema: FeatureSchema) -> None:
+    def __init__(self, dataset_path: Path) -> None:
         self.dataset_path = dataset_path
-        self.feature_schema = feature_schema
         self._cache: pd.DataFrame | None = None
         self.model_registry: ModelRegistry | None = None
         self.model_loader: ModelLoader | None = None
@@ -44,7 +36,11 @@ class VolatilityDataProvider:
         refresh: bool = False,
         model_id: str | None = None,
     ) -> pd.DataFrame:
-        if model_id and self.model_registry is not None and self.model_loader is not None:
+        if (
+            model_id
+            and self.model_registry is not None
+            and self.model_loader is not None
+        ):
             discovered = self.model_registry.get_model(model_id)
             if discovered is not None:
                 bundle = self.model_loader.load(discovered)
@@ -61,10 +57,6 @@ class VolatilityDataProvider:
                 "Persisted dashboard split not found at %s. Falling back to VolatilityStepLoader.",
                 self.dataset_path,
             )
-            if VolatilityStepLoader is None:
-                raise ImportError(
-                    "VolatilityStepLoader dependencies are not available in this environment."
-                )
             frame = select_trade_columns(VolatilityStepLoader.load(force_reload=False))
 
         dataset = build_model_dataset(frame)

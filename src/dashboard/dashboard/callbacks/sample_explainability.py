@@ -1,6 +1,4 @@
-﻿"""Callbacks for local sample explainability."""
-
-from __future__ import annotations
+"""Callbacks for local sample explainability."""
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -194,7 +192,6 @@ def register_sample_callbacks(app, services) -> None:
                 explanation = services.shap_service.explain_sample(
                     model_id,
                     reference_sample,
-                    dataset,
                 )
                 neighbors = services.neighbors_service.find_neighbors(
                     model_id,
@@ -226,9 +223,7 @@ def register_sample_callbacks(app, services) -> None:
                     0
                 ]
             )
-            explanation = services.shap_service.explain_sample(
-                model_id, sample_frame, dataset
-            )
+            explanation = services.shap_service.explain_sample(model_id, sample_frame)
             neighbors = services.neighbors_service.find_neighbors(
                 model_id, dataset, sample_frame, k=10
             )

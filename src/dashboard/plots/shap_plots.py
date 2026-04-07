@@ -1,6 +1,4 @@
-﻿"""Render SHAP native plots as embeddable images."""
-
-from __future__ import annotations
+"""Render SHAP native plots as embeddable images."""
 
 import base64
 import io
@@ -75,7 +73,9 @@ def _rename_explanation(
     result: ShapExplanationResult,
     schema: FeatureSchema,
 ) -> shap.Explanation:
-    feature_names = [display_feature_label(name, schema) for name in result.feature_names]
+    feature_names = [
+        display_feature_label(name, schema) for name in result.feature_names
+    ]
     return shap.Explanation(
         values=result.explanation.values,
         base_values=result.explanation.base_values,
@@ -92,7 +92,9 @@ def _figure_to_data_uri(figure) -> str:
     figure.tight_layout()
     figure.savefig(buffer, format="png", dpi=160, bbox_inches="tight")
     plt.close(figure)
-    return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
+    return (
+        f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
+    )
 
 
 def _render_plot(plotter, figsize: tuple[float, float]) -> str:
@@ -101,4 +103,3 @@ def _render_plot(plotter, figsize: tuple[float, float]) -> str:
         plotter()
         figure = plt.gcf()
     return _figure_to_data_uri(figure)
-

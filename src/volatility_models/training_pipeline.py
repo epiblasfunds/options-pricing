@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,7 +15,7 @@ from src.config.config import (
 from src.dashboard.domain import build_metrics_registry
 from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.python_models.dashboard.dashboard_models import DashboardModel
+from src.python_models.dashboard.dashboard_model import DashboardModel
 from src.python_models.explainable_model import (
     ExplainableModel,
     ExplainableModelMetadata,
@@ -51,32 +49,10 @@ class ExportedBundlePaths:
     dashboard_metadata_path: Path
 
 
-def _require_tensorflow() -> None:
-    if keras is None or callbacks is None or layers is None or models is None:
-        raise ImportError(
-            "TensorFlow is required to train volatility models in this pipeline."
-        )
-
-
 def load_volatility_trade_frame(force_reload: bool = False) -> pd.DataFrame:
-    if VolatilityStepLoader is None:
-        raise ImportError(
-            "VolatilityStepLoader dependencies are not available in this environment."
-        )
     frame = VolatilityStepLoader.load(force_reload=force_reload)
     selected = select_trade_columns(frame)
-    selected[str(TARGET_COLUMN)] = pd.to_numeric(
-        selected[str(TARGET_COLUMN)],
-        errors="coerce",
-    )
-    selected = selected.dropna(subset=[str(TARGET_COLUMN)]).copy()
-    selected[str(TARGET_COLUMN)] = selected[str(TARGET_COLUMN)].astype("float64")
-    selected["ExecDatetime"] = pd.to_datetime(
-        selected["ExecDatetime"],
-        format="mixed",
-        errors="coerce",
-    )
-    return selected.dropna(subset=["ExecDatetime"]).sort_values("ExecDatetime").reset_index(drop=True)
+    return selected.sort_values("ExecDatetime").reset_index(drop=True)
 
 
 def split_trade_frame(
@@ -107,7 +83,7 @@ def save_dataset_splits(
 
 def build_training_matrices(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     X = build_feature_frame_from_trades(frame)
-    y = pd.to_numeric(frame[str(TARGET_COLUMN)]).astype("float64")
+    y = frame[str(TARGET_COLUMN)].astype("float64")
     return X.loc[:, MODEL_FEATURE_NAMES], y
 
 
@@ -118,7 +94,6 @@ def build_baseline_mlp(
     learning_rate: float = 5e-4,
     l2_strength: float = 1e-5,
 ) -> keras.Model:
-    _require_tensorflow()
     inputs = keras.Input(shape=(input_dim,), name="features")
     x = inputs
     for units in hidden_units:
@@ -146,7 +121,6 @@ def build_residual_mlp(
     learning_rate: float = 5e-4,
     l2_strength: float = 5e-5,
 ) -> keras.Model:
-    _require_tensorflow()
     inputs = keras.Input(shape=(input_dim,), name="features")
     x = layers.Dense(
         width,
@@ -184,7 +158,6 @@ def train_trained_model(
     batch_size: int = 1024,
     output_dir: Path = VOLATILITY_TRAINED_MODELS_DIR_PATH,
 ) -> tuple[TrainedModel, dict[str, float]]:
-    _require_tensorflow()
     X_train, y_train = build_training_matrices(train_frame)
     X_validation, y_validation = build_training_matrices(validation_frame)
     scaler = StandardScaler()
@@ -242,7 +215,9 @@ def train_trained_model(
         preprocessor=scaler,
     )
     trained_model.save(model_path)
-    return trained_model, {name: float(value) for name, value in validation_metrics.items()}
+    return trained_model, {
+        name: float(value) for name, value in validation_metrics.items()
+    }
 
 
 def export_explainable_bundle(
@@ -252,13 +227,9 @@ def export_explainable_bundle(
     bundle_name: str,
     bundle_dir: Path = DASHBOARD_SAVED_MODELS_DIR_PATH,
 ) -> ExportedBundlePaths:
-    if DashboardModel is None:
-        raise ImportError(
-            "Dashboard export dependencies are not available in this environment."
-        )
     bundle_path = bundle_dir / bundle_name
     raw_reference = select_trade_columns(reference_frame)
-    y_reference = pd.to_numeric(raw_reference[str(TARGET_COLUMN)], errors="coerce").astype("float64")
+    y_reference = raw_reference[str(TARGET_COLUMN)].astype("float64")
     model_features = list(trained_model.metadata.feature_names)
     explainable_metadata = ExplainableModelMetadata(
         model_id=trained_model.metadata.model_id,
@@ -295,9 +266,12 @@ def export_explainable_bundle(
         tree_format=ModelFormatEnum.JOBLIB,
         metadata={
             **explainable_metadata.metadata,
-            "available_surrogate_depths": sorted(int(depth) for depth in dashboard_model.tree_models),
+            "available_surrogate_depths": sorted(
+                int(depth) for depth in dashboard_model.tree_models
+            ),
             "surrogate_metrics_by_depth": {
-                str(depth): tree.metrics for depth, tree in dashboard_model.tree_models.items()
+                str(depth): tree.metrics
+                for depth, tree in dashboard_model.tree_models.items()
             },
         },
     )

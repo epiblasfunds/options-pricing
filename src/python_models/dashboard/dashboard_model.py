@@ -1,24 +1,20 @@
-from __future__ import annotations
-
 import json
 import typing as t
 from pathlib import Path
 
 import joblib
 import pandas as pd
-from sklearn.compose import ColumnTransformer
 
-from src.python_models.dashboard_artifacts import DiagnosisArtifact
-from src.python_models.dashboard_artifacts import ManualApiStubResponse
-from src.python_models.dashboard_artifacts import StoredShapExplanation
-from src.python_models.dashboard_model_builders import (
+from src.functionalities.dashboard_models.dashboard_model_builder import (
     build_dashboard_model,
-    load_dashboard_tree_models,
 )
-from src.python_models.explainable_model import (
-    ExplainableModel,
-    SurrogateTreeModel,
+from src.functionalities.dashboard_models.tree_models import load_dashboard_tree_models
+from src.python_models.dashboard.artifacts import (
+    DiagnosisArtifact,
+    ManualApiStubResponse,
+    StoredShapExplanation,
 )
+from src.python_models.explainable_model import ExplainableModel, SurrogateTreeModel
 
 
 class DashboardModel:
@@ -66,10 +62,7 @@ class DashboardModel:
         model: ExplainableModel,
         X: pd.DataFrame,
         y: pd.Series,
-        *,
-        preprocessor: ColumnTransformer | None = None,
     ) -> "DashboardModel":
-        del preprocessor
         return build_dashboard_model(
             cls,
             model=model,
@@ -98,7 +91,8 @@ class DashboardModel:
             "metadata": self.metadata,
         }
         self.get_metadata_path(root).write_text(
-            json.dumps(payload, indent=2, default=str), encoding="utf-8"
+            json.dumps(payload, indent=2, default=str),
+            encoding="utf-8",
         )
         joblib.dump(self.dataset_frame, root / "dataset_frame.joblib")
         joblib.dump(self.global_shap, root / "global_shap.joblib")

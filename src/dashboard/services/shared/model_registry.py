@@ -1,7 +1,5 @@
 """Model discovery utilities for dashboard-ready explainability bundles."""
 
-from __future__ import annotations
-
 import json
 from pathlib import Path
 
@@ -22,7 +20,9 @@ class ModelRegistry:
 
     def discover_models(self) -> list[AbstractModelMetadata]:
         models: list[AbstractModelMetadata] = []
-        for artifact in sorted(self.model_dir.iterdir(), key=lambda path: path.name.lower()):
+        for artifact in sorted(
+            self.model_dir.iterdir(), key=lambda path: path.name.lower()
+        ):
             discovered = self._build_discovered_model(artifact)
             if discovered is not None:
                 models.append(discovered)
@@ -34,9 +34,7 @@ class ModelRegistry:
                 return model
         return None
 
-    def _build_discovered_model(
-        self, artifact: Path
-    ) -> AbstractModelMetadata | None:
+    def _build_discovered_model(self, artifact: Path) -> AbstractModelMetadata | None:
         if artifact.is_dir() and self._looks_like_dashboard_bundle_directory(artifact):
             return ExplainableModelMetadata.load(artifact)
         return None

@@ -1,6 +1,4 @@
-﻿"""Tree plots and visual exports."""
-
-from __future__ import annotations
+"""Tree plots and visual exports."""
 
 import base64
 import io

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import typing as t
 from abc import ABC
@@ -103,7 +101,9 @@ class ExplainableModelMetadata(AbstractModelMetadata):
 
     @classmethod
     def load(cls, path: Path) -> "ExplainableModelMetadata":
-        payload = json.loads(cls.get_root_metadata_path(path).read_text(encoding="utf-8"))
+        payload = json.loads(
+            cls.get_root_metadata_path(path).read_text(encoding="utf-8")
+        )
         return cls(
             model_id=payload["model_id"],
             name=payload["name"],
@@ -206,7 +206,9 @@ class ExplainableModel:
     @property
     def tree_model(self) -> SurrogateTreeModel:
         if not self.tree_models:
-            raise ValueError("The explainable model does not contain persisted surrogate trees.")
+            raise ValueError(
+                "The explainable model does not contain persisted surrogate trees."
+            )
         return self.tree_models[max(self.tree_models)]
 
     @classmethod
@@ -236,7 +238,9 @@ class ExplainableModel:
         tree_models_path = metadata.get_tree_models_path()
         if tree_models_path.exists():
             loaded: dict[int, SurrogateTreeModel] = {}
-            for tree_path in sorted(tree_models_path.iterdir(), key=lambda path: path.name):
+            for tree_path in sorted(
+                tree_models_path.iterdir(), key=lambda path: path.name
+            ):
                 if not tree_path.is_dir():
                     continue
                 try:

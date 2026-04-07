@@ -1,6 +1,4 @@
-﻿"""Plotly figures for surface analysis."""
-
-from __future__ import annotations
+"""Plotly figures for surface analysis."""
 
 import plotly.express as px
 import plotly.graph_objects as go

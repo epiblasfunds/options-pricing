@@ -1,6 +1,5 @@
-﻿"""Callbacks for behaviour and surface analysis."""
+"""Callbacks for behaviour and surface analysis."""
 
-from __future__ import annotations
 
 import numpy as np
 import plotly.graph_objects as go

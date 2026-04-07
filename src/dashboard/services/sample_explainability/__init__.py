@@ -1,4 +1,4 @@
-﻿"""Services for the sample explainability dashboard tab."""
+"""Services for the sample explainability dashboard tab."""
 
 from src.dashboard.services.sample_explainability.neighbors_service import (
     NeighborsService,

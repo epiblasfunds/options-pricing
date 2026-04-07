@@ -1,14 +1,12 @@
 """Lazy loading for dashboard-ready explainable-model bundles."""
 
-from __future__ import annotations
-
 import json
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.python_models.dashboard.dashboard_models import DashboardModel
+from src.python_models.dashboard.dashboard_model import DashboardModel
 from src.python_models.explainable_model import (
     AbstractModelMetadata,
     ExplainableModelMetadata,

@@ -1,6 +1,4 @@
-﻿"""Local sample explainability figures."""
-
-from __future__ import annotations
+"""Local sample explainability figures."""
 
 import plotly.express as px
 

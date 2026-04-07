@@ -1,6 +1,4 @@
-﻿"""Reusable preprocessing builders."""
-
-from __future__ import annotations
+"""Reusable preprocessing builders."""
 
 from typing import Sequence
 
@@ -9,9 +7,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
-from src.dashboard.services.shared.feature_schema import (
-    FeatureSchema,
-)
+from src.dashboard.services.shared.feature_schema import FeatureSchema
 
 
 def make_one_hot_encoder() -> OneHotEncoder:
@@ -115,4 +111,3 @@ def build_tree_preprocessor(
         ],
         remainder="drop",
     )
-

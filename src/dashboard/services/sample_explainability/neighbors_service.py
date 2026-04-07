@@ -1,6 +1,4 @@
-﻿"""Nearest-neighbor local comparison service backed by precalculated artifacts."""
-
-from __future__ import annotations
+"""Nearest-neighbor local comparison service backed by precalculated artifacts."""
 
 import pandas as pd
 

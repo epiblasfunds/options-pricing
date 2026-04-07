@@ -1,6 +1,4 @@
-﻿"""Callbacks for global explainability plots."""
-
-from __future__ import annotations
+"""Callbacks for global explainability plots."""
 
 from dash import Input, Output
 
@@ -46,16 +44,27 @@ def register_global_callbacks(app, services) -> None:
     )
     def render_global_explainability(model_id, selected_feature):
         if not model_id:
-            return _empty_image(), _empty_image(), _empty_image(), _empty_image(), "Select a model."
-        dataset = services.data_provider.load_dataset(model_id=model_id)
+            return (
+                _empty_image(),
+                _empty_image(),
+                _empty_image(),
+                _empty_image(),
+                "Select a model.",
+            )
         try:
             result = services.cache.get_or_compute(
                 "shap_global",
                 {"model_id": model_id},
-                lambda: services.shap_service.explain(model_id, dataset),
+                lambda: services.shap_service.explain(model_id),
             )
         except Exception as exc:  # pragma: no cover - defensive UI path
-            return _empty_image(), _empty_image(), _empty_image(), _empty_image(), str(exc)
+            return (
+                _empty_image(),
+                _empty_image(),
+                _empty_image(),
+                _empty_image(),
+                str(exc),
+            )
 
         feature_name = _pick_dependence_feature(result, selected_feature)
         top_driver_labels = [

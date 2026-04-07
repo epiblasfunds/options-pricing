@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import typing as t
 from dataclasses import dataclass
 
@@ -20,9 +18,9 @@ class StoredShapExplanation:
     predictions: np.ndarray
     mean_abs_shap: dict[str, float]
 
-    def select(self, row_index: t.Any) -> "StoredShapExplanation":
+    def select(self, row_index: t.Any) -> t.Self:
         position = self.index.index(row_index)
-        return StoredShapExplanation(
+        return type(self)(
             method=self.method,
             feature_names=list(self.feature_names),
             index=[row_index],

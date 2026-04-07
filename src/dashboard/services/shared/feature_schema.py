@@ -1,7 +1,5 @@
 """Feature schema definitions and helpers."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from statistics import multimode
 from typing import Any
@@ -64,11 +62,15 @@ class FeatureSchema:
         ]
 
     def numerical_features(self, raw_only: bool = False) -> list[FeatureDefinition]:
-        features = self.raw_input_features() if raw_only else self.explainability_features()
+        features = (
+            self.raw_input_features() if raw_only else self.explainability_features()
+        )
         return [feature for feature in features if feature.is_numerical]
 
     def categorical_features(self, raw_only: bool = False) -> list[FeatureDefinition]:
-        features = self.raw_input_features() if raw_only else self.explainability_features()
+        features = (
+            self.raw_input_features() if raw_only else self.explainability_features()
+        )
         return [feature for feature in features if feature.is_categorical]
 
     def labels(self, names: list[str] | None = None) -> dict[str, str]:
@@ -81,7 +83,9 @@ class FeatureSchema:
         raw_only: bool = True,
     ) -> dict[str, Any]:
         defaults: dict[str, Any] = {}
-        features = self.raw_input_features() if raw_only else self.explainability_features()
+        features = (
+            self.raw_input_features() if raw_only else self.explainability_features()
+        )
         for feature in features:
             if feature.default_value is not None:
                 defaults[feature.name] = feature.default_value
@@ -136,7 +140,10 @@ class FeatureSchema:
 
         enum_suffix = uppercase_text.split(".")[-1]
         option_aliases = {"CALL": "C", "PUT": "P"}
-        if enum_suffix in option_aliases and option_aliases[enum_suffix] in uppercase_allowed:
+        if (
+            enum_suffix in option_aliases
+            and option_aliases[enum_suffix] in uppercase_allowed
+        ):
             return uppercase_allowed[option_aliases[enum_suffix]]
 
         if all(isinstance(item, int) for item in feature.allowed_values):
@@ -153,11 +160,17 @@ class FeatureSchema:
         sample: dict[str, Any],
         required_raw_inputs: bool = True,
     ) -> dict[str, Any]:
-        features = self.raw_input_features() if required_raw_inputs else self.explainability_features()
+        features = (
+            self.raw_input_features()
+            if required_raw_inputs
+            else self.explainability_features()
+        )
         normalized: dict[str, Any] = dict(sample)
         for feature in features:
             if feature.name in normalized:
-                normalized[feature.name] = self.normalize_value(feature.name, normalized[feature.name])
+                normalized[feature.name] = self.normalize_value(
+                    feature.name, normalized[feature.name]
+                )
         return normalized
 
     def validate_sample(
@@ -166,14 +179,25 @@ class FeatureSchema:
         required_raw_inputs: bool = True,
     ) -> dict[str, str]:
         errors: dict[str, str] = {}
-        features = self.raw_input_features() if required_raw_inputs else self.explainability_features()
-        normalized_sample = self.normalize_sample(sample, required_raw_inputs=required_raw_inputs)
+        features = (
+            self.raw_input_features()
+            if required_raw_inputs
+            else self.explainability_features()
+        )
+        normalized_sample = self.normalize_sample(
+            sample, required_raw_inputs=required_raw_inputs
+        )
         for feature in features:
-            if feature.name not in normalized_sample or normalized_sample[feature.name] in (None, ""):
+            if feature.name not in normalized_sample or normalized_sample[
+                feature.name
+            ] in (None, ""):
                 errors[feature.name] = "Value is required."
                 continue
             value = normalized_sample[feature.name]
-            if feature.allowed_values is not None and value not in feature.allowed_values:
+            if (
+                feature.allowed_values is not None
+                and value not in feature.allowed_values
+            ):
                 errors[feature.name] = "Value is outside the allowed set."
                 continue
             if feature.is_numerical:

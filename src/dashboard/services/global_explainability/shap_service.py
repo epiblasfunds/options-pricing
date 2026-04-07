@@ -1,15 +1,12 @@
-﻿"""SHAP-based explainability services backed by precalculated dashboard artifacts."""
-
-from __future__ import annotations
+"""SHAP-based explainability services backed by precalculated dashboard artifacts."""
 
 from dataclasses import dataclass
 
 import pandas as pd
 import shap
 
-from src.dashboard.services.shared.feature_schema import FeatureSchema
 from src.dashboard.services.shared.prediction_service import PredictionService
-from src.python_models.dashboard.dashboard_artifacts import StoredShapExplanation
+from src.python_models.dashboard.artifacts import StoredShapExplanation
 
 
 @dataclass
@@ -28,12 +25,16 @@ class ShapExplanationResult:
         values = self.explanation.values
         if getattr(values, "ndim", 1) == 1:
             values = values.reshape(1, -1)
-        return pd.DataFrame(values, index=self.explain_frame.index, columns=self.feature_names)
+        return pd.DataFrame(
+            values, index=self.explain_frame.index, columns=self.feature_names
+        )
 
     @property
     def base_value(self) -> float:
         base_values = self.explanation.base_values
-        if hasattr(base_values, "__len__") and not isinstance(base_values, (str, bytes)):
+        if hasattr(base_values, "__len__") and not isinstance(
+            base_values, (str, bytes)
+        ):
             return float(pd.Series(base_values).astype(float).mean())
         return float(base_values)
 
@@ -44,12 +45,10 @@ class ShapService:
     def __init__(
         self,
         prediction_service: PredictionService,
-        feature_schema: FeatureSchema,
     ) -> None:
         self.prediction_service = prediction_service
-        self.feature_schema = feature_schema
 
-    def explain(self, model_id: str, frame: pd.DataFrame) -> ShapExplanationResult:
+    def explain(self, model_id: str) -> ShapExplanationResult:
         bundle = self.prediction_service.load_bundle(model_id)
         return self._from_stored(bundle.dashboard_model.global_shap)
 
@@ -57,14 +56,15 @@ class ShapService:
         self,
         model_id: str,
         sample_to_explain: pd.DataFrame,
-        reference_frame: pd.DataFrame,
     ) -> ShapExplanationResult:
         """Return the precomputed local SHAP explanation for the selected sample."""
 
         bundle = self.prediction_service.load_bundle(model_id)
         row_index = sample_to_explain.index[0]
         if row_index in bundle.dashboard_model.local_shap.index:
-            return self._from_stored(bundle.dashboard_model.local_shap_for_index(row_index))
+            return self._from_stored(
+                bundle.dashboard_model.local_shap_for_index(row_index)
+            )
         return self._from_stored(bundle.dashboard_model.local_shap)
 
     def _from_stored(self, stored: StoredShapExplanation) -> ShapExplanationResult:
@@ -85,4 +85,3 @@ class ShapService:
             mean_abs_shap=pd.Series(stored.mean_abs_shap).sort_values(ascending=False),
             feature_names=list(stored.feature_names),
         )
-

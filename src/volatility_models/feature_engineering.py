@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+import typing as t
 
 import numpy as np
 import pandas as pd
@@ -89,14 +87,16 @@ def build_features_from_trade(tr) -> dict:
     underlying_price = tr[VolatilityDBEnum.UNDERLYING_PRICE]
     strike_price = tr[VolatilityDBEnum.STRIKE_PRICE]
     log_moneyness = np.log(underlying_price / strike_price)
-    log_moneyness_sq = log_moneyness ** 2
+    log_moneyness_sq = log_moneyness**2
     log_moneyness_x_sqrt_tte = log_moneyness * sqrt_tte_years
 
     rate = tr[VolatilityDBEnum.RATE]
     forward_price = underlying_price * np.exp(rate * tte_years)
     log_forward_moneyness = np.log(forward_price / strike_price)
 
-    is_call = float(str(tr[VolatilityDBEnum.OPTION_TYPE]).upper() == OptionTypeEnum.CALL)
+    is_call = float(
+        str(tr[VolatilityDBEnum.OPTION_TYPE]).upper() == OptionTypeEnum.CALL
+    )
 
     exec_dt = tr[VolatilityDBEnum.EXEC_DATETIME]
     exec_hour = float(exec_dt.hour)
@@ -130,7 +130,9 @@ def build_features_from_trade(tr) -> dict:
 
 
 def select_trade_columns(frame: pd.DataFrame) -> pd.DataFrame:
-    available_columns = [str(column) for column in SELECTED_TRADE_COLUMNS if str(column) in frame.columns]
+    available_columns = [
+        str(column) for column in SELECTED_TRADE_COLUMNS if str(column) in frame.columns
+    ]
     return frame.loc[:, available_columns].copy()
 
 
@@ -138,11 +140,7 @@ def add_dashboard_derived_features(frame: pd.DataFrame) -> pd.DataFrame:
     derived = frame.copy()
 
     if VolatilityDBEnum.EXEC_DATETIME in derived.columns:
-        exec_dt = pd.to_datetime(
-            derived[VolatilityDBEnum.EXEC_DATETIME],
-            format="mixed",
-            errors="coerce",
-        )
+        exec_dt = derived[VolatilityDBEnum.EXEC_DATETIME]
         derived["ExecHour"] = exec_dt.dt.hour.astype("float64")
         derived["ExecWeekday"] = exec_dt.dt.weekday.astype("float64")
 
@@ -151,8 +149,8 @@ def add_dashboard_derived_features(frame: pd.DataFrame) -> pd.DataFrame:
         VolatilityDBEnum.STRIKE_PRICE,
     }.issubset(derived.columns):
         ratio = (
-            pd.to_numeric(derived[VolatilityDBEnum.UNDERLYING_PRICE], errors="coerce")
-            / pd.to_numeric(derived[VolatilityDBEnum.STRIKE_PRICE], errors="coerce")
+            derived[VolatilityDBEnum.UNDERLYING_PRICE]
+            / derived[VolatilityDBEnum.STRIKE_PRICE]
         )
         ratio = ratio.replace([np.inf, -np.inf], np.nan)
         safe_ratio = ratio.where(ratio > 0.0)
@@ -166,7 +164,9 @@ def add_dashboard_derived_features(frame: pd.DataFrame) -> pd.DataFrame:
 def build_feature_frame_from_trades(frame: pd.DataFrame) -> pd.DataFrame:
     trades = select_trade_columns(frame)
     if trades.empty:
-        return pd.DataFrame(index=frame.index, columns=MODEL_FEATURE_NAMES, dtype="float64")
+        return pd.DataFrame(
+            index=frame.index, columns=MODEL_FEATURE_NAMES, dtype="float64"
+        )
 
     normalized = trades.copy()
 
@@ -185,20 +185,27 @@ def build_model_dataset(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([dashboard_frame, model_features], axis=1)
 
 
-def apply_feature_override(frame: pd.DataFrame, feature_name: str, value: Any) -> pd.DataFrame:
+def apply_feature_override(
+    frame: pd.DataFrame,
+    feature_name: str,
+    value: t.Any,
+) -> pd.DataFrame:
     updated = frame.copy()
 
     if feature_name == "ExecHour" and VolatilityDBEnum.EXEC_DATETIME in updated.columns:
-        exec_dt = pd.to_datetime(updated[VolatilityDBEnum.EXEC_DATETIME], format="mixed", errors="coerce")
-        updated[VolatilityDBEnum.EXEC_DATETIME] = (
-            exec_dt.dt.floor("D") + pd.to_timedelta(float(value), unit="h")
-        )
+        exec_dt = updated[VolatilityDBEnum.EXEC_DATETIME]
+        updated[VolatilityDBEnum.EXEC_DATETIME] = exec_dt.dt.floor(
+            "D"
+        ) + pd.to_timedelta(float(value), unit="h")
         return add_dashboard_derived_features(updated)
 
-    if feature_name == "ExecWeekday" and VolatilityDBEnum.EXEC_DATETIME in updated.columns:
-        exec_dt = pd.to_datetime(updated[VolatilityDBEnum.EXEC_DATETIME], format="mixed", errors="coerce")
-        updated[VolatilityDBEnum.EXEC_DATETIME] = (
-            exec_dt + pd.to_timedelta(float(value) - exec_dt.dt.weekday, unit="D")
+    if (
+        feature_name == "ExecWeekday"
+        and VolatilityDBEnum.EXEC_DATETIME in updated.columns
+    ):
+        exec_dt = updated[VolatilityDBEnum.EXEC_DATETIME]
+        updated[VolatilityDBEnum.EXEC_DATETIME] = exec_dt + pd.to_timedelta(
+            float(value) - exec_dt.dt.weekday, unit="D"
         )
         return add_dashboard_derived_features(updated)
 
@@ -207,17 +214,15 @@ def apply_feature_override(frame: pd.DataFrame, feature_name: str, value: Any) -
         return add_dashboard_derived_features(updated)
 
     if feature_name == "Moneyness":
-        updated[VolatilityDBEnum.STRIKE_PRICE] = (
-            pd.to_numeric(updated[VolatilityDBEnum.UNDERLYING_PRICE], errors="coerce")
-            / float(value)
-        )
+        updated[VolatilityDBEnum.STRIKE_PRICE] = updated[
+            VolatilityDBEnum.UNDERLYING_PRICE
+        ] / float(value)
         return add_dashboard_derived_features(updated)
 
     if feature_name == "LogMoneyness":
         moneyness = float(np.exp(float(value)))
         updated[VolatilityDBEnum.STRIKE_PRICE] = (
-            pd.to_numeric(updated[VolatilityDBEnum.UNDERLYING_PRICE], errors="coerce")
-            / moneyness
+            updated[VolatilityDBEnum.UNDERLYING_PRICE] / moneyness
         )
         return add_dashboard_derived_features(updated)
 

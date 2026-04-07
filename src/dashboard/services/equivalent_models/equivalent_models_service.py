@@ -1,6 +1,4 @@
-﻿"""Access to precomputed equivalent explainable models."""
-
-from __future__ import annotations
+"""Access to precomputed equivalent explainable models."""
 
 from src.dashboard.services.shared.prediction_service import PredictionService
 from src.python_models.explainable_model import SurrogateTreeModel

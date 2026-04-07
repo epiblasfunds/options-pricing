@@ -1,4 +1,4 @@
-﻿"""CLI entry point for the explainability dashboard."""
+"""CLI entry point for the explainability dashboard."""
 
 from src.dashboard.app import create_app
 
@@ -12,4 +12,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,6 +1,4 @@
-﻿"""Callbacks related to model discovery and shared dashboard context."""
-
-from __future__ import annotations
+"""Callbacks related to model discovery and shared dashboard context."""
 
 from dash import Input, Output, State, dcc, html
 

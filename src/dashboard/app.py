@@ -1,7 +1,5 @@
 """Dash app factory."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from dash import Dash
@@ -50,7 +48,6 @@ def build_services() -> Services:
     model_loader = ModelLoader()
     data_provider = VolatilityDataProvider(
         dataset_path=VOLATILITY_MODEL_DATA_DIR_PATH / "test.csv",
-        feature_schema=feature_schema,
     )
     data_provider.bind_model_runtime(
         model_registry=model_registry,
@@ -78,7 +75,6 @@ def build_services() -> Services:
         ),
         shap_service=ShapService(
             prediction_service=prediction_service,
-            feature_schema=feature_schema,
         ),
         neighbors_service=NeighborsService(
             prediction_service=prediction_service,
@@ -87,9 +83,6 @@ def build_services() -> Services:
         surface_service=surface_service,
         diagnosis_service=DiagnosisService(
             prediction_service=prediction_service,
-            metrics_registry=metrics_registry,
-            surface_service=surface_service,
-            target_column=feature_schema.target_column,
         ),
     )
 
@@ -97,13 +90,10 @@ def build_services() -> Services:
 def create_app():
     """Create the Dash application."""
 
-    if Dash is None:
-        raise ImportError(
-            "Dash is required to run the explainability dashboard."
-        )
-
     services = build_services()
-    app = Dash(__name__, suppress_callback_exceptions=True, title="Volatility Explainability")
+    app = Dash(
+        __name__, suppress_callback_exceptions=True, title="Volatility Explainability"
+    )
     app.layout = build_layout()
     register_callbacks(app, services)
     return app

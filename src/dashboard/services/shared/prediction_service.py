@@ -1,6 +1,4 @@
-﻿"""Access helpers for dashboard-ready volatility bundles."""
-
-from __future__ import annotations
+"""Access helpers for dashboard-ready volatility bundles."""
 
 from typing import Any
 
