@@ -7,213 +7,176 @@ import joblib
 import numpy as np
 import pandas as pd
 import shap
-from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.tree import DecisionTreeRegressor, export_text
 
+from src.config.config import config
+from src.enums.data_enums import VolatilityDBEnum
+from src.enums.volatility_model_enums import ModelFormatEnum
+from src.python_models.dashboard_artifacts import DiagnosisArtifact
+from src.python_models.dashboard_artifacts import ManualApiStubResponse
+from src.python_models.dashboard_artifacts import StoredShapExplanation
+from src.python_models.explainable_model import ExplainableModel
+from src.python_models.explainable_model import SingleModelMetadata
 from src.python_models.explainable_model import SurrogateTreeModel
-from src.volatility_models.model_explainability.runtime import (
-    DEFAULT_FEATURE_SCHEMA,
-    DEFAULT_METRICS_REGISTRY,
-    DEFAULT_SETTINGS,
-)
-from src.volatility_models.model_explainability.utils.feature_utils import (
-    add_derived_features,
-    apply_feature_override,
-)
-from src.volatility_models.model_explainability.utils.preprocessing import (
-    build_similarity_preprocessor,
-    build_tree_preprocessor,
-)
-from src.volatility_models.model_explainability.utils.sampling import (
-    quantile_grid,
-    sample_frame,
-)
+from src.volatility_models import ANALYSIS_FEATURE_NAMES
+from src.volatility_models import TARGET_COLUMN
+from src.volatility_models import add_dashboard_derived_features
+from src.volatility_models import apply_feature_override
+from src.volatility_models import build_feature_frame_from_trades
+from src.volatility_models import build_model_dataset
+from src.volatility_models import select_trade_columns
+from src.dashboard.domain import build_metrics_registry
+from src.dashboard.utils.sampling import quantile_grid
+from src.dashboard.utils.sampling import sample_frame
+
+METRICS_REGISTRY = build_metrics_registry()
 
 
-def build_dashboard_model_from_runtime(
+def build_dashboard_model(
     cls,
     *,
-    model,
+    model: ExplainableModel,
     X: pd.DataFrame,
     y: pd.Series | np.ndarray | None,
-    preprocessor: ColumnTransformer | None,
-    build_config,
 ):
-    from src.python_models.dashboard_models import ManualApiStubResponse
+    if not isinstance(X, pd.DataFrame):
+        raise ValueError("Input features X must be a pandas DataFrame.")
+    if y is None:
+        raise ValueError("Target variable y cannot be None.")
 
-    explainable_model = (
-        model if model.__class__.__name__ == "ExplainableModel" else None
-    )
-    epi_model = model.main_model if explainable_model is not None else model
-    metadata = dict(getattr(epi_model.metadata, "metadata", {}) or {})
-    model_id = getattr(epi_model.metadata, "model_id", "dashboard_model")
-    model_name = getattr(epi_model.metadata, "name", model_id)
-    raw_feature_names = list(
-        metadata.get(
-            "model_input_features", list(DEFAULT_SETTINGS.model_input_features)
-        )
-    )
-    target_column = metadata.get("target_column", DEFAULT_SETTINGS.target_column)
-    transformed_feature_names = list(
-        metadata.get("transformed_feature_names", raw_feature_names)
-    )
+    raw_frame = select_trade_columns(X)
+    raw_frame[str(TARGET_COLUMN)] = pd.Series(y, index=X.index)
+    dataset_frame = build_model_dataset(raw_frame)
 
-    working = X.copy()
-    if y is not None:
-        target_series = (
-            y
-            if isinstance(y, pd.Series)
-            else pd.Series(y, index=working.index, name=target_column)
-        )
-        working[target_column] = target_series
-    working = add_derived_features(working, DEFAULT_FEATURE_SCHEMA)
-    prepared = prepare_feature_frame(working, raw_feature_names)
-    resolved_preprocessor = preprocessor or load_preprocessor(
-        epi_model.metadata.path, metadata
-    )
-    transformed = transform_frame(
-        prepared,
-        raw_feature_names,
-        transformed_feature_names,
-        resolved_preprocessor,
-    )
-    predictions = predict_transformed(epi_model.model, transformed)
-    dataset_frame = working.copy()
+    trained_model = model.main_model
+    model_input_features = list(trained_model.metadata.feature_names)
+    predictions = predict_raw_frame(trained_model, raw_frame)
     dataset_frame["PredictedVolatility"] = predictions
-    if target_column in dataset_frame.columns:
-        dataset_frame["Residual"] = (
-            dataset_frame[target_column].astype(float)
-            - dataset_frame["PredictedVolatility"]
-        )
-        dataset_frame["AbsoluteError"] = dataset_frame["Residual"].abs()
+    dataset_frame["Residual"] = (
+        pd.to_numeric(dataset_frame[str(TARGET_COLUMN)], errors="coerce")
+        - dataset_frame["PredictedVolatility"]
+    )
+    dataset_frame["AbsoluteError"] = dataset_frame["Residual"].abs()
 
+    build_config = config.dashboard_models_config.build_config
     tree_models = (
-        dict(explainable_model.tree_models)
-        if explainable_model is not None
+        dict(model.tree_models)
+        if model.tree_models
         else build_surrogate_tree_models(
-            model=epi_model.model,
-            preprocessor=resolved_preprocessor,
-            reference_frame=dataset_frame,
-            model_input_features=raw_feature_names,
+            trained_model=trained_model,
+            dataset_frame=dataset_frame,
+            raw_frame=raw_frame,
+            model_input_features=model_input_features,
             surrogate_depths=build_config.surrogate_depths,
         )
     )
     sample_indices = sample_frame(
         dataset_frame,
         max_rows=build_config.sample_option_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+        random_state=config.dashboard_models_config.random_state,
     ).index.tolist()
     behaviour_anchor_indices = sample_frame(
         dataset_frame,
         max_rows=min(build_config.behaviour_anchor_size, len(dataset_frame)),
-        random_state=DEFAULT_SETTINGS.random_state + 11,
+        random_state=config.dashboard_models_config.random_state + 11,
     ).index.tolist()
 
-    background = sample_frame(
-        dataset_frame,
-        max_rows=DEFAULT_SETTINGS.shap_background_size,
-        random_state=DEFAULT_SETTINGS.random_state + 1,
+    background_raw = raw_frame.loc[
+        sample_frame(
+            dataset_frame,
+            max_rows=config.dashboard_models_config.shap_background_size,
+            random_state=config.dashboard_models_config.random_state + 1,
+        ).index
+    ].copy()
+    global_raw = raw_frame.loc[
+        sample_frame(
+            dataset_frame,
+            max_rows=config.dashboard_models_config.shap_explain_size,
+            random_state=config.dashboard_models_config.random_state,
+        ).index
+    ].copy()
+
+    background_features = build_feature_frame_from_trades(background_raw)
+    global_features = build_feature_frame_from_trades(global_raw)
+    transformed_background = transform_feature_frame(
+        background_features,
+        trained_model.preprocessor,
+        model_input_features,
     )
-    global_rows = sample_frame(
-        dataset_frame,
-        max_rows=DEFAULT_SETTINGS.shap_explain_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+    transformed_global = transform_feature_frame(
+        global_features,
+        trained_model.preprocessor,
+        model_input_features,
     )
     explainer = build_shap_explainer(
-        model=epi_model.model,
-        background_frame=transform_frame(
-            prepare_feature_frame(background, raw_feature_names),
-            raw_feature_names,
-            transformed_feature_names,
-            resolved_preprocessor,
-        ),
-        feature_names=transformed_feature_names,
+        model=trained_model.model,
+        background_frame=transformed_background,
+        feature_names=model_input_features,
+    )
+    global_explanation = explainer(
+        transformed_global,
+        max_evals=max_evals(len(model_input_features)),
+        silent=True,
     )
     global_shap = serialize_shap_result(
         method="shap.Explainer(permutation)",
-        explanation=explainer(
-            transform_frame(
-                prepare_feature_frame(global_rows, raw_feature_names),
-                raw_feature_names,
-                transformed_feature_names,
-                resolved_preprocessor,
-            ),
-            max_evals=max_evals(len(transformed_feature_names)),
-            silent=True,
-        ),
-        transformed_frame=transform_frame(
-            prepare_feature_frame(global_rows, raw_feature_names),
-            raw_feature_names,
-            transformed_feature_names,
-            resolved_preprocessor,
-        ),
-        raw_frame=prepare_feature_frame(global_rows, raw_feature_names),
-        feature_names=transformed_feature_names,
-        predictions=dataset_frame.loc[global_rows.index, "PredictedVolatility"],
+        explanation=global_explanation,
+        transformed_frame=transformed_global,
+        raw_frame=global_features,
+        feature_names=model_input_features,
+        predictions=dataset_frame.loc[global_raw.index, "PredictedVolatility"],
     )
-    local_rows = dataset_frame.loc[sample_indices]
+
+    local_raw = raw_frame.loc[sample_indices].copy()
+    local_features = build_feature_frame_from_trades(local_raw)
+    transformed_local = transform_feature_frame(
+        local_features,
+        trained_model.preprocessor,
+        model_input_features,
+    )
+    local_explanation = explainer(
+        transformed_local,
+        max_evals=max_evals(len(model_input_features)),
+        silent=True,
+    )
     local_shap = serialize_shap_result(
         method="shap.Explainer(permutation)",
-        explanation=explainer(
-            transform_frame(
-                prepare_feature_frame(local_rows, raw_feature_names),
-                raw_feature_names,
-                transformed_feature_names,
-                resolved_preprocessor,
-            ),
-            max_evals=max_evals(len(transformed_feature_names)),
-            silent=True,
-        ),
-        transformed_frame=transform_frame(
-            prepare_feature_frame(local_rows, raw_feature_names),
-            raw_feature_names,
-            transformed_feature_names,
-            resolved_preprocessor,
-        ),
-        raw_frame=prepare_feature_frame(local_rows, raw_feature_names),
-        feature_names=transformed_feature_names,
-        predictions=dataset_frame.loc[local_rows.index, "PredictedVolatility"],
+        explanation=local_explanation,
+        transformed_frame=transformed_local,
+        raw_frame=local_features,
+        feature_names=model_input_features,
+        predictions=dataset_frame.loc[local_raw.index, "PredictedVolatility"],
     )
 
     neighbors_frame = build_neighbors_frame(
         dataset_frame=dataset_frame,
-        raw_feature_names=raw_feature_names,
+        raw_frame=raw_frame,
+        trained_model=trained_model,
+        model_input_features=model_input_features,
         sample_indices=sample_indices,
         neighbors_k=build_config.neighbors_k,
     )
     surfaces_frame = build_surfaces_frame(
-        model=epi_model.model,
-        preprocessor=resolved_preprocessor,
-        dataset_frame=dataset_frame,
-        raw_feature_names=raw_feature_names,
+        trained_model=trained_model,
+        raw_frame=raw_frame,
         anchor_indices=behaviour_anchor_indices,
-        target_column=target_column,
     )
-    numerical_features = [
-        feature.name
-        for feature in DEFAULT_FEATURE_SCHEMA.numerical_features(raw_only=False)
-        if feature.name in dataset_frame.columns
-        or feature.name in {"Moneyness", "LogMoneyness"}
-    ]
     ice_frame = build_ice_frame(
-        model=epi_model.model,
-        preprocessor=resolved_preprocessor,
+        trained_model=trained_model,
         dataset_frame=dataset_frame,
-        raw_feature_names=raw_feature_names,
-        feature_names=numerical_features,
+        raw_frame=raw_frame,
+        feature_names=list(ANALYSIS_FEATURE_NAMES),
     )
     ale_frame = build_ale_frame(
-        model=epi_model.model,
-        preprocessor=resolved_preprocessor,
+        trained_model=trained_model,
         dataset_frame=dataset_frame,
-        raw_feature_names=raw_feature_names,
-        feature_names=numerical_features,
+        raw_frame=raw_frame,
+        feature_names=list(ANALYSIS_FEATURE_NAMES),
     )
     diagnosis = build_diagnosis_artifact(
         dataset_frame,
-        target_column=target_column,
         financial_warnings=(
             financial_checks_from_surface(
                 surfaces_frame.loc[
@@ -226,16 +189,26 @@ def build_dashboard_model_from_runtime(
     )
     manual_api_stub = ManualApiStubResponse(
         prediction=float(dataset_frame["PredictedVolatility"].mean()),
-        summary="Placeholder response from the manual-input prediction API.",
+        summary="Reference prediction based on the persisted explainability bundle.",
         reference_sample_index=sample_indices[0] if sample_indices else None,
     )
     return cls(
-        model_id=model_id,
-        model_name=model_name,
-        metadata=metadata,
+        model_id=model.metadata.model_id,
+        model_name=model.metadata.name,
+        metadata=dict(model.metadata.metadata),
         dataset_frame=dataset_frame,
-        raw_feature_names=raw_feature_names,
-        transformed_feature_names=transformed_feature_names,
+        raw_feature_names=[
+            str(VolatilityDBEnum.EXEC_DATETIME),
+            str(VolatilityDBEnum.OPTION_TYPE),
+            str(VolatilityDBEnum.QUANTITY),
+            str(VolatilityDBEnum.STRIKE_PRICE),
+            str(VolatilityDBEnum.TRADE_TYPE),
+            str(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
+            str(VolatilityDBEnum.UNDERLYING_PRICE),
+            str(VolatilityDBEnum.TIME_TO_EXPIRATION),
+            str(VolatilityDBEnum.RATE),
+        ],
+        transformed_feature_names=model_input_features,
         tree_models=tree_models,
         sample_indices=sample_indices,
         behaviour_anchor_indices=behaviour_anchor_indices,
@@ -261,82 +234,42 @@ def load_dashboard_tree_models(
                 continue
             depth = int(tree_path.name.removeprefix("depth_"))
             tree_models[depth] = SurrogateTreeModel.load(
-                metadata=single_metadata_from_path(
-                    tree_path,
+                metadata=SingleModelMetadata(
                     model_id=f"{payload['model_id']}_dashboard_tree_{depth}",
                     name=f"{payload['model_name']}_dashboard_tree_{depth}",
+                    path=tree_path,
+                    format=ModelFormatEnum.JOBLIB,
+                    metadata={},
                 )
             )
     return tree_models
 
 
-def single_metadata_from_path(path: Path, model_id: str, name: str):
-    from src.enums.volatility_model_enums import ModelFormatEnum
-    from src.python_models.explainable_model import SingleModelMetadata
-
-    return SingleModelMetadata(
-        model_id=model_id,
-        name=name,
-        path=path,
-        format=ModelFormatEnum.JOBLIB,
-        metadata={},
-    )
-
-
-def prepare_feature_frame(
-    frame: pd.DataFrame, feature_names: list[str]
-) -> pd.DataFrame:
-    prepared = frame.copy()
-    for feature in DEFAULT_FEATURE_SCHEMA.numerical_features(raw_only=True):
-        if feature.name in feature_names and feature.name in prepared.columns:
-            prepared[feature.name] = pd.to_numeric(
-                prepared[feature.name], errors="coerce"
-            )
-    for feature in DEFAULT_FEATURE_SCHEMA.categorical_features(raw_only=True):
-        if feature.name in feature_names and feature.name in prepared.columns:
-            prepared[feature.name] = prepared[feature.name].astype("object")
-    return prepared[feature_names]
-
-
-def transform_frame(
+def transform_feature_frame(
     frame: pd.DataFrame,
-    raw_feature_names: list[str],
-    transformed_feature_names: list[str],
-    preprocessor: ColumnTransformer | None,
+    preprocessor,
+    feature_names: list[str],
 ) -> pd.DataFrame:
+    ordered = frame.loc[:, feature_names].copy()
     if preprocessor is None:
-        return frame[transformed_feature_names].copy()
-    transformed = preprocessor.transform(frame[raw_feature_names])
+        return ordered
+    transformed = preprocessor.transform(ordered)
     matrix = np.asarray(transformed, dtype=np.float32)
-    return pd.DataFrame(matrix, index=frame.index, columns=transformed_feature_names)
+    return pd.DataFrame(matrix, index=ordered.index, columns=feature_names)
 
 
-def predict_transformed(model, transformed_frame: pd.DataFrame) -> np.ndarray:
-    predictions = model.predict(
-        transformed_frame.to_numpy(dtype=np.float32, copy=False), verbose=0
+def predict_raw_frame(trained_model, raw_frame: pd.DataFrame) -> np.ndarray:
+    feature_frame = build_feature_frame_from_trades(raw_frame)
+    transformed = transform_feature_frame(
+        feature_frame,
+        trained_model.preprocessor,
+        list(trained_model.metadata.feature_names),
+    )
+    predictions = trained_model.model.predict(
+        transformed.to_numpy(dtype=np.float32, copy=False),
+        verbose=0,
     )
     return np.asarray(predictions).reshape(-1)
-
-
-def predict_frame(
-    model,
-    preprocessor: ColumnTransformer | None,
-    frame: pd.DataFrame,
-    raw_feature_names: list[str],
-    transformed_feature_names: list[str],
-) -> pd.Series:
-    prepared = prepare_feature_frame(frame, raw_feature_names)
-    transformed = transform_frame(
-        prepared,
-        raw_feature_names,
-        transformed_feature_names,
-        preprocessor,
-    )
-    return pd.Series(
-        predict_transformed(model, transformed),
-        index=frame.index,
-        name="PredictedVolatility",
-    )
 
 
 def build_shap_explainer(
@@ -349,7 +282,7 @@ def build_shap_explainer(
         masker=background_frame,
         algorithm="permutation",
         feature_names=feature_names,
-        seed=DEFAULT_SETTINGS.random_state,
+        seed=config.dashboard_models_config.random_state,
     )
 
 
@@ -366,7 +299,7 @@ def predict_transformed_values(model, feature_names: list[str], values):
 def max_evals(n_features: int) -> int:
     return max(
         2 * n_features + 1,
-        DEFAULT_SETTINGS.shap_permutations * n_features,
+        config.dashboard_models_config.shap_permutations * n_features,
     )
 
 
@@ -379,12 +312,7 @@ def serialize_shap_result(
     feature_names: list[str],
     predictions: pd.Series,
 ):
-    from src.python_models.dashboard_models import StoredShapExplanation
-
-    display_frame = pd.DataFrame(index=raw_frame.index)
-    for feature_name in feature_names:
-        display_frame[feature_name] = display_series(raw_frame, feature_name)
-    explanation.display_data = display_frame.to_numpy()
+    explanation.display_data = raw_frame.loc[:, feature_names].to_numpy()
     mean_abs_shap = pd.Series(
         explanation.abs.mean(0).values, index=feature_names
     ).sort_values(ascending=False)
@@ -403,51 +331,35 @@ def serialize_shap_result(
     )
 
 
-def display_series(raw_frame: pd.DataFrame, feature_name: str) -> pd.Series:
-    if feature_name in raw_frame.columns:
-        return raw_frame[feature_name]
-    if "__" not in feature_name:
-        return pd.Series([None] * len(raw_frame), index=raw_frame.index)
-    _, transformed_name = feature_name.split("__", 1)
-    if transformed_name in raw_frame.columns:
-        return raw_frame[transformed_name]
-    for feature in DEFAULT_FEATURE_SCHEMA.categorical_features(raw_only=True):
-        prefix = f"{feature.name}_"
-        if transformed_name.startswith(prefix) and feature.name in raw_frame.columns:
-            expected_value = transformed_name[len(prefix):]
-            return (
-                raw_frame[feature.name].astype(str).str.upper()
-                == str(expected_value).upper()
-            ).astype(int)
-    return pd.Series([None] * len(raw_frame), index=raw_frame.index)
-
-
 def build_neighbors_frame(
     *,
     dataset_frame: pd.DataFrame,
-    raw_feature_names: list[str],
+    raw_frame: pd.DataFrame,
+    trained_model,
+    model_input_features: list[str],
     sample_indices: list[t.Any],
     neighbors_k: int,
 ) -> pd.DataFrame:
     sampled_dataset = sample_frame(
         dataset_frame,
-        max_rows=DEFAULT_SETTINGS.neighbors_sample_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+        max_rows=config.dashboard_models_config.neighbors_sample_size,
+        random_state=config.dashboard_models_config.random_state,
     )
-    prepared_dataset = prepare_feature_frame(sampled_dataset, raw_feature_names)
-    prepared_samples = prepare_feature_frame(
-        dataset_frame.loc[sample_indices], raw_feature_names
+    dataset_features = build_feature_frame_from_trades(raw_frame.loc[sampled_dataset.index])
+    sample_features = build_feature_frame_from_trades(raw_frame.loc[sample_indices])
+    transformed_dataset = transform_feature_frame(
+        dataset_features,
+        trained_model.preprocessor,
+        model_input_features,
     )
-    preprocessor = build_similarity_preprocessor(
-        DEFAULT_FEATURE_SCHEMA, raw_feature_names
+    transformed_samples = transform_feature_frame(
+        sample_features,
+        trained_model.preprocessor,
+        model_input_features,
     )
-    transformed_dataset = preprocessor.fit_transform(
-        prepared_dataset[raw_feature_names]
-    )
-    transformed_samples = preprocessor.transform(prepared_samples[raw_feature_names])
     estimator = NearestNeighbors(n_neighbors=min(neighbors_k, len(sampled_dataset)))
-    estimator.fit(transformed_dataset)
-    distances, indices = estimator.kneighbors(transformed_samples)
+    estimator.fit(transformed_dataset.to_numpy())
+    distances, indices = estimator.kneighbors(transformed_samples.to_numpy())
     rows: list[dict[str, t.Any]] = []
     dataset_indices = sampled_dataset.index.to_numpy()
     for sample_position, sample_index in enumerate(sample_indices):
@@ -465,90 +377,60 @@ def build_neighbors_frame(
 
 def build_surfaces_frame(
     *,
-    model,
-    preprocessor: ColumnTransformer | None,
-    dataset_frame: pd.DataFrame,
-    raw_feature_names: list[str],
+    trained_model,
+    raw_frame: pd.DataFrame,
     anchor_indices: list[t.Any],
-    target_column: str,
 ) -> pd.DataFrame:
-    transformed_feature_names = resolve_transformed_feature_names(
-        raw_feature_names, preprocessor
-    )
     rows: list[pd.DataFrame] = []
+    surface_grid_size = config.dashboard_models_config.surface_grid_size
     for anchor_index in anchor_indices:
-        anchor = dataset_frame.loc[anchor_index, raw_feature_names].copy()
-        anchor_frame = anchor.to_frame().T
-        base_underlying = float(anchor_frame["UnderlyingPrice"].iloc[0])
-        moneyness_values = np.linspace(0.8, 1.2, DEFAULT_SETTINGS.surface_grid_size)
-        maturity_values = np.linspace(
-            1.0,
-            max(float(anchor_frame["TimeToExpiration"].iloc[0]) * 1.5, 30.0),
-            DEFAULT_SETTINGS.surface_grid_size,
-        )
+        anchor = raw_frame.loc[[anchor_index]].copy()
+        base_underlying = float(anchor[str(VolatilityDBEnum.UNDERLYING_PRICE)].iloc[0])
+        anchor_tte = float(anchor[str(VolatilityDBEnum.TIME_TO_EXPIRATION)].iloc[0])
+        moneyness_values = np.linspace(0.8, 1.2, surface_grid_size)
+        maturity_values = np.linspace(1.0, max(anchor_tte * 1.5, 30.0), surface_grid_size)
         grid_rows: list[pd.DataFrame] = []
         for maturity in maturity_values:
             for moneyness in moneyness_values:
-                row = anchor_frame.copy()
-                row["TimeToExpiration"] = maturity
-                row["UnderlyingPrice"] = base_underlying
-                row["StrikePrice"] = base_underlying / moneyness
-                row["Moneyness"] = moneyness
-                row["LogMoneyness"] = np.log(moneyness)
-                row["AbsLogMoneyness"] = abs(np.log(moneyness))
-                if target_column in row.columns:
-                    row[target_column] = np.nan
-                row["anchor_index"] = anchor_index
-                grid_rows.append(row)
-        surface = pd.concat(grid_rows, ignore_index=True)
-        surface["PredictedVolatility"] = predict_frame(
-            model,
-            preprocessor,
-            surface,
-            raw_feature_names,
-            transformed_feature_names,
-        ).to_numpy()
+                row = anchor.copy()
+                row[str(VolatilityDBEnum.TIME_TO_EXPIRATION)] = maturity
+                row[str(VolatilityDBEnum.UNDERLYING_PRICE)] = base_underlying
+                row[str(VolatilityDBEnum.STRIKE_PRICE)] = base_underlying / moneyness
+                grid_rows.append(add_dashboard_derived_features(row))
+        surface_raw = pd.concat(grid_rows, ignore_index=True)
+        surface = build_model_dataset(surface_raw)
+        surface[str(TARGET_COLUMN)] = np.nan
+        surface["anchor_index"] = anchor_index
+        surface["PredictedVolatility"] = predict_raw_frame(trained_model, surface_raw)
         rows.append(surface)
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
 
 
 def build_ice_frame(
     *,
-    model,
-    preprocessor: ColumnTransformer | None,
+    trained_model,
     dataset_frame: pd.DataFrame,
-    raw_feature_names: list[str],
+    raw_frame: pd.DataFrame,
     feature_names: list[str],
 ) -> pd.DataFrame:
-    transformed_feature_names = resolve_transformed_feature_names(
-        raw_feature_names, preprocessor
-    )
-    sampled = sample_frame(
+    curve_points = config.dashboard_models_config.curve_points
+    sampled_dataset = sample_frame(
         dataset_frame,
-        max_rows=DEFAULT_SETTINGS.ice_sample_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+        max_rows=config.dashboard_models_config.ice_sample_size,
+        random_state=config.dashboard_models_config.random_state,
     )
     rows: list[dict[str, t.Any]] = []
     for feature_name in feature_names:
-        if feature_name in sampled.columns:
-            values = quantile_grid(sampled[feature_name], DEFAULT_SETTINGS.curve_points)
-        elif feature_name in {"Moneyness", "LogMoneyness"}:
-            values = quantile_grid(sampled[feature_name], DEFAULT_SETTINGS.curve_points)
-        else:
+        if feature_name not in sampled_dataset.columns:
             continue
-        for sample_id, (_, sample_row) in enumerate(sampled.iterrows()):
-            base_frame = sample_row.to_frame().T
+        values = quantile_grid(sampled_dataset[feature_name], curve_points)
+        if not values:
+            continue
+        for sample_id, sample_index in enumerate(sampled_dataset.index):
+            base_raw = raw_frame.loc[[sample_index]].copy()
             for value in values:
-                adjusted = apply_feature_override(base_frame, feature_name, value)
-                prediction = float(
-                    predict_frame(
-                        model,
-                        preprocessor,
-                        adjusted,
-                        raw_feature_names,
-                        transformed_feature_names,
-                    ).iloc[0]
-                )
+                adjusted = apply_feature_override(base_raw, feature_name, value)
+                prediction = float(predict_raw_frame(trained_model, adjusted)[0])
                 rows.append(
                     {
                         "feature_name": feature_name,
@@ -562,23 +444,18 @@ def build_ice_frame(
 
 def build_ale_frame(
     *,
-    model,
-    preprocessor: ColumnTransformer | None,
+    trained_model,
     dataset_frame: pd.DataFrame,
-    raw_feature_names: list[str],
+    raw_frame: pd.DataFrame,
     feature_names: list[str],
 ) -> pd.DataFrame:
-    transformed_feature_names = resolve_transformed_feature_names(
-        raw_feature_names, preprocessor
-    )
     rows: list[dict[str, t.Any]] = []
     for feature_name in feature_names:
         if feature_name not in dataset_frame.columns:
             continue
-        series = dataset_frame[feature_name]
+        series = pd.to_numeric(dataset_frame[feature_name], errors="coerce")
         edges = (
-            pd.Series(series)
-            .dropna()
+            series.dropna()
             .quantile(np.linspace(0.05, 0.95, 13))
             .drop_duplicates()
             .tolist()
@@ -588,26 +465,15 @@ def build_ale_frame(
         increments: list[float] = []
         centers: list[float] = []
         for lower, upper in zip(edges[:-1], edges[1:]):
-            bucket = dataset_frame.loc[(series >= lower) & (series <= upper)]
-            if bucket.empty:
+            bucket_index = dataset_frame.loc[(series >= lower) & (series <= upper)].index
+            if len(bucket_index) == 0:
                 continue
-            lower_frame = apply_feature_override(bucket, feature_name, lower)
-            upper_frame = apply_feature_override(bucket, feature_name, upper)
+            bucket_raw = raw_frame.loc[bucket_index]
+            lower_frame = apply_feature_override(bucket_raw, feature_name, lower)
+            upper_frame = apply_feature_override(bucket_raw, feature_name, upper)
             delta = (
-                predict_frame(
-                    model,
-                    preprocessor,
-                    upper_frame,
-                    raw_feature_names,
-                    transformed_feature_names,
-                )
-                - predict_frame(
-                    model,
-                    preprocessor,
-                    lower_frame,
-                    raw_feature_names,
-                    transformed_feature_names,
-                )
+                pd.Series(predict_raw_frame(trained_model, upper_frame), index=bucket_index)
+                - pd.Series(predict_raw_frame(trained_model, lower_frame), index=bucket_index)
             ).mean()
             increments.append(float(delta))
             centers.append(float((lower + upper) / 2.0))
@@ -629,30 +495,27 @@ def build_ale_frame(
 def build_diagnosis_artifact(
     dataset_frame: pd.DataFrame,
     *,
-    target_column: str,
     financial_warnings: list[str],
 ):
-    from src.python_models.dashboard_models import DiagnosisArtifact
-
     sampled = sample_frame(
-        dataset_frame.dropna(subset=[target_column]),
-        max_rows=DEFAULT_SETTINGS.diagnosis_sample_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+        dataset_frame.dropna(subset=[str(TARGET_COLUMN)]),
+        max_rows=config.dashboard_models_config.diagnosis_sample_size,
+        random_state=config.dashboard_models_config.random_state,
     )
-    metrics = DEFAULT_METRICS_REGISTRY.compute_metrics(
-        sampled[target_column].astype(float).reset_index(drop=True),
+    metrics = METRICS_REGISTRY.compute_metrics(
+        sampled[str(TARGET_COLUMN)].astype(float).reset_index(drop=True),
         sampled["PredictedVolatility"].astype(float).reset_index(drop=True),
-        DEFAULT_SETTINGS.error_metrics,
+        config.dashboard_models_config.error_metrics,
     )
     plot_frame = sample_frame(
         sampled,
-        max_rows=min(2500, DEFAULT_SETTINGS.diagnosis_sample_size),
-        random_state=DEFAULT_SETTINGS.random_state + 7,
+        max_rows=min(2500, len(sampled)),
+        random_state=config.dashboard_models_config.random_state + 7,
     )
     error_heatmap = (
         sampled.assign(
             moneyness_bin=pd.cut(sampled["Moneyness"], bins=12),
-            maturity_bin=pd.cut(sampled["TimeToExpiration"], bins=12),
+            maturity_bin=pd.cut(sampled[str(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12),
         )
         .groupby(["moneyness_bin", "maturity_bin"], observed=False)["AbsoluteError"]
         .mean()
@@ -693,48 +556,46 @@ def financial_checks_from_surface(surface_frame: pd.DataFrame) -> list[str]:
 
 def build_surrogate_tree_models(
     *,
-    model,
-    preprocessor: ColumnTransformer | None,
-    reference_frame: pd.DataFrame,
+    trained_model,
+    dataset_frame: pd.DataFrame,
+    raw_frame: pd.DataFrame,
     model_input_features: list[str],
     surrogate_depths: tuple[int, ...],
 ) -> dict[int, SurrogateTreeModel]:
     sampled = sample_frame(
-        reference_frame,
-        max_rows=DEFAULT_SETTINGS.surrogate_sample_size,
-        random_state=DEFAULT_SETTINGS.random_state,
+        dataset_frame,
+        max_rows=config.dashboard_models_config.surrogate_sample_size,
+        random_state=config.dashboard_models_config.random_state,
     )
-    prepared = prepare_feature_frame(sampled, model_input_features)
-    predictions = predict_frame(
-        model,
-        preprocessor,
-        sampled,
+    sampled_features = build_feature_frame_from_trades(raw_frame.loc[sampled.index])
+    transformed = transform_feature_frame(
+        sampled_features,
+        trained_model.preprocessor,
         model_input_features,
-        resolve_transformed_feature_names(model_input_features, preprocessor),
     )
-    tree_preprocessor = build_tree_preprocessor(
-        DEFAULT_FEATURE_SCHEMA, model_input_features
+    predictions = pd.Series(
+        predict_raw_frame(trained_model, raw_frame.loc[sampled.index]),
+        index=sampled.index,
     )
-    transformed = tree_preprocessor.fit_transform(prepared)
     X_train, X_test, y_train, y_test = train_test_split(
         transformed,
         predictions,
         test_size=0.2,
-        random_state=DEFAULT_SETTINGS.random_state,
+        random_state=config.dashboard_models_config.random_state,
     )
     tree_models: dict[int, SurrogateTreeModel] = {}
     for depth in surrogate_depths:
         surrogate = DecisionTreeRegressor(
             max_depth=int(depth),
-            min_samples_leaf=DEFAULT_SETTINGS.surrogate_min_samples_leaf,
-            random_state=DEFAULT_SETTINGS.random_state,
+            min_samples_leaf=config.dashboard_models_config.surrogate_min_samples_leaf,
+            random_state=config.dashboard_models_config.random_state,
         )
         surrogate.fit(X_train, y_train)
         y_pred = pd.Series(surrogate.predict(X_test), index=y_test.index)
-        metrics = DEFAULT_METRICS_REGISTRY.compute_metrics(
+        metrics = METRICS_REGISTRY.compute_metrics(
             y_test.reset_index(drop=True),
             y_pred.reset_index(drop=True),
-            DEFAULT_SETTINGS.error_metrics,
+            config.dashboard_models_config.error_metrics,
         )
         importances = pd.Series(
             surrogate.feature_importances_,
@@ -748,7 +609,7 @@ def build_surrogate_tree_models(
             n_leaves=surrogate.get_n_leaves(),
             text_rules=export_text(surrogate, feature_names=model_input_features),
             interpretation=(
-                "The surrogate approximates the main volatility model "
+                "The surrogate approximates the trained volatility model "
                 f"with RMSE {metrics['rmse']:.4f} at max depth {int(depth)}. "
                 f"The dominant decision logic is driven by {', '.join(top_features) or 'no features'}."
             ),
@@ -764,21 +625,9 @@ def build_surrogate_tree_models(
     return tree_models
 
 
-def resolve_transformed_feature_names(
-    raw_feature_names: list[str],
-    preprocessor: ColumnTransformer | None,
-) -> list[str]:
-    if preprocessor is not None and hasattr(preprocessor, "get_feature_names_out"):
-        try:
-            return [str(name) for name in preprocessor.get_feature_names_out()]
-        except Exception:
-            pass
-    return list(raw_feature_names)
-
-
 def load_preprocessor(
     base_path: Path, metadata: dict[str, t.Any]
-) -> ColumnTransformer | None:
+):
     explicit_preprocessor = metadata.get("preprocessor_path")
     candidates: list[Path] = []
     if explicit_preprocessor:
@@ -798,8 +647,5 @@ def load_preprocessor(
         )
     for candidate in candidates:
         if candidate.exists():
-            loaded = joblib.load(candidate)
-            if isinstance(loaded, ColumnTransformer):
-                return loaded
-            return t.cast(ColumnTransformer, loaded)
+            return joblib.load(candidate)
     return None

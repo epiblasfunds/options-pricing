@@ -1,47 +1,24 @@
 {
-  "dashboard_models": {
-    "model_input_features": [
-      "TimeToExpiration",
-      "Rate",
-      "UnderlyingPrice",
-      "StrikePrice",
-      "OptionType",
-      "ExecHour",
-      "ExecWeekday"
-    ],
-    "categorical_features": [
-      "OptionType",
-      "ExecWeekday"
-    ],
-    "numerical_features": [
-      "TimeToExpiration",
-      "Rate",
-      "UnderlyingPrice",
-      "StrikePrice",
-      "ExecHour"
-    ],
-    "optional_derived_explainability_features": [
-      "Moneyness",
-      "LogMoneyness",
-      "AbsLogMoneyness",
-      "UnderlyingLagMinutes"
-    ],
-    "target_column": "ImpliedVolatility",
+  "dashboard_features": {
     "error_metrics": [
       "rmse",
       "mae",
       "r2"
     ]
   },
-  "dashboard_runtime": {
+  "dashboard_settings": {
+    "build_config": {
+      "surrogate_depths": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "sample_option_size": 250,
+      "behaviour_anchor_size": 96,
+      "neighbors_k": 10
+    },
     "random_state": 42,
-    "surrogate_depths": [
-      2,
-      4,
-      8,
-      16
-    ],
-    "surrogate_max_depth": 4,
     "surrogate_min_samples_leaf": 80,
     "surrogate_sample_size": 12000,
     "shap_background_size": 24,

@@ -1,40 +1,40 @@
-from src.config.dashboard_models_config.dashboard_features_config import (
-    DashboardFeaturesConfig,
-)
-from src.config.dashboard_models_config.dashboard_runtime_config import (
-    DashboardRuntimeConfig,
-)
+import json
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class DashboardBuildConfig:
+    surrogate_depths: tuple[int, ...]
+    sample_option_size: int
+    behaviour_anchor_size: int
+    neighbors_k: int
 
 
 class DashboardModelsConfig:
     def __init__(self, dashboard_models_config_file_path: str):
-        self.dashboard_features_config = DashboardFeaturesConfig(
-            dashboard_models_config_file_path=dashboard_models_config_file_path
+        with open(dashboard_models_config_file_path, "r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        features_config = payload["dashboard_features"]
+        settings_config = payload["dashboard_settings"]
+        build_config = settings_config["build_config"]
+
+        self.error_metrics = tuple(features_config["error_metrics"])
+        self.build_config = DashboardBuildConfig(
+            surrogate_depths=tuple(int(depth) for depth in build_config["surrogate_depths"]),
+            sample_option_size=int(build_config["sample_option_size"]),
+            behaviour_anchor_size=int(build_config["behaviour_anchor_size"]),
+            neighbors_k=int(build_config["neighbors_k"]),
         )
-        self.dashboard_runtime_config = DashboardRuntimeConfig(
-            dashboard_models_config_file_path=dashboard_models_config_file_path
-        )
-        self.model_input_features = self.dashboard_features_config.model_input_features
-        self.categorical_features = self.dashboard_features_config.categorical_features
-        self.numerical_features = self.dashboard_features_config.numerical_features
-        self.optional_derived_explainability_features = (
-            self.dashboard_features_config.optional_derived_explainability_features
-        )
-        self.target_column = self.dashboard_features_config.target_column
-        self.error_metrics = self.dashboard_features_config.error_metrics
-        self.random_state = self.dashboard_runtime_config.random_state
-        self.surrogate_depths = self.dashboard_runtime_config.surrogate_depths
-        self.surrogate_max_depth = self.dashboard_runtime_config.surrogate_max_depth
-        self.surrogate_min_samples_leaf = (
-            self.dashboard_runtime_config.surrogate_min_samples_leaf
-        )
-        self.surrogate_sample_size = self.dashboard_runtime_config.surrogate_sample_size
-        self.shap_background_size = self.dashboard_runtime_config.shap_background_size
-        self.shap_explain_size = self.dashboard_runtime_config.shap_explain_size
-        self.shap_permutations = self.dashboard_runtime_config.shap_permutations
-        self.neighbors_sample_size = self.dashboard_runtime_config.neighbors_sample_size
-        self.diagnosis_sample_size = self.dashboard_runtime_config.diagnosis_sample_size
-        self.surface_grid_size = self.dashboard_runtime_config.surface_grid_size
-        self.ice_sample_size = self.dashboard_runtime_config.ice_sample_size
-        self.curve_points = self.dashboard_runtime_config.curve_points
-        self.cache_entries = self.dashboard_runtime_config.cache_entries
+        self.random_state = int(settings_config["random_state"])
+        self.surrogate_min_samples_leaf = int(settings_config["surrogate_min_samples_leaf"])
+        self.surrogate_sample_size = int(settings_config["surrogate_sample_size"])
+        self.shap_background_size = int(settings_config["shap_background_size"])
+        self.shap_explain_size = int(settings_config["shap_explain_size"])
+        self.shap_permutations = int(settings_config["shap_permutations"])
+        self.neighbors_sample_size = int(settings_config["neighbors_sample_size"])
+        self.diagnosis_sample_size = int(settings_config["diagnosis_sample_size"])
+        self.surface_grid_size = int(settings_config["surface_grid_size"])
+        self.ice_sample_size = int(settings_config["ice_sample_size"])
+        self.curve_points = int(settings_config["curve_points"])
+        self.cache_entries = int(settings_config["cache_entries"])

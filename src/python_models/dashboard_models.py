@@ -2,86 +2,23 @@ from __future__ import annotations
 
 import json
 import typing as t
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
-import shap
 from sklearn.compose import ColumnTransformer
 
-from src.python_models.dashboard_model_builders import build_dashboard_model_from_runtime
-from src.python_models.dashboard_model_builders import load_dashboard_tree_models
+from src.python_models.dashboard_artifacts import DiagnosisArtifact
+from src.python_models.dashboard_artifacts import ManualApiStubResponse
+from src.python_models.dashboard_artifacts import StoredShapExplanation
+from src.python_models.dashboard_model_builders import (
+    build_dashboard_model,
+    load_dashboard_tree_models,
+)
 from src.python_models.explainable_model import (
-    EpiBlasModel,
     ExplainableModel,
     SurrogateTreeModel,
 )
-from src.volatility_models.model_explainability.runtime import DEFAULT_SETTINGS
-
-
-@dataclass(frozen=True)
-class DashboardBuildConfig:
-    surrogate_depths: tuple[int, ...] = (2, 4, 8, 16)
-    sample_option_size: int = 250
-    behaviour_anchor_size: int = 96
-    neighbors_k: int = 10
-
-
-@dataclass
-class StoredShapExplanation:
-    method: str
-    feature_names: list[str]
-    index: list[t.Any]
-    values: np.ndarray
-    base_values: np.ndarray
-    data: np.ndarray
-    display_data: np.ndarray | None
-    predictions: np.ndarray
-    mean_abs_shap: dict[str, float]
-
-    def select(self, row_index: t.Any) -> "StoredShapExplanation":
-        position = self.index.index(row_index)
-        return StoredShapExplanation(
-            method=self.method,
-            feature_names=list(self.feature_names),
-            index=[row_index],
-            values=np.asarray(self.values[position : position + 1]),
-            base_values=np.asarray(self.base_values[position : position + 1]),
-            data=np.asarray(self.data[position : position + 1]),
-            display_data=(
-                None
-                if self.display_data is None
-                else np.asarray(self.display_data[position : position + 1])
-            ),
-            predictions=np.asarray(self.predictions[position : position + 1]),
-            mean_abs_shap=dict(self.mean_abs_shap),
-        )
-
-    def to_explanation(self) -> shap.Explanation:
-        return shap.Explanation(
-            values=self.values,
-            base_values=self.base_values,
-            data=self.data,
-            display_data=self.display_data,
-            feature_names=self.feature_names,
-        )
-
-
-@dataclass
-class DiagnosisArtifact:
-    metrics: dict[str, float]
-    plot_frame: pd.DataFrame
-    error_heatmap: pd.DataFrame
-    financial_warnings: list[str]
-
-
-@dataclass
-class ManualApiStubResponse:
-    prediction: float
-    summary: str
-    reference_sample_index: t.Any | None = None
 
 
 class DashboardModel:
@@ -126,23 +63,18 @@ class DashboardModel:
     @classmethod
     def from_model(
         cls,
-        model: ExplainableModel | EpiBlasModel,
+        model: ExplainableModel,
         X: pd.DataFrame,
-        y: pd.Series | np.ndarray | None,
+        y: pd.Series,
         *,
         preprocessor: ColumnTransformer | None = None,
-        build_config: DashboardBuildConfig | None = None,
     ) -> "DashboardModel":
-        config = build_config or DashboardBuildConfig(
-            surrogate_depths=tuple(getattr(DEFAULT_SETTINGS, "surrogate_depths", (2, 4, 8, 16)))
-        )
-        return build_dashboard_model_from_runtime(
+        del preprocessor
+        return build_dashboard_model(
             cls,
             model=model,
             X=X,
             y=y,
-            preprocessor=preprocessor,
-            build_config=config,
         )
 
     @staticmethod
@@ -165,7 +97,9 @@ class DashboardModel:
             "behaviour_anchor_indices": list(self.behaviour_anchor_indices),
             "metadata": self.metadata,
         }
-        self.get_metadata_path(root).write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+        self.get_metadata_path(root).write_text(
+            json.dumps(payload, indent=2, default=str), encoding="utf-8"
+        )
         joblib.dump(self.dataset_frame, root / "dataset_frame.joblib")
         joblib.dump(self.global_shap, root / "global_shap.joblib")
         joblib.dump(self.local_shap, root / "local_shap.joblib")
@@ -211,7 +145,9 @@ class DashboardModel:
         return self.local_shap.select(row_index)
 
     def neighbors_for_index(self, row_index: t.Any) -> pd.DataFrame:
-        rows = self.neighbors_frame.loc[self.neighbors_frame["sample_index"] == row_index].copy()
+        rows = self.neighbors_frame.loc[
+            self.neighbors_frame["sample_index"] == row_index
+        ].copy()
         if rows.empty:
             return pd.DataFrame()
         neighbors = self.dataset_frame.loc[rows["neighbor_index"]].copy()
@@ -219,7 +155,9 @@ class DashboardModel:
         return neighbors
 
     def surface_for_anchor(self, anchor_index: t.Any) -> pd.DataFrame:
-        return self.surfaces_frame.loc[self.surfaces_frame["anchor_index"] == anchor_index].copy()
+        return self.surfaces_frame.loc[
+            self.surfaces_frame["anchor_index"] == anchor_index
+        ].copy()
 
     def ice_for_feature(self, feature_name: str) -> pd.DataFrame:
         return self.ice_frame.loc[self.ice_frame["feature_name"] == feature_name].copy()
