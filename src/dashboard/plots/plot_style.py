@@ -22,8 +22,11 @@ def safe_color_range(values: Iterable[float]) -> tuple[float, float]:
     for value in values:
         if value is None:
             continue
-        numeric_value = float(value)
-        if math.isnan(numeric_value):
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(numeric_value):
             continue
         numeric_values.append(numeric_value)
     if not numeric_values:

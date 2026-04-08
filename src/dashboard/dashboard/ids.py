@@ -16,6 +16,7 @@ class IDS:
     GLOBAL_EQUIVALENT_ZOOM = "global-equivalent-zoom"
     GLOBAL_EQUIVALENT_CONTENT = "global-equivalent-content"
     GLOBAL_EQUIVALENT_TREE_IMAGE = "global-equivalent-tree-image"
+    GLOBAL_EQUIVALENT_TREE_PANEL = "global-equivalent-tree-panel"
 
     BEHAVIOUR_ANCHOR_INDEX = "behaviour-anchor-index"
     BEHAVIOUR_ICE_FEATURE = "behaviour-ice-feature"

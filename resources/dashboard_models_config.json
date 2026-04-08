@@ -30,12 +30,12 @@
     "ice_sample_size": 24,
     "curve_points": 25,
     "cache_entries": 64,
-    "symbolic_sample_size": 1200,
-    "symbolic_niterations": 8,
-    "symbolic_populations": 4,
-    "symbolic_population_size": 18,
-    "symbolic_maxsize": 18,
-    "symbolic_maxdepth": 6,
-    "symbolic_timeout_seconds": 90
+    "symbolic_sample_size": 2500,
+    "symbolic_niterations": 12,
+    "symbolic_populations": 6,
+    "symbolic_population_size": 26,
+    "symbolic_maxsize": 48,
+    "symbolic_maxdepth": 14,
+    "symbolic_timeout_seconds": 180
   }
 }

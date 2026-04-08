@@ -1,6 +1,6 @@
 """Callbacks related to model discovery and shared dashboard context."""
 
-from dash import Input, Output, State, dcc, html
+from dash import Input, Output, State, html
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
@@ -43,8 +43,6 @@ def register_model_loading_callbacks(app, services) -> None:
         Output(IDS.BEHAVIOUR_ICE_FEATURE, "value"),
         Output(IDS.BEHAVIOUR_ANCHOR_INDEX, "options"),
         Output(IDS.SAMPLE_INDEX, "options"),
-        Output(IDS.GLOBAL_EQUIVALENT_DEPTH_TABS, "children"),
-        Output(IDS.GLOBAL_EQUIVALENT_DEPTH_TABS, "value"),
         Input(IDS.MODEL_SELECTOR, "value"),
     )
     def update_shared_context(model_id):
@@ -64,8 +62,6 @@ def register_model_loading_callbacks(app, services) -> None:
         ]
 
         shap_options = []
-        tree_tabs = []
-        tree_value = None
 
         if not model_id:
             sample_options = [
@@ -83,8 +79,6 @@ def register_model_loading_callbacks(app, services) -> None:
                 ice_options[0]["value"] if ice_options else None,
                 sample_options,
                 sample_options,
-                tree_tabs,
-                tree_value,
             )
 
         model = services.model_registry.get_model(model_id)
@@ -111,12 +105,6 @@ def register_model_loading_callbacks(app, services) -> None:
             }
             for feature_name in shap_feature_names
         ]
-        available_depths = metadata.get("available_surrogate_depths", [])
-        tree_tabs = [
-            dcc.Tab(label=f"Depth {int(depth)}", value=str(int(depth)))
-            for depth in available_depths
-        ]
-        tree_value = tree_tabs[0].value if tree_tabs else None
         format_label = model.format.value if model else "unknown"
         info_children = [
             html.H3(model.name if model else model_id, style={"marginBottom": "6px"}),
@@ -139,6 +127,4 @@ def register_model_loading_callbacks(app, services) -> None:
             ice_options[0]["value"] if ice_options else None,
             anchor_options,
             sample_options,
-            tree_tabs,
-            tree_value,
         )

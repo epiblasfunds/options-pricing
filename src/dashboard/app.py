@@ -92,7 +92,12 @@ def create_app():
 
     services = build_services()
     app = Dash(
-        __name__, suppress_callback_exceptions=True, title="Volatility Explainability"
+        __name__,
+        suppress_callback_exceptions=True,
+        title="Volatility Explainability",
+        external_scripts=[
+            "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        ],
     )
     app.layout = build_layout()
     register_callbacks(app, services)

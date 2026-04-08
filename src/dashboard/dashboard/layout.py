@@ -335,7 +335,7 @@ def _global_tab():
                             html.Div(
                                 style={
                                     "display": "grid",
-                                    "gridTemplateColumns": "repeat(auto-fit, minmax(320px, 1fr))",
+                                    "gridTemplateColumns": "repeat(auto-fit, minmax(640px, 1fr))",
                                     "gap": "16px",
                                 },
                                 children=[
@@ -393,7 +393,6 @@ def _global_tab():
                                             "opacity": "0.78",
                                         },
                                     ),
-                                    dcc.Tabs(id=IDS.GLOBAL_EQUIVALENT_DEPTH_TABS),
                                     html.Div(
                                         id=IDS.GLOBAL_EQUIVALENT_CONTENT,
                                         style={"marginTop": "14px"},
@@ -521,54 +520,68 @@ def _diagnosis_tab():
                                 ],
                             ),
                             html.Div(
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "repeat(auto-fit, minmax(320px, 1fr))",
-                                    "gap": "16px",
-                                },
+                                style={"display": "grid", "gap": "16px"},
                                 children=[
                                     html.Div(
-                                        style=SUBCARD_STYLE,
+                                        style={
+                                            "display": "grid",
+                                            "gridTemplateColumns": "repeat(auto-fit, minmax(640px, 1fr))",
+                                            "gap": "16px",
+                                        },
                                         children=[
-                                            _section_title_with_info(
-                                                "Predicted vs Actual",
-                                                "Scatter comparison between observed implied volatility and model prediction. The closer the cloud is to the diagonal, the more "
-                                                "accurate and better calibrated the model is across the evaluated observations.",
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Predicted vs Actual",
+                                                        "Scatter comparison between observed implied volatility and model prediction. The closer the cloud is to the diagonal, the more "
+                                                        "accurate and better calibrated the model is across the evaluated observations.",
+                                                    ),
+                                                    dcc.Graph(id=IDS.DIAGNOSIS_SCATTER),
+                                                ],
                                             ),
-                                            dcc.Graph(id=IDS.DIAGNOSIS_SCATTER),
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Residual Heatmap",
+                                                        "Heatmap of average absolute error across the joint moneyness and maturity grid. It is designed to reveal where model accuracy "
+                                                        "deteriorates systematically on the surface and whether that deterioration is linked to specific smile or term-structure regimes.",
+                                                    ),
+                                                    dcc.Graph(id=IDS.DIAGNOSIS_HEATMAP),
+                                                ],
+                                            ),
                                         ],
                                     ),
                                     html.Div(
-                                        style=SUBCARD_STYLE,
+                                        style={
+                                            "display": "grid",
+                                            "gridTemplateColumns": "repeat(auto-fit, minmax(640px, 1fr))",
+                                            "gap": "16px",
+                                        },
                                         children=[
-                                            _section_title_with_info(
-                                                "Residual Heatmap",
-                                                "Heatmap of average absolute error across the joint moneyness and maturity grid. It is designed to reveal where model accuracy "
-                                                "deteriorates systematically on the surface and whether that deterioration is linked to specific smile or term-structure regimes.",
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Error by Moneyness",
+                                                        "Residual pattern across moneyness. This view helps identify whether the model systematically overestimates or underestimates "
+                                                        "volatility in in-the-money, at-the-money or out-of-the-money regions, which is particularly relevant for smile diagnostics.",
+                                                    ),
+                                                    dcc.Graph(id=IDS.DIAGNOSIS_MONEYNESS),
+                                                ],
                                             ),
-                                            dcc.Graph(id=IDS.DIAGNOSIS_HEATMAP),
-                                        ],
-                                    ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            _section_title_with_info(
-                                                "Error by Moneyness",
-                                                "Residual pattern across moneyness. This view helps identify whether the model systematically overestimates or underestimates "
-                                                "volatility in in-the-money, at-the-money or out-of-the-money regions, which is particularly relevant for smile diagnostics.",
+                                            html.Div(
+                                                style=SUBCARD_STYLE,
+                                                children=[
+                                                    _section_title_with_info(
+                                                        "Error by Maturity",
+                                                        "Residual pattern across time to expiration. It helps detect short-end versus long-end calibration issues and broader term-structure "
+                                                        "biases in the model predictions.",
+                                                    ),
+                                                    dcc.Graph(id=IDS.DIAGNOSIS_MATURITY),
+                                                ],
                                             ),
-                                            dcc.Graph(id=IDS.DIAGNOSIS_MONEYNESS),
-                                        ],
-                                    ),
-                                    html.Div(
-                                        style=SUBCARD_STYLE,
-                                        children=[
-                                            _section_title_with_info(
-                                                "Error by Maturity",
-                                                "Residual pattern across time to expiration. It helps detect short-end versus long-end calibration issues and broader term-structure "
-                                                "biases in the model predictions.",
-                                            ),
-                                            dcc.Graph(id=IDS.DIAGNOSIS_MATURITY),
                                         ],
                                     ),
                                 ],

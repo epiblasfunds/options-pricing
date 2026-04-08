@@ -41,9 +41,9 @@ def build_symbolic_regressor_model(
         random_state=config.dashboard_models_config.random_state,
     )
     regressor = PySRRegressor(
-        model_selection="best",
-        binary_operators=["+", "-", "*"],
-        unary_operators=None,
+        model_selection="accuracy",
+        binary_operators=["+", "-", "*", "/"],
+        unary_operators=["square", "cube"],
         niterations=config.dashboard_models_config.symbolic_niterations,
         populations=config.dashboard_models_config.symbolic_populations,
         population_size=config.dashboard_models_config.symbolic_population_size,
@@ -138,6 +138,6 @@ def _build_interpretation(
     return (
         "The symbolic surrogate approximates the trained model with "
         f"RMSE {metrics['rmse']:.4f}. "
-        f"It uses {dominant_terms} and reaches complexity "
+        f"It uses {dominant_terms}, reaches complexity "
         f"{int(best_equation['complexity'])}."
     )
