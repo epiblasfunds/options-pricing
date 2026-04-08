@@ -9,7 +9,8 @@ from src.config.config import config
 from src.dashboard.domain import build_metrics_registry
 from src.enums.volatility_model_enums import ModelFormatEnum
 from src.functionalities.dashboard_models.runtime import predict_raw_frame
-from src.python_models.explainable_model import SingleModelMetadata, SurrogateTreeModel
+from src.python_models.explainable_artifacts import SingleModelMetadata
+from src.python_models.explainable_artifacts import SurrogateTreeModel
 from src.volatility_models import build_feature_frame_from_trades
 
 METRICS_REGISTRY = build_metrics_registry()

@@ -5,10 +5,8 @@ from pathlib import Path
 
 from src.config.config import DASHBOARD_SAVED_MODELS_DIR_PATH
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.python_models.explainable_model import (
-    AbstractModelMetadata,
-    ExplainableModelMetadata,
-)
+from src.python_models.explainable_artifacts import AbstractModelMetadata
+from src.python_models.explainable_artifacts import ExplainableModelMetadata
 
 
 class ModelRegistry:

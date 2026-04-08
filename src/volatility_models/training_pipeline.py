@@ -7,7 +7,6 @@ from keras import callbacks, layers, models, optimizers, regularizers
 from sklearn.preprocessing import StandardScaler
 
 from src.config.config import (
-    DASHBOARD_SAVED_MODELS_DIR_PATH,
     VOLATILITY_MODEL_DATA_DIR_PATH,
     VOLATILITY_TRAINED_MODELS_DIR_PATH,
     config,
@@ -15,11 +14,6 @@ from src.config.config import (
 from src.dashboard.domain import build_metrics_registry
 from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
 from src.enums.volatility_model_enums import ModelFormatEnum
-from src.python_models.dashboard.dashboard_model import DashboardModel
-from src.python_models.explainable_model import (
-    ExplainableModel,
-    ExplainableModelMetadata,
-)
 from src.volatility_models import (
     MODEL_FEATURE_NAMES,
     TARGET_COLUMN,
@@ -40,13 +34,6 @@ class DatasetSplits:
     train_frame: pd.DataFrame
     validation_frame: pd.DataFrame
     test_frame: pd.DataFrame
-
-
-@dataclass(frozen=True)
-class ExportedBundlePaths:
-    trained_model_path: Path
-    explainable_bundle_path: Path
-    dashboard_metadata_path: Path
 
 
 def load_volatility_trade_frame(force_reload: bool = False) -> pd.DataFrame:
@@ -218,75 +205,3 @@ def train_trained_model(
     return trained_model, {
         name: float(value) for name, value in validation_metrics.items()
     }
-
-
-def export_explainable_bundle(
-    *,
-    trained_model: TrainedModel,
-    reference_frame: pd.DataFrame,
-    bundle_name: str,
-    bundle_dir: Path = DASHBOARD_SAVED_MODELS_DIR_PATH,
-) -> ExportedBundlePaths:
-    bundle_path = bundle_dir / bundle_name
-    raw_reference = select_trade_columns(reference_frame)
-    y_reference = raw_reference[str(TARGET_COLUMN)].astype("float64")
-    model_features = list(trained_model.metadata.feature_names)
-    explainable_metadata = ExplainableModelMetadata(
-        model_id=trained_model.metadata.model_id,
-        name=trained_model.metadata.name,
-        path=bundle_path,
-        format=ModelFormatEnum.EXPLAINABLE_MODEL,
-        trained_model_format=trained_model.metadata.format,
-        tree_format=ModelFormatEnum.JOBLIB,
-        metadata={
-            "model_input_features": model_features,
-            "transformed_feature_names": model_features,
-            "target_column": str(TARGET_COLUMN),
-            "error_metrics": list(config.dashboard_models_config.error_metrics),
-            "loss_name": trained_model.metadata.loss_name,
-            "trained_model_path": trained_model.metadata.path.as_posix(),
-        },
-    )
-    seed_explainable_model = ExplainableModel(
-        main_model=trained_model,
-        tree_models={},
-        metadata=explainable_metadata,
-    )
-    dashboard_model = DashboardModel.from_model(
-        seed_explainable_model,
-        raw_reference.drop(columns=[str(TARGET_COLUMN)]),
-        y_reference,
-    )
-    final_metadata = ExplainableModelMetadata(
-        model_id=trained_model.metadata.model_id,
-        name=trained_model.metadata.name,
-        path=bundle_path,
-        format=ModelFormatEnum.EXPLAINABLE_MODEL,
-        trained_model_format=trained_model.metadata.format,
-        tree_format=ModelFormatEnum.JOBLIB,
-        metadata={
-            **explainable_metadata.metadata,
-            "available_surrogate_depths": sorted(
-                int(depth) for depth in dashboard_model.tree_models
-            ),
-            "surrogate_metrics_by_depth": {
-                str(depth): tree.metrics
-                for depth, tree in dashboard_model.tree_models.items()
-            },
-        },
-    )
-    explainable_model = ExplainableModel(
-        main_model=trained_model,
-        tree_models=dashboard_model.tree_models,
-        metadata=final_metadata,
-    )
-    explainable_model.save(bundle_path)
-    dashboard_model.metadata = dict(final_metadata.metadata)
-    dashboard_model.save(bundle_path)
-    return ExportedBundlePaths(
-        trained_model_path=trained_model.metadata.path,
-        explainable_bundle_path=bundle_path,
-        dashboard_metadata_path=DashboardModel.get_metadata_path(
-            DashboardModel.get_root_path(bundle_path)
-        ),
-    )

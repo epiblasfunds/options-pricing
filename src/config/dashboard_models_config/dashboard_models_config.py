@@ -38,3 +38,14 @@ class DashboardModelsConfig:
         self.ice_sample_size = int(settings_config["ice_sample_size"])
         self.curve_points = int(settings_config["curve_points"])
         self.cache_entries = int(settings_config["cache_entries"])
+        self.symbolic_sample_size = int(settings_config["symbolic_sample_size"])
+        self.symbolic_niterations = int(settings_config["symbolic_niterations"])
+        self.symbolic_populations = int(settings_config["symbolic_populations"])
+        self.symbolic_population_size = int(
+            settings_config["symbolic_population_size"]
+        )
+        self.symbolic_maxsize = int(settings_config["symbolic_maxsize"])
+        self.symbolic_maxdepth = int(settings_config["symbolic_maxdepth"])
+        self.symbolic_timeout_seconds = int(
+            settings_config["symbolic_timeout_seconds"]
+        )

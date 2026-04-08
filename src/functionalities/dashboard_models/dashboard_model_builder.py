@@ -146,6 +146,7 @@ def build_dashboard_model(
         ],
         transformed_feature_names=model_input_features,
         tree_models=tree_models,
+        symbolic_model=model.symbolic_model,
         sample_indices=sample_indices,
         behaviour_anchor_indices=behaviour_anchor_indices,
         global_shap=global_shap,

@@ -6,10 +6,8 @@ from pathlib import Path
 
 from src.enums.volatility_model_enums import ModelFormatEnum
 from src.python_models.dashboard.dashboard_model import DashboardModel
-from src.python_models.explainable_model import (
-    AbstractModelMetadata,
-    ExplainableModelMetadata,
-)
+from src.python_models.explainable_artifacts import AbstractModelMetadata
+from src.python_models.explainable_artifacts import ExplainableModelMetadata
 
 
 @dataclass(frozen=True)

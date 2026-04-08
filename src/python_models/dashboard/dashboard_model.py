@@ -15,6 +15,7 @@ from src.python_models.dashboard.artifacts import (
     StoredShapExplanation,
 )
 from src.python_models.explainable_model import ExplainableModel, SurrogateTreeModel
+from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
 
 
 class DashboardModel:
@@ -27,6 +28,7 @@ class DashboardModel:
         raw_feature_names: list[str],
         transformed_feature_names: list[str],
         tree_models: dict[int, SurrogateTreeModel],
+        symbolic_model: SymbolicRegressorModel | None,
         sample_indices: list[t.Any],
         behaviour_anchor_indices: list[t.Any],
         global_shap: StoredShapExplanation,
@@ -45,6 +47,7 @@ class DashboardModel:
         self.raw_feature_names = raw_feature_names
         self.transformed_feature_names = transformed_feature_names
         self.tree_models = {int(depth): model for depth, model in tree_models.items()}
+        self.symbolic_model = symbolic_model
         self.sample_indices = list(sample_indices)
         self.behaviour_anchor_indices = list(behaviour_anchor_indices)
         self.global_shap = global_shap
@@ -107,6 +110,8 @@ class DashboardModel:
         trees_root.mkdir(parents=True, exist_ok=True)
         for depth, tree_model in sorted(self.tree_models.items()):
             tree_model.save(trees_root / f"depth_{int(depth)}")
+        if self.symbolic_model is not None:
+            self.symbolic_model.save(root / "symbolic_model")
 
     @classmethod
     def load(cls, bundle_path: Path) -> "DashboardModel":
@@ -120,6 +125,7 @@ class DashboardModel:
             raw_feature_names=list(payload["raw_feature_names"]),
             transformed_feature_names=list(payload["transformed_feature_names"]),
             tree_models=load_dashboard_tree_models(root, payload),
+            symbolic_model=cls._load_symbolic_model(root),
             sample_indices=list(payload.get("sample_indices", [])),
             behaviour_anchor_indices=list(payload.get("behaviour_anchor_indices", [])),
             global_shap=joblib.load(root / "global_shap.joblib"),
@@ -158,3 +164,10 @@ class DashboardModel:
 
     def ale_for_feature(self, feature_name: str) -> pd.DataFrame:
         return self.ale_frame.loc[self.ale_frame["feature_name"] == feature_name].copy()
+
+    @staticmethod
+    def _load_symbolic_model(root: Path) -> SymbolicRegressorModel | None:
+        symbolic_root = root / "symbolic_model"
+        if symbolic_root.exists():
+            return SymbolicRegressorModel.load(symbolic_root)
+        return None

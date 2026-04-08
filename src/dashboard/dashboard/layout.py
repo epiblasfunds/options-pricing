@@ -387,7 +387,7 @@ def _global_tab():
                                         style=SECTION_TITLE_STYLE,
                                     ),
                                     html.P(
-                                        "Precomputed surrogate trees for the selected model. Choose the depth to inspect the decision logic.",
+                                        "Precomputed symbolic and tree surrogates for the selected model. The symbolic regressor provides a compact closed-form approximation, and the tree tabs let you inspect explicit split logic by depth.",
                                         style={
                                             "margin": "0 0 14px 0",
                                             "opacity": "0.78",
