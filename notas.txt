@@ -64,7 +64,6 @@
 - Cuando ejecutamos el main.py de src simplemente sale el resultado al final, ¿Deberíamos meter algún loggin para conocer qué step se está ejecutando? ¿Esto en realidad cuándo lo vamos a ejecutar?
 - En algún momento, tenemos que valorar si depuramos las columnas que seleccionamos
 - Revisar cuando dentro de los builders y los loaders ponemos _ o no
-- Hacer que en cada load() se tome directamente el load del paso anterior para los ficheros del step anterior
 - Arreglar enums y cómo se usan en los builders y loaders porque en ocasiones no tiene sentido cómo se usan, tomando diferentes enums de ficheros anteriores y propios del step
 - Tenemos validaciones de que el season date coincide con la fecha de ejecución?
 - Añadir validacion en el step del underlying para que la tabla de relación opciones futuros esté completa. (no sé si ya está)
