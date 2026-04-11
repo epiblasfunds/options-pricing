@@ -1,4 +1,6 @@
 data/*
 tfmenv/*
+src/volatility_models/trained_models/*
+src/dashboard/saved_models/*
 *.csv
 __pycache__/

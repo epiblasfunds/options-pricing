@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -11,7 +12,7 @@ class DashboardBuildConfig:
 
 
 class DashboardModelsConfig:
-    def __init__(self, dashboard_models_config_file_path: str):
+    def __init__(self, dashboard_models_config_file_path: Path):
         with open(dashboard_models_config_file_path, "r", encoding="utf-8") as file:
             payload = json.load(file)
 
