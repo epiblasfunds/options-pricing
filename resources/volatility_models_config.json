@@ -63,8 +63,7 @@
             "beta": 0.75,
             "base_metric": "rmse"
         },
-        "metric_order": [
-            "custom_error1",
+        "models_metrics": [
             "train_mae",
             "train_rmse",
             "train_r2",

@@ -7,11 +7,16 @@ import keras
 import numpy as np
 import tensorflow as tf
 from keras import callbacks, layers, regularizers
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
-from src.volatility_models.data_utils import BASE_NUMERIC_FEATURE_COLS
+from src.volatility_models.data_utils import (
+    BASE_FEATURE_COLS,
+    BASE_NUMERIC_FEATURE_COLS,
+)
 from src.volatility_models.visualization_utils import Visualizer
 
 
@@ -174,6 +179,69 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
             train_predictions=np.asarray(model.predict(X_train), dtype=float),
             validation_predictions=np.asarray(model.predict(X_val), dtype=float),
         )
+    
+    
+class RandomForestFamily(VolatilityModelFamilyABC):
+    @staticmethod
+    def get_family_name() -> str:
+        return "random_forest"
+
+    @staticmethod
+    def get_fixed_params() -> t.Dict:
+        return {
+            "criterion": "squared_error",
+            "random_state": 42,
+            "n_jobs": -1,
+            "min_weight_fraction_leaf": 0.0,
+            "verbose": 0,
+            "bootstrap": True,
+        }
+
+    @staticmethod
+    def get_hyperparameter_search_space() -> t.Dict:
+        return {
+            "n_estimators": [300, 500, 800, 1200],
+            "max_depth": [None, 8, 12, 16, 24, 32],
+            "min_samples_split": [2, 5, 10, 20],
+            "min_samples_leaf": [1, 2, 5, 10],
+            "max_features": [1.0, "sqrt", "log2", 0.7, 0.5],
+            "bootstrap": [True],
+            "max_samples": [None, 0.6, 0.8, 0.9],
+            "min_impurity_decrease": [0.0, 1e-6, 1e-5, 1e-4],
+            "ccp_alpha": [0.0, 1e-6, 1e-5, 1e-4],
+
+        }
+
+    @staticmethod
+    def instantiate_model(
+        *, input_dim: int, model_params: dict[str, t.Any]
+    ) -> RandomForestRegressor:
+        _ = input_dim
+        return RandomForestRegressor(**model_params)
+
+    @staticmethod
+    def get_n_iter():
+        return 3 #120
+
+    @classmethod
+    def fit_model(
+        cls,
+        *,
+        model: t.Any,
+        model_params: t.Dict[str, t.Any],
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray,
+        y_val: np.ndarray,
+        phase: TrainnigPhase,
+    ) -> ModelFitResult:
+        _ = model_params, y_val, phase
+        model.fit(X_train, y_train)
+        return ModelFitResult(
+            model=model,
+            train_predictions=np.asarray(model.predict(X_train), dtype=float),
+            validation_predictions=np.asarray(model.predict(X_val), dtype=float),
+        )
 
 
 class XGBoostFamily(VolatilityModelFamilyABC):
@@ -198,7 +266,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
             "colsample_bynode": 1.0,
             "max_delta_step": 0.0,
             "grow_policy": "depthwise",
-            "base_score": 0.20,
+            "base_score": 0.20,  # Ajustado a la media del target para mejorar convergencia
         }
 
     @staticmethod
@@ -221,13 +289,13 @@ class XGBoostFamily(VolatilityModelFamilyABC):
     @staticmethod
     def instantiate_model(
         *, input_dim: int, model_params: dict[str, t.Any]
-    ) -> LinearRegression:
+    ) -> XGBRegressor:
         _ = input_dim
         return XGBRegressor(**model_params)
 
     @staticmethod
     def get_n_iter():
-        return 200
+        return 3 #200
 
     @classmethod
     def fit_model(
@@ -241,9 +309,9 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         y_val: np.ndarray,
         phase: TrainnigPhase,
     ) -> ModelFitResult:
-        _ = model_params
+        _ = model_params, y_val
 
-        if phase in {TrainnigPhase.CV, TrainnigPhase.FINAL_TEST}:
+        if phase is TrainnigPhase.CV:
             X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
                 X_train,
                 y_train,
@@ -252,13 +320,6 @@ class XGBoostFamily(VolatilityModelFamilyABC):
                 X_fit,
                 y_fit,
                 eval_set=[(X_es, y_es)],
-                verbose=False,
-            )
-        else:
-            model.fit(
-                X_train,
-                y_train,
-                eval_set=[(X_val, y_val)],
                 verbose=False,
             )
 
@@ -335,7 +396,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         X_train_full_raw: np.ndarray,
         X_eval_raw: np.ndarray,
         numeric_col_indices: tuple[int, ...],
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, StandardScaler]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         scaler = StandardScaler()
         indices = list(numeric_col_indices)
 
@@ -349,33 +410,28 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         X_train_full_scaled[:, indices] = scaler.transform(X_train_full_raw[:, indices])
         X_eval_scaled[:, indices] = scaler.transform(X_eval_raw[:, indices])
 
-        return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled, scaler
-    
+        return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled
+
     @staticmethod
-    def temporal_inner_split_for_early_stopping(
-        X_train,
-        y_train,
-        valid_fraction: float = 0.20,
-        min_valid_samples: int = 256,
-    ):
-        """
-        Crea un split temporal interno dentro de X_train para el early stopping.
-        El fold-valid externo queda reservado únicamente para evaluación final de métricas,
-        evitando así cualquier sesgo de overfitting hacia ese conjunto.
-        """
-        n_samples = len(X_train)
+    def _resolve_numeric_col_indices() -> tuple[int, ...]:
+        def _feature_name(col: t.Any) -> str:
+            return str(col.value) if hasattr(col, "value") else str(col)
 
-        n_valid = max(int(np.ceil(n_samples * valid_fraction)), min_valid_samples)
-        split_idx = n_samples - n_valid
+        base_feature_names = [_feature_name(col) for col in BASE_FEATURE_COLS]
+        feature_to_index = {
+            feature_name: idx for idx, feature_name in enumerate(base_feature_names)
+        }
 
-        return X_train[:split_idx], y_train[:split_idx], X_train[split_idx:], y_train[split_idx:]
+        numeric_feature_names = [_feature_name(col) for col in BASE_NUMERIC_FEATURE_COLS]
+
+        return tuple(feature_to_index[name] for name in numeric_feature_names)
 
     @staticmethod
     def instantiate_model(
         *, input_dim: int, model_params: dict[str, t.Any]
-    ) -> LinearRegression:
+    ) -> keras.Sequential:
         keras.backend.clear_session()
-        tf.random.set_seed(42)
+        tf.random.set_seed(VolatilityModelFamilyABC.RANDOM_SEED)
 
         model = keras.Sequential()
         model.add(layers.Input(shape=(input_dim,)))
@@ -407,7 +463,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 200
+        return 3 #200
 
     @classmethod
     def fit_model(
@@ -421,8 +477,10 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         y_val: np.ndarray,
         phase: TrainnigPhase,
     ) -> ModelFitResult:
+        _ = y_val
+        numeric_col_indices = cls._resolve_numeric_col_indices()
 
-        if phase in {"cv", "final_test"}:
+        if phase is TrainnigPhase.CV:
             X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
                 X_train,
                 y_train,
@@ -432,40 +490,51 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
                 X_es_scaled,
                 X_train_scaled,
                 X_val_scaled,
-                scaler,
             ) = cls._scale_numeric_features(
                 X_fit_raw=X_fit_raw,
-                X_val_raw=X_es_raw,
+                X_valid_raw=X_es_raw,
                 X_train_full_raw=X_train,
                 X_eval_raw=X_val,
-                numeric_col_indices=BASE_NUMERIC_FEATURE_COLS,
+                numeric_col_indices=numeric_col_indices,
             )
-            y_fit_target = y_fit
-            validation_data = (X_es_scaled, y_es)
-        else:
-            scaler = StandardScaler()
-            X_train_scaled = X_train.copy()
-            X_val_scaled = X_val.copy()
-            indices = list(BASE_NUMERIC_FEATURE_COLS)
-            X_train_scaled[:, indices] = scaler.fit_transform(X_train[:, indices])
-            X_val_scaled[:, indices] = scaler.transform(X_val[:, indices])
-            X_fit_scaled = X_train_scaled
-            y_fit_target = y_train
-            validation_data = (X_val_scaled, y_val)
 
-        history = model.fit(
-            X_fit_scaled,
-            y_fit_target,
-            epochs=model_params["epochs"],
-            batch_size=model_params["batch_size"],
-            validation_data=validation_data,
-            callbacks=callbacks,
-            verbose=model_params["verbose"],
-        )
+            early_stop = EarlyStopping(
+                monitor="val_rmse",
+                mode="min",
+                patience=model_params["patience"],
+                restore_best_weights=True,
+                verbose=0,
+            )
 
-        val_rmse_history = history.history.get("val_rmse", [])
-        best_epoch = int(np.argmin(val_rmse_history)) + 1 if val_rmse_history else None
-        best_score = float(np.min(val_rmse_history)) if val_rmse_history else None
+            callbacks = [early_stop]
+
+            if model_params.get("use_lr_scheduler", False):
+                callbacks.append(
+                    ReduceLROnPlateau(
+                        monitor="val_rmse",
+                        factor=0.5,
+                        patience=5,
+                        min_lr=1e-6,
+                        verbose=0,
+                    )
+                )
+
+            history = model.fit(
+                X_fit_scaled,
+                y_fit,
+                epochs=model_params["epochs"],
+                batch_size=model_params["batch_size"],
+                validation_data=(X_es_scaled, y_es),
+                callbacks=callbacks,
+                verbose=model_params["verbose"],
+            )
+
+            train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
+            val_rmse_history = [float(value) for value in history.history.get("val_rmse", [])]
+
+            metric_history = val_rmse_history if val_rmse_history else train_rmse_history
+            best_epoch = int(np.argmin(metric_history)) + 1 if metric_history else None
+            best_score = float(np.min(metric_history)) if metric_history else None
 
         return ModelFitResult(
             model=model,
@@ -474,17 +543,16 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             best_iteration=best_epoch,
             best_score=best_score,
             epoch_history={
-                "rmse": [float(value) for value in history.history.get("rmse", [])],
-                "val_rmse": [float(value) for value in val_rmse_history],
+                "rmse": train_rmse_history,
+                "val_rmse": val_rmse_history,
             },
-            preprocessor=scaler,
         )
 
     @classmethod
     def plots(cls, kwargs):
         args = {
             "training_registry": kwargs.get("training_registry"),
-            "best_model_row": kwargs.get("best_model_row"),
+            "best_model_name": kwargs.get("best_model_name"),
             "family_name": cls.get_family_name(),
         }
         Visualizer.plot_nn_learning_curves(**args)

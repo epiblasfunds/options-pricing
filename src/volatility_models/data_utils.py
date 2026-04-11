@@ -156,8 +156,8 @@ class TrainingDataHandler:
         n_dates_total = len(unique_dates_total)
         train_end = int(n_dates_total * train_size)
 
-        train_dates = unique_dates_total[:train_end]
-        test_dates = unique_dates_total[train_end + lag:]
+        train_dates = unique_dates_total[:train_end-lag]
+        test_dates = unique_dates_total[train_end:]
 
         train_df = data_df[exec_dates.isin(train_dates)].copy()
         test_df = data_df[exec_dates.isin(test_dates)].copy()
@@ -168,12 +168,12 @@ class TrainingDataHandler:
         return train_df, test_df
 
     @classmethod
-    def add_features(cls, data_df: pd.DataFrame):
+    def add_features(cls, data_df: pd.DataFrame, split: TrainingDataSplitEnum):
         new_features = data_df.apply(
             lambda row: pd.Series(cls.build_features_from_trade(row)), axis=1
         )
         columns = BASE_FEATURE_COLS + [TARGET_COL] + AUX_CONTEXT_COLS
-        logger.info(f"Rows after feature engineering: {len(data_df)}")
+        logger.info(f"Rows after feature engineering ({split.value}) : {len(data_df)}")
         result = pd.concat([data_df, new_features], axis=1)[columns]
         return result
 
@@ -237,7 +237,7 @@ class TrainingDataHandler:
         ]:
             filename = cls._get_splitted_features_data_filename(split)
             if not filename.exists():
-                df = cls.add_features(data_df)
+                df = cls.add_features(data_df, split=split)
                 cls._to_csv(df, filename=filename)
 
         train_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TRAIN)
@@ -255,7 +255,7 @@ class TrainingDataHandler:
         n_folds = TRAINING_DATA_CONFIG.kfolds_config.n_folds
         extra_blocks = TRAINING_DATA_CONFIG.kfolds_config.extra_blocks
 
-        n_blocks = n_folds + extra_blocks  # t0..t6 => 7 bloques
+        n_blocks = n_folds + extra_blocks  # t0..t6 => 7 blocks
         block_size = train_df.shape[0] // n_blocks
 
         folds = {}
@@ -264,6 +264,10 @@ class TrainingDataHandler:
             kfold_full_df = train_df.iloc[: -block_size * i] if i > 0 else train_df
             fold_train_df, fold_val_df = cls.split_train_test(kfold_full_df)
             folds[fold_name] = {"train": fold_train_df, "val": fold_val_df}
+
+        folds = dict(
+            sorted(folds.items(), key=lambda item: int(item[0].split("fold-")[-1]))
+        )
 
         if verbose:
             DataInfoDisplay.display_kfolds_info(folds=folds, full_df=train_df)

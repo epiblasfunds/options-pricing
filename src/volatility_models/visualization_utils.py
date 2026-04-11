@@ -8,13 +8,22 @@ logger = logging.getLogger(__name__)
 
 
 class Visualizer:
+
     @staticmethod
-    def plot_nn_learning_curves(training_registry, best_model_row, family_name=None):
+    def top_n_family_models_table(
+        family_models_metrics_table,
+        n=10):
+
+        logger.info(f"Mostrando top {n} modelos de la familia")
+        top_n_models = family_models_metrics_table.head(n)
+        print(top_n_models)
+
+    @staticmethod
+    def plot_nn_learning_curves(training_registry, best_model_name, family_name=None):
         """
-        Muestra las curvas de aprendizaje (train RMSE vs val RMSE por epoch) del mejor modelo
-        en cada fold, con una línea vertical en el early-stopping point.
+        Muestra las curvas de aprendizaje (train vs val por epoch) del mejor modelo
+        en cada fold, con una línea vertical en best_epoch.
         """
-        best_model_name = str(best_model_row.index[0])
         plot_title = family_name
 
         fold_keys = sorted(
@@ -39,13 +48,28 @@ class Visualizer:
             train_rmse = epoch_history.get("rmse", [])
             best_epoch = record.get("best_iteration", None)
 
-            epochs = range(1, len(val_rmse) + 1)
+            train_epochs = range(1, len(train_rmse) + 1)
+            val_epochs = range(1, len(val_rmse) + 1)
+            max_epochs = max(len(train_rmse), len(val_rmse))
 
             if train_rmse:
-                ax.plot(epochs, train_rmse, label="train RMSE", linewidth=1.2, alpha=0.85)
-            ax.plot(epochs, val_rmse, label="val RMSE", linewidth=1.2, alpha=0.85)
+                ax.plot(
+                    train_epochs,
+                    train_rmse,
+                    label="train RMSE",
+                    linewidth=1.2,
+                    alpha=0.85,
+                )
+            if val_rmse:
+                ax.plot(
+                    val_epochs,
+                    val_rmse,
+                    label="val RMSE",
+                    linewidth=1.2,
+                    alpha=0.85,
+                )
 
-            if best_epoch and best_epoch <= len(val_rmse):
+            if best_epoch and best_epoch <= max_epochs:
                 ax.axvline(
                     best_epoch, color="red", linestyle="--", linewidth=1,
                     label=f"best epoch ({best_epoch})"
@@ -109,7 +133,6 @@ class Visualizer:
             all_val_pred.extend(record["y_val_pred"])
 
         fold_metrics_df = pd.DataFrame(fold_rows)
-        logger.info(fold_metrics_df)
 
         fig, axes = plt.subplots(2, 2, figsize=(14, 9))
 
@@ -150,24 +173,37 @@ class Visualizer:
         axes[1, 0].legend()
         axes[1, 0].grid(alpha=0.25)
 
-        scatter_df = pd.DataFrame(
-            {
-                "y_true": np.asarray(all_val_true, dtype=float),
-                "y_pred": np.asarray(all_val_pred, dtype=float),
-            }
+        # El scatter se construye con el fold de último índice
+        max_fold_key = (
+            max(fold_keys, key=lambda k: int(k.split("fold-")[-1]))
         )
-        if len(scatter_df) > sample_size:
-            scatter_df = scatter_df.sample(sample_size, random_state=42)
+        last_fold_record = training_registry[max_fold_key] if max_fold_key else {}
+        last_fold_valid_true = last_fold_record.get("y_val_true", last_fold_record.get("y_valid_true", []))
+        last_fold_valid_pred = last_fold_record.get("y_val_pred", last_fold_record.get("y_valid_pred", []))
+        if last_fold_valid_true and last_fold_valid_pred:
+            scatter_df = pd.DataFrame(
+                {
+                    "y_true": np.asarray(last_fold_valid_true, dtype=float),
+                    "y_pred": np.asarray(last_fold_valid_pred, dtype=float),
+                }
+            )
+            if len(scatter_df) > sample_size:
+                scatter_df = scatter_df.sample(sample_size, random_state=42)
 
-        min_v = float(min(scatter_df["y_true"].min(), scatter_df["y_pred"].min()))
-        max_v = float(max(scatter_df["y_true"].max(), scatter_df["y_pred"].max()))
+            min_value = float(min(scatter_df["y_true"].min(), scatter_df["y_pred"].min()))
+            max_value = float(max(scatter_df["y_true"].max(), scatter_df["y_pred"].max()))
 
-        axes[1, 1].scatter(scatter_df["y_true"], scatter_df["y_pred"], s=10, alpha=0.30)
-        axes[1, 1].plot([min_v, max_v], [min_v, max_v], "k--", linewidth=1)
-        axes[1, 1].set_title(f"{plot_title} - val agregado: real vs pred")
-        axes[1, 1].set_xlabel("IV real")
-        axes[1, 1].set_ylabel("IV pred")
-        axes[1, 1].grid(alpha=0.25)
+            axes[1, 1].scatter(
+                scatter_df["y_true"],
+                scatter_df["y_pred"],
+                s=10,
+                alpha=0.30,
+            )
+            axes[1, 1].plot([min_value, max_value], [min_value, max_value], "k--")
+            axes[1, 1].set_title(f"{plot_title} - valid: real vs pred")
+            axes[1, 1].set_xlabel("IV real")
+            axes[1, 1].set_ylabel("IV pred")
+            axes[1, 1].grid(alpha=0.25)
 
         fig.suptitle(f"{plot_title} - resumen del mejor candidato", y=1.02)
         plt.tight_layout()
