@@ -35,6 +35,7 @@ class TrainingDataConfig:
         self.train_test_split_config = TrainTestSplitConfig(data_config_file_path)
         self.kfolds_config = KFoldsConfig(data_config_file_path)
         self.custom_error_1: t.Dict = training_data_config["custom_error_1"]
+        self.custom_error_2: t.Dict = training_data_config["custom_error_2"]
         self.models_metrics: t.List = training_data_config["models_metrics"]
 
     def __init__(self, data_config_file_path: str):

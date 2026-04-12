@@ -3,11 +3,25 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from IPython.display import display
 
 logger = logging.getLogger(__name__)
 
 
 class Visualizer:
+
+    @staticmethod
+    def save_model_confirmation(model_path):
+        logger.info(f"Modelo guardado en: {model_path}")
+
+    @staticmethod
+    def best_model_family_retrained(result_series, phase):
+        phase_value = getattr(phase, "value", str(phase))
+        if phase_value == "train_val":
+            logger.info("Resultados del mejor modelo de la familia tras el reentrenamiento:")
+        elif phase_value == "final_test":
+            logger.info("Resultados del mejor modelo de la familia tras el reentrenamiento con train + val:")
+        print(pd.DataFrame([result_series], index=["retrained_best"]))
 
     @staticmethod
     def top_n_family_models_table(
@@ -19,12 +33,72 @@ class Visualizer:
         print(top_n_models)
 
     @staticmethod
-    def plot_nn_learning_curves(training_registry, best_model_name, family_name=None):
+    def plot_nn_learning_curves(
+        training_registry=None,
+        best_model_name=None,
+        family_name=None,
+        training_information=None,
+        phase=None,
+    ):
         """
         Muestra las curvas de aprendizaje (train vs val por epoch) del mejor modelo
         en cada fold, con una línea vertical en best_epoch.
         """
         plot_title = family_name
+
+        if training_information is not None:
+            epoch_history = training_information.get("epoch_history", {})
+            train_rmse = epoch_history.get("rmse", [])
+            val_rmse = epoch_history.get("val_rmse", [])
+            best_epoch = training_information.get("best_iteration", None)
+
+            if not train_rmse and not val_rmse:
+                logger.info("No hay historial de epocas para graficar curvas de aprendizaje.")
+                return
+
+            phase_value = getattr(phase, "value", str(phase)) if phase is not None else "retrain"
+            validation_label = "test RMSE" if phase_value == "final_test" else "val RMSE"
+            fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+
+            if train_rmse:
+                ax.plot(
+                    range(1, len(train_rmse) + 1),
+                    train_rmse,
+                    label="train RMSE",
+                    linewidth=1.4,
+                    alpha=0.9,
+                )
+            if val_rmse:
+                ax.plot(
+                    range(1, len(val_rmse) + 1),
+                    val_rmse,
+                    label=validation_label,
+                    linewidth=1.4,
+                    alpha=0.9,
+                )
+
+            max_epochs = max(len(train_rmse), len(val_rmse))
+            if best_epoch and best_epoch <= max_epochs:
+                ax.axvline(
+                    best_epoch,
+                    color="red",
+                    linestyle="--",
+                    linewidth=1,
+                    label=f"best epoch ({best_epoch})",
+                )
+
+            ax.set_title(f"{plot_title} - curvas de aprendizaje ({phase_value})")
+            ax.set_xlabel("Epoch")
+            ax.set_ylabel("RMSE")
+            ax.legend(fontsize=9)
+            ax.grid(alpha=0.25)
+            plt.tight_layout()
+            plt.show()
+            return
+
+        if training_registry is None or best_model_name is None:
+            logger.info("Faltan datos para graficar curvas de aprendizaje.")
+            return
 
         fold_keys = sorted(
             [k for k in training_registry.keys() if k.startswith(f"{best_model_name}_fold-")],

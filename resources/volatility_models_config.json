@@ -63,6 +63,13 @@
             "beta": 0.75,
             "base_metric": "rmse"
         },
+        "custom_error_2": {
+            "metric": "custom_error2",
+            "mode": "min",
+            "gamma": 0.25,
+            "beta": 0.75,
+            "base_metric": "rmse"
+        },
         "models_metrics": [
             "train_mae",
             "train_rmse",

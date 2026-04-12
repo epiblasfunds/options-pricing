@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum
 
+import joblib
 import keras
 import numpy as np
 import tensorflow as tf
@@ -13,6 +14,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
+from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
 from src.volatility_models.data_utils import (
     BASE_FEATURE_COLS,
     BASE_NUMERIC_FEATURE_COLS,
@@ -20,7 +22,7 @@ from src.volatility_models.data_utils import (
 from src.volatility_models.visualization_utils import Visualizer
 
 
-class TrainnigPhase(StrEnum):
+class TrainingPhase(StrEnum):
     CV = "cv"
     TRAIN_VAL = "train_val"
     FINAL_TEST = "final_test"
@@ -75,13 +77,20 @@ class VolatilityModelFamilyABC(ABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         y_val: np.ndarray,
-        phase: TrainnigPhase,
+        phase: TrainingPhase,
     ) -> ModelFitResult:
         raise NotImplementedError
 
     @classmethod
     def plots(cls, kwargs):
         pass
+
+    @staticmethod
+    @abstractmethod
+    def save_model(
+        model: t.Any,
+    ) -> str:
+        raise NotImplementedError
 
     @classmethod
     def build_model_candidates(
@@ -132,6 +141,7 @@ class VolatilityModelFamilyABC(ABC):
 
 
 class LinearRegressionFamily(VolatilityModelFamilyABC):
+
     @staticmethod
     def get_family_name() -> str:
         return "linear_regression"
@@ -170,7 +180,7 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         y_val: np.ndarray,
-        phase: TrainnigPhase,
+        phase: TrainingPhase,
     ) -> ModelFitResult:
         _ = model_params, y_val, phase
         model.fit(X_train, y_train)
@@ -179,7 +189,19 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
             train_predictions=np.asarray(model.predict(X_train), dtype=float),
             validation_predictions=np.asarray(model.predict(X_val), dtype=float),
         )
-    
+
+    @staticmethod
+    def save_model(
+        model: t.Any,
+    ) -> str:
+        VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{LinearRegressionFamily.get_family_name()}.joblib"
+        joblib.dump(model, model_path)
+
+        Visualizer.save_model_confirmation(
+            model_path
+        )
     
 class RandomForestFamily(VolatilityModelFamilyABC):
     @staticmethod
@@ -233,7 +255,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         y_val: np.ndarray,
-        phase: TrainnigPhase,
+        phase: TrainingPhase,
     ) -> ModelFitResult:
         _ = model_params, y_val, phase
         model.fit(X_train, y_train)
@@ -241,6 +263,19 @@ class RandomForestFamily(VolatilityModelFamilyABC):
             model=model,
             train_predictions=np.asarray(model.predict(X_train), dtype=float),
             validation_predictions=np.asarray(model.predict(X_val), dtype=float),
+        )
+
+    @staticmethod
+    def save_model(
+        model: t.Any,
+    ) -> str:
+        VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{RandomForestFamily.get_family_name()}.joblib"
+        joblib.dump(model, model_path)
+
+        Visualizer.save_model_confirmation(
+            model_path
         )
 
 
@@ -307,21 +342,20 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         y_val: np.ndarray,
-        phase: TrainnigPhase,
+        phase: TrainingPhase,
     ) -> ModelFitResult:
-        _ = model_params, y_val
+        _ = model_params, y_val, phase
 
-        if phase is TrainnigPhase.CV:
-            X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
-                X_train,
-                y_train,
-            )
-            model.fit(
-                X_fit,
-                y_fit,
-                eval_set=[(X_es, y_es)],
-                verbose=False,
-            )
+        X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
+            X_train,
+            y_train,
+        )
+        model.fit(
+            X_fit,
+            y_fit,
+            eval_set=[(X_es, y_es)],
+            verbose=False,
+        )
 
         best_iteration = getattr(model, "best_iteration", None)
         best_score = getattr(model, "best_score", None)
@@ -336,6 +370,19 @@ class XGBoostFamily(VolatilityModelFamilyABC):
                 else None
             ),
             best_score=float(best_score) if best_score is not None else None,
+        )
+
+    @staticmethod
+    def save_model(
+        model: t.Any,
+    ) -> str:
+        VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{XGBoostFamily.get_family_name()}.joblib"
+        joblib.dump(model, model_path)
+
+        Visualizer.save_model_confirmation(
+            model_path
         )
 
 
@@ -475,66 +522,65 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         y_val: np.ndarray,
-        phase: TrainnigPhase,
+        phase: TrainingPhase,
     ) -> ModelFitResult:
         _ = y_val
         numeric_col_indices = cls._resolve_numeric_col_indices()
 
-        if phase is TrainnigPhase.CV:
-            X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
-                X_train,
-                y_train,
-            )
-            (
-                X_fit_scaled,
-                X_es_scaled,
-                X_train_scaled,
-                X_val_scaled,
-            ) = cls._scale_numeric_features(
-                X_fit_raw=X_fit_raw,
-                X_valid_raw=X_es_raw,
-                X_train_full_raw=X_train,
-                X_eval_raw=X_val,
-                numeric_col_indices=numeric_col_indices,
-            )
+        X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
+            X_train,
+            y_train,
+        )
+        (
+            X_fit_scaled,
+            X_es_scaled,
+            X_train_scaled,
+            X_val_scaled,
+        ) = cls._scale_numeric_features(
+            X_fit_raw=X_fit_raw,
+            X_valid_raw=X_es_raw,
+            X_train_full_raw=X_train,
+            X_eval_raw=X_val,
+            numeric_col_indices=numeric_col_indices,
+        )
 
-            early_stop = EarlyStopping(
-                monitor="val_rmse",
-                mode="min",
-                patience=model_params["patience"],
-                restore_best_weights=True,
-                verbose=0,
-            )
+        early_stop = EarlyStopping(
+            monitor="val_rmse",
+            mode="min",
+            patience=model_params["patience"],
+            restore_best_weights=True,
+            verbose=0,
+        )
 
-            callbacks = [early_stop]
+        callbacks = [early_stop]
 
-            if model_params.get("use_lr_scheduler", False):
-                callbacks.append(
-                    ReduceLROnPlateau(
-                        monitor="val_rmse",
-                        factor=0.5,
-                        patience=5,
-                        min_lr=1e-6,
-                        verbose=0,
-                    )
+        if model_params.get("use_lr_scheduler", False):
+            callbacks.append(
+                ReduceLROnPlateau(
+                    monitor="val_rmse",
+                    factor=0.5,
+                    patience=5,
+                    min_lr=1e-6,
+                    verbose=0,
                 )
-
-            history = model.fit(
-                X_fit_scaled,
-                y_fit,
-                epochs=model_params["epochs"],
-                batch_size=model_params["batch_size"],
-                validation_data=(X_es_scaled, y_es),
-                callbacks=callbacks,
-                verbose=model_params["verbose"],
             )
 
-            train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
-            val_rmse_history = [float(value) for value in history.history.get("val_rmse", [])]
+        history = model.fit(
+            X_fit_scaled,
+            y_fit,
+            epochs=model_params["epochs"],
+            batch_size=model_params["batch_size"],
+            validation_data=(X_es_scaled, y_es),
+            callbacks=callbacks,
+            verbose=model_params["verbose"],
+        )
 
-            metric_history = val_rmse_history if val_rmse_history else train_rmse_history
-            best_epoch = int(np.argmin(metric_history)) + 1 if metric_history else None
-            best_score = float(np.min(metric_history)) if metric_history else None
+        train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
+        val_rmse_history = [float(value) for value in history.history.get("val_rmse", [])]
+
+        metric_history = val_rmse_history if val_rmse_history else train_rmse_history
+        best_epoch = int(np.argmin(metric_history)) + 1 if metric_history else None
+        best_score = float(np.min(metric_history)) if metric_history else None
 
         return ModelFitResult(
             model=model,
@@ -548,11 +594,30 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             },
         )
 
+    @staticmethod
+    def save_model(
+        model: t.Any,
+    ) -> str:
+        VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+        model_path = (
+            VOLATILITY_TRAINED_MODELS_DIR_PATH
+            / f"{SequentialNNFamily.get_family_name()}.keras"
+        )
+
+        model.save(model_path)
+
+        Visualizer.save_model_confirmation(
+            model_path
+        )
+
     @classmethod
     def plots(cls, kwargs):
         args = {
             "training_registry": kwargs.get("training_registry"),
             "best_model_name": kwargs.get("best_model_name"),
-            "family_name": cls.get_family_name(),
+            "family_name": kwargs.get("family_name", cls.get_family_name()),
+            "training_information": kwargs.get("training_information"),
+            "phase": kwargs.get("phase"),
         }
         Visualizer.plot_nn_learning_curves(**args)
