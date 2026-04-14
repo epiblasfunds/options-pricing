@@ -1,7 +1,6 @@
 import typing as t
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import StrEnum
 
 import joblib
 import keras
@@ -15,17 +14,12 @@ from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 
 from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
+from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.volatility_models.data_utils import (
     BASE_FEATURE_COLS,
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
-
-
-class TrainingPhase(StrEnum):
-    CV = "cv"
-    TRAIN_VAL = "train_val"
-    FINAL_TEST = "final_test"
 
 
 @dataclass
@@ -36,6 +30,7 @@ class ModelFitResult:
     best_iteration: int | None = None
     best_score: float | None = None
     epoch_history: t.Dict[str, t.List[float]] | None = None
+    feature_scaler: StandardScaler | None = None
 
 
 class VolatilityModelFamilyABC(ABC):
@@ -76,8 +71,7 @@ class VolatilityModelFamilyABC(ABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray,
-        y_val: np.ndarray,
-        phase: TrainingPhase,
+        phase: TrainingPhase = TrainingPhase.CV,
     ) -> ModelFitResult:
         raise NotImplementedError
 
@@ -85,10 +79,15 @@ class VolatilityModelFamilyABC(ABC):
     def plots(cls, kwargs):
         pass
 
+    @classmethod
+    def get_model_path(cls):
+        return VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{cls.get_family_name()}{cls.MODEL_EXTENSION}"
+
     @staticmethod
     @abstractmethod
     def save_model(
         model: t.Any,
+        scaler: StandardScaler | None = None,
     ) -> str:
         raise NotImplementedError
 
@@ -141,6 +140,7 @@ class VolatilityModelFamilyABC(ABC):
 
 
 class LinearRegressionFamily(VolatilityModelFamilyABC):
+    MODEL_EXTENSION = ".joblib"
 
     @staticmethod
     def get_family_name() -> str:
@@ -179,10 +179,9 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray,
-        y_val: np.ndarray,
-        phase: TrainingPhase,
+        phase: TrainingPhase = TrainingPhase.CV,
     ) -> ModelFitResult:
-        _ = model_params, y_val, phase
+        _, _ = model_params, phase
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -193,17 +192,22 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
     @staticmethod
     def save_model(
         model: t.Any,
+        scaler: StandardScaler | None = None,
     ) -> str:
+        _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{LinearRegressionFamily.get_family_name()}.joblib"
         joblib.dump(model, model_path)
 
-        Visualizer.save_model_confirmation(
-            model_path
+        Visualizer.info_confirmation(
+            model_path,
+            label="Modelo guardado en",
         )
     
 class RandomForestFamily(VolatilityModelFamilyABC):
+    MODEL_EXTENSION = ".joblib"
+
     @staticmethod
     def get_family_name() -> str:
         return "random_forest"
@@ -243,7 +247,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 3 #120
+        return 120
 
     @classmethod
     def fit_model(
@@ -254,10 +258,9 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray,
-        y_val: np.ndarray,
-        phase: TrainingPhase,
+        phase: TrainingPhase = TrainingPhase.CV,
     ) -> ModelFitResult:
-        _ = model_params, y_val, phase
+        _, _ = model_params, phase
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -268,18 +271,23 @@ class RandomForestFamily(VolatilityModelFamilyABC):
     @staticmethod
     def save_model(
         model: t.Any,
+        scaler: StandardScaler | None = None,
     ) -> str:
+        _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{RandomForestFamily.get_family_name()}.joblib"
         joblib.dump(model, model_path)
 
-        Visualizer.save_model_confirmation(
-            model_path
+        Visualizer.info_confirmation(
+            model_path,
+            label="Modelo guardado en",
         )
 
 
 class XGBoostFamily(VolatilityModelFamilyABC):
+    MODEL_EXTENSION = ".joblib"
+
     @staticmethod
     def get_family_name() -> str:
         return "xgboost"
@@ -330,7 +338,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 3 #200
+        return 200
 
     @classmethod
     def fit_model(
@@ -341,10 +349,9 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray,
-        y_val: np.ndarray,
-        phase: TrainingPhase,
+        phase: TrainingPhase = TrainingPhase.CV,
     ) -> ModelFitResult:
-        _ = model_params, y_val, phase
+        _, _ = model_params, phase
 
         X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
             X_train,
@@ -375,18 +382,23 @@ class XGBoostFamily(VolatilityModelFamilyABC):
     @staticmethod
     def save_model(
         model: t.Any,
+        scaler: StandardScaler | None = None,
     ) -> str:
+        _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{XGBoostFamily.get_family_name()}.joblib"
         joblib.dump(model, model_path)
 
-        Visualizer.save_model_confirmation(
-            model_path
+        Visualizer.info_confirmation(
+            model_path,
+            label="Modelo guardado en",
         )
 
 
 class SequentialNNFamily(VolatilityModelFamilyABC):
+    MODEL_EXTENSION = ".keras"
+
     @staticmethod
     def get_family_name() -> str:
         return "sequential_nn"
@@ -443,7 +455,8 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         X_train_full_raw: np.ndarray,
         X_eval_raw: np.ndarray,
         numeric_col_indices: tuple[int, ...],
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        phase: TrainingPhase,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, StandardScaler]:
         scaler = StandardScaler()
         indices = list(numeric_col_indices)
 
@@ -452,12 +465,17 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         X_train_full_scaled = X_train_full_raw.copy()
         X_eval_scaled = X_eval_raw.copy()
 
-        X_fit_scaled[:, indices] = scaler.fit_transform(X_fit_raw[:, indices])
+        scale_reference = (
+            X_train_full_raw if phase is TrainingPhase.FINAL_TEST else X_fit_raw
+        )
+        scaler.fit(scale_reference[:, indices])
+
+        X_fit_scaled[:, indices] = scaler.transform(X_fit_raw[:, indices])
         X_valid_scaled[:, indices] = scaler.transform(X_valid_raw[:, indices])
         X_train_full_scaled[:, indices] = scaler.transform(X_train_full_raw[:, indices])
         X_eval_scaled[:, indices] = scaler.transform(X_eval_raw[:, indices])
 
-        return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled
+        return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled, scaler
 
     @staticmethod
     def _resolve_numeric_col_indices() -> tuple[int, ...]:
@@ -510,7 +528,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 3 #200
+        return 75
 
     @classmethod
     def fit_model(
@@ -521,10 +539,8 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         X_train: np.ndarray,
         y_train: np.ndarray,
         X_val: np.ndarray,
-        y_val: np.ndarray,
-        phase: TrainingPhase,
+        phase: TrainingPhase = TrainingPhase.CV,
     ) -> ModelFitResult:
-        _ = y_val
         numeric_col_indices = cls._resolve_numeric_col_indices()
 
         X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
@@ -536,12 +552,14 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             X_es_scaled,
             X_train_scaled,
             X_val_scaled,
+            feature_scaler,
         ) = cls._scale_numeric_features(
             X_fit_raw=X_fit_raw,
             X_valid_raw=X_es_raw,
             X_train_full_raw=X_train,
             X_eval_raw=X_val,
             numeric_col_indices=numeric_col_indices,
+            phase=phase,
         )
 
         early_stop = EarlyStopping(
@@ -592,11 +610,17 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
                 "rmse": train_rmse_history,
                 "val_rmse": val_rmse_history,
             },
+            feature_scaler=feature_scaler,
         )
 
+    @classmethod
+    def get_scaler_path(cls):
+        return VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{cls.get_family_name()}_scaler.joblib"
+    
     @staticmethod
     def save_model(
         model: t.Any,
+        scaler: StandardScaler | None = None,
     ) -> str:
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -607,8 +631,17 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
         model.save(model_path)
 
-        Visualizer.save_model_confirmation(
-            model_path
+        if scaler is not None:
+            scaler_path = SequentialNNFamily.get_scaler_path()
+            joblib.dump(scaler, scaler_path)
+            Visualizer.info_confirmation(
+                scaler_path,
+                label="Scaler guardado en",
+            )
+
+        Visualizer.info_confirmation(
+            model_path,
+            label="Modelo guardado en",
         )
 
     @classmethod

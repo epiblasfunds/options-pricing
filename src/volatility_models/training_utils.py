@@ -1,5 +1,4 @@
 import json
-import logging
 
 import numpy as np
 import pandas as pd
@@ -9,21 +8,18 @@ from tqdm import tqdm
 from src.config.config import (
     VOLATILITY_FAMILY_METADATA_DIR_PATH,
     VOLATILITY_RETRAINED_METADATA_DIR_PATH,
+    VOLATILITY_TRAINED_MODELS_DIR_PATH,
     config,
 )
+from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
+from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.python_models.volatility_models.volatility_model_family import (
-    TrainingPhase,
     VolatilityModelFamilyABC,
 )
-from src.volatility_models.data_utils import (
-    BASE_FEATURE_COLS,
-    TrainingDataHandler,
-    TrainingDataSplitEnum,
-)
+from src.volatility_models.data_utils import BASE_FEATURE_COLS, TrainingDataHandler
 from src.volatility_models.visualization_utils import Visualizer
 
 TARGET_COLUMN = config.volatility_models_config.training_data_config.target_column
-logger = logging.getLogger(__name__)
 
 
 class Trainer:
@@ -171,7 +167,6 @@ class Trainer:
                 X_train=X_train_fold,
                 y_train=y_train_fold,
                 X_val=X_val_fold,
-                y_val=y_val_fold,
                 phase=phase,
             )
 
@@ -277,7 +272,7 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"Metadata guardada: {file_path}")
+        Visualizer.info_confirmation(file_path, label="Metadata guardada")
 
     @classmethod
     def save_retrained_metadata(
@@ -310,7 +305,7 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"Metadata de reentrenamiento guardada: {file_path}")
+        Visualizer.info_confirmation(file_path, label="Metadata de reentrenamiento guardada")
     
     @classmethod
     def rename_metrics(
@@ -357,6 +352,7 @@ class Trainer:
             Visualizer.top_n_family_models_table(
                 family_models_metrics_table=family_models_metrics_table,
                 n=15,
+                cache_path=metadata_path,
             )
             self.select_best_model_from_metrics_table(
                 metrics_table=family_models_metrics_table,
@@ -371,7 +367,6 @@ class Trainer:
                     "family_name": family_name,
                 }
             )
-            logger.info(f"Metadata cargada desde cache: {metadata_path}")
             return family_models_metrics_table, best_model_name
 
         phase = TrainingPhase.CV
@@ -457,6 +452,7 @@ class Trainer:
             Visualizer.best_model_family_retrained(
                 result_series=result_series,
                 phase=phase,
+                cache_path=retrained_metadata_path,
             )
 
             training_information = payload.get("training_information", {})
@@ -469,11 +465,27 @@ class Trainer:
                 }
             )
 
-            logger.info(f"Metadata de reentrenamiento cargada desde cache: {retrained_metadata_path}")
+            if phase is TrainingPhase.FINAL_TEST:
+                Visualizer.info_confirmation(self.model_family.get_model_path(), label="Modelo guardado previamente en")
+                get_scaler_path = getattr(self.model_family, "get_scaler_path", None)
+                scaler_path = None
+                if callable(get_scaler_path):
+                    scaler_path = get_scaler_path()
+                elif family_name == "sequential_nn":
+                    scaler_path = (
+                        VOLATILITY_TRAINED_MODELS_DIR_PATH
+                        / f"{family_name}_scaler.joblib"
+                    )
+
+                if scaler_path is not None and scaler_path.exists():
+                    Visualizer.info_confirmation(
+                        scaler_path,
+                        label="Scaler guardado previamente en",
+                    )
             return result_series
 
         if not metadata_path.exists():
-            logger.error(f"No se encontró metadata para la familia {family_name}. Se requiere ejecutar `run_kfolds_training`.")
+            Visualizer.missing_metadata_warning(family_name)
             Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
@@ -514,7 +526,6 @@ class Trainer:
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
-            y_val=y_val,
             phase=phase,
         )
 
@@ -571,6 +582,7 @@ class Trainer:
         if phase is TrainingPhase.FINAL_TEST:
             self.model_family.save_model(
                 model=model,
+                scaler=fit_result.feature_scaler,
             )
 
         return result_series

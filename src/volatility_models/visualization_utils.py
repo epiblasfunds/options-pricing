@@ -5,32 +5,47 @@ import numpy as np
 import pandas as pd
 from IPython.display import display
 
+from src.enums.volatility_model_enums.training_phase import TrainingPhase
+
 logger = logging.getLogger(__name__)
 
 
 class Visualizer:
 
     @staticmethod
-    def save_model_confirmation(model_path):
-        logger.info(f"Modelo guardado en: {model_path}")
+    def info_confirmation(info_path, label="Información guardada en"):
+        logger.info(f"{label}: {info_path}")
 
     @staticmethod
-    def best_model_family_retrained(result_series, phase):
-        phase_value = getattr(phase, "value", str(phase))
-        if phase_value == "train_val":
-            logger.info("Resultados del mejor modelo de la familia tras el reentrenamiento:")
-        elif phase_value == "final_test":
-            logger.info("Resultados del mejor modelo de la familia tras el reentrenamiento con train + val:")
-        print(pd.DataFrame([result_series], index=["retrained_best"]))
+    def missing_metadata_warning(family_name: str):
+        logger.error(
+            f"No se encontró metadata para la familia {family_name}. "
+            "Se requiere ejecutar `run_kfolds_training`."
+        )
+
+    @staticmethod
+    def best_model_family_retrained(result_series, phase, cache_path=None):
+        if cache_path is not None:
+            logger.info(f"Metadata de reentrenamiento cargada desde cache: {cache_path}")
+        if phase is TrainingPhase.TRAIN_VAL:
+            title = "Resultados del mejor modelo de la familia tras el reentrenamiento:"
+        elif phase is TrainingPhase.FINAL_TEST:
+            title = "Resultados del mejor modelo de la familia tras el reentrenamiento con train + val:"
+        else:
+            title = "Resultados del mejor modelo de la familia:"
+        result_df = pd.DataFrame([result_series], index=["retrained_best"])
+        logger.info("%s\n%s", title, result_df.to_string())
 
     @staticmethod
     def top_n_family_models_table(
         family_models_metrics_table,
-        n=10):
-
-        logger.info(f"Mostrando top {n} modelos de la familia")
+        n=10,
+        cache_path=None,
+    ):
+        if cache_path is not None:
+            logger.info(f"Metadata cargada desde cache: {cache_path}")
         top_n_models = family_models_metrics_table.head(n)
-        print(top_n_models)
+        logger.info("Mostrando top %s modelos de la familia\n%s", n, top_n_models.to_string())
 
     @staticmethod
     def plot_nn_learning_curves(
@@ -56,8 +71,8 @@ class Visualizer:
                 logger.info("No hay historial de epocas para graficar curvas de aprendizaje.")
                 return
 
-            phase_value = getattr(phase, "value", str(phase)) if phase is not None else "retrain"
-            validation_label = "test RMSE" if phase_value == "final_test" else "val RMSE"
+            phase_value = phase.value
+            validation_label = "test RMSE" if phase is TrainingPhase.FINAL_TEST else "val RMSE"
             fig, ax = plt.subplots(1, 1, figsize=(10, 4))
 
             if train_rmse:
@@ -241,7 +256,7 @@ class Visualizer:
         axes[1, 0].set_xticks(x)
         axes[1, 0].set_xticklabels(fold_metrics_df["fold"])
         axes[1, 0].axhline(0.0, color="black", linestyle="--", linewidth=1)
-        axes[1, 0].set_title(f"{plot_title} - R2 train vs val por fold")
+        axes[1, 0].set_title(f"{plot_title} - R2 por fold")
         axes[1, 0].set_xlabel("Fold")
         axes[1, 0].set_ylabel("R2")
         axes[1, 0].legend()

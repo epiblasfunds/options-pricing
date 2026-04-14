@@ -1,6 +1,5 @@
 import logging
 import typing as t
-from enum import StrEnum
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +14,7 @@ from src.data_management.loaders.volatility_step_loader import VolatilityStepLoa
 from src.enums.data_enums import OptionTypeEnum
 from src.enums.data_enums.database_schema.training_data_enum import TrainingDataEnum
 from src.enums.data_enums.database_schema.volatility_db_enum import VolatilityDBEnum
+from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +33,13 @@ BASE_CATEGORICAL_FEATURE_COLS = [
 BASE_FEATURE_COLS = BASE_NUMERIC_FEATURE_COLS + BASE_CATEGORICAL_FEATURE_COLS
 
 
-class TrainingDataSplitEnum(StrEnum):
-    TRAIN = "train"
-    VAL = "val"
-    TEST = "test"
-
-
 class TrainingDataHandler:
+    SPLIT_PRIORITY = {
+        TrainingDataSplitEnum.TRAIN.value: 0,
+        TrainingDataSplitEnum.VAL.value: 1,
+        TrainingDataSplitEnum.TEST.value: 2,
+    }
+
     @staticmethod
     def _get_splitted_data_filename(split: TrainingDataSplitEnum):
         filename = f"{split.value}_splitted_data.csv"
@@ -168,12 +168,110 @@ class TrainingDataHandler:
         return train_df, test_df
 
     @classmethod
-    def add_features(cls, data_df: pd.DataFrame, split: TrainingDataSplitEnum):
+    def enforce_unique_option_contract_split(
+        cls,
+        train_df: pd.DataFrame,
+        val_df: pd.DataFrame,
+        test_df: pd.DataFrame,
+        verbose: bool = True,
+    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        contract_col = VolatilityDBEnum.OPTION_CONTRACT_CODE.value
+        contract_key_col = "_option_contract_code_key"
+        split_col = "_split"
+        count_col = "_count"
+        missing_contract_key = "__MISSING_OPTION_CONTRACT_CODE__"
+
+        split_frames = {
+            TrainingDataSplitEnum.TRAIN.value: train_df.copy(),
+            TrainingDataSplitEnum.VAL.value: val_df.copy(),
+            TrainingDataSplitEnum.TEST.value: test_df.copy(),
+        }
+
+        for split_name, df in split_frames.items():
+            if contract_col not in df.columns:
+                raise KeyError(
+                    f"Column '{contract_col}' is required in split '{split_name}'."
+                )
+            df[contract_key_col] = (
+                df[contract_col].astype("string").fillna(missing_contract_key)
+            )
+            df[split_col] = split_name
+
+        split_assignments = pd.concat(
+            [
+                split_frames[TrainingDataSplitEnum.TRAIN.value][[contract_key_col, split_col]],
+                split_frames[TrainingDataSplitEnum.VAL.value][[contract_key_col, split_col]],
+                split_frames[TrainingDataSplitEnum.TEST.value][[contract_key_col, split_col]],
+            ],
+            axis=0,
+            ignore_index=True,
+        )
+
+        per_split_counts = (
+            split_assignments.groupby([contract_key_col, split_col], observed=True)
+            .size()
+            .rename(count_col)
+            .reset_index()
+        )
+
+        overlap_contracts = (
+            per_split_counts.groupby(contract_key_col, observed=True)[split_col]
+            .nunique()
+            .gt(1)
+            .sum()
+        )
+
+        if overlap_contracts == 0:
+            for df in split_frames.values():
+                df.drop(columns=[contract_key_col, split_col], inplace=True)
+            return (
+                split_frames[TrainingDataSplitEnum.TRAIN.value],
+                split_frames[TrainingDataSplitEnum.VAL.value],
+                split_frames[TrainingDataSplitEnum.TEST.value],
+            )
+
+        per_split_counts["_priority"] = per_split_counts[split_col].map(cls.SPLIT_PRIORITY)
+        winner_split_by_contract = (
+            per_split_counts.sort_values(
+                by=[contract_key_col, count_col, "_priority"],
+                ascending=[True, False, True],
+            )
+            .drop_duplicates(subset=[contract_key_col], keep="first")
+            .set_index(contract_key_col)[split_col]
+        )
+
+        filtered_frames: dict[str, pd.DataFrame] = {}
+        removal_stats: dict[str, int] = {}
+        for split_name, df in split_frames.items():
+            before_rows = len(df)
+            keep_mask = df[contract_key_col].map(winner_split_by_contract) == split_name
+            filtered_df = df.loc[keep_mask].drop(columns=[contract_key_col, split_col])
+            filtered_frames[split_name] = filtered_df
+            removal_stats[split_name] = before_rows - len(filtered_df)
+
+        if verbose:
+            logger.info(
+                "Contract-code leakage control applied | overlapping contracts: %s | removed rows -> train: %s, val: %s, test: %s",
+                int(overlap_contracts),
+                removal_stats[TrainingDataSplitEnum.TRAIN.value],
+                removal_stats[TrainingDataSplitEnum.VAL.value],
+                removal_stats[TrainingDataSplitEnum.TEST.value],
+            )
+
+        return (
+            filtered_frames[TrainingDataSplitEnum.TRAIN.value],
+            filtered_frames[TrainingDataSplitEnum.VAL.value],
+            filtered_frames[TrainingDataSplitEnum.TEST.value],
+        )
+
+    @classmethod
+    def add_features(cls, data_df: pd.DataFrame, split: TrainingDataSplitEnum, verbose: bool = True):
         new_features = data_df.apply(
             lambda row: pd.Series(cls.build_features_from_trade(row)), axis=1
         )
         columns = BASE_FEATURE_COLS + [TARGET_COL] + AUX_CONTEXT_COLS
-        logger.info(f"Rows after feature engineering ({split.value}) : {len(data_df)}")
+        if verbose:
+            logger.info(f"Rows after feature engineering ({split.value}) : {len(data_df)}")
         result = pd.concat([data_df, new_features], axis=1)[columns]
         return result
 
@@ -190,6 +288,12 @@ class TrainingDataHandler:
         volatility_df = cls.load_volatility_db()
         trainval_df, test_df = cls.split_train_test(volatility_df)
         train_df, val_df = cls.split_train_test(trainval_df)
+        train_df, val_df, test_df = cls.enforce_unique_option_contract_split(
+            train_df=train_df,
+            val_df=val_df,
+            test_df=test_df,
+            verbose=verbose,
+        )
 
         if verbose:
             DataInfoDisplay.display_split_info(train_df, val_df, test_df)
@@ -229,7 +333,7 @@ class TrainingDataHandler:
 
     @classmethod
     def load_full_features_splitted_data(cls, verbose: bool = True):
-        train_df, val_df, test_df = cls.load_splitted_data(verbose=False)
+        train_df, val_df, test_df = cls.load_splitted_data(verbose=verbose)
         for data_df, split in [
             (train_df, TrainingDataSplitEnum.TRAIN),
             (val_df, TrainingDataSplitEnum.VAL),
@@ -237,7 +341,7 @@ class TrainingDataHandler:
         ]:
             filename = cls._get_splitted_features_data_filename(split)
             if not filename.exists():
-                df = cls.add_features(data_df, split=split)
+                df = cls.add_features(data_df, split=split, verbose=verbose)
                 cls._to_csv(df, filename=filename)
 
         train_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TRAIN)
