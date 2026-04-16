@@ -188,12 +188,8 @@ class TrainingDataHandler:
         }
 
         for split_name, df in split_frames.items():
-            if contract_col not in df.columns:
-                raise KeyError(
-                    f"Column '{contract_col}' is required in split '{split_name}'."
-                )
             df[contract_key_col] = (
-                df[contract_col].astype("string").fillna(missing_contract_key)
+                df[contract_col]#.astype("string")
             )
             df[split_col] = split_name
 

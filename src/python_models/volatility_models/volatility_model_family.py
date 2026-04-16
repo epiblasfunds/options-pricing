@@ -88,7 +88,7 @@ class VolatilityModelFamilyABC(ABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
-    ) -> str:
+    ) -> None:
         raise NotImplementedError
 
     @classmethod
@@ -193,7 +193,7 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
-    ) -> str:
+    ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -216,7 +216,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
     def get_fixed_params() -> t.Dict:
         return {
             "criterion": "squared_error",
-            "random_state": 42,
+            "random_state": VolatilityModelFamilyABC.RANDOM_SEED,
             "n_jobs": -1,
             "min_weight_fraction_leaf": 0.0,
             "verbose": 0,
@@ -230,7 +230,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
             "max_depth": [None, 8, 12, 16, 24, 32],
             "min_samples_split": [2, 5, 10, 20],
             "min_samples_leaf": [1, 2, 5, 10],
-            "max_features": [1.0, "sqrt", "log2", 0.7, 0.5],
+            "max_features": ["sqrt", "log2", 0.3, 0.5, 0.7, 0.9],
             "bootstrap": [True],
             "max_samples": [None, 0.6, 0.8, 0.9],
             "min_impurity_decrease": [0.0, 1e-6, 1e-5, 1e-4],
@@ -247,7 +247,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 120
+        return 10
 
     @classmethod
     def fit_model(
@@ -272,7 +272,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
-    ) -> str:
+    ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -298,7 +298,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
             "booster": "gbtree",
             "objective": "reg:pseudohubererror",
             "eval_metric": "rmse",
-            "random_state": 42,
+            "random_state": VolatilityModelFamilyABC.RANDOM_SEED,
             "n_jobs": -1,
             "tree_method": "hist",
             "predictor": "auto",
@@ -383,7 +383,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
-    ) -> str:
+    ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -621,7 +621,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
-    ) -> str:
+    ) -> None:
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         model_path = (
