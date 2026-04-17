@@ -27,6 +27,10 @@ class Trainer:
         self.model_family = model_family
 
     @staticmethod
+    def _dataset_suffix(use_atm: bool = False) -> str:
+        return "_atm" if use_atm else ""
+
+    @staticmethod
     def add_custom_error1(
         metrics_table: pd.DataFrame,
         round_digits: int = 6
@@ -142,9 +146,12 @@ class Trainer:
         model_params,
         phase: TrainingPhase,
         evaluation_label: TrainingDataSplitEnum = TrainingDataSplitEnum.VAL,
+        use_atm: bool = False,
+        folds: dict | None = None,
     ):
         training_registry = {}
-        folds = TrainingDataHandler.load_kfolds(False)
+        if folds is None:
+            folds = TrainingDataHandler.load_kfolds(False, use_atm=use_atm)
         model_folds_metrics = []
         for k, v in folds.items():
             fold_name = k
@@ -255,6 +262,7 @@ class Trainer:
         metrics_table: pd.DataFrame,
         model_params_registry: dict,
         training_registry: dict,
+        use_atm: bool = False,
     ):
         """Guarda metadatos estructurados de la familia entrenada en JSON."""
 
@@ -268,7 +276,7 @@ class Trainer:
             "training_registry": cls._training_registry_for_json(training_registry),
         }
 
-        file_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
+        file_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{cls._dataset_suffix(use_atm)}_metadata.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -281,6 +289,7 @@ class Trainer:
         phase: TrainingPhase,
         model_params: dict,
         training_information: dict,
+        use_atm: bool = False,
     ):
         """Guarda metadatos del modelo reentrenado en JSON."""
 
@@ -301,7 +310,7 @@ class Trainer:
             },
         }
 
-        file_path = VOLATILITY_RETRAINED_METADATA_DIR_PATH / f"{family_name}_{phase_suffix}_retrained_metadata.json"
+        file_path = VOLATILITY_RETRAINED_METADATA_DIR_PATH / f"{family_name}{cls._dataset_suffix(use_atm)}_{phase_suffix}_retrained_metadata.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -336,10 +345,11 @@ class Trainer:
 
     def run_kfolds_training(
         self,
-        force_reload: bool = False
+        force_reload: bool = False,
+        use_atm: bool = False,
     ) -> tuple[pd.DataFrame, str]:
         family_name = self.model_family.get_family_name()
-        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
+        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{self._dataset_suffix(use_atm)}_metadata.json"
 
         if not force_reload and metadata_path.exists():
             with open(metadata_path, "r", encoding="utf-8") as f:
@@ -377,6 +387,7 @@ class Trainer:
         )
         training_registry = {}
         model_params_registry = {}
+        folds = TrainingDataHandler.load_kfolds(False, use_atm=use_atm)
 
         for model_i_name, model_i_params in tqdm(
             models.items(),
@@ -388,6 +399,8 @@ class Trainer:
                 model_name=model_i_name,
                 model_params=model_i_params,
                 phase=phase,
+                use_atm=use_atm,
+                folds=folds,
             )
             family_models_metrics_table.loc[model_i_name] = metrics
             training_registry.update(tr)
@@ -427,6 +440,7 @@ class Trainer:
             metrics_table=family_models_metrics_table,
             model_params_registry=model_params_registry,
             training_registry=training_registry,
+            use_atm=use_atm,
         )
         return family_models_metrics_table, best_model_name
     
@@ -434,14 +448,15 @@ class Trainer:
         self,
         phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
         force_reload: bool = False,
+        use_atm: bool = False,
     ):
         family_name = self.model_family.get_family_name()
         model_name = f"{family_name}_best"
-        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
+        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{self._dataset_suffix(use_atm)}_metadata.json"
         phase_suffix = str(getattr(phase, "value", phase)).lower().replace(" ", "_")
         retrained_metadata_path = (
             VOLATILITY_RETRAINED_METADATA_DIR_PATH
-            / f"{family_name}_{phase_suffix}_retrained_metadata.json"
+            / f"{family_name}{self._dataset_suffix(use_atm)}_{phase_suffix}_retrained_metadata.json"
         )
 
         if not force_reload and retrained_metadata_path.exists():
@@ -486,7 +501,7 @@ class Trainer:
 
         if not metadata_path.exists():
             Visualizer.missing_metadata_warning(family_name)
-            Trainer(self.model_family).run_kfolds_training()
+            Trainer(self.model_family).run_kfolds_training(use_atm=use_atm)
 
         with open(metadata_path, "r", encoding="utf-8") as f:
             payload = json.load(f)
@@ -495,7 +510,7 @@ class Trainer:
         custom_error_1 = payload["best_model_metrics"][config.volatility_models_config.training_data_config.custom_error_1["metric"]]
 
         if phase is TrainingPhase.TRAIN_VAL:
-            train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
+            train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()
             y_train = train_data[TARGET_COLUMN].to_numpy()
@@ -505,7 +520,7 @@ class Trainer:
             evaluation_label = TrainingDataSplitEnum.VAL
 
         if phase is TrainingPhase.FINAL_TEST:
-            train_data, val_data, test_data = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
+            train_data, val_data, test_data = TrainingDataHandler.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
             train_data = pd.concat([train_data, val_data], ignore_index=True)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()
@@ -576,7 +591,8 @@ class Trainer:
             family_name=family_name,
             phase=phase,
             model_params=best_model_params,
-            training_information=training_information
+            training_information=training_information,
+            use_atm=use_atm,
         )
 
         if phase is TrainingPhase.FINAL_TEST:
