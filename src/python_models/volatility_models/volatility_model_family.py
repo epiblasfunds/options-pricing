@@ -6,7 +6,7 @@ import joblib
 import keras
 import numpy as np
 import tensorflow as tf
-from keras import callbacks, layers, regularizers
+from keras import callbacks, layers, ops, regularizers
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -31,6 +31,104 @@ class ModelFitResult:
     best_score: float | None = None
     epoch_history: t.Dict[str, t.List[float]] | None = None
     feature_scaler: StandardScaler | None = None
+
+
+@keras.utils.register_keras_serializable(package="volatility_models")
+class TensorTrainLayer(keras.layers.Layer):
+    """Tensor-network feature extractor basado en una factorizacion tensor-train."""
+
+    def __init__(
+        self,
+        input_dims: t.Sequence[int],
+        tt_ranks: t.Sequence[int],
+        output_dim: int,
+        activation: str | None = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.input_dims = tuple(int(dim) for dim in input_dims)
+        self.tt_ranks = tuple(int(rank) for rank in tt_ranks)
+        self.output_dim = int(output_dim)
+        self.activation = keras.activations.get(activation)
+
+        if len(self.tt_ranks) != len(self.input_dims) + 1:
+            raise ValueError("tt_ranks debe tener longitud len(input_dims) + 1.")
+        if self.tt_ranks[0] != 1 or self.tt_ranks[-1] != 1:
+            raise ValueError("TensorTrainLayer requiere fronteras TT [1, ..., 1].")
+        if any(dim <= 0 for dim in self.input_dims):
+            raise ValueError("input_dims debe contener solo enteros positivos.")
+        if any(rank <= 0 for rank in self.tt_ranks):
+            raise ValueError("tt_ranks debe contener solo enteros positivos.")
+        if self.output_dim <= 0:
+            raise ValueError("output_dim debe ser positivo.")
+
+    def build(self, input_shape):
+        expected_shape = tuple(self.input_dims)
+        received_shape = tuple(
+            int(dim) if dim is not None else None for dim in input_shape[1:]
+        )
+
+        if len(received_shape) != len(expected_shape):
+            raise ValueError(
+                f"Se esperaba un tensor de orden {len(expected_shape)}, pero llego shape={input_shape}."
+            )
+
+        for expected_dim, received_dim in zip(expected_shape, received_shape):
+            if received_dim is not None and received_dim != expected_dim:
+                raise ValueError(
+                    f"Shape incompatible. Esperado {expected_shape} y recibido {received_shape}."
+                )
+
+        initializer = keras.initializers.GlorotUniform()
+        self.cores: list[tuple[t.Any, ...]] = []
+        for out_idx in range(self.output_dim):
+            output_chain = []
+            for site_idx, mode_dim in enumerate(self.input_dims):
+                output_chain.append(
+                    self.add_weight(
+                        name=f"tt_core_{out_idx}_{site_idx}",
+                        shape=(
+                            self.tt_ranks[site_idx],
+                            mode_dim,
+                            self.tt_ranks[site_idx + 1],
+                        ),
+                        initializer=initializer,
+                        trainable=True,
+                    )
+                )
+            self.cores.append(tuple(output_chain))
+        super().build(input_shape)
+
+    def _contract_chain(self, inputs, chain: tuple[t.Any, ...]):
+        state = ops.tensordot(inputs, chain[0], axes=[[1], [1]])
+        state = ops.squeeze(state, axis=-2)
+        for core in chain[1:]:
+            state = ops.tensordot(state, core, axes=[[1, -1], [1, 0]])
+        return ops.reshape(state, (-1,))
+
+    def call(self, inputs):
+        outputs = ops.stack(
+            [self._contract_chain(inputs, chain) for chain in self.cores],
+            axis=-1,
+        )
+        if self.activation is not None:
+            outputs = self.activation(outputs)
+        return outputs
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.output_dim)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "input_dims": list(self.input_dims),
+                "tt_ranks": list(self.tt_ranks),
+                "output_dim": self.output_dim,
+                "activation": keras.activations.serialize(self.activation),
+            }
+        )
+        return config
 
 
 class VolatilityModelFamilyABC(ABC):
@@ -654,3 +752,160 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             "phase": kwargs.get("phase"),
         }
         Visualizer.plot_nn_learning_curves(**args)
+
+
+class QuantumInspiredNNFamily(SequentialNNFamily):
+    MODEL_EXTENSION = ".keras"
+
+    @staticmethod
+    def get_family_name() -> str:
+        return "quantum_inspired_nn"
+
+    @staticmethod
+    def get_fixed_params() -> t.Dict:
+        return {
+            "patience": 12,
+            "epochs": 150,
+            "verbose": 0,
+            "embedding_activation": "swish",
+            "post_tt_activation": "swish",
+            "use_batch_norm": True,
+            "kernel_initializer": "glorot_uniform",
+        }
+
+    @staticmethod
+    def _get_tt_configurations() -> list[dict[str, t.Any]]:
+        return [
+            {
+                "tensor_dims": [2, 2, 2, 2],
+                "tt_ranks": [1, 2, 2, 2, 1],
+                "tt_output_dim": 8,
+            },
+            {
+                "tensor_dims": [2, 2, 2, 2],
+                "tt_ranks": [1, 4, 4, 4, 1],
+                "tt_output_dim": 12,
+            },
+            {
+                "tensor_dims": [2, 2, 2, 3],
+                "tt_ranks": [1, 3, 3, 3, 1],
+                "tt_output_dim": 12,
+            },
+            {
+                "tensor_dims": [2, 2, 2, 4],
+                "tt_ranks": [1, 4, 4, 4, 1],
+                "tt_output_dim": 16,
+            },
+            {
+                "tensor_dims": [2, 2, 3, 3],
+                "tt_ranks": [1, 3, 4, 3, 1],
+                "tt_output_dim": 16,
+            },
+        ]
+
+    @staticmethod
+    def get_hyperparameter_search_space() -> t.Dict:
+        return {
+            "tt_configuration": QuantumInspiredNNFamily._get_tt_configurations(),
+            "dense_units": [16, 24, 32, 48, 64],
+            "dropout_rate": [0.0, 0.05, 0.1, 0.15],
+            "l2_reg": [0.0, 1e-6, 1e-5, 1e-4],
+            "learning_rate": [3e-4, 5e-4, 8e-4, 1e-3],
+            "batch_size": [128, 256, 512, 1024],
+            "loss": ["huber", "mse"],
+            "use_lr_scheduler": [True, False],
+            "kernel_initializer": ["glorot_uniform", "he_uniform"],
+        }
+
+    @staticmethod
+    def instantiate_model(
+        *, input_dim: int, model_params: dict[str, t.Any]
+    ) -> keras.Model:
+        keras.backend.clear_session()
+        keras.utils.set_random_seed(VolatilityModelFamilyABC.RANDOM_SEED)
+
+        tt_configuration = dict(model_params["tt_configuration"])
+        tensor_dims = tuple(int(dim) for dim in tt_configuration["tensor_dims"])
+        tt_ranks = tuple(int(rank) for rank in tt_configuration["tt_ranks"])
+        tt_output_dim = int(tt_configuration["tt_output_dim"])
+        embedding_dim = int(np.prod(tensor_dims))
+        kernel_regularizer = regularizers.l2(model_params["l2_reg"])
+
+        inputs = keras.Input(shape=(input_dim,), name="qi_features")
+        x = inputs
+
+        if model_params.get("use_batch_norm", True):
+            x = layers.BatchNormalization(name="qi_batch_norm")(x)
+
+        x = layers.Dense(
+            embedding_dim,
+            activation=model_params["embedding_activation"],
+            kernel_initializer=model_params["kernel_initializer"],
+            kernel_regularizer=kernel_regularizer,
+            name="qi_embedding",
+        )(x)
+        x = layers.Reshape(tensor_dims, name="qi_tensorize")(x)
+        x = TensorTrainLayer(
+            input_dims=tensor_dims,
+            tt_ranks=tt_ranks,
+            output_dim=tt_output_dim,
+            activation=model_params["post_tt_activation"],
+            name="qi_tensor_train",
+        )(x)
+        x = layers.Dense(
+            model_params["dense_units"],
+            activation=model_params["post_tt_activation"],
+            kernel_initializer=model_params["kernel_initializer"],
+            kernel_regularizer=kernel_regularizer,
+            name="qi_post_tt_dense",
+        )(x)
+
+        if model_params["dropout_rate"] > 0.0:
+            x = layers.Dropout(model_params["dropout_rate"], name="qi_post_tt_dropout")(x)
+
+        outputs = layers.Dense(1, activation="linear", name="qi_output")(x)
+
+        model = keras.Model(
+            inputs=inputs,
+            outputs=outputs,
+            name=f"quantum_inspired_tt_{'_'.join(map(str, tensor_dims))}",
+        )
+        model.compile(
+            optimizer=keras.optimizers.Adam(
+                learning_rate=model_params["learning_rate"]
+            ),
+            loss=model_params["loss"],
+            metrics=[keras.metrics.RootMeanSquaredError(name="rmse")],
+        )
+        return model
+
+    @staticmethod
+    def get_n_iter():
+        return 50
+
+    @staticmethod
+    def save_model(
+        model: t.Any,
+        scaler: StandardScaler | None = None,
+    ) -> None:
+        VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+        model_path = (
+            VOLATILITY_TRAINED_MODELS_DIR_PATH
+            / f"{QuantumInspiredNNFamily.get_family_name()}.keras"
+        )
+
+        model.save(model_path)
+
+        if scaler is not None:
+            scaler_path = QuantumInspiredNNFamily.get_scaler_path()
+            joblib.dump(scaler, scaler_path)
+            Visualizer.info_confirmation(
+                scaler_path,
+                label="Scaler guardado en",
+            )
+
+        Visualizer.info_confirmation(
+            model_path,
+            label="Modelo guardado en",
+        )
