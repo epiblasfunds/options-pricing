@@ -14,6 +14,7 @@ from src.config.config import (
 from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.python_models.volatility_models.volatility_model_family import (
+    ModelFitResult,
     VolatilityModelFamilyABC,
 )
 from src.volatility_models.data_utils import BASE_FEATURE_COLS, TrainingDataHandler
@@ -444,6 +445,34 @@ class Trainer:
         )
         return family_models_metrics_table, best_model_name
     
+    def fit_model(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray,
+        phase: TrainingPhase,
+        model_params: dict,
+    ) -> ModelFitResult:
+        indices = np.random.permutation(len(X_train))
+        X_train = X_train[indices]
+        y_train = y_train[indices]
+
+        model = self.model_family.instantiate_model(
+            input_dim=X_train.shape[1],
+            model_params=model_params,
+        )
+
+        fit_result = self.model_family.fit_model(
+            model=model,
+            model_params=model_params,
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            phase=phase,
+        )
+
+        return fit_result, model
+
     def retrain_best_params_family(
         self,
         phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
@@ -512,7 +541,7 @@ class Trainer:
         if phase is TrainingPhase.TRAIN_VAL:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
 
-            X_train = train_data[BASE_FEATURE_COLS].to_numpy()
+            X_train = train_data[BASE_FEATURE_COLS].to_numpy()      
             y_train = train_data[TARGET_COLUMN].to_numpy()
             X_val = val_data[BASE_FEATURE_COLS].to_numpy()
             y_val = val_data[TARGET_COLUMN].to_numpy()
@@ -530,20 +559,14 @@ class Trainer:
 
             evaluation_label = TrainingDataSplitEnum.TEST
 
-        model = self.model_family.instantiate_model(
-            input_dim=X_train.shape[1],
-            model_params=best_model_params,
-        )
-
-        fit_result = self.model_family.fit_model(
-            model=model,
+        fit_result, model = self.fit_model(
             model_params=best_model_params,
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
             phase=phase,
         )
-
+        
         metrics_dict = self.calculate_regression_metrics(
             y_train,
             fit_result.train_predictions,

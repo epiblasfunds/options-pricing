@@ -345,7 +345,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 10
+        return 1
 
     @classmethod
     def fit_model(
@@ -436,7 +436,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 200
+        return 1 #200
 
     @classmethod
     def fit_model(
@@ -626,7 +626,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 75
+        return 1 #75
 
     @classmethod
     def fit_model(
@@ -881,7 +881,7 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
 
     @staticmethod
     def get_n_iter():
-        return 50
+        return 1 #50
 
     @staticmethod
     def save_model(
