@@ -5,5 +5,4 @@ src/volatility_models/trained_metadata/*
 src/dashboard/saved_models/*
 *.csv
 __pycache__/
-terraform/terraform_aws/.terraform*
-terraform/terraform_gcp/.terraform*
+terraform/.terraform*
