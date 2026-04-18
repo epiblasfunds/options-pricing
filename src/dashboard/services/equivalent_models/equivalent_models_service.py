@@ -3,7 +3,7 @@
 import typing as t
 
 from src.dashboard.services.shared.prediction_service import PredictionService
-from src.python_models.explainable_artifacts import SurrogateTreeModel
+from src.python_models.dashboard.artifacts import SurrogateTreeModel
 from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
 
 

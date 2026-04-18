@@ -6,7 +6,7 @@ from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
-from src.volatility_models import ANALYSIS_FEATURE_NAMES
+from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
 
 
 def register_model_loading_callbacks(app, services) -> None:
@@ -22,7 +22,7 @@ def register_model_loading_callbacks(app, services) -> None:
         models = services.model_registry.discover_models()
         options = [
             {
-                "label": f"{model.name} ({model.format})",
+                "label": f"{model.name} ({model.format.value})",
                 "value": model.model_id,
             }
             for model in models

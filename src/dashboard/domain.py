@@ -7,12 +7,11 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricDefinition,
     MetricsRegistry,
 )
-from src.enums.data_enums import OptionTypeEnum, VolatilityDBEnum
-from src.volatility_models.feature_engineering import (
-    MODEL_FEATURE_NAMES,
-    RAW_INPUT_FEATURES,
-    TRADE_TYPE_TO_FEATURE,
-)
+from src.enums.data_enums import OptionTypeEnum
+from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
+from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
+from src.model2dashboard.features import TARGET_COLUMN
+from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
 
 
 def _r2_score(y_true, y_pred) -> float:
@@ -25,241 +24,141 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
-    features = [
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.EXEC_DATETIME),
-            label="Execution Datetime",
+    features = [_raw_feature_definition(name) for name in RAW_INPUT_FEATURE_NAMES]
+    features.extend(
+        [
+            FeatureDefinition(
+                name="ExecHour",
+                label="Execution Hour",
+                dtype="float",
+                category="numerical",
+                raw_input=False,
+                derived_explainability_feature=True,
+            ),
+            FeatureDefinition(
+                name="ExecWeekday",
+                label="Execution Weekday",
+                dtype="int",
+                category="categorical",
+                raw_input=False,
+                derived_explainability_feature=True,
+            ),
+            FeatureDefinition(
+                name="Moneyness",
+                label="Moneyness",
+                dtype="float",
+                category="numerical",
+                raw_input=False,
+                derived_explainability_feature=True,
+            ),
+            FeatureDefinition(
+                name="LogMoneyness",
+                label="Log-Moneyness",
+                dtype="float",
+                category="numerical",
+                raw_input=False,
+                derived_explainability_feature=True,
+            ),
+            FeatureDefinition(
+                name="AbsLogMoneyness",
+                label="Absolute Log-Moneyness",
+                dtype="float",
+                category="numerical",
+                raw_input=False,
+                derived_explainability_feature=True,
+            ),
+        ]
+    )
+    known = {feature.name for feature in features}
+    for feature_name in MODEL_INPUT_FEATURE_NAMES:
+        if feature_name not in known:
+            features.append(_model_feature_definition(feature_name))
+            known.add(feature_name)
+    return FeatureSchema(features=features, target_column=TARGET_COLUMN)
+
+
+def _raw_feature_definition(name: str) -> FeatureDefinition:
+    labels = {
+        "ExecDatetime": "Execution Datetime",
+        "OptionType": "Option Type",
+        "Quantity": "Quantity",
+        "StrikePrice": "Strike Price",
+        "TradeType": "Trade Type",
+        "UnderlyingLagMinutes": "Underlying Lag (minutes)",
+        "UnderlyingPrice": "Underlying Price",
+        "TimeToExpiration": "Time To Expiration (days)",
+        "Rate": "Rate",
+    }
+    if name == "ExecDatetime":
+        return FeatureDefinition(
+            name=name,
+            label=labels[name],
             dtype="datetime",
             category="categorical",
             raw_input=True,
             widget="text",
             description="Execution timestamp of the option trade.",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.OPTION_TYPE),
-            label="Option Type",
+        )
+    if name == "OptionType":
+        return FeatureDefinition(
+            name=name,
+            label=labels[name],
             dtype="category",
             category="categorical",
             raw_input=True,
             allowed_values=(OptionTypeEnum.CALL, OptionTypeEnum.PUT),
             default_value=OptionTypeEnum.CALL,
             widget="dropdown",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.QUANTITY),
-            label="Quantity",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            min_value=0.0,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.STRIKE_PRICE),
-            label="Strike Price",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            min_value=0.0,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.TRADE_TYPE),
-            label="Trade Type",
+        )
+    if name == "TradeType":
+        return FeatureDefinition(
+            name=name,
+            label=labels[name],
             dtype="category",
             category="categorical",
             raw_input=True,
             allowed_values=tuple(TRADE_TYPE_TO_FEATURE.keys()),
             default_value="M",
             widget="dropdown",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
-            label="Underlying Lag (minutes)",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            min_value=0.0,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.UNDERLYING_PRICE),
-            label="Underlying Price",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            min_value=0.0,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.TIME_TO_EXPIRATION),
-            label="Time To Expiration (days)",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            min_value=0.0,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name=str(VolatilityDBEnum.RATE),
-            label="Rate",
-            dtype="float",
-            category="numerical",
-            raw_input=True,
-            widget="number",
-        ),
-        FeatureDefinition(
-            name="ExecHour",
-            label="Execution Hour",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="ExecWeekday",
-            label="Execution Weekday",
-            dtype="int",
-            category="categorical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="Moneyness",
-            label="Moneyness",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="LogMoneyness",
-            label="Log-Moneyness",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="AbsLogMoneyness",
-            label="Absolute Log-Moneyness",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="tte_years",
-            label="TTE (years)",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="sqrt_tte_years",
-            label="Sqrt TTE (years)",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="log_moneyness",
-            label="Log-Moneyness",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="log_moneyness_sq",
-            label="Log-Moneyness Squared",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="log_moneyness_x_sqrt_tte",
-            label="Log-Moneyness x Sqrt TTE",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="log_forward_moneyness",
-            label="Log Forward Moneyness",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="rate",
-            label="Rate",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="is_call",
-            label="Is Call",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="exec_hour",
-            label="Execution Hour",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="exec_weekday",
-            label="Execution Weekday",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="underlying_lag_minutes",
-            label="Underlying Lag (minutes)",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-        FeatureDefinition(
-            name="quantity_log1p",
-            label="Log(1 + Quantity)",
-            dtype="float",
-            category="numerical",
-            raw_input=False,
-            derived_explainability_feature=True,
-        ),
-    ]
-    for trade_type, feature_name in TRADE_TYPE_TO_FEATURE.items():
-        features.append(
-            FeatureDefinition(
-                name=feature_name,
-                label=f"Trade Type = {trade_type}",
-                dtype="float",
-                category="numerical",
-                raw_input=False,
-                derived_explainability_feature=True,
-            )
         )
+    return FeatureDefinition(
+        name=name,
+        label=labels.get(name, name),
+        dtype="float",
+        category="numerical",
+        raw_input=True,
+        min_value=0.0 if name != "Rate" else None,
+        widget="number",
+    )
 
-    return FeatureSchema(
-        features=features,
-        target_column=str(VolatilityDBEnum.IMPLIED_VOLATILITY),
+
+def _model_feature_definition(name: str) -> FeatureDefinition:
+    labels = {
+        "TTEYears": "TTE (years)",
+        "sqrtTTEYears": "Sqrt TTE (years)",
+        "logMoneyness": "Log-Moneyness",
+        "logMoneynessSq": "Log-Moneyness Squared",
+        "logMoneynessXSqrtTTE": "Log-Moneyness x Sqrt TTE",
+        "logForwardMoneyness": "Log Forward Moneyness",
+        "rate": "Rate",
+        "underlyingLagMinutes": "Underlying Lag (minutes)",
+        "quantityLog1p": "Log(1 + Quantity)",
+        "isCall": "Is Call",
+        "isPut": "Is Put",
+    }
+    for trade_type, feature_column in TRADE_TYPE_TO_FEATURE.items():
+        labels[feature_column] = f"Trade Type = {trade_type}"
+    if name.startswith("execHour"):
+        labels[name] = f"Execution Hour = {name.removeprefix('execHour')}"
+    if name.startswith("execWeekday"):
+        labels[name] = f"Execution Weekday = {name.removeprefix('execWeekday')}"
+    return FeatureDefinition(
+        name=name,
+        label=labels.get(name, name),
+        dtype="float",
+        category="numerical",
+        raw_input=False,
+        derived_explainability_feature=True,
     )
 
 
@@ -300,6 +199,4 @@ def build_metrics_registry() -> MetricsRegistry:
     return registry
 
 
-RAW_INPUT_FEATURE_NAMES = [str(feature) for feature in RAW_INPUT_FEATURES]
-MODEL_INPUT_FEATURE_NAMES = list(MODEL_FEATURE_NAMES)
 ERROR_METRICS = tuple(config.dashboard_models_config.error_metrics)

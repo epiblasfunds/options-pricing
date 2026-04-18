@@ -12,7 +12,7 @@ from src.dashboard.plots.plot_style import (
     STANDARD_MARGIN,
     STANDARD_TEMPLATE,
 )
-from src.python_models.explainable_artifacts import SurrogateTreeModel
+from src.python_models.dashboard.artifacts import SurrogateTreeModel
 
 
 def feature_importance_figure(result: SurrogateTreeModel):

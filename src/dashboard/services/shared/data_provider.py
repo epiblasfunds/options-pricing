@@ -8,8 +8,8 @@ import pandas as pd
 from src.dashboard.services.shared.model_loader import ModelLoader
 from src.dashboard.services.shared.model_registry import ModelRegistry
 from src.dashboard.utils.validation import ensure_non_empty_frame
-from src.data_management.loaders.volatility_step_loader import VolatilityStepLoader
-from src.volatility_models import build_model_dataset, select_trade_columns
+from src.model2dashboard.features import add_dashboard_derived_features
+from src.model2dashboard.features import load_test_trade_frame
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +52,14 @@ class VolatilityDataProvider:
 
         if self.dataset_path.exists():
             frame = pd.read_csv(self.dataset_path, sep=";", low_memory=False)
+            dataset = add_dashboard_derived_features(frame)
         else:
             logger.info(
-                "Persisted dashboard split not found at %s. Falling back to VolatilityStepLoader.",
+                "Persisted dashboard split not found at %s. Loading Test split via TrainingDataHandler.",
                 self.dataset_path,
             )
-            frame = select_trade_columns(VolatilityStepLoader.load(force_reload=False))
+            dataset = add_dashboard_derived_features(load_test_trade_frame(verbose=False))
 
-        dataset = build_model_dataset(frame)
         ensure_non_empty_frame(dataset, "The volatility dataset is empty.")
         self._cache = dataset.copy()
         return dataset

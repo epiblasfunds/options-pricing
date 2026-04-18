@@ -3,7 +3,10 @@
 import pandas as pd
 
 from src.dashboard.services.shared.feature_schema import FeatureSchema
-from src.volatility_models import add_dashboard_derived_features, apply_feature_override
+from src.model2dashboard.features import (
+    add_dashboard_derived_features,
+    apply_feature_override,
+)
 
 
 def add_derived_features(

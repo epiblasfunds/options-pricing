@@ -5,16 +5,15 @@ from functools import lru_cache
 from pathlib import Path
 
 from src.enums.volatility_model_enums import ModelFormatEnum
+from src.python_models.dashboard.artifacts import DashboardBundleMetadata
 from src.python_models.dashboard.dashboard_model import DashboardModel
-from src.python_models.explainable_artifacts import AbstractModelMetadata
-from src.python_models.explainable_artifacts import ExplainableModelMetadata
 
 
 @dataclass(frozen=True)
 class LoadedModelBundle:
     """Loaded dashboard-ready bundle metadata and precalculated artifacts."""
 
-    discovered_model: AbstractModelMetadata
+    discovered_model: DashboardBundleMetadata
     metadata: dict
     dashboard_model: DashboardModel
 
@@ -26,7 +25,7 @@ class ModelLoader:
         self.cache_size = cache_size
         self._load_cached = lru_cache(maxsize=cache_size)(self._load_uncached)
 
-    def load(self, discovered_model: AbstractModelMetadata) -> LoadedModelBundle:
+    def load(self, discovered_model: DashboardBundleMetadata) -> LoadedModelBundle:
         return self._load_cached(
             discovered_model.path.as_posix(),
             discovered_model.format.value,
@@ -44,7 +43,7 @@ class ModelLoader:
             raise ValueError(
                 f"Unsupported model format for the dashboard runtime: {format_enum.value}."
             )
-        discovered = ExplainableModelMetadata.load(model_path)
+        discovered = DashboardBundleMetadata.load(model_path)
         dashboard_root = DashboardModel.get_root_path(discovered.path)
         if not dashboard_root.exists():
             raise FileNotFoundError(

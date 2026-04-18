@@ -307,7 +307,6 @@ class TrainingDataHandler:
                     (100.0 * kept_rows / total_rows) if total_rows else 0.0,
                 )
 
-
         volatility_df = volatility_df.sort_values(VolatilityDBEnum.EXEC_DATETIME)
         volatility_df = volatility_df.reset_index(drop=True)
         return volatility_df

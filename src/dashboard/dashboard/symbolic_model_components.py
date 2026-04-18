@@ -22,7 +22,7 @@ def build_symbolic_panel(symbolic_model, services):
         children=[
             html.H3("Symbolic Regressor", style={"margin": "0 0 8px 0"}),
             html.P(
-                "Closed-form surrogate fitted with PySR over the engineered model inputs. "
+                "Closed-form surrogate fitted over the engineered model inputs. "
                 "It complements the tree panel by exposing a compact analytic approximation.",
                 style={"margin": "0 0 16px 0", "color": "#4a5a73"},
             ),
