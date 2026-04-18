@@ -5,7 +5,11 @@ on:
     branches:
       - main
 #   workflow_dispatch:
-
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Workflow desactivado temporalmente"
 
 # jobs:
 #   terraform:
