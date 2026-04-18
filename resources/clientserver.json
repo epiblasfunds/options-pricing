@@ -1,0 +1,36 @@
+{
+  "api": {
+    "base_url": "http://127.0.0.1:8000",
+    "timeout_seconds": 30,
+    "cache_entries": 1
+  },
+  "model_storage": {
+    "backend": "local",
+    "local_cache_dir": "artifacts/api_model_cache",
+    "local": {
+      "trained_models_dir": "src/volatility_models/trained_models",
+      "retrained_metadata_dir": "src/volatility_models/trained_metadata/retrained_metadata",
+      "dashboard_models_dir": "src/dashboard/saved_models"
+    },
+    "gcp": {
+      "credentials_path": null,
+      "trained_models_bucket": "",
+      "trained_models_prefix": "src/volatility_models/trained_models",
+      "retrained_metadata_bucket": "",
+      "retrained_metadata_prefix": "src/volatility_models/trained_metadata/retrained_metadata",
+      "dashboard_models_bucket": "",
+      "dashboard_models_prefix": "src/dashboard/saved_models"
+    }
+  },
+  "dashboard": {
+    "model_storage_dir": "src/dashboard/saved_models",
+    "manual_input_features": [
+      "OptionType",
+      "StrikePrice",
+      "UnderlyingPrice",
+      "TimeToExpiration",
+      "Rate"
+    ],
+    "sample_explainability_neighbors_k": 10
+  }
+}

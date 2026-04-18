@@ -44,8 +44,12 @@ def build_services() -> Services:
     feature_schema = build_feature_schema()
     metrics_registry = build_metrics_registry()
     cache = CacheService(max_entries=config.dashboard_models_config.cache_entries)
-    model_registry = ModelRegistry()
-    model_loader = ModelLoader()
+    model_registry = ModelRegistry(
+        model_dir=config.clientserver_config.dashboard_model_storage_dir
+    )
+    model_loader = ModelLoader(
+        cache_size=config.dashboard_models_config.cache_entries
+    )
     data_provider = VolatilityDataProvider(
         dataset_path=VOLATILITY_MODEL_DATA_DIR_PATH / "test.csv",
     )
