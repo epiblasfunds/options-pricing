@@ -1,0 +1,91 @@
+name: Backend AWS project Terraform Apply
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: Backend AWS project Terraform Apply
+    runs-on: ubuntu-latest
+
+    env:
+      ECR_REGISTRY: 517941688314.dkr.ecr.eu-west-1.amazonaws.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Make script executable
+        run: chmod +x ./scripts/aws/bootstrap_s3.sh
+
+      - name: Create Terraform Backend
+        run: ./scripts/aws/bootstrap_s3.sh
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform/terraform_aws
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan_aws
+        working-directory: ./terraform/terraform_aws
+
+      - name: Terraform create ecr repository
+        run: terraform apply -auto-approve -target=aws_ecr_repository.fetch_data_repo -target=aws_ecr_repository.volatility_repo
+        working-directory: ./terraform/terraform_aws
+        
+      - name: Build Docker image
+        run: docker build -t lambda-fetch-data -f dockerfiles/fetch_data_lambda/Dockerfile .
+
+      - name: Tag Docker image
+        run: docker tag lambda-fetch-data:latest $ECR_REGISTRY/lambda_fetch_data:latest
+
+      - name: Push Docker image to ECR
+        run: docker push $ECR_REGISTRY/lambda_fetch_data:latest
+        
+      - name: Build Docker image
+        run: docker build -t lambda-compute-volatility -f dockerfiles/compute_volatility_lambda/Dockerfile .
+
+      - name: Tag Docker image
+        run: docker tag lambda-compute-volatility:latest $ECR_REGISTRY/lambda_volatility:latest
+
+      - name: Push Docker image to ECR
+        run: docker push $ECR_REGISTRY/lambda_volatility:latest
+  
+      - name: Terraform Plan (Full)
+        run: terraform plan -out=tfplan_aws
+        working-directory: ./terraform/terraform_aws
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve tfplan_aws
+        working-directory: ./terraform/terraform_aws
+        
+      - name: Deploying new Fetch Data Lambda image 
+        run: |
+          aws lambda update-function-code \
+            --function-name mini_ibex_options_scraper \
+            --image-uri 517941688314.dkr.ecr.eu-west-1.amazonaws.com/lambda_fetch_data:latest
+        
+      - name: Deploying new Volatility Lambda image
+        run: |
+          aws lambda update-function-code \
+            --function-name writer_mini_ibex_options \
+            --image-uri 517941688314.dkr.ecr.eu-west-1.amazonaws.com/lambda_volatility:latest

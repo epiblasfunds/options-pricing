@@ -1,0 +1,18 @@
+# Imagen base oficial de Python 3.11
+FROM python:3.11-slim
+
+# Establece el directorio de trabajo dentro del contenedor
+WORKDIR /ui
+
+# Copia los archivos de dependencias
+COPY src/ui/ .
+
+# Instala git y las dependencias
+RUN apt-get update \
+    && pip install -r requirements.txt 
+
+# Exponer el puerto por defecto de Streamlit
+EXPOSE 8501
+
+# Ejecutar la app Streamlit
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
