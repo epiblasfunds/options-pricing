@@ -135,52 +135,6 @@ def apply_feature_override(
     return adjusted
 
 
-def _build_features_from_trade(trade: pd.Series) -> dict[str, float]:
-    tte_years = float(trade[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)]) / 365.0
-    sqrt_tte_years = float(np.sqrt(tte_years))
-
-    underlying_price = float(trade[column_name(VolatilityDBEnum.UNDERLYING_PRICE)])
-    strike_price = float(trade[column_name(VolatilityDBEnum.STRIKE_PRICE)])
-    log_moneyness = float(np.log(underlying_price / strike_price))
-    log_moneyness_sq = log_moneyness**2
-    log_moneyness_x_sqrt_tte = log_moneyness * sqrt_tte_years
-
-    rate = float(trade[column_name(VolatilityDBEnum.RATE)])
-    forward_price = underlying_price * float(np.exp(rate * tte_years))
-    log_forward_moneyness = float(np.log(forward_price / strike_price))
-
-    option_type = str(trade[column_name(VolatilityDBEnum.OPTION_TYPE)]).upper()
-    trade_value = str(trade[column_name(VolatilityDBEnum.TRADE_TYPE)])
-    exec_dt = pd.to_datetime(trade[column_name(VolatilityDBEnum.EXEC_DATETIME)])
-    exec_hour = int(exec_dt.hour)
-    exec_weekday = int(exec_dt.weekday())
-
-    features: dict[str, float] = {
-        "TTEYears": tte_years,
-        "sqrtTTEYears": sqrt_tte_years,
-        "logMoneyness": log_moneyness,
-        "logMoneynessSq": log_moneyness_sq,
-        "logMoneynessXSqrtTTE": log_moneyness_x_sqrt_tte,
-        "logForwardMoneyness": log_forward_moneyness,
-        "rate": rate,
-        "underlyingLagMinutes": float(
-            trade[column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES)]
-        ),
-        "quantityLog1p": float(
-            np.log1p(float(trade[column_name(VolatilityDBEnum.QUANTITY)]))
-        ),
-        "isCall": float(option_type == OptionTypeEnum.CALL.value),
-        "isPut": float(option_type == OptionTypeEnum.PUT.value),
-    }
-    for trade_type, feature_column in TRADE_TYPE_TO_FEATURE.items():
-        features[feature_column] = float(trade_value == trade_type)
-    for hour in range(9, 20):
-        features[f"execHour{hour}"] = float(exec_hour == hour)
-    for weekday in range(5):
-        features[f"execWeekday{weekday}"] = float(exec_weekday == weekday)
-    return features
-
-
 def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     result = pd.DataFrame(index=frame.index)
     tte_days = frame[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)].astype(float)

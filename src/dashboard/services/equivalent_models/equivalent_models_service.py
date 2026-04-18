@@ -17,10 +17,6 @@ class EquivalentModelsService:
         bundle = self.prediction_service.load_bundle(model_id)
         return dict(sorted(bundle.dashboard_model.tree_models.items()))
 
-    def load_symbolic_model(self, model_id: str) -> SymbolicRegressorModel | None:
-        bundle = self.prediction_service.load_bundle(model_id)
-        return bundle.dashboard_model.symbolic_model
-
     def load_equivalent_models(
         self,
         model_id: str,

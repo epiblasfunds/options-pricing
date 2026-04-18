@@ -1,4 +1,3 @@
-from src.config.config import config
 from src.dashboard.services.shared.feature_schema import (
     FeatureDefinition,
     FeatureSchema,
@@ -197,6 +196,3 @@ def build_metrics_registry() -> MetricsRegistry:
         )
     )
     return registry
-
-
-ERROR_METRICS = tuple(config.dashboard_models_config.error_metrics)

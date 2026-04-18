@@ -3,16 +3,6 @@
 import pandas as pd
 
 from src.dashboard.services.shared.feature_schema import FeatureSchema
-from src.model2dashboard.features import (
-    add_dashboard_derived_features,
-    apply_feature_override,
-)
-
-
-def add_derived_features(
-    frame: pd.DataFrame, _feature_schema: FeatureSchema
-) -> pd.DataFrame:
-    return add_dashboard_derived_features(frame)
 
 
 def build_sample_label(row: pd.Series) -> str:
@@ -47,8 +37,6 @@ def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> s
 
 
 __all__ = [
-    "add_derived_features",
-    "apply_feature_override",
     "build_sample_label",
     "display_feature_label",
 ]

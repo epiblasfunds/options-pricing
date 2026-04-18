@@ -28,6 +28,7 @@ from src.model2dashboard.model_io import TrainingModelRuntime
 from src.model2dashboard.model_io import predict_feature_frame
 from src.model2dashboard.model_io import predict_raw_frame
 from src.model2dashboard.model_io import transform_feature_frame
+from src.model2dashboard.surface_checks import financial_checks_from_surface
 from src.python_models.dashboard.artifacts import DiagnosisArtifact
 from src.python_models.dashboard.artifacts import ManualApiStubResponse
 from src.python_models.dashboard.artifacts import StoredShapExplanation
@@ -66,7 +67,6 @@ def build_dashboard_artifacts(
     global_shap, local_shap = build_shap_artifacts(
         runtime=runtime,
         dataset_frame=dataset_frame,
-        raw_frame=raw_test_frame,
         feature_frame=feature_frame,
         predictions=predictions,
         sample_indices=sample_indices,
@@ -136,7 +136,6 @@ def build_shap_artifacts(
     *,
     runtime: TrainingModelRuntime,
     dataset_frame: pd.DataFrame,
-    raw_frame: pd.DataFrame,
     feature_frame: pd.DataFrame,
     predictions: pd.Series,
     sample_indices: list[t.Any],
@@ -572,30 +571,6 @@ def build_diagnosis_artifact(
         error_heatmap=error_heatmap,
         financial_warnings=list(financial_warnings),
     )
-
-
-def financial_checks_from_surface(surface_frame: pd.DataFrame) -> list[str]:
-    if surface_frame.empty:
-        return ["No local surface could be generated for the financial checks."]
-    pivot = surface_frame.pivot_table(
-        index="TimeToExpiration",
-        columns="Moneyness",
-        values="PredictedVolatility",
-    ).sort_index()
-    smile_diff = pivot.diff(axis=1).abs().max().max()
-    term_diff = pivot.diff(axis=0).abs().max().max()
-    warnings: list[str] = []
-    if pd.notna(smile_diff) and smile_diff > 0.20:
-        warnings.append(
-            "Heuristic warning: adjacent smile points show large volatility jumps."
-        )
-    if pd.notna(term_diff) and term_diff > 0.20:
-        warnings.append(
-            "Heuristic warning: adjacent maturity points show large term-structure jumps."
-        )
-    if not warnings:
-        warnings.append("No large discontinuities were detected by the heuristic checks.")
-    return warnings
 
 
 def _predict_transformed_values(
