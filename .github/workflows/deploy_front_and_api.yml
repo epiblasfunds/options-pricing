@@ -1,9 +1,9 @@
-# name: Frontend GCP project Terraform Apply
+name: Frontend GCP project Terraform Apply
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 #   workflow_dispatch:
 
 

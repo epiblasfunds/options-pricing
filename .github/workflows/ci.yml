@@ -1,15 +1,15 @@
-# name: CI Pipeline
+name: CI Pipeline
 
-# on:
-#   push:
-#     branches:
-#       - main
-#       - 'feat/**'
-#       - 'fix/**'
-#       - 'chore/**'
-#   pull_request:
-#     branches: main
-#   workflow_dispatch:
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+  pull_request:
+    branches: main
+  # workflow_dispatch:
 
 # jobs:
 #   # Job 1: Linting y formateo
