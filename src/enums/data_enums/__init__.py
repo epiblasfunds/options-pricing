@@ -13,6 +13,7 @@ from src.enums.data_enums.database_schema.option_underlying_db import (
 )
 from src.enums.data_enums.database_schema.tgentrades_enum import TgentradesEnum
 from src.enums.data_enums.database_schema.trade_ibex_db_enum import TradeIbexDBEnum
+from src.enums.data_enums.database_schema.training_data_enum import TrainingDataEnum
 from src.enums.data_enums.database_schema.volatility_db_enum import VolatilityDBEnum
 from src.enums.data_enums.option_type_enum import OptionTypeEnum
 from src.enums.data_enums.rates_enum import RatesEnum
@@ -30,4 +31,5 @@ __all__ = [
     "TgentradesEnum",
     "TradeIbexDBEnum",
     "VolatilityDBEnum",
+    "TrainingDataEnum",
 ]

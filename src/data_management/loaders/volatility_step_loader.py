@@ -98,7 +98,7 @@ class VolatilityStepLoader:
         df: pd.DataFrame,
     ):
         df = VolatilityStepLoader._clean_trades_wo_underlying(df=df)
-        df = VolatilityStepLoader._clean_trades_wo_underlying(df=df)
+        df = VolatilityStepLoader._filter_high_lag(df=df)
         return df
 
     # VALIDATIONS

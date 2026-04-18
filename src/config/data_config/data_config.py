@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from src.config.data_config.contract_code_config import ContractCodeConfig
 from src.config.data_config.merge_raw_config import MergeRawConfig
 from src.config.data_config.product_split_config import ProductSplitConfig
@@ -7,7 +9,7 @@ from src.config.data_config.volatility_config import VolatilityConfig
 
 
 class DataConfig:
-    def __init__(self, data_config_file_path: str):
+    def __init__(self, data_config_file_path: Path):
         self.contract_code_config = ContractCodeConfig(
             data_config_file_path=data_config_file_path
         )

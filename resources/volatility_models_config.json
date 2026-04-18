@@ -1,0 +1,82 @@
+{
+    "training_data_config": {
+        "vol_db_cols": [
+            "ExecDatetime",
+            "OptionContractCode",
+            "OptionType",
+            "Quantity",
+            "StrikePrice",
+            "TradeType",
+            "UnderlyingLagMinutes",
+            "UnderlyingPrice",
+            "TimeToExpiration",
+            "Rate",
+            "ImpliedVolatility"
+        ],
+        "aux_context_cols": [
+            "ExecDatetime",
+            "OptionContractCode"
+        ],
+        "raw_model_input": [
+            "ExecDatetime",
+            "OptionType",
+            "Quantity",
+            "StrikePrice",
+            "TradeType",
+            "UnderlyingLagMinutes",
+            "UnderlyingPrice",
+            "TimeToExpiration",
+            "Rate"
+        ],
+        "numeric_features": [
+            "TTEYears",
+            "sqrtTTEYears",
+            "logMoneyness",
+            "logMoneynessSq",
+            "logMoneynessXSqrtTTE",
+            "logForwardMoneyness",
+            "rate",
+            "underlyingLagMinutes",
+            "quantityLog1p"
+        ],
+        "target_column": "ImpliedVolatility",
+        "trade_type_to_feature": {
+            "3": "tradeType3",
+            "H": "tradeTypeH",
+            "M": "tradeTypeM",
+            "S": "tradeTypeS",
+            "W": "tradeTypeW",
+            "X": "tradeTypeX"
+        },
+        "train_test_split_config": {
+            "train_size": 0.85,
+            "lag": 0
+        },
+        "kfolds_config": {
+            "n_folds": 5,
+            "extra_blocks": 2
+        },
+        "custom_error_1": {
+            "metric": "custom_error1",
+            "mode": "min",
+            "alpha": 0.25,
+            "beta": 0.75,
+            "base_metric": "rmse"
+        },
+        "custom_error_2": {
+            "metric": "custom_error2",
+            "mode": "min",
+            "gamma": 0.25,
+            "beta": 0.75,
+            "base_metric": "rmse"
+        },
+        "models_metrics": [
+            "train_mae",
+            "train_rmse",
+            "train_r2",
+            "val_mae",
+            "val_rmse",
+            "val_r2"
+        ]
+    }
+}

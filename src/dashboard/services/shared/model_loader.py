@@ -1,0 +1,57 @@
+"""Lazy loading for dashboard-ready explainable-model bundles."""
+
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+
+from src.enums.volatility_model_enums import ModelFormatEnum
+from src.python_models.dashboard.artifacts import DashboardBundleMetadata
+from src.python_models.dashboard.dashboard_model import DashboardModel
+
+
+@dataclass(frozen=True)
+class LoadedModelBundle:
+    """Loaded dashboard-ready bundle metadata and precalculated artifacts."""
+
+    discovered_model: DashboardBundleMetadata
+    metadata: dict
+    dashboard_model: DashboardModel
+
+
+class ModelLoader:
+    """Load persisted dashboard artifacts only when they are requested."""
+
+    def __init__(self, cache_size: int = 16) -> None:
+        self.cache_size = cache_size
+        self._load_cached = lru_cache(maxsize=cache_size)(self._load_uncached)
+
+    def load(self, discovered_model: DashboardBundleMetadata) -> LoadedModelBundle:
+        return self._load_cached(
+            discovered_model.path.as_posix(),
+            discovered_model.format.value,
+        )
+
+    def _load_uncached(
+        self,
+        model_path_str: str,
+        model_format: str,
+    ) -> LoadedModelBundle:
+        model_path = Path(model_path_str)
+        format_enum = ModelFormatEnum(model_format)
+
+        if format_enum != ModelFormatEnum.EXPLAINABLE_MODEL:
+            raise ValueError(
+                f"Unsupported model format for the dashboard runtime: {format_enum.value}."
+            )
+        discovered = DashboardBundleMetadata.load(model_path)
+        dashboard_root = DashboardModel.get_root_path(discovered.path)
+        if not dashboard_root.exists():
+            raise FileNotFoundError(
+                f"Dashboard artifacts were not found for bundle '{discovered.model_id}'. "
+                "Re-export the model with DashboardModel artifacts."
+            )
+        return LoadedModelBundle(
+            discovered_model=discovered,
+            metadata=discovered.metadata,
+            dashboard_model=DashboardModel.load(discovered.path),
+        )

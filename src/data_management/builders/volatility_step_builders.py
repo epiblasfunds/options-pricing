@@ -66,16 +66,16 @@ class VolatilityBuilder:
                 date_rate -= pd.Timedelta(days=1)
                 mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
 
-            r_on = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0])
+            r_on = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0]) / 100.0
             year_fraction = d_c / N
             one_plus_rate = 1.0 + (r_on * year_fraction)
 
             if one_plus_rate <= 0.0:
-                return r_on
+                return r_on * 100.0
 
             discount_factor = 1.0 / one_plus_rate
             equivalent_rate = -math.log(discount_factor) / year_fraction
-            return equivalent_rate
+            return equivalent_rate * 100.0
 
         # Get business days between exec_date and maturity_date
         business_days = pd.bdate_range(
@@ -96,7 +96,7 @@ class VolatilityBuilder:
                 date_rate -= pd.Timedelta(days=1)
                 mask = rates_df[RatesEnum.SESSION_DATE] == date_rate
 
-            r_i = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0])
+            r_i = float(rates_df.loc[mask, RatesEnum.RATE].iloc[0]) / 100.0
 
             # Calculate n_i: number of calendar days this rate applies to
             # If it's Monday (weekday==0), it covers 3 days (Sat, Sun, Mon)
@@ -110,7 +110,7 @@ class VolatilityBuilder:
             compound_product *= 1 + (r_i * n_i / N)
 
         # Final calculation: [product - 1] × N / d_c
-        compounded_rate = (compound_product - 1) * (N / d_c)
+        compounded_rate = (compound_product - 1) * (N / d_c) * 100.0
 
         return compounded_rate
 
@@ -153,6 +153,8 @@ class VolatilityBuilder:
         sigma: float,
         option_type: OptionTypeEnum,
     ) -> float:
+        if not isinstance(option_type, OptionTypeEnum):
+            raise ValueError("option_type must be an instance of OptionTypeEnum")
 
         # Validate inputs
         if any([sigma <= 0, T <= 0, F <= 0, K <= 0]):

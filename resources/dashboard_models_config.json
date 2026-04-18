@@ -1,0 +1,41 @@
+{
+  "dashboard_features": {
+    "error_metrics": [
+      "rmse",
+      "mae",
+      "r2"
+    ]
+  },
+  "dashboard_settings": {
+    "build_config": {
+      "surrogate_depths": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "sample_option_size": 250,
+      "behaviour_anchor_size": 96,
+      "neighbors_k": 10
+    },
+    "random_state": 42,
+    "surrogate_min_samples_leaf": 80,
+    "surrogate_sample_size": 12000,
+    "shap_background_size": 24,
+    "shap_explain_size": 48,
+    "shap_permutations": 20,
+    "neighbors_sample_size": 20000,
+    "diagnosis_sample_size": 10000,
+    "surface_grid_size": 24,
+    "ice_sample_size": 24,
+    "curve_points": 25,
+    "cache_entries": 64,
+    "symbolic_sample_size": 2500,
+    "symbolic_niterations": 12,
+    "symbolic_populations": 6,
+    "symbolic_population_size": 26,
+    "symbolic_maxsize": 48,
+    "symbolic_maxdepth": 14,
+    "symbolic_timeout_seconds": 180
+  }
+}
