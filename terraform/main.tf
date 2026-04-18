@@ -11,8 +11,6 @@ terraform {
   backend "gcs" {
     bucket  = "options-pricing-explainability-tfstate"
     prefix  = "terraform/state"
-    region         = "eu-west-1"
-    encrypt        = true
   }
 }
 
