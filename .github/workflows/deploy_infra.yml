@@ -38,10 +38,10 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Make script executable
-        run: chmod +x ./scripts/bootstrap_gcs.sh
+        run: chmod +x ./scripts/bootstrap_gcp.sh
 
       - name: Create Terraform Backend
-        run: ./scripts/bootstrap_gcs.sh
+        run: ./scripts/bootstrap_gcp.sh
 
       - name: Terraform Init
         run: |
