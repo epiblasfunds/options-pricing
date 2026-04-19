@@ -35,3 +35,9 @@ resource "google_project_iam_member" "cloud_run_artifact_registry_reader" {
   role    = "roles/artifactregistry.reader"
   member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
 }
+
+resource "google_project_iam_member" "github_actions_owner" {
+  project = var.gcp_project
+  role    = "roles/owner"
+  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
+}
