@@ -15,6 +15,7 @@ jobs:
     env:
       TF_WORKING_DIR: ./terraform
       TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+      TF_VAR_gcp_project: ${{ secrets.GCP_PROJECT_ID }}
 
     steps:
       - name: Checkout code
@@ -49,7 +50,7 @@ jobs:
             -input=false
 
       - name: Terraform Plan
-        run: terraform -chdir=$TF_WORKING_DIR plan -out=tfplan_gcp
+        run: terraform -chdir=$TF_WORKING_DIR plan -input=false -out=tfplan_gcp
 
       - name: Terraform Apply
         run: terraform -chdir=$TF_WORKING_DIR apply -auto-approve tfplan_gcp

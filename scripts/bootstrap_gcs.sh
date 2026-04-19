@@ -2,7 +2,7 @@
 set -e
 
 REGION="europe-west1"
-BUCKET_NAME_TERRAFORM="options-pricing-explainability-tfstate"
+BUCKET_NAME_TERRAFORM="${TF_BACKEND_BUCKET}"
 
 echo "Checking if the bucket '$BUCKET_NAME_TERRAFORM' already exists..."
 

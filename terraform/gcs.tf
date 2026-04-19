@@ -11,7 +11,7 @@ resource "google_storage_bucket" "models_bucket" {
   }
 
   encryption {
-    default_kms_key_name = var.kms_key
+    default_kms_key_name = var.kms_key != "" ? var.kms_key : null
   }
 
   storage_class = "STANDARD"
