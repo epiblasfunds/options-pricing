@@ -1,4 +1,7 @@
 import json
+import os
+import shutil
+import subprocess
 
 import numpy as np
 import pandas as pd
@@ -624,4 +627,94 @@ class Trainer:
                 scaler=fit_result.feature_scaler,
             )
 
+
+
+
+            
+            # Ejecutar pipeline de model2dashboard antes de subir modelos a GCP
+            try:
+                import subprocess
+                import sys
+                subprocess.run([
+                    sys.executable,
+                    "-m",
+                    "src.model2dashboard.pipeline"
+                ], check=True)
+            except Exception as e:
+                print(f"Error ejecutando pipeline de model2dashboard: {e}")
+            upload_models_to_gcp()
+
         return result_series
+
+def find_gcloud():
+    gcloud = shutil.which("gcloud")
+    if gcloud:
+        return gcloud
+
+    if os.name == "nt":
+        possible_paths = [
+            os.path.expandvars(r"%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"),
+            os.path.expandvars(r"%PROGRAMFILES%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"),
+        ]
+
+        for path in possible_paths:
+            if os.path.exists(path):
+                return path
+
+    return None
+
+
+def upload_models_to_gcp():
+    env = os.environ.copy()
+    gcloud_path = find_gcloud()
+
+    if "VIRTUAL_ENV" in env:
+        env["CLOUDSDK_PYTHON"] = os.path.join(
+            env["VIRTUAL_ENV"], "Scripts", "python.exe"
+        )
+
+    volatility_path = "src/volatility_models/trained_models"
+    dashboard_path = "src/dashboard/saved_models"
+
+    VOLATILITY_BUCKET = "options-pricing-explainability-volatility"
+    DASHBOARD_BUCKET = "options-pricing-explainability-dashboard"
+
+    try:
+        if os.path.isdir(volatility_path):
+            print("Subiendo modelos de volatility a GCP...")
+            subprocess.run(
+                [
+                    gcloud_path, "storage", "cp",
+                    "--recursive",
+                    os.path.join(volatility_path, "*"),
+                    f"gs://{VOLATILITY_BUCKET}/"
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt")
+            )
+        else:
+            print(f"No existe {volatility_path}, omitiendo.")
+
+        if os.path.isdir(dashboard_path):
+            print("Subiendo modelos de dashboard a GCP...")
+            subprocess.run(
+                [
+                    gcloud_path, "storage", "cp",
+                    "--recursive",
+                    os.path.join(dashboard_path, "*"),
+                    f"gs://{DASHBOARD_BUCKET}/"
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt")
+            )
+        else:
+            print(f"No existe {dashboard_path}, omitiendo.")
+
+        print("Subida finalizada.")
+
+    except subprocess.CalledProcessError as e:
+        print("Error al subir modelos a GCP:")
+        print(e)
+        raise
