@@ -59,7 +59,12 @@ jobs:
         run: echo "BUCKET_NAME=$(terraform -chdir=$TF_WORKING_DIR output -raw models_bucket_name)" >> $GITHUB_ENV
 
       - name: Upload trained_metadata to GCS
-        run: gsutil -m cp -r src/volatility_models/trained_metadata gs://$BUCKET_NAME/
+        run: |
+          if [ -d src/volatility_models/trained_metadata ]; then
+            gsutil -m cp -r src/volatility_models/trained_metadata gs://$BUCKET_NAME/
+          else
+            echo "trained_metadata folder does not exist, skipping upload."
+          fi
 
       - name: Upload trained_models to GCS
         run: gsutil -m cp -r src/volatility_models/trained_models gs://$BUCKET_NAME/
