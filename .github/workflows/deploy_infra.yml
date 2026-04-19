@@ -16,7 +16,7 @@ jobs:
       TF_WORKING_DIR: ./terraform
       TF_BACKEND_BUCKET: "options-pricing-explainability-tfstate"
       TF_VAR_gcp_project: "options-pricing-explainability"
-      TF_VAR_tf_backend_bucket: "options-pricing-explainability-models"
+      TF_VAR_models_bucket: "options-pricing-explainability-models"
 
     steps:
       - name: Checkout code

@@ -16,6 +16,6 @@ provider "google" {
   region  = var.gcp_region
 }
 
-output "tf_backend_bucket" {
-  value = var.tf_backend_bucket
+output "models_bucket" {
+  value = var.models_bucket
 }
