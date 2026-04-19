@@ -14,4 +14,4 @@ app = create_app()
 server = app.server
 
 if __name__ == "__main__":
-    main()    main()
+    main()
