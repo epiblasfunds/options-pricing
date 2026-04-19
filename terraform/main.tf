@@ -16,6 +16,10 @@ provider "google" {
   region  = var.gcp_region
 }
 
-output "models_bucket" {
-  value = var.models_bucket
+output "volatility_models_bucket_name" {
+  value = var.volatility_models_bucket
+}
+
+output "dashboard_models_bucket_name" {
+  value = var.dashboard_models_bucket
 }

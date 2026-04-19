@@ -16,7 +16,8 @@ jobs:
       TF_WORKING_DIR: ./terraform
       TF_BACKEND_BUCKET: "options-pricing-explainability-tfstate"
       TF_VAR_gcp_project: "options-pricing-explainability"
-      TF_VAR_models_bucket: "options-pricing-explainability-models"
+      TF_VAR_volatility_models_bucket: "options-pricing-explainability-volatility"
+      TF_VAR_dashboard_models_bucket: "options-pricing-explainability-dashboard"
 
     steps:
       - name: Checkout code
@@ -56,8 +57,11 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=$TF_WORKING_DIR apply -auto-approve tfplan_gcp
 
-      - name: Get bucket name from Terraform
-        run: echo "BUCKET_NAME=$(terraform -chdir=$TF_WORKING_DIR output -raw models_bucket_name)" >> $GITHUB_ENV
+      - name: Get volatility bucket name from Terraform
+        run: echo "VOLATILITY_BUCKET=$(terraform -chdir=$TF_WORKING_DIR output -raw volatility_models_bucket_name)" >> $GITHUB_ENV
+
+      - name: Get dashboard bucket name from Terraform
+        run: echo "DASHBOARD_BUCKET=$(terraform -chdir=$TF_WORKING_DIR output -raw dashboard_models_bucket_name)" >> $GITHUB_ENV
 
       - name: Upload trained_metadata to GCS
         run: |
@@ -67,18 +71,18 @@ jobs:
             echo "trained_metadata folder does not exist, skipping upload."
           fi
 
-      - name: Upload trained_models to GCS
+      - name: Upload trained_models to volatility bucket
         run: |
           if [ -d src/volatility_models/trained_models ]; then
-            gsutil -m cp -r src/volatility_models/trained_models gs://$BUCKET_NAME/
+            gsutil -m cp -r src/volatility_models/trained_models gs://$VOLATILITY_BUCKET/
           else
             echo "trained_models folder does not exist, skipping upload."
           fi
 
-      - name: Upload dashboard saved_models to GCS
+      - name: Upload dashboard saved_models to dashboard bucket
         run: |
           if [ -d src/dashboard/saved_models ]; then
-            gsutil -m cp -r src/dashboard/saved_models gs://$BUCKET_NAME/dashboard_models/
+            gsutil -m cp -r src/dashboard/saved_models gs://$DASHBOARD_BUCKET/
           else
             echo "saved_models folder does not exist, skipping upload."
           fi

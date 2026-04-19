@@ -1,5 +1,10 @@
-variable "models_bucket" {
-  description = "Bucket name for storing models and artifacts"
+variable "volatility_models_bucket" {
+  description = "Bucket name for storing volatility models"
+  type        = string
+}
+
+variable "dashboard_models_bucket" {
+  description = "Bucket name for storing dashboard models"
   type        = string
 }
 variable "gcp_region" {
