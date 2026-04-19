@@ -29,3 +29,9 @@ resource "google_cloud_run_service_iam_member" "public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+resource "google_project_iam_member" "cloud_run_artifact_registry_reader" {
+  project = var.gcp_project
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
+}
