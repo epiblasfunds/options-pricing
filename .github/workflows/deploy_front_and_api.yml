@@ -1,119 +1,44 @@
-name: Frontend GCP project Terraform Apply
+name: Build & Deploy Dashboard and API
 
 on:
   push:
     branches:
       - main
       - 'feature/**'
-#   workflow_dispatch:
+  workflow_dispatch:
+
 jobs:
-  terraform:
+  build-and-push-dashboard:
     runs-on: ubuntu-latest
+    env:
+      GCP_REGION: europe-west1
     steps:
-      - run: echo "Workflow desactivado temporalmente"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-# jobs:
-#   terraform:
-#     name: Frontend GCP project Terraform Apply
-#     runs-on: ubuntu-latest
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
-#     env:
-#       ECR_REGISTRY: 517941688314.dkr.ecr.eu-west-1.amazonaws.com
-#       GCP_REGION: europe-west1
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker $GCP_REGION-docker.pkg.dev
 
-#       - name: Set up Terraform
-#         uses: hashicorp/setup-terraform@v3
-#         with:
-#           terraform_version: 1.6.6
-                
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: eu-west-1
+      - name: Build dashboard Docker image
+        run: docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest -f dockerfiles/dashboard/Dockerfile .
 
-#       - name: Login to Amazon ECR
-#         uses: aws-actions/amazon-ecr-login@v1
-
-#       - name: Authenticate to GCP
-#         uses: google-github-actions/auth@v2
-#         with:
-#           credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-
-#       - name: Set up gcloud CLI
-#         uses: google-github-actions/setup-gcloud@v1
-#         with:
-#           project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-#       - name: Configure Docker for Artifact Registry
-#         run: gcloud auth configure-docker $GCP_REGION-docker.pkg.dev
-
-#       - name: Make script executable
-#         run: chmod +x ./scripts/gcp/bootstrap_s3.sh
-
-#       - name: Create Terraform Backend
-#         run: ./scripts/gcp/bootstrap_s3.sh
-
-#       - name: Terraform Init
-#         run: terraform init -input=false
-#         working-directory: ./terraform/terraform_gcp
-
-#       - name: Terraform Plan
-#         run: |
-#           terraform plan -out=tfplan_gcp \
-#             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-#             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-#         working-directory: ./terraform/terraform_gcp
-
-#       - name: Terraform create artifact
-#         run: | 
-#           terraform apply -auto-approve \
-#             -target=google_artifact_registry_repository.api_repo \
-#             -target=google_artifact_registry_repository.ui_repo \
-#             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-#             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-
-#         working-directory: ./terraform/terraform_gcp
-        
-#       - name: Build and push API Docker image
-#         run: |
-#           docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fastapi-repo-mini-ibex-options/fastapi-querydynamodb -f dockerfiles/api/Dockerfile .
-#           docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fastapi-repo-mini-ibex-options/fastapi-querydynamodb
-
-#       - name: Build and push Streamlit Docker image
-#         run: |
-#           docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/streamlit-repo-mini-ibex-options/streamlit -f dockerfiles/ui/Dockerfile .
-#           docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/streamlit-repo-mini-ibex-options/streamlit
-
-#       - name: Terraform Plan
-#         run: |
-#           terraform plan -out=tfplan_gcp \
-#             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \
-#             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-#         working-directory: ./terraform/terraform_gcp
-
-#       - name: Terraform Apply
-#         if: github.ref == 'refs/heads/main'
-#         run: terraform apply -auto-approve tfplan_gcp
-#         working-directory: ./terraform/terraform_gcp
-
-#       - name: Deploying new FastApi Cloud Run image
-#         run: |
-#           gcloud run deploy fastapi-querydynamodb \
-#             --image europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fastapi-repo-mini-ibex-options/fastapi-querydynamodb:latest \
-#             --region europe-west1 \
-#             --platform managed \
-#             --allow-unauthenticated
-
-#       - name: Deploying new Streamlit Cloud Run image
-#         run: |
-#           gcloud run deploy streamlit \
-#             --image europe-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/streamlit-repo-mini-ibex-options/streamlit:latest \
-#             --region europe-west1 \
-#             --platform managed \
-#             --allow-unauthenticated
+      - name: Push dashboard Docker image
+        run: docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy dashboard \
+            --image $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest \
+            --region $GCP_REGION \
+            --platform managed \
+            --allow-unauthenticated

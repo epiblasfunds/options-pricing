@@ -1,14 +1,17 @@
 """CLI entry point for the explainability dashboard."""
 
+import os
+
 from src.dashboard.app import create_app
 
 
 def main() -> None:
-    """Launch the dashboard."""
-
     app = create_app()
-    app.run(debug=False, host="127.0.0.1", port=8050)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=False, host="0.0.0.0", port=port)
 
+app = create_app()
+server = app.server
 
 if __name__ == "__main__":
-    main()
+    main()    main()

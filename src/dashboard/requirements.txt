@@ -2,3 +2,4 @@ dash==2.18.2
 plotly==6.1.1
 pytest==8.4.2
 scikit-learn==1.7.2
+gunicorn
