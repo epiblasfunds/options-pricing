@@ -1,3 +1,7 @@
+variable "tf_backend_bucket" {
+  description = "Bucket name for Terraform backend state"
+  type        = string
+}
 variable "gcp_region" {
   description = "GCP region to deploy resources"
   type        = string

@@ -14,8 +14,9 @@ jobs:
 
     env:
       TF_WORKING_DIR: ./terraform
-      TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
-      TF_VAR_gcp_project: ${{ secrets.GCP_PROJECT_ID }}
+      TF_BACKEND_BUCKET: "options-pricing-explainability-tfstate"
+      TF_VAR_gcp_project: "options-pricing-explainability"
+      TF_VAR_tf_backend_bucket: "options-pricing-explainability-models"
 
     steps:
       - name: Checkout code
@@ -68,6 +69,14 @@ jobs:
 
       - name: Upload trained_models to GCS
         run: gsutil -m cp -r src/volatility_models/trained_models gs://$BUCKET_NAME/
+
+      - name: Upload dashboard saved_models to GCS
+        run: |
+          if [ -d src/dashboard/saved_models ]; then
+            gsutil -m cp -r src/dashboard/saved_models gs://$BUCKET_NAME/dashboard_models/
+          else
+            echo "saved_models folder does not exist, skipping upload."
+          fi
 
       # - name: Terraform create gcs bucket
       #   run: terraform apply -auto-approve -target=gcp_storage_bucket.fetch_data_bucket -target=gcp_storage_bucket.volatility_bucket

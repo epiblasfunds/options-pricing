@@ -15,3 +15,7 @@ provider "google" {
   project = var.gcp_project
   region  = var.gcp_region
 }
+
+output "tf_backend_bucket" {
+  value = var.tf_backend_bucket
+}

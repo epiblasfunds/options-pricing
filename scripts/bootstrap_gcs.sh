@@ -2,7 +2,7 @@
 set -e
 
 REGION="europe-west1"
-BUCKET_NAME_TERRAFORM="${TF_BACKEND_BUCKET}"
+BUCKET_NAME_TERRAFORM="${TF_VAR_tf_backend_bucket}"
 
 echo "Checking if the bucket '$BUCKET_NAME_TERRAFORM' already exists..."
 
