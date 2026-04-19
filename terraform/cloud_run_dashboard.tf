@@ -1,11 +1,11 @@
 resource "google_cloud_run_service" "dashboard" {
   name     = "dashboard"
-  location = var.region
+  location = var.gcp_region
 
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/dashboard-repo-mini-ibex-options/dashboard:latest"
+        image = "${var.gcp_region}-docker.pkg.dev/${var.gcp_project}/dashboard-repo-mini-ibex-options/dashboard:latest"
 
         resources {
           limits = {
