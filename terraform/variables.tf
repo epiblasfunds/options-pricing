@@ -1,7 +1,3 @@
-variable "tf_backend_bucket" {
-  description = "Bucket name for Terraform backend state"
-  type        = string
-}
 variable "models_bucket" {
   description = "Bucket name for storing models and artifacts"
   type        = string
