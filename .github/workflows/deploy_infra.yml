@@ -68,7 +68,12 @@ jobs:
           fi
 
       - name: Upload trained_models to GCS
-        run: gsutil -m cp -r src/volatility_models/trained_models gs://$BUCKET_NAME/
+        run: |
+          if [ -d src/volatility_models/trained_models ]; then
+            gsutil -m cp -r src/volatility_models/trained_models gs://$BUCKET_NAME/
+          else
+            echo "trained_models folder does not exist, skipping upload."
+          fi
 
       - name: Upload dashboard saved_models to GCS
         run: |
