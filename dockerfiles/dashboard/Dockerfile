@@ -14,9 +14,14 @@ COPY src/dashboard/requirements.txt requirements.txt
 # Instalar dependencias Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar solo el código fuente necesario
-COPY src/ src/
 
+# Copiar el código fuente
+COPY src/ src/
+COPY resources/ /app/resources/
+
+
+# Expone el puerto estándar de Cloud Run
+EXPOSE 8080
 ENV PORT=8080
 
-CMD ["gunicorn", "dashboard.main:server", "--chdir", "src"]
+CMD ["gunicorn", "dashboard.main:server", "--chdir", "src", "--bind", ":8080", "--workers", "2"]
