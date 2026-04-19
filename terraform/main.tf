@@ -8,10 +8,7 @@ terraform {
 
   required_version = ">= 1.2.0"
 
-  backend "gcs" {
-    bucket  = "options-pricing-explainability-tfstate"
-    prefix  = "terraform/state"
-  }
+  backend "gcs" {}
 }
 
 provider "google" {

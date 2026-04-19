@@ -14,6 +14,7 @@ jobs:
 
     env:
       TF_WORKING_DIR: ./terraform
+      TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
 
     steps:
       - name: Checkout code
@@ -34,14 +35,18 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # - name: Make script executable
-      #   run: chmod +x ./scripts/gcp/bootstrap_gcs.sh
+      - name: Make script executable
+        run: chmod +x ./scripts/bootstrap_gcs.sh
 
-      # - name: Create Terraform Backend
-      #   run: ./scripts/gcp/bootstrap_gcs.sh
+      - name: Create Terraform Backend
+        run: ./scripts/bootstrap_gcs.sh
 
       - name: Terraform Init
-        run: terraform -chdir=$TF_WORKING_DIR init -input=false
+        run: |
+          terraform -chdir=$TF_WORKING_DIR init \
+            -backend-config="bucket=$TF_BACKEND_BUCKET" \
+            -backend-config="prefix=terraform/state" \
+            -input=false
 
       - name: Terraform Plan
         run: terraform -chdir=$TF_WORKING_DIR plan -out=tfplan_gcp
