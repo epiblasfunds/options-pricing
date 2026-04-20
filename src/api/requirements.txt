@@ -9,3 +9,6 @@ matplotlib
 scipy
 scikit-learn
 shap
+xgboost
+keras
+tensorflow-cpu
