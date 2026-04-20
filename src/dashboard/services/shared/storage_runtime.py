@@ -33,11 +33,6 @@ class DashboardModelStorageRuntime:
                 "model_storage.gcp.dashboard_models_bucket is empty. "
                 "Set the dashboard bucket in resources/clientserver.json."
             )
-        if not gcp.dashboard_models_prefix:
-            raise ValueError(
-                "model_storage.gcp.dashboard_models_prefix is empty. "
-                "Set the prefix where dashboard bundles were uploaded."
-            )
 
         target_dir = self.clientserver_config.local_cache_dir / "dashboard_saved_models"
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -121,17 +116,28 @@ class DashboardModelStorageRuntime:
         strip_prefix: str,
     ) -> int:
         client = self._storage_client()
-        blobs = list(client.list_blobs(bucket_name, prefix=f"{prefix.strip('/')}/"))
+        normalized_prefix = prefix.strip("/")
+        blob_prefix = f"{normalized_prefix}/" if normalized_prefix else None
+        blobs = list(client.list_blobs(bucket_name, prefix=blob_prefix))
         if not blobs:
+            location = (
+                f"gs://{bucket_name}/{normalized_prefix}"
+                if normalized_prefix
+                else f"gs://{bucket_name}"
+            )
             raise FileNotFoundError(
-                f"No GCP objects found under gs://{bucket_name}/{prefix}."
+                f"No GCP objects found under {location}."
             )
         normalized_strip_prefix = strip_prefix.strip("/")
         downloaded = 0
         for blob in blobs:
             if blob.name.endswith("/"):
                 continue
-            relative_name = blob.name.removeprefix(normalized_strip_prefix).lstrip("/")
+            relative_name = (
+                blob.name.removeprefix(normalized_strip_prefix).lstrip("/")
+                if normalized_strip_prefix
+                else blob.name.lstrip("/")
+            )
             target_path = destination_dir / relative_name
             target_path.parent.mkdir(parents=True, exist_ok=True)
             blob.download_to_filename(str(target_path))

@@ -19,7 +19,7 @@
       "retrained_metadata_bucket": "options-pricing-explainability-volatility",
       "retrained_metadata_prefix": "trained_metadata/retrained_metadata",
       "dashboard_models_bucket": "options-pricing-explainability-dashboard",
-      "dashboard_models_prefix": "saved_models"
+      "dashboard_models_prefix": ""
     }
   },
   "dashboard": {
