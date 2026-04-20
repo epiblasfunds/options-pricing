@@ -2,3 +2,10 @@ fastapi
 uvicorn
 pydantic
 google-cloud-storage
+numpy
+pandas
+joblib
+matplotlib
+scipy
+scikit-learn
+shap
