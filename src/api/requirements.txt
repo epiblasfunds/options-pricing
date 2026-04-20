@@ -12,3 +12,4 @@ shap
 xgboost
 keras
 tensorflow-cpu
+ipython
