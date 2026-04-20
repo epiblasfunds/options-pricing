@@ -12,6 +12,11 @@ resource "google_cloud_run_service" "dashboard" {
           value = "gcp"
         }
 
+        env {
+          name  = "API_BASE_URL"
+          value = google_cloud_run_service.api.status[0].url
+        }
+
         resources {
           limits = {
             memory = "1Gi"
@@ -38,6 +43,12 @@ resource "google_cloud_run_service_iam_member" "public" {
 resource "google_project_iam_member" "cloud_run_artifact_registry_reader" {
   project = var.gcp_project
   role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cloud_run_storage_object_viewer" {
+  project = var.gcp_project
+  role    = "roles/storage.objectViewer"
   member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
 }
 

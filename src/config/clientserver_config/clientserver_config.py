@@ -33,8 +33,18 @@ class ClientserverConfig:
         storage_config = payload["model_storage"]
         dashboard_config = payload["dashboard"]
 
-        self.api_base_url = str(api_config["base_url"]).rstrip("/")
-        self.api_timeout_seconds = float(api_config["timeout_seconds"])
+        env_api_base_url = os.environ.get("API_BASE_URL", "").strip().rstrip("/")
+        self.api_base_url = (
+            env_api_base_url
+            if env_api_base_url
+            else str(api_config["base_url"]).rstrip("/")
+        )
+        env_timeout_seconds = os.environ.get("API_TIMEOUT_SECONDS", "").strip()
+        self.api_timeout_seconds = (
+            float(env_timeout_seconds)
+            if env_timeout_seconds
+            else float(api_config["timeout_seconds"])
+        )
         self.api_cache_entries = int(api_config["cache_entries"])
 
         env_backend = os.environ.get("MODEL_STORAGE_BACKEND", "").strip().lower()

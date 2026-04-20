@@ -1,19 +1,15 @@
-# Imagen base oficial de Python 3.11
 FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
 
-# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia el proyecto porque la API reutiliza módulos de src/ y resources/
 COPY src/ src/.
 COPY resources/ resources/.
 
-# Instala git y las dependencias
 RUN apt-get update \
-    && pip install -r src/api/requirements.txt 
+    && pip install --no-cache-dir -r src/api/requirements.txt
 
-# Expone el puerto en el que correrá la API (FastAPI por defecto en 8000)
-EXPOSE 8000
+EXPOSE 8080
 
-# Comando para ejecutar la API
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

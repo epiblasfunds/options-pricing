@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push-dashboard:
+  build-and-deploy:
     runs-on: ubuntu-latest
     env:
       GCP_REGION: europe-west1
@@ -32,13 +32,35 @@ jobs:
       - name: Build dashboard Docker image
         run: docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest -f dockerfiles/dashboard/Dockerfile .
 
+      - name: Build API Docker image
+        run: docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest -f dockerfiles/api/dockerfile .
+
       - name: Push dashboard Docker image
         run: docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest
+
+      - name: Push API Docker image
+        run: docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest
       
-      - name: Deploy to Cloud Run
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy api \
+            --image $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest \
+            --region $GCP_REGION \
+            --platform managed \
+            --set-env-vars MODEL_STORAGE_BACKEND=gcp \
+            --allow-unauthenticated
+
+      - name: Resolve API URL
+        id: api-url
+        run: |
+          API_URL=$(gcloud run services describe api --region $GCP_REGION --format='value(status.url)')
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy dashboard to Cloud Run
         run: |
           gcloud run deploy dashboard \
             --image $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest \
             --region $GCP_REGION \
             --platform managed \
+            --set-env-vars MODEL_STORAGE_BACKEND=gcp,API_BASE_URL=${{ steps.api-url.outputs.api_url }} \
             --allow-unauthenticated

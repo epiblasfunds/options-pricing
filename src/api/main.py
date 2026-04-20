@@ -23,6 +23,12 @@ def get_model_service() -> ApiModelService:
     return _service
 
 
+@app.get("/")
+@app.get("/health")
+def healthcheck() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @app.post("/run_model/predict/", response_model=PredictionResponse)
 def predict(
     request: ModelRequest,
