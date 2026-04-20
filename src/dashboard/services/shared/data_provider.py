@@ -47,6 +47,13 @@ class VolatilityDataProvider:
                 if bundle.dashboard_model is not None:
                     return bundle.dashboard_model.dataset_frame.copy()
 
+        if model_id is None and self.model_registry is not None and self.model_loader is not None:
+            discovered_models = self.model_registry.discover_models()
+            if discovered_models:
+                first_bundle = self.model_loader.load(discovered_models[0])
+                if first_bundle.dashboard_model is not None:
+                    return first_bundle.dashboard_model.dataset_frame.copy()
+
         if self._cache is not None and not refresh:
             return self._cache.copy()
 

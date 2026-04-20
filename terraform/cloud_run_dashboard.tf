@@ -7,6 +7,11 @@ resource "google_cloud_run_service" "dashboard" {
       containers {
         image = "${var.gcp_region}-docker.pkg.dev/${var.gcp_project}/dashboard-repo-mini-ibex-options/dashboard:latest"
 
+        env {
+          name  = "MODEL_STORAGE_BACKEND"
+          value = "gcp"
+        }
+
         resources {
           limits = {
             memory = "1Gi"

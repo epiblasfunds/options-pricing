@@ -9,3 +9,5 @@ sympy
 numpy
 scipy
 shap
+google-cloud-storage
+google-auth

@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -36,7 +37,8 @@ class ClientserverConfig:
         self.api_timeout_seconds = float(api_config["timeout_seconds"])
         self.api_cache_entries = int(api_config["cache_entries"])
 
-        self.model_storage_backend = str(storage_config["backend"]).lower()
+        env_backend = os.environ.get("MODEL_STORAGE_BACKEND", "").strip().lower()
+        self.model_storage_backend = env_backend if env_backend else str(storage_config["backend"]).lower()
         self.local_cache_dir = self._resolve_path(
             project_root,
             storage_config["local_cache_dir"],

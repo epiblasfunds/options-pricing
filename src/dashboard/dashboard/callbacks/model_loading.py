@@ -70,7 +70,7 @@ def register_model_loading_callbacks(app, services) -> None:
             ]
             return (
                 html.Div(
-                    "No model selected. Add explainable-model bundles to src/dashboard/saved_models/ and select one.",
+                    "No model selected. Publish explainable-model bundles to the configured storage backend and select one.",
                     style={"color": "#8a1c1c"},
                 ),
                 shap_options,

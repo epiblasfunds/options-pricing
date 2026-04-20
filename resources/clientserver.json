@@ -14,12 +14,12 @@
     },
     "gcp": {
       "credentials_path": null,
-      "trained_models_bucket": "",
-      "trained_models_prefix": "src/volatility_models/trained_models",
-      "retrained_metadata_bucket": "",
-      "retrained_metadata_prefix": "src/volatility_models/trained_metadata/retrained_metadata",
-      "dashboard_models_bucket": "",
-      "dashboard_models_prefix": "src/dashboard/saved_models"
+      "trained_models_bucket": "options-pricing-explainability-volatility",
+      "trained_models_prefix": "trained_models",
+      "retrained_metadata_bucket": "options-pricing-explainability-volatility",
+      "retrained_metadata_prefix": "trained_metadata/retrained_metadata",
+      "dashboard_models_bucket": "options-pricing-explainability-dashboard",
+      "dashboard_models_prefix": "saved_models"
     }
   },
   "dashboard": {
