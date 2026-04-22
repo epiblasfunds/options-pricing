@@ -59,11 +59,15 @@ class ModelStorage:
         self._download_named_files(
             bucket_name=gcp.retrained_metadata_bucket,
             prefix=gcp.retrained_metadata_prefix,
-            filenames=[
-                f"{model_name}_final_test_retrained_metadata.json",
-                f"{model_name}_train_val_retrained_metadata.json",
-            ],
+            filenames=[f"{model_name}_final_test_retrained_metadata.json"],
             destination_dir=retrained_metadata_dir,
+        )
+        self._download_named_files(
+            bucket_name=gcp.retrained_metadata_bucket,
+            prefix=gcp.retrained_metadata_prefix,
+            filenames=[f"{model_name}_train_val_retrained_metadata.json"],
+            destination_dir=retrained_metadata_dir,
+            missing_ok=True,
         )
         self._download_prefix(
             bucket_name=gcp.explainability_artifacts_bucket,
