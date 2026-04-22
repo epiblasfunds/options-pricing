@@ -37,6 +37,7 @@ class TrainingDataConfig:
         self.custom_error_1: t.Dict = training_data_config["custom_error_1"]
         self.custom_error_2: t.Dict = training_data_config["custom_error_2"]
         self.models_metrics: t.List = training_data_config["models_metrics"]
+        self.required_scaler_models: t.List = training_data_config.get("required_scaler_models", [])
 
     def __init__(self, data_config_file_path: str):
         self._load_config(data_config_file_path)

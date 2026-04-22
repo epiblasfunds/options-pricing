@@ -77,6 +77,10 @@
             "val_mae",
             "val_rmse",
             "val_r2"
+        ],
+        "required_scaler_models": [
+            "sequential_nn",
+            "quantum_inspired_nn"
         ]
     }
 }
