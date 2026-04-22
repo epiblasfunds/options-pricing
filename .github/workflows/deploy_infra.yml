@@ -1,4 +1,4 @@
-name: Backend GCP project Terraform Apply
+name: Backend Google Cloud project Terraform Apply
 
 on:
   push:
