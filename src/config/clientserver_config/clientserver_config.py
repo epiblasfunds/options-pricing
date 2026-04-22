@@ -12,7 +12,7 @@ class GcpModelStorageConfig:
     trained_models_prefix: str
     retrained_metadata_bucket: str
     retrained_metadata_prefix: str
-    dashboard_models_bucket: str
+    explainability_artifacts_bucket: str
     dashboard_models_prefix: str
 
 
@@ -27,6 +27,9 @@ class ClientserverConfig:
     def __init__(self, clientserver_config_file_path: Path):
         with open(clientserver_config_file_path, "r", encoding="utf-8") as file:
             payload = json.load(file)
+        cloud_payload = self._load_cloud_config(
+            clientserver_config_file_path.parent / "cloud_config.json"
+        )
 
         project_root = clientserver_config_file_path.resolve().parent.parent
         api_config = payload["api"]
@@ -69,6 +72,18 @@ class ClientserverConfig:
         )
 
         gcp_config = storage_config["gcp"]
+        volatility_bucket = self._first_non_empty(
+            gcp_config.get("trained_models_bucket"),
+            self._nested_get(cloud_payload, "storage", "volatility_models_bucket"),
+        )
+        retrained_bucket = self._first_non_empty(
+            gcp_config.get("retrained_metadata_bucket"),
+            self._nested_get(cloud_payload, "storage", "volatility_models_bucket"),
+        )
+        dashboard_bucket = self._first_non_empty(
+            gcp_config.get("explainability_artifacts_bucket"),
+            self._nested_get(cloud_payload, "storage", "explainability_artifacts_bucket"),
+        )
         credentials_path = gcp_config.get("credentials_path")
         self.gcp_storage = GcpModelStorageConfig(
             credentials_path=(
@@ -76,15 +91,15 @@ class ClientserverConfig:
                 if not credentials_path
                 else self._resolve_path(project_root, credentials_path)
             ),
-            trained_models_bucket=str(gcp_config["trained_models_bucket"]),
+            trained_models_bucket=str(volatility_bucket or ""),
             trained_models_prefix=self._normalize_prefix(
                 gcp_config["trained_models_prefix"]
             ),
-            retrained_metadata_bucket=str(gcp_config["retrained_metadata_bucket"]),
+            retrained_metadata_bucket=str(retrained_bucket or ""),
             retrained_metadata_prefix=self._normalize_prefix(
                 gcp_config["retrained_metadata_prefix"]
             ),
-            dashboard_models_bucket=str(gcp_config["dashboard_models_bucket"]),
+            explainability_artifacts_bucket=str(dashboard_bucket or ""),
             dashboard_models_prefix=self._normalize_prefix(
                 gcp_config["dashboard_models_prefix"]
             ),
@@ -109,3 +124,29 @@ class ClientserverConfig:
     @staticmethod
     def _normalize_prefix(value: str) -> str:
         return str(value).strip("/")
+
+    @staticmethod
+    def _load_cloud_config(cloud_config_path: Path) -> dict[str, Any]:
+        if not cloud_config_path.exists():
+            return {}
+        with open(cloud_config_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    @staticmethod
+    def _nested_get(payload: dict[str, Any], *keys: str) -> Any:
+        current: Any = payload
+        for key in keys:
+            if not isinstance(current, dict):
+                return None
+            current = current.get(key)
+        return current
+
+    @staticmethod
+    def _first_non_empty(*values: Any) -> Any:
+        for value in values:
+            if value is None:
+                continue
+            if isinstance(value, str) and not value.strip():
+                continue
+            return value
+        return None

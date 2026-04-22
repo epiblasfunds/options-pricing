@@ -1,0 +1,17 @@
+{
+  "gcp": {
+    "project_id": "options-pricing-explainability",
+    "region": "europe-west1",
+    "service_account_email": "github-actions@options-pricing-explainability.iam.gserviceaccount.com"
+  },
+  "terraform": {
+    "backend_bucket": "options-pricing-explainability-tfstate"
+  },
+  "storage": {
+    "volatility_models_bucket": "options-pricing-explainability-volatility",
+    "explainability_artifacts_bucket": "options-pricing-explainability-dashboard"
+  },
+  "artifact_registry": {
+    "repository_id": "dashboard-repo-mini-ibex-options"
+  }
+}

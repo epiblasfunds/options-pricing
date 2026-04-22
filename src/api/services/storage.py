@@ -66,7 +66,7 @@ class ModelStorage:
             destination_dir=retrained_metadata_dir,
         )
         self._download_prefix(
-            bucket_name=gcp.dashboard_models_bucket,
+            bucket_name=gcp.explainability_artifacts_bucket,
             prefix=f"{gcp.dashboard_models_prefix}/{model_name}",
             destination_dir=dashboard_model_dir,
             strip_prefix=f"{gcp.dashboard_models_prefix}/{model_name}",

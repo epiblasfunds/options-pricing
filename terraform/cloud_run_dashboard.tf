@@ -1,11 +1,11 @@
 resource "google_cloud_run_service" "dashboard" {
-  name     = "dashboard"
+  name     = local.dashboard_service_name
   location = var.gcp_region
 
   template {
     spec {
       containers {
-        image = "${var.gcp_region}-docker.pkg.dev/${var.gcp_project}/dashboard-repo-mini-ibex-options/dashboard:latest"
+        image = "${local.image_registry_base}/${local.dashboard_service_name}:latest"
 
         env {
           name  = "MODEL_STORAGE_BACKEND"
@@ -17,13 +17,21 @@ resource "google_cloud_run_service" "dashboard" {
           value = google_cloud_run_service.api.status[0].url
         }
 
+        env {
+          name  = "API_TIMEOUT_SECONDS"
+          value = tostring(local.dashboard_api_client_timeout_seconds)
+        }
+
         resources {
           limits = {
             memory = "1Gi"
             cpu    = "1"
           }
         }
+
       }
+
+      timeout_seconds = local.dashboard_cloud_run_timeout_seconds
     }
   }
 
@@ -33,31 +41,10 @@ resource "google_cloud_run_service" "dashboard" {
   }
 }
 
-resource "google_cloud_run_service_iam_member" "public" {
+resource "google_cloud_run_service_iam_member" "dashboard_invoker" {
   service  = google_cloud_run_service.dashboard.name
   location = google_cloud_run_service.dashboard.location
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
 
-data "google_project" "current" {
-  project_id = var.gcp_project
-}
-
-resource "google_project_iam_member" "cloud_run_artifact_registry_reader" {
-  project = var.gcp_project
-  role    = "roles/artifactregistry.reader"
-  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "cloud_run_storage_object_viewer" {
-  project = var.gcp_project
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "github_actions_owner" {
-  project = var.gcp_project
-  role    = "roles/owner"
-  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
-}

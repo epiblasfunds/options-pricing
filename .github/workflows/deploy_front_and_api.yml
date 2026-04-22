@@ -8,51 +8,61 @@ on:
       - completed
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
-      GCP_REGION: europe-west1
+      PROJECT_ID: ""
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Authenticate to GCP
+      - name: Load cloud config
+        run: |
+          CONFIG_FILE="resources/cloud_config.json"
+          echo "GCP_REGION=$(jq -r '.gcp.region' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
+          echo "PROJECT_ID=$(jq -r '.gcp.project_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
+          echo "ARTIFACT_REPOSITORY=$(jq -r '.artifact_registry.repository_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
+
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
-      - name: Set up gcloud CLI
+      - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ env.PROJECT_ID }}
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker $GCP_REGION-docker.pkg.dev
 
       - name: Build dashboard Docker image
-        run: docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest -f dockerfiles/dashboard/Dockerfile .
+        run: docker build -t $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/dashboard:latest -f dockerfiles/dashboard/Dockerfile .
 
       - name: Build API Docker image
-        run: docker build -t $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest -f dockerfiles/api/dockerfile .
+        run: docker build -t $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest -f dockerfiles/api/Dockerfile .
 
       - name: Push dashboard Docker image
-        run: docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest
+        run: docker push $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/dashboard:latest
 
       - name: Push API Docker image
-        run: docker push $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest
+        run: docker push $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest
       
       - name: Deploy API to Cloud Run
         run: |
           gcloud run deploy api \
-            --image $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/api:latest \
+            --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest \
             --region $GCP_REGION \
             --platform managed \
             --set-env-vars MODEL_STORAGE_BACKEND=gcp \
             --allow-unauthenticated
 
-      - name: Resolve API URL
+      - name: Get Cloud Run API Service URL
         id: api-url
         run: |
           API_URL=$(gcloud run services describe api --region $GCP_REGION --format='value(status.url)')
@@ -61,7 +71,7 @@ jobs:
       - name: Deploy dashboard to Cloud Run
         run: |
           gcloud run deploy dashboard \
-            --image $GCP_REGION-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/dashboard-repo-mini-ibex-options/dashboard:latest \
+            --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/dashboard:latest \
             --region $GCP_REGION \
             --platform managed \
             --set-env-vars MODEL_STORAGE_BACKEND=gcp,API_BASE_URL=${{ steps.api-url.outputs.api_url }} \

@@ -685,22 +685,40 @@ def _upload_models_to_gcp(
     gcloud_path = _find_gcloud()
 
     if not gcloud_path:
-        logger.error(
-            "No se encontró 'gcloud'. Instala Google Cloud SDK o agrega gcloud al PATH."
+        logger.warning(
+            "No se encontró 'gcloud'. Se omite subida a GCP para la familia '%s'.",
+            family_name,
         )
+        return
 
     if "VIRTUAL_ENV" in env:
         python_rel = os.path.join("Scripts", "python.exe") if os.name == "nt" else os.path.join("bin", "python")
         env["CLOUDSDK_PYTHON"] = os.path.join(env["VIRTUAL_ENV"], python_rel)
 
+    credentials_path = getattr(config.clientserver_config.gcp_storage, "credentials_path", None)
+    if credentials_path:
+        env["GOOGLE_APPLICATION_CREDENTIALS"] = str(credentials_path)
+
     dashboard_family_path = os.path.join("src", "dashboard", "saved_models", family_name)
 
     gcp_storage = config.clientserver_config.gcp_storage
     VOLATILITY_BUCKET = gcp_storage.trained_models_bucket
-    DASHBOARD_BUCKET = gcp_storage.dashboard_models_bucket
+    DASHBOARD_BUCKET = gcp_storage.explainability_artifacts_bucket
+
+    if not VOLATILITY_BUCKET:
+        logger.warning(
+            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler para '%s'.",
+            family_name,
+        )
+
+    if not DASHBOARD_BUCKET:
+        logger.warning(
+            "explainability_artifacts_bucket no está configurado. Se omite subida de artefactos dashboard para '%s'.",
+            family_name,
+        )
 
     try:
-        if model_path and os.path.isfile(model_path):
+        if VOLATILITY_BUCKET and model_path and os.path.isfile(model_path):
             subprocess.run(
                 [
                     gcloud_path,
@@ -717,7 +735,7 @@ def _upload_models_to_gcp(
         else:
             logger.warning("No existe modelo entrenado para subir: %s", model_path)
 
-        if scaler_path and os.path.isfile(scaler_path):
+        if VOLATILITY_BUCKET and scaler_path and os.path.isfile(scaler_path):
             subprocess.run(
                 [
                     gcloud_path,
@@ -732,7 +750,7 @@ def _upload_models_to_gcp(
             )
             logger.info("Scaler de modelo entrenado '%s' subido a GCP: %s", family_name, scaler_path)
 
-        if os.path.isdir(dashboard_family_path):
+        if DASHBOARD_BUCKET and os.path.isdir(dashboard_family_path):
             subprocess.run(
                 [
                     gcloud_path,
@@ -750,6 +768,6 @@ def _upload_models_to_gcp(
         else:
             logger.warning("No existe carpeta de dashboard para '%s', omitiendo.", family_name)
 
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         logger.exception("Error al subir modelos a GCP: %s", e)
         raise

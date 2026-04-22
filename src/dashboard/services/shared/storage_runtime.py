@@ -28,9 +28,9 @@ class DashboardModelStorageRuntime:
 
     def _prepare_gcp(self) -> Path:
         gcp = self.clientserver_config.gcp_storage
-        if not gcp.dashboard_models_bucket:
+        if not gcp.explainability_artifacts_bucket:
             raise ValueError(
-                "model_storage.gcp.dashboard_models_bucket is empty. "
+                "model_storage.gcp.explainability_artifacts_bucket is empty. "
                 "Set the dashboard bucket in resources/clientserver.json."
             )
 
@@ -38,7 +38,7 @@ class DashboardModelStorageRuntime:
         target_dir.mkdir(parents=True, exist_ok=True)
 
         downloaded = self._download_prefix(
-            bucket_name=gcp.dashboard_models_bucket,
+            bucket_name=gcp.explainability_artifacts_bucket,
             prefix=gcp.dashboard_models_prefix,
             destination_dir=target_dir,
             strip_prefix=gcp.dashboard_models_prefix,
@@ -46,7 +46,7 @@ class DashboardModelStorageRuntime:
         logger.info(
             "Downloaded %s dashboard artifact file(s) from gs://%s/%s into %s",
             downloaded,
-            gcp.dashboard_models_bucket,
+            gcp.explainability_artifacts_bucket,
             gcp.dashboard_models_prefix,
             target_dir,
         )

@@ -1,14 +1,15 @@
 FROM python:3.11-slim
+
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
 WORKDIR /app
 
-COPY src/ src/.
-COPY resources/ resources/.
+COPY src/api/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN apt-get update \
-    && pip install --no-cache-dir -r src/api/requirements.txt
+COPY src/ ./src
+COPY resources/ ./resources
 
 EXPOSE 8080
 

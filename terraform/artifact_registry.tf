@@ -1,5 +1,5 @@
 resource "google_artifact_registry_repository" "repo" {
   location      = var.gcp_region
-  repository_id = "dashboard-repo-mini-ibex-options"
+  repository_id = var.artifact_repository_id
   format        = "DOCKER"
 }
