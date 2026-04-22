@@ -704,10 +704,27 @@ def _upload_models_to_gcp(
     gcp_storage = config.clientserver_config.gcp_storage
     VOLATILITY_BUCKET = gcp_storage.trained_models_bucket
     DASHBOARD_BUCKET = gcp_storage.explainability_artifacts_bucket
+    TRAINED_MODELS_PREFIX = gcp_storage.trained_models_prefix.strip("/")
+    RETRAINED_METADATA_PREFIX = gcp_storage.retrained_metadata_prefix.strip("/")
+
+    model_destination = (
+        f"gs://{VOLATILITY_BUCKET}/{TRAINED_MODELS_PREFIX}/"
+        if TRAINED_MODELS_PREFIX
+        else f"gs://{VOLATILITY_BUCKET}/"
+    )
+    metadata_destination = (
+        f"gs://{VOLATILITY_BUCKET}/{RETRAINED_METADATA_PREFIX}/"
+        if RETRAINED_METADATA_PREFIX
+        else f"gs://{VOLATILITY_BUCKET}/"
+    )
+    final_test_metadata_path = (
+        VOLATILITY_RETRAINED_METADATA_DIR_PATH
+        / f"{family_name}_final_test_retrained_metadata.json"
+    )
 
     if not VOLATILITY_BUCKET:
         logger.warning(
-            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler para '%s'.",
+            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler/metadatos para '%s'.",
             family_name,
         )
 
@@ -725,13 +742,18 @@ def _upload_models_to_gcp(
                     "storage",
                     "cp",
                     str(model_path),
-                    f"gs://{VOLATILITY_BUCKET}/",
+                    model_destination,
                 ],
                 check=True,
                 env=env,
                 shell=(os.name == "nt")
             )
-            logger.info("Modelo entrenado '%s' subido a GCP: %s", family_name, model_path)
+            logger.info(
+                "Modelo entrenado '%s' subido a GCP: %s -> %s",
+                family_name,
+                model_path,
+                model_destination,
+            )
         else:
             logger.warning("No existe modelo entrenado para subir: %s", model_path)
 
@@ -742,13 +764,43 @@ def _upload_models_to_gcp(
                     "storage",
                     "cp",
                     str(scaler_path),
-                    f"gs://{VOLATILITY_BUCKET}/",
+                    model_destination,
                 ],
                 check=True,
                 env=env,
                 shell=(os.name == "nt")
             )
-            logger.info("Scaler de modelo entrenado '%s' subido a GCP: %s", family_name, scaler_path)
+            logger.info(
+                "Scaler de modelo entrenado '%s' subido a GCP: %s -> %s",
+                family_name,
+                scaler_path,
+                model_destination,
+            )
+
+        if VOLATILITY_BUCKET and os.path.isfile(final_test_metadata_path):
+            subprocess.run(
+                [
+                    gcloud_path,
+                    "storage",
+                    "cp",
+                    str(final_test_metadata_path),
+                    metadata_destination,
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt"),
+            )
+            logger.info(
+                "Metadata final-test '%s' subida a GCP: %s -> %s",
+                family_name,
+                final_test_metadata_path,
+                metadata_destination,
+            )
+        else:
+            logger.warning(
+                "No existe metadata final-test para subir: %s",
+                final_test_metadata_path,
+            )
 
         if DASHBOARD_BUCKET and os.path.isdir(dashboard_family_path):
             subprocess.run(
