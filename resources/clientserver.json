@@ -17,7 +17,7 @@
       "trained_models_bucket": null,
       "trained_models_prefix": "trained_models",
       "retrained_metadata_bucket": null,
-      "retrained_metadata_prefix": "trained_metadata/retrained_metadata",
+      "retrained_metadata_prefix": "trained_metadata",
       "explainability_artifacts_bucket": null,
       "dashboard_models_prefix": ""
     }
