@@ -6,9 +6,6 @@ on:
       - Backend GCP Project Terraform Apply
     types:
       - completed
-    branches:
-      - main
-      - 'feature/**'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +20,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Debug trigger context
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "workflow_run_name=${{ github.event.workflow_run.name || 'n/a' }}"
+          echo "workflow_run_conclusion=${{ github.event.workflow_run.conclusion || 'n/a' }}"
+          echo "workflow_run_head_branch=${{ github.event.workflow_run.head_branch || 'n/a' }}"
 
       - name: Load cloud config
         run: |
