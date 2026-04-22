@@ -56,26 +56,8 @@ resource "google_project_iam_member" "cloud_run_storage_object_viewer" {
   member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }
 
-resource "google_project_iam_member" "github_actions_run_admin" {
+resource "google_project_iam_member" "github_actions_owner" {
   project = var.gcp_project
-  role    = "roles/run.admin"
-  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "github_actions_sa_user" {
-  project = var.gcp_project
-  role    = "roles/iam.serviceAccountUser"
-  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "github_actions_artifact_registry" {
-  project = var.gcp_project
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "github_actions_storage_admin" {
-  project = var.gcp_project
-  role    = "roles/storage.admin"
+  role    = "roles/owner"
   member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
 }
