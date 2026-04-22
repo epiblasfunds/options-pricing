@@ -47,6 +47,7 @@ jobs:
           echo "TF_VAR_explainability_artifacts_bucket=$TF_VAR_explainability_artifacts_bucket" >> "$GITHUB_ENV"
           echo "TF_VAR_artifact_repository_id=$TF_VAR_artifact_repository_id" >> "$GITHUB_ENV"
           echo "TF_VAR_github_actions_service_account_email=$TF_VAR_github_actions_service_account_email" >> "$GITHUB_ENV"
+          echo "TF_VAR_manage_cloud_run_services=false" >> "$GITHUB_ENV"
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3

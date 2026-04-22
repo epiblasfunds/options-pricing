@@ -21,20 +21,31 @@ jobs:
           CONFIG_FILE="resources/cloud_config.json"
           set -euo pipefail
 
+          TF_BACKEND_BUCKET="$(jq -r '.terraform.backend_bucket // empty' "$CONFIG_FILE")"
           GCP_REGION="$(jq -r '.gcp.region // empty' "$CONFIG_FILE")"
           PROJECT_ID="$(jq -r '.gcp.project_id // empty' "$CONFIG_FILE")"
           ARTIFACT_REPOSITORY="$(jq -r '.artifact_registry.repository_id // empty' "$CONFIG_FILE")"
           GCP_SERVICE_ACCOUNT_EMAIL="$(jq -r '.gcp.service_account_email // empty' "$CONFIG_FILE")"
+          VOLATILITY_MODELS_BUCKET="$(jq -r '.storage.volatility_models_bucket // empty' "$CONFIG_FILE")"
+          EXPLAINABILITY_ARTIFACTS_BUCKET="$(jq -r '.storage.explainability_artifacts_bucket // empty' "$CONFIG_FILE")"
 
-          if [[ -z "$GCP_REGION" || -z "$PROJECT_ID" || -z "$ARTIFACT_REPOSITORY" || -z "$GCP_SERVICE_ACCOUNT_EMAIL" ]]; then
-            echo "resources/cloud_config.json is missing required keys: gcp.region, gcp.project_id, artifact_registry.repository_id, gcp.service_account_email"
+          if [[ -z "$TF_BACKEND_BUCKET" || -z "$GCP_REGION" || -z "$PROJECT_ID" || -z "$ARTIFACT_REPOSITORY" || -z "$GCP_SERVICE_ACCOUNT_EMAIL" || -z "$VOLATILITY_MODELS_BUCKET" || -z "$EXPLAINABILITY_ARTIFACTS_BUCKET" ]]; then
+            echo "resources/cloud_config.json is missing required keys: terraform.backend_bucket, gcp.region, gcp.project_id, artifact_registry.repository_id, gcp.service_account_email, storage.volatility_models_bucket, storage.explainability_artifacts_bucket"
             exit 1
           fi
 
+          echo "TF_BACKEND_BUCKET=$TF_BACKEND_BUCKET" >> "$GITHUB_ENV"
           echo "GCP_REGION=$GCP_REGION" >> "$GITHUB_ENV"
           echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
           echo "ARTIFACT_REPOSITORY=$ARTIFACT_REPOSITORY" >> "$GITHUB_ENV"
           echo "GCP_SERVICE_ACCOUNT_EMAIL=$GCP_SERVICE_ACCOUNT_EMAIL" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_project=$PROJECT_ID" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_region=$GCP_REGION" >> "$GITHUB_ENV"
+          echo "TF_VAR_artifact_repository_id=$ARTIFACT_REPOSITORY" >> "$GITHUB_ENV"
+          echo "TF_VAR_github_actions_service_account_email=$GCP_SERVICE_ACCOUNT_EMAIL" >> "$GITHUB_ENV"
+          echo "TF_VAR_volatility_models_bucket=$VOLATILITY_MODELS_BUCKET" >> "$GITHUB_ENV"
+          echo "TF_VAR_explainability_artifacts_bucket=$EXPLAINABILITY_ARTIFACTS_BUCKET" >> "$GITHUB_ENV"
+          echo "TF_VAR_manage_cloud_run_services=true" >> "$GITHUB_ENV"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -45,6 +56,11 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker $GCP_REGION-docker.pkg.dev
@@ -60,29 +76,16 @@ jobs:
 
       - name: Push API Docker image
         run: docker push $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest
-      
-      - name: Deploy API to Cloud Run
-        run: |
-          gcloud run deploy api \
-            --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest \
-            --region $GCP_REGION \
-            --platform managed \
-            --service-account $GCP_SERVICE_ACCOUNT_EMAIL \
-            --set-env-vars MODEL_STORAGE_BACKEND=gcp \
-            --allow-unauthenticated
 
-      - name: Get Cloud Run API Service URL
-        id: api-url
+      - name: Terraform Init
         run: |
-          API_URL=$(gcloud run services describe api --region $GCP_REGION --format='value(status.url)')
-          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          terraform -chdir=./terraform init \
+            -backend-config="bucket=$TF_BACKEND_BUCKET" \
+            -backend-config="prefix=terraform/state" \
+            -input=false
 
-      - name: Deploy dashboard to Cloud Run
-        run: |
-          gcloud run deploy dashboard \
-            --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/dashboard:latest \
-            --region $GCP_REGION \
-            --platform managed \
-            --service-account $GCP_SERVICE_ACCOUNT_EMAIL \
-            --set-env-vars MODEL_STORAGE_BACKEND=gcp,API_BASE_URL=${{ steps.api-url.outputs.api_url }} \
-            --allow-unauthenticated
+      - name: Terraform Plan Cloud Run
+        run: terraform -chdir=./terraform plan -input=false -out=tfplan_cloud_run
+
+      - name: Terraform Apply Cloud Run
+        run: terraform -chdir=./terraform apply -auto-approve -input=false tfplan_cloud_run
