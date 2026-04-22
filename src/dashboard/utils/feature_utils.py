@@ -6,10 +6,22 @@ from src.dashboard.services.shared.feature_schema import FeatureSchema
 
 
 def build_sample_label(row: pd.Series) -> str:
-    option_type = row.get("OptionType", "?")
+    option_type = _display_option_type(row.get("OptionType", "?"))
     maturity = float(row.get("TimeToExpiration", 0.0))
     moneyness = float(row.get("Moneyness", 0.0)) if "Moneyness" in row else float("nan")
-    return f"{row.name} | {option_type} | T={maturity:.1f}d | M={moneyness:.3f}"
+    return (
+        f"Sample ID: {row.name} | Option type: {option_type} | "
+        f"Time to expiration: {maturity:.1f} days | Moneyness: {moneyness:.3f}"
+    )
+
+
+def _display_option_type(value) -> str:
+    text = str(value.value if hasattr(value, "value") else value).strip().upper()
+    if text == "C":
+        return "CALL"
+    if text == "P":
+        return "PUT"
+    return text or "?"
 
 
 def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> str:

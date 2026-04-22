@@ -9,6 +9,13 @@ from src.dashboard.utils.sampling import sample_frame
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
 
 
+def _default_ice_feature(ice_options: list[dict]) -> str | None:
+    option_values = [option["value"] for option in ice_options]
+    if "Moneyness" in option_values:
+        return "Moneyness"
+    return option_values[0] if option_values else None
+
+
 def register_model_loading_callbacks(app, services) -> None:
     """Register model-loading callbacks."""
 
@@ -76,7 +83,7 @@ def register_model_loading_callbacks(app, services) -> None:
                 shap_options,
                 None,
                 ice_options,
-                ice_options[0]["value"] if ice_options else None,
+                _default_ice_feature(ice_options),
                 sample_options,
                 sample_options,
             )
@@ -124,7 +131,7 @@ def register_model_loading_callbacks(app, services) -> None:
             shap_options,
             shap_options[0]["value"] if shap_options else None,
             ice_options,
-            ice_options[0]["value"] if ice_options else None,
+            _default_ice_feature(ice_options),
             anchor_options,
             sample_options,
         )

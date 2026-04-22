@@ -10,13 +10,106 @@ from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
 
 
+MANUAL_INPUT_DEFAULTS = {
+    "OptionType": "CALL",
+    "StrikePrice": 9100.0,
+    "UnderlyingPrice": 9000.0,
+    "TimeToExpiration": 20.0,
+    "Rate": -0.6,
+}
+
+
 def _empty_figure():
     return go.Figure()
 
 
+def _prediction_indicator(
+    *,
+    title: str,
+    prediction: float,
+    actual: float | None = None,
+) -> html.Div:
+    supporting_items = []
+    if actual is not None:
+        supporting_items.append(
+            html.Div(
+                [
+                    html.Span("Actual implied volatility"),
+                    html.Strong(f"{actual:.4f}"),
+                ],
+                style={
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                    "gap": "18px",
+                    "fontSize": "0.96rem",
+                    "color": "#35506e",
+                },
+            )
+        )
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "minmax(0, 1fr) auto",
+            "gap": "18px",
+            "alignItems": "center",
+            "padding": "20px 22px",
+            "borderRadius": "14px",
+            "border": "1px solid rgba(33,75,122,0.18)",
+            "background": "linear-gradient(135deg, #ffffff 0%, #edf5ff 100%)",
+            "boxShadow": "0 12px 26px rgba(22,40,68,0.10)",
+            "margin": "16px 0",
+        },
+        children=[
+            html.Div(
+                [
+                    html.H3(
+                        title,
+                        style={
+                            "margin": "0 0 8px 0",
+                            "fontSize": "1.05rem",
+                            "color": "#17304f",
+                        },
+                    ),
+                    html.Div(
+                        "Predicted volatility",
+                        style={
+                            "fontSize": "0.92rem",
+                            "fontWeight": "700",
+                            "textTransform": "uppercase",
+                            "color": "#48617f",
+                        },
+                    ),
+                    html.Div(supporting_items, style={"marginTop": "12px"}),
+                ]
+            ),
+            html.Div(
+                f"{prediction:.4f}",
+                style={
+                    "minWidth": "180px",
+                    "textAlign": "right",
+                    "fontSize": "2.55rem",
+                    "fontWeight": "800",
+                    "lineHeight": "1",
+                    "color": "#17304f",
+                },
+            ),
+        ],
+    )
+
+
 def _manual_field(feature, default_value):
     component_id = {"type": "manual-feature", "feature": feature.name}
-    if feature.widget == "dropdown" and feature.allowed_values:
+    if feature.name == "OptionType":
+        input_component = dcc.Dropdown(
+            id=component_id,
+            options=[
+                {"label": "CALL", "value": "CALL"},
+                {"label": "PUT", "value": "PUT"},
+            ],
+            value=_manual_option_type_value(default_value),
+            clearable=False,
+        )
+    elif feature.widget == "dropdown" and feature.allowed_values:
         options = [
             {"label": str(value), "value": value}
             for value in feature.allowed_values or ()
@@ -46,6 +139,16 @@ def _manual_field(feature, default_value):
             input_component,
         ]
     )
+
+
+def _manual_option_type_value(default_value):
+    value = default_value.value if hasattr(default_value, "value") else default_value
+    text = str(value).strip().upper()
+    if text in {"CALL", "C"}:
+        return "CALL"
+    if text in {"PUT", "P"}:
+        return "PUT"
+    return "CALL"
 
 
 def _neighbors_table(frame: pd.DataFrame):
@@ -148,6 +251,7 @@ def register_sample_callbacks(app, services) -> None:
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
+        defaults.update(MANUAL_INPUT_DEFAULTS)
         mandatory_names = set(
             config.clientserver_config.dashboard_manual_input_features
         )
@@ -223,13 +327,9 @@ def register_sample_callbacks(app, services) -> None:
                     if not neighbors.empty
                     else _empty_figure()
                 )
-                sample_summary = html.Div(
-                    [
-                        html.H3("Manual Input"),
-                        html.P(
-                            f"Predicted volatility: {float(api_result['prediction']):.4f}"
-                        ),
-                    ]
+                sample_summary = _prediction_indicator(
+                    title="Manual Input",
+                    prediction=float(api_result["prediction"]),
                 )
                 return (
                     sample_summary,
@@ -249,15 +349,14 @@ def register_sample_callbacks(app, services) -> None:
             )
             comparison = neighbors_distance_figure(neighbors)
             actual = (
-                f" | actual IV: {float(sample_frame['ImpliedVolatility'].iloc[0]):.4f}"
+                float(sample_frame["ImpliedVolatility"].iloc[0])
                 if "ImpliedVolatility" in sample_frame.columns
-                else ""
+                else None
             )
-            sample_summary = html.Div(
-                [
-                    html.H3("Selected Sample"),
-                    html.P(f"Predicted volatility: {prediction:.4f}{actual}"),
-                ]
+            sample_summary = _prediction_indicator(
+                title="Selected Sample",
+                prediction=prediction,
+                actual=actual,
             )
             return (
                 sample_summary,
