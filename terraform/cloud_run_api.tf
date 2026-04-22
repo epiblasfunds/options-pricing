@@ -7,7 +7,7 @@ resource "google_cloud_run_service" "api" {
       service_account_name = var.github_actions_service_account_email
 
       containers {
-        image = "${local.image_registry_base}/${local.api_service_name}:latest"
+        image = local.cloud_run_bootstrap_image
 
         env {
           name  = "MODEL_STORAGE_BACKEND"
@@ -29,6 +29,12 @@ resource "google_cloud_run_service" "api" {
   traffic {
     percent         = 100
     latest_revision = true
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].spec[0].containers[0].image,
+    ]
   }
 }
 
