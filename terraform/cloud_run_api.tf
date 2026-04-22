@@ -4,6 +4,8 @@ resource "google_cloud_run_service" "api" {
 
   template {
     spec {
+      service_account_name = var.github_actions_service_account_email
+
       containers {
         image = "${local.image_registry_base}/${local.api_service_name}:latest"
 
