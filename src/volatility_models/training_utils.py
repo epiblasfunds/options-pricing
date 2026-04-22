@@ -803,6 +803,7 @@ def _upload_models_to_gcp(
             )
 
         if DASHBOARD_BUCKET and os.path.isdir(dashboard_family_path):
+            dashboard_destination = f"gs://{DASHBOARD_BUCKET}/{family_name}/"
             subprocess.run(
                 [
                     gcloud_path,
@@ -810,13 +811,18 @@ def _upload_models_to_gcp(
                     "cp",
                     "--recursive",
                     os.path.join(dashboard_family_path, "*"),
-                    f"gs://{DASHBOARD_BUCKET}/{family_name}/",
+                    dashboard_destination,
                 ],
                 check=True,
                 env=env,
                 shell=(os.name == "nt"),
             )
-            logger.info("Artefactos de dashboard '%s' subidos a GCP: %s", family_name, dashboard_family_path)
+            logger.info(
+                "Artefactos de dashboard '%s' subidos a GCP: %s -> %s",
+                family_name,
+                dashboard_family_path,
+                dashboard_destination,
+            )
         else:
             logger.warning("No existe carpeta de dashboard para '%s', omitiendo.", family_name)
 
