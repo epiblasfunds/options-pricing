@@ -81,3 +81,9 @@ jobs:
 
       - name: Terraform Apply
         run: terraform -chdir=$TF_WORKING_DIR apply -auto-approve tfplan_gcp
+
+  deploy-front-and-api:
+    name: Build and Deploy Front and API
+    needs: terraform
+    uses: ./.github/workflows/deploy_front_and_api.yml
+    secrets: inherit

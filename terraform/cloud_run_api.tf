@@ -1,4 +1,5 @@
 resource "google_cloud_run_service" "api" {
+  count    = var.manage_cloud_run_services ? 1 : 0
   name     = local.api_service_name
   location = var.gcp_region
 
@@ -7,7 +8,7 @@ resource "google_cloud_run_service" "api" {
       service_account_name = var.github_actions_service_account_email
 
       containers {
-        image = local.cloud_run_bootstrap_image
+        image = "${local.image_registry_base}/api:latest"
 
         env {
           name  = "MODEL_STORAGE_BACKEND"
@@ -39,8 +40,9 @@ resource "google_cloud_run_service" "api" {
 }
 
 resource "google_cloud_run_service_iam_member" "api_invoker" {
-  service  = google_cloud_run_service.api.name
-  location = google_cloud_run_service.api.location
+  count    = var.manage_cloud_run_services ? 1 : 0
+  service  = google_cloud_run_service.api[0].name
+  location = google_cloud_run_service.api[0].location
   role     = "roles/run.invoker"
   member   = "allUsers"
 }

@@ -1,4 +1,5 @@
 resource "google_cloud_run_service" "dashboard" {
+  count    = var.manage_cloud_run_services ? 1 : 0
   name     = local.dashboard_service_name
   location = var.gcp_region
 
@@ -7,7 +8,7 @@ resource "google_cloud_run_service" "dashboard" {
       service_account_name = var.github_actions_service_account_email
 
       containers {
-        image = local.cloud_run_bootstrap_image
+        image = "${local.image_registry_base}/dashboard:latest"
 
         env {
           name  = "MODEL_STORAGE_BACKEND"
@@ -16,7 +17,7 @@ resource "google_cloud_run_service" "dashboard" {
 
         env {
           name  = "API_BASE_URL"
-          value = google_cloud_run_service.api.status[0].url
+          value = google_cloud_run_service.api[0].status[0].url
         }
 
         env {
@@ -50,8 +51,9 @@ resource "google_cloud_run_service" "dashboard" {
 }
 
 resource "google_cloud_run_service_iam_member" "dashboard_invoker" {
-  service  = google_cloud_run_service.dashboard.name
-  location = google_cloud_run_service.dashboard.location
+  count    = var.manage_cloud_run_services ? 1 : 0
+  service  = google_cloud_run_service.dashboard[0].name
+  location = google_cloud_run_service.dashboard[0].location
   role     = "roles/run.invoker"
   member   = "allUsers"
 }

@@ -46,3 +46,9 @@ variable "kms_key" {
   type        = string
   default     = ""
 }
+
+variable "manage_cloud_run_services" {
+  description = "Whether Terraform should create/manage Cloud Run services. Keep false to let CI deploy services from real images."
+  type        = bool
+  default     = false
+}
