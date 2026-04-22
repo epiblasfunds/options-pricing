@@ -24,15 +24,17 @@ jobs:
           GCP_REGION="$(jq -r '.gcp.region // empty' "$CONFIG_FILE")"
           PROJECT_ID="$(jq -r '.gcp.project_id // empty' "$CONFIG_FILE")"
           ARTIFACT_REPOSITORY="$(jq -r '.artifact_registry.repository_id // empty' "$CONFIG_FILE")"
+          GCP_SERVICE_ACCOUNT_EMAIL="$(jq -r '.gcp.service_account_email // empty' "$CONFIG_FILE")"
 
-          if [[ -z "$GCP_REGION" || -z "$PROJECT_ID" || -z "$ARTIFACT_REPOSITORY" ]]; then
-            echo "resources/cloud_config.json is missing required keys: gcp.region, gcp.project_id, artifact_registry.repository_id"
+          if [[ -z "$GCP_REGION" || -z "$PROJECT_ID" || -z "$ARTIFACT_REPOSITORY" || -z "$GCP_SERVICE_ACCOUNT_EMAIL" ]]; then
+            echo "resources/cloud_config.json is missing required keys: gcp.region, gcp.project_id, artifact_registry.repository_id, gcp.service_account_email"
             exit 1
           fi
 
           echo "GCP_REGION=$GCP_REGION" >> "$GITHUB_ENV"
           echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
           echo "ARTIFACT_REPOSITORY=$ARTIFACT_REPOSITORY" >> "$GITHUB_ENV"
+          echo "GCP_SERVICE_ACCOUNT_EMAIL=$GCP_SERVICE_ACCOUNT_EMAIL" >> "$GITHUB_ENV"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -65,6 +67,7 @@ jobs:
             --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/api:latest \
             --region $GCP_REGION \
             --platform managed \
+            --service-account $GCP_SERVICE_ACCOUNT_EMAIL \
             --set-env-vars MODEL_STORAGE_BACKEND=gcp \
             --allow-unauthenticated
 
@@ -80,5 +83,6 @@ jobs:
             --image $GCP_REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPOSITORY/dashboard:latest \
             --region $GCP_REGION \
             --platform managed \
+            --service-account $GCP_SERVICE_ACCOUNT_EMAIL \
             --set-env-vars MODEL_STORAGE_BACKEND=gcp,API_BASE_URL=${{ steps.api-url.outputs.api_url }} \
             --allow-unauthenticated
