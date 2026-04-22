@@ -16,6 +16,124 @@ def _default_ice_feature(ice_options: list[dict]) -> str | None:
     return option_values[0] if option_values else None
 
 
+def _model_info_panel(
+    *,
+    model_name: str,
+    format_label: str,
+    model_features: list[str],
+    metric_names: list[str],
+) -> html.Div:
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "minmax(220px, 0.9fr) minmax(320px, 1.8fr)",
+            "gap": "16px",
+            "alignItems": "stretch",
+            "padding": "14px 16px",
+            "border": "1px solid rgba(33,75,122,0.14)",
+            "borderRadius": "14px",
+            "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            "boxShadow": "0 8px 18px rgba(22,40,68,0.05)",
+        },
+        children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        "Selected model",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                            "marginBottom": "5px",
+                        },
+                    ),
+                    html.H3(
+                        model_name,
+                        style={
+                            "margin": "0 0 10px 0",
+                            "fontSize": "1.18rem",
+                            "lineHeight": "1.25",
+                            "color": "#17304f",
+                        },
+                    ),
+                    html.Div(
+                        style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
+                        children=[
+                            _metadata_chip("Format", format_label),
+                            *[_metadata_chip("Metric", metric) for metric in metric_names],
+                        ],
+                    ),
+                ]
+            ),
+            html.Div(
+                children=[
+                    html.Div(
+                        "Model inputs",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.Div(
+                        style={
+                            "display": "flex",
+                            "gap": "8px",
+                            "overflowX": "auto",
+                            "padding": "2px 2px 8px 2px",
+                            "maxWidth": "100%",
+                            "scrollbarWidth": "thin",
+                        },
+                        children=[
+                            html.Span(
+                                str(feature_name),
+                                style={
+                                    "display": "inline-flex",
+                                    "alignItems": "center",
+                                    "whiteSpace": "nowrap",
+                                    "padding": "6px 10px",
+                                    "borderRadius": "999px",
+                                    "border": "1px solid rgba(33,75,122,0.14)",
+                                    "background": "#ffffff",
+                                    "color": "#243b5a",
+                                    "fontSize": "0.86rem",
+                                    "fontWeight": "600",
+                                },
+                            )
+                            for feature_name in model_features
+                        ],
+                    ),
+                ]
+            ),
+        ],
+    )
+
+
+def _metadata_chip(label: str, value: str) -> html.Span:
+    return html.Span(
+        [
+            html.Span(
+                f"{label}:",
+                style={"color": "#5b6d85", "fontWeight": "700"},
+            ),
+            html.Span(str(value), style={"color": "#17304f", "fontWeight": "800"}),
+        ],
+        style={
+            "display": "inline-flex",
+            "alignItems": "center",
+            "gap": "4px",
+            "padding": "6px 10px",
+            "borderRadius": "999px",
+            "background": "#edf5ff",
+            "border": "1px solid rgba(47,93,138,0.18)",
+            "fontSize": "0.84rem",
+        },
+    )
+
+
 def register_model_loading_callbacks(app, services) -> None:
     """Register model-loading callbacks."""
 
@@ -113,21 +231,17 @@ def register_model_loading_callbacks(app, services) -> None:
             for feature_name in shap_feature_names
         ]
         format_label = model.format.value if model else "unknown"
-        info_children = [
-            html.H3(model.name if model else model_id, style={"marginBottom": "6px"}),
-            html.P(f"Format: {format_label}"),
-            html.P(f"Inputs: {', '.join(model_features)}"),
-            html.P(
-                "Metadata metrics: "
-                + ", ".join(
-                    metadata.get(
-                        "error_metrics", config.dashboard_models_config.error_metrics
-                    )
-                )
-            ),
-        ]
+        metric_names = list(
+            metadata.get("error_metrics", config.dashboard_models_config.error_metrics)
+        )
+        info_panel = _model_info_panel(
+            model_name=model.name if model else str(model_id),
+            format_label=format_label,
+            model_features=[str(feature) for feature in model_features],
+            metric_names=[str(metric) for metric in metric_names],
+        )
         return (
-            html.Div(info_children),
+            info_panel,
             shap_options,
             shap_options[0]["value"] if shap_options else None,
             ice_options,

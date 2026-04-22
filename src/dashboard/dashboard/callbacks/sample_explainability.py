@@ -2,7 +2,7 @@
 
 import pandas as pd
 import plotly.graph_objects as go
-from dash import ALL, Input, Output, State, dcc, html
+from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
@@ -124,20 +124,86 @@ def _manual_field(feature, default_value):
             value="" if default_value is None else str(default_value),
             placeholder="YYYY-MM-DD HH:MM:SS",
         )
+    elif feature.is_numerical:
+        input_component = _manual_number_control(feature, default_value)
     else:
         input_component = dcc.Input(
             id=component_id,
-            type="number" if feature.is_numerical else "text",
+            type="text",
             value=default_value,
-            min=feature.min_value,
-            max=feature.max_value,
-            step=1 if feature.dtype == "int" else "any",
         )
     return html.Div(
         children=[
             html.Label(feature.label),
             input_component,
         ]
+    )
+
+
+def _manual_number_control(feature, default_value):
+    feature_name = feature.name
+    button_style = {
+        "width": "34px",
+        "height": "34px",
+        "border": "1px solid rgba(23,48,79,0.18)",
+        "background": "#edf5ff",
+        "color": "#17304f",
+        "fontWeight": "800",
+        "cursor": "pointer",
+    }
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "34px minmax(0, 1fr) 34px",
+            "alignItems": "center",
+            "width": "100%",
+        },
+        children=[
+            html.Button(
+                "-",
+                id={
+                    "type": "manual-step",
+                    "feature": feature_name,
+                    "direction": "down",
+                },
+                n_clicks=0,
+                type="button",
+                style={
+                    **button_style,
+                    "borderRadius": "8px 0 0 8px",
+                    "borderRight": "0",
+                },
+            ),
+            dcc.Input(
+                id={"type": "manual-feature", "feature": feature_name},
+                type="text",
+                value=_manual_numeric_value(default_value),
+                style={
+                    "height": "34px",
+                    "width": "100%",
+                    "boxSizing": "border-box",
+                    "borderRadius": "0",
+                    "border": "1px solid rgba(23,48,79,0.18)",
+                    "textAlign": "right",
+                    "padding": "0 10px",
+                },
+            ),
+            html.Button(
+                "+",
+                id={
+                    "type": "manual-step",
+                    "feature": feature_name,
+                    "direction": "up",
+                },
+                n_clicks=0,
+                type="button",
+                style={
+                    **button_style,
+                    "borderRadius": "0 8px 8px 0",
+                    "borderLeft": "0",
+                },
+            ),
+        ],
     )
 
 
@@ -149,6 +215,48 @@ def _manual_option_type_value(default_value):
     if text in {"PUT", "P"}:
         return "PUT"
     return "CALL"
+
+
+def _manual_numeric_step(feature):
+    if feature.dtype == "int":
+        return 1
+    return {
+        "StrikePrice": 1,
+        "UnderlyingPrice": 1,
+        "TimeToExpiration": 1,
+        "UnderlyingLagMinutes": 1,
+        "Quantity": 1,
+        "Rate": 0.01,
+    }.get(feature.name, 0.01 if feature.is_numerical else None)
+
+
+def _manual_numeric_value(default_value):
+    if default_value in (None, ""):
+        return None
+    try:
+        numeric_value = float(default_value)
+    except (TypeError, ValueError):
+        return default_value
+    if numeric_value.is_integer():
+        return int(numeric_value)
+    return numeric_value
+
+
+def _stepped_manual_value(feature_schema, feature_name, current_value, direction):
+    feature = feature_schema.get(feature_name)
+    step = float(_manual_numeric_step(feature) or 1)
+    try:
+        value = float(current_value)
+    except (TypeError, ValueError):
+        value = float(MANUAL_INPUT_DEFAULTS.get(feature_name, 0.0))
+    value = value + step if direction == "up" else value - step
+    if feature.min_value is not None:
+        value = max(float(feature.min_value), value)
+    if feature.max_value is not None:
+        value = min(float(feature.max_value), value)
+    if feature.dtype == "int" or float(value).is_integer():
+        return int(round(value))
+    return round(value, 10)
 
 
 def _neighbors_table(frame: pd.DataFrame):
@@ -239,6 +347,25 @@ def _validate_manual_payload(services, sample_payload: dict) -> dict[str, str]:
 
 def register_sample_callbacks(app, services) -> None:
     """Register sample-explainability callbacks."""
+
+    @app.callback(
+        Output({"type": "manual-feature", "feature": MATCH}, "value"),
+        Input({"type": "manual-step", "feature": MATCH, "direction": ALL}, "n_clicks"),
+        State({"type": "manual-feature", "feature": MATCH}, "id"),
+        State({"type": "manual-feature", "feature": MATCH}, "value"),
+        prevent_initial_call=True,
+    )
+    def step_manual_numeric_value(_, component_id, current_value):
+        triggered = ctx.triggered_id
+        if not isinstance(triggered, dict):
+            return no_update
+        feature_name = component_id["feature"]
+        return _stepped_manual_value(
+            services.feature_schema,
+            feature_name,
+            current_value,
+            triggered.get("direction"),
+        )
 
     @app.callback(
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),

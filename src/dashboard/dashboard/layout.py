@@ -92,7 +92,7 @@ def _behaviour_tab():
                                                     _section_title_with_info(
                                                         "Surface Analysis",
                                                         "This block groups every visualization driven by the selected anchor observation. "
-                                                        "Changing the anchor sample updates the volatility heatmap, the 3D surface, "
+                                                        "Changing the sample updates the volatility heatmap, the 3D surface, "
                                                         "the smile slices, the term structure slices and the associated financial checks.",
                                                         level=3,
                                                     ),
@@ -105,7 +105,7 @@ def _behaviour_tab():
                                             html.Div(
                                                 style=SECTION_CONTROL_CARD_STYLE,
                                                 children=[
-                                                    html.Label("Anchor Sample"),
+                                                    html.Label("Sample"),
                                                     dcc.Dropdown(
                                                         id=IDS.BEHAVIOUR_ANCHOR_INDEX
                                                     ),
@@ -145,7 +145,7 @@ def _behaviour_tab():
                                                 children=[
                                                     _section_title_with_info(
                                                         "Surface Slice",
-                                                        "Three-dimensional rendering of the same volatility surface around the selected anchor sample. "
+                                                        "Three-dimensional rendering of the same volatility surface around the selected sample. "
                                                         "This view is useful for assessing smoothness, slope changes and interaction effects between moneyness and maturity "
                                                         "while preserving the exact same volatility scale used by the heatmap and related slices.",
                                                     ),
