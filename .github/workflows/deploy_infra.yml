@@ -36,7 +36,7 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ env.TF_VAR_gcp_project }}
 
       - name: Make script executable
         run: chmod +x ./scripts/bootstrap_gcp.sh
