@@ -69,3 +69,9 @@ resource "google_project_iam_member" "github_actions_artifact_registry" {
   role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
 }
+
+resource "google_project_iam_member" "github_actions_storage_admin" {
+  project = var.gcp_project
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:github-actions@options-pricing-explainability.iam.gserviceaccount.com"
+}
