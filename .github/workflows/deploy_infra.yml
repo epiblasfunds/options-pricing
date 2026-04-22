@@ -1,4 +1,4 @@
-name: Backend Google Cloud project Terraform Apply
+name: Backend GCP Project Terraform Apply
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   terraform:
-    name: Backend GCP project Terraform Apply
+    name: Backend GCP Project Terraform Apply
     runs-on: ubuntu-latest
 
     env:

@@ -3,7 +3,7 @@ name: Build & Deploy Dashboard and API
 on:
   workflow_run:
     workflows:
-      - Backend GCP project Terraform Apply
+      - Backend GCP Project Terraform Apply
     types:
       - completed
     branches:
