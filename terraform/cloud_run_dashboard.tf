@@ -40,16 +40,20 @@ resource "google_cloud_run_service_iam_member" "public" {
   member   = "allUsers"
 }
 
+data "google_project" "current" {
+  project_id = var.gcp_project
+}
+
 resource "google_project_iam_member" "cloud_run_artifact_registry_reader" {
   project = var.gcp_project
   role    = "roles/artifactregistry.reader"
-  member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
+  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "cloud_run_storage_object_viewer" {
   project = var.gcp_project
   role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:269293143637-compute@developer.gserviceaccount.com"
+  member  = "serviceAccount:${data.google_project.current.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "github_actions_run_admin" {

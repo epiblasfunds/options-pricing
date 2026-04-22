@@ -66,7 +66,7 @@ jobs:
       - name: Upload trained_metadata to GCS
         run: |
           if [ -d src/volatility_models/trained_metadata ]; then
-            gsutil -m cp -r src/volatility_models/trained_metadata gs://$BUCKET_NAME/
+            gsutil -m cp -r src/volatility_models/trained_metadata gs://$VOLATILITY_BUCKET/
           else
             echo "trained_metadata folder does not exist, skipping upload."
           fi
