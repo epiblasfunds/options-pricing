@@ -2,13 +2,13 @@
 set -euo pipefail
 
 REGION="${TF_VAR_gcp_region:-${GCP_REGION:-europe-west1}}"
-BUCKET_BACKEND="${TF_BACKEND_BUCKET:-}"
 PROJECT_ID="${TF_VAR_gcp_project:-}"
 
-if [[ -z "$BUCKET_BACKEND" ]]; then
-  echo "Missing TF_BACKEND_BUCKET"
-  exit 1
-fi
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+CONFIG_FILE="$ROOT_DIR/resources/cloud_config.json"
+
+BUCKET_BACKEND="${TF_BACKEND_BUCKET:-$(sed -n 's/.*"backend_bucket"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CONFIG_FILE" | head -n1)}"
 
 echo "Bootstrap backend bucket: $BUCKET_BACKEND"
 if BUCKET_CHECK_OUTPUT=$(gcloud storage buckets describe "gs://$BUCKET_BACKEND" 2>&1); then

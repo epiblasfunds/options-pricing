@@ -26,13 +26,27 @@ jobs:
       - name: Load cloud config
         run: |
           CONFIG_FILE="resources/cloud_config.json"
-          echo "TF_BACKEND_BUCKET=$(jq -r '.terraform.backend_bucket' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "TF_VAR_gcp_project=$(jq -r '.gcp.project_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "TF_VAR_gcp_region=$(jq -r '.gcp.region' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "TF_VAR_volatility_models_bucket=$(jq -r '.storage.volatility_models_bucket' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "TF_VAR_explainability_artifacts_bucket=$(jq -r '.storage.explainability_artifacts_bucket' "$CONFIG_FILE")" >> "$GITHUB_ENV"
-          echo "TF_VAR_artifact_repository_id=$(jq -r '.artifact_registry.repository_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "TF_VAR_github_actions_service_account_email=$(jq -r '.gcp.service_account_email' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
+          set -euo pipefail
+          TF_BACKEND_BUCKET="$(jq -r '.terraform.backend_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_gcp_project="$(jq -r '.gcp.project_id // empty' "$CONFIG_FILE")"
+          TF_VAR_gcp_region="$(jq -r '.gcp.region // empty' "$CONFIG_FILE")"
+          TF_VAR_volatility_models_bucket="$(jq -r '.storage.volatility_models_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_explainability_artifacts_bucket="$(jq -r '.storage.explainability_artifacts_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_artifact_repository_id="$(jq -r '.artifact_registry.repository_id // empty' "$CONFIG_FILE")"
+          TF_VAR_github_actions_service_account_email="$(jq -r '.gcp.service_account_email // empty' "$CONFIG_FILE")"
+
+          if [[ -z "$TF_BACKEND_BUCKET" ]]; then
+            echo "resources/cloud_config.json is missing terraform.backend_bucket"
+            exit 1
+          fi
+
+          echo "TF_BACKEND_BUCKET=$TF_BACKEND_BUCKET" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_project=$TF_VAR_gcp_project" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_region=$TF_VAR_gcp_region" >> "$GITHUB_ENV"
+          echo "TF_VAR_volatility_models_bucket=$TF_VAR_volatility_models_bucket" >> "$GITHUB_ENV"
+          echo "TF_VAR_explainability_artifacts_bucket=$TF_VAR_explainability_artifacts_bucket" >> "$GITHUB_ENV"
+          echo "TF_VAR_artifact_repository_id=$TF_VAR_artifact_repository_id" >> "$GITHUB_ENV"
+          echo "TF_VAR_github_actions_service_account_email=$TF_VAR_github_actions_service_account_email" >> "$GITHUB_ENV"
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3

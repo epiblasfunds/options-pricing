@@ -24,9 +24,20 @@ jobs:
       - name: Load cloud config
         run: |
           CONFIG_FILE="resources/cloud_config.json"
-          echo "GCP_REGION=$(jq -r '.gcp.region' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "PROJECT_ID=$(jq -r '.gcp.project_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
-          echo "ARTIFACT_REPOSITORY=$(jq -r '.artifact_registry.repository_id' \"$CONFIG_FILE\")" >> "$GITHUB_ENV"
+          set -euo pipefail
+
+          GCP_REGION="$(jq -r '.gcp.region // empty' "$CONFIG_FILE")"
+          PROJECT_ID="$(jq -r '.gcp.project_id // empty' "$CONFIG_FILE")"
+          ARTIFACT_REPOSITORY="$(jq -r '.artifact_registry.repository_id // empty' "$CONFIG_FILE")"
+
+          if [[ -z "$GCP_REGION" || -z "$PROJECT_ID" || -z "$ARTIFACT_REPOSITORY" ]]; then
+            echo "resources/cloud_config.json is missing required keys: gcp.region, gcp.project_id, artifact_registry.repository_id"
+            exit 1
+          fi
+
+          echo "GCP_REGION=$GCP_REGION" >> "$GITHUB_ENV"
+          echo "PROJECT_ID=$PROJECT_ID" >> "$GITHUB_ENV"
+          echo "ARTIFACT_REPOSITORY=$ARTIFACT_REPOSITORY" >> "$GITHUB_ENV"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
