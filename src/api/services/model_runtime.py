@@ -7,11 +7,13 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import shap
 
 from src.api.models import ApiOptionTypeEnum
 from src.api.models import ModelRequest
 from src.api.services.cache import ApiModelCache
 from src.api.services.storage import ModelStorage
+from src.config.config import config
 from src.dashboard.domain import build_feature_schema
 from src.dashboard.plots.shap_plots import waterfall_image
 from src.dashboard.services.global_explainability import ShapExplanationResult
@@ -20,6 +22,7 @@ from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import build_feature_frame_from_trades
 from src.model2dashboard.model_io import load_training_runtime
 from src.model2dashboard.model_io import predict_raw_frame
+from src.model2dashboard.model_io import transform_feature_frame
 from src.python_models.dashboard.artifacts import StoredShapExplanation
 from src.python_models.dashboard.dashboard_model import DashboardModel
 
@@ -66,21 +69,19 @@ class ApiModelService:
             sample_frame=sample_frame,
             k=self.neighbors_k,
         )
-        reference_index = self._nearest_explainable_index(
+        stored = self._runtime_shap_explanation(
+            training_runtime=loaded.training_runtime,
             dashboard_model=dashboard_model,
-            sample_frame=sample_frame,
+            raw_frame=raw_frame,
+            prediction=prediction,
         )
-        explanation_payload: dict[str, Any] = {}
-        waterfall_src = None
-        if reference_index is not None and dashboard_model.local_shap is not None:
-            stored = dashboard_model.local_shap_for_index(reference_index)
-            explanation_result = self._stored_shap_to_result(stored)
-            waterfall_src = waterfall_image(
-                explanation_result,
-                reference_index,
-                self.feature_schema,
-            )
-            explanation_payload = self._stored_shap_to_payload(stored)
+        explanation_result = self._stored_shap_to_result(stored)
+        waterfall_src = waterfall_image(
+            explanation_result,
+            raw_frame.index[0],
+            self.feature_schema,
+        )
+        explanation_payload = self._stored_shap_to_payload(stored)
 
         neighbor_distances = [
             {"row_id": str(index), "distance": row["distance"]}
@@ -90,7 +91,7 @@ class ApiModelService:
             "modelo": request.modelo.value,
             "prediction": prediction,
             "input": self._json_safe(raw_frame.iloc[0].to_dict()),
-            "reference_sample_index": self._json_safe(reference_index),
+            "reference_sample_index": None,
             "waterfall_image": waterfall_src,
             "local_explanation": self._json_safe(explanation_payload),
             "neighbors": self._frame_records(neighbors),
@@ -178,34 +179,6 @@ class ApiModelService:
         neighbors["distance"] = distances.loc[neighbor_indices].to_numpy()
         return neighbors
 
-    def _nearest_explainable_index(
-        self,
-        *,
-        dashboard_model: DashboardModel,
-        sample_frame: pd.DataFrame,
-    ) -> Any | None:
-        if dashboard_model.local_shap is None or not dashboard_model.local_shap.index:
-            return None
-        dataset = dashboard_model.dataset_frame
-        explainable_indices = [
-            index for index in dashboard_model.local_shap.index if index in dataset.index
-        ]
-        if not explainable_indices:
-            return None
-        feature_names = self._neighbor_feature_names(dashboard_model, sample_frame)
-        if not feature_names:
-            return None
-        explainable_frame = dataset.loc[explainable_indices, feature_names]
-        sample_vector = sample_frame.loc[:, feature_names].iloc[0]
-        center = explainable_frame.mean()
-        scale = explainable_frame.std(ddof=0).replace(0.0, 1.0).fillna(1.0)
-        normalized_frame = (explainable_frame.fillna(center) - center) / scale
-        normalized_sample = (sample_vector.fillna(center) - center) / scale
-        distances = np.sqrt(
-            ((normalized_frame - normalized_sample.to_numpy()) ** 2).mean(axis=1)
-        )
-        return distances.sort_values().index[0]
-
     def _neighbor_feature_names(
         self,
         dashboard_model: DashboardModel,
@@ -220,6 +193,97 @@ class ApiModelService:
             for name in candidates
             if name in dashboard_model.dataset_frame.columns and name in sample_frame.columns
         ]
+
+    @staticmethod
+    def _runtime_shap_explanation(
+        *,
+        training_runtime: Any,
+        dashboard_model: DashboardModel,
+        raw_frame: pd.DataFrame,
+        prediction: float,
+    ) -> StoredShapExplanation:
+        feature_names = list(training_runtime.model_input_features)
+        if not feature_names:
+            raise RuntimeError("Cannot build runtime SHAP explanation without features.")
+        missing_features = [
+            name for name in feature_names if name not in dashboard_model.dataset_frame
+        ]
+        if missing_features:
+            raise RuntimeError(
+                "Cannot build runtime SHAP explanation. Missing dashboard "
+                f"features: {missing_features}."
+            )
+
+        background_source = dashboard_model.dataset_frame.loc[:, feature_names]
+        if len(background_source) > config.dashboard_models_config.shap_background_size:
+            background_source = background_source.sample(
+                n=config.dashboard_models_config.shap_background_size,
+                random_state=config.dashboard_models_config.random_state,
+            ).sort_index()
+
+        sample_feature_frame = build_feature_frame_from_trades(raw_frame)
+        transformed_background = transform_feature_frame(
+            training_runtime,
+            background_source,
+        )
+        transformed_sample = transform_feature_frame(
+            training_runtime,
+            sample_feature_frame,
+        )
+        explainer = shap.Explainer(
+            lambda values: ApiModelService._predict_transformed_values(
+                training_runtime,
+                feature_names,
+                values,
+            ),
+            masker=transformed_background,
+            algorithm="permutation",
+            feature_names=feature_names,
+            seed=config.dashboard_models_config.random_state,
+        )
+        explanation = explainer(
+            transformed_sample,
+            max_evals=ApiModelService._shap_max_evals(len(feature_names)),
+            silent=True,
+        )
+        explanation.display_data = sample_feature_frame.loc[:, feature_names].to_numpy()
+        mean_abs_shap = pd.Series(
+            np.abs(np.asarray(explanation.values)).mean(axis=0),
+            index=feature_names,
+        ).sort_values(ascending=False)
+        return StoredShapExplanation(
+            method="shap.Explainer(permutation, runtime)",
+            feature_names=feature_names,
+            index=list(transformed_sample.index),
+            values=np.asarray(explanation.values),
+            base_values=np.asarray(explanation.base_values),
+            data=np.asarray(transformed_sample.to_numpy()),
+            display_data=np.asarray(explanation.display_data),
+            predictions=np.asarray([prediction], dtype="float64"),
+            mean_abs_shap={
+                str(name): float(value) for name, value in mean_abs_shap.items()
+            },
+        )
+
+    @staticmethod
+    def _predict_transformed_values(
+        training_runtime: Any,
+        feature_names: list[str],
+        values: Any,
+    ) -> np.ndarray:
+        if isinstance(values, pd.DataFrame):
+            matrix = values.loc[:, feature_names].to_numpy(dtype="float32", copy=False)
+        else:
+            matrix = np.asarray(values, dtype="float32")
+        if training_runtime.is_keras:
+            predictions = training_runtime.model.predict(matrix, verbose=0)
+        else:
+            predictions = training_runtime.model.predict(matrix)
+        return np.asarray(predictions, dtype="float64").reshape(-1)
+
+    @staticmethod
+    def _shap_max_evals(n_features: int) -> int:
+        return 2 * int(n_features) + 1
 
     @staticmethod
     def _stored_shap_to_result(stored: StoredShapExplanation) -> ShapExplanationResult:

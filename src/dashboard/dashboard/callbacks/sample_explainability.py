@@ -50,6 +50,7 @@ def _manual_field(feature, default_value):
 
 def _neighbors_table(frame: pd.DataFrame):
     columns = [
+        "index",
         "OptionType",
         "TimeToExpiration",
         "UnderlyingPrice",
@@ -227,9 +228,6 @@ def register_sample_callbacks(app, services) -> None:
                         html.H3("Manual Input"),
                         html.P(
                             f"Predicted volatility: {float(api_result['prediction']):.4f}"
-                        ),
-                        html.P(
-                            f"Reference sample: {api_result.get('reference_sample_index')}"
                         ),
                     ]
                 )

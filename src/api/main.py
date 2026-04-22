@@ -1,13 +1,11 @@
-from fastapi import Depends
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 
-from src.api.models import ModelRequest
-from src.api.models import PredictionResponse
-from src.api.models import SampleExplainabilityResponse
-from src.api.services import ApiModelCache
-from src.api.services import ApiModelService
-from src.api.services import ModelStorage
+from src.api.models import (
+    ModelRequest,
+    PredictionResponse,
+    SampleExplainabilityResponse,
+)
+from src.api.services import ApiModelCache, ApiModelService, ModelStorage
 from src.config.config import config
 
 app = FastAPI(title="Volatility Model API")
@@ -60,3 +58,6 @@ def sample_explainability(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+# python -m uvicorn src.api.main:app --host 127.0.0.1 --port 8000 --reload

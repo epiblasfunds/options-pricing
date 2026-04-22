@@ -11,7 +11,9 @@ from src.dashboard.plots.plot_style import (
 
 def neighbors_distance_figure(neighbors_frame):
     frame = neighbors_frame.copy()
-    frame["row_id"] = frame.index.astype(str)
+    if "row_id" not in frame.columns:
+        row_source = frame["index"] if "index" in frame.columns else frame.index
+        frame["row_id"] = row_source.astype(str)
     fig = px.bar(
         frame,
         x="row_id",
