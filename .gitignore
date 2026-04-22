@@ -5,3 +5,4 @@ src/volatility_models/trained_metadata/*
 src/dashboard/saved_models/*
 *.csv
 __pycache__/
+terraform/.terraform*

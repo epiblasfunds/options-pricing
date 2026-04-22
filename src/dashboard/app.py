@@ -1,6 +1,7 @@
 """Dash app factory."""
 
 from dataclasses import dataclass
+import logging
 
 from dash import Dash
 
@@ -18,6 +19,9 @@ from src.dashboard.services.shared.data_provider import VolatilityDataProvider
 from src.dashboard.services.shared.model_loader import ModelLoader
 from src.dashboard.services.shared.model_registry import ModelRegistry
 from src.dashboard.services.shared.prediction_service import PredictionService
+from src.dashboard.services.shared.storage_runtime import DashboardModelStorageRuntime
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -44,8 +48,19 @@ def build_services() -> Services:
     feature_schema = build_feature_schema()
     metrics_registry = build_metrics_registry()
     cache = CacheService(max_entries=config.dashboard_models_config.cache_entries)
-    model_registry = ModelRegistry()
-    model_loader = ModelLoader()
+    storage_runtime = DashboardModelStorageRuntime(config.clientserver_config)
+    model_dir = storage_runtime.prepare_model_dir()
+    model_registry = ModelRegistry(model_dir=model_dir)
+    logger.info("Dashboard model directory resolved to %s", model_dir)
+    if not model_registry.discover_models():
+        logger.warning(
+            "No valid explainable-model bundles were discovered under %s. "
+            "Check that each bundle contains metadata.json and dashboard_model/metadata.json.",
+            model_dir,
+        )
+    model_loader = ModelLoader(
+        cache_size=config.dashboard_models_config.cache_entries
+    )
     data_provider = VolatilityDataProvider(
         dataset_path=VOLATILITY_MODEL_DATA_DIR_PATH / "test.csv",
     )

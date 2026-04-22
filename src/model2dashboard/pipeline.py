@@ -1,3 +1,4 @@
+import argparse
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -200,7 +201,22 @@ def _display_model_name(model_id: str) -> str:
 
 
 def main() -> None:
-    exported = run_pipeline()
+    parser = argparse.ArgumentParser(
+        description="Build dashboard explainable artifacts from trained volatility models.",
+    )
+    parser.add_argument(
+        "--family",
+        type=str,
+        default=None,
+        help="Model family name to process. If omitted, all discovered families are processed.",
+    )
+    args = parser.parse_args()
+
+    if args.family:
+        exported = [build_explainable_model(family_name=args.family)]
+    else:
+        exported = run_pipeline()
+
     for bundle in exported:
         print(f"{bundle.model_id}: {bundle.bundle_path}")
 

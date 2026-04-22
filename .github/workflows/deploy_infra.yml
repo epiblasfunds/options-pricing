@@ -1,0 +1,90 @@
+name: Backend GCP Project Terraform Apply
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Backend GCP Project Terraform Apply
+    runs-on: ubuntu-latest
+
+    env:
+      TF_WORKING_DIR: ./terraform
+      TF_VAR_gcp_project: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Load cloud config
+        run: |
+          CONFIG_FILE="resources/cloud_config.json"
+          set -euo pipefail
+          TF_BACKEND_BUCKET="$(jq -r '.terraform.backend_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_gcp_project="$(jq -r '.gcp.project_id // empty' "$CONFIG_FILE")"
+          TF_VAR_gcp_region="$(jq -r '.gcp.region // empty' "$CONFIG_FILE")"
+          TF_VAR_volatility_models_bucket="$(jq -r '.storage.volatility_models_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_explainability_artifacts_bucket="$(jq -r '.storage.explainability_artifacts_bucket // empty' "$CONFIG_FILE")"
+          TF_VAR_artifact_repository_id="$(jq -r '.artifact_registry.repository_id // empty' "$CONFIG_FILE")"
+          TF_VAR_github_actions_service_account_email="$(jq -r '.gcp.service_account_email // empty' "$CONFIG_FILE")"
+
+          if [[ -z "$TF_BACKEND_BUCKET" ]]; then
+            echo "resources/cloud_config.json is missing terraform.backend_bucket"
+            exit 1
+          fi
+
+          echo "TF_BACKEND_BUCKET=$TF_BACKEND_BUCKET" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_project=$TF_VAR_gcp_project" >> "$GITHUB_ENV"
+          echo "TF_VAR_gcp_region=$TF_VAR_gcp_region" >> "$GITHUB_ENV"
+          echo "TF_VAR_volatility_models_bucket=$TF_VAR_volatility_models_bucket" >> "$GITHUB_ENV"
+          echo "TF_VAR_explainability_artifacts_bucket=$TF_VAR_explainability_artifacts_bucket" >> "$GITHUB_ENV"
+          echo "TF_VAR_artifact_repository_id=$TF_VAR_artifact_repository_id" >> "$GITHUB_ENV"
+          echo "TF_VAR_github_actions_service_account_email=$TF_VAR_github_actions_service_account_email" >> "$GITHUB_ENV"
+          echo "TF_VAR_manage_cloud_run_services=false" >> "$GITHUB_ENV"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.6.6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ env.TF_VAR_gcp_project }}
+
+      - name: Make bootstrap script executable
+        run: chmod +x ./scripts/bootstrap_gcp.sh
+
+      - name: Prepare Terraform Remote State Backend (GCS)
+        run: ./scripts/bootstrap_gcp.sh
+
+      - name: Terraform Init
+        run: |
+          terraform -chdir=$TF_WORKING_DIR init \
+            -backend-config="bucket=$TF_BACKEND_BUCKET" \
+            -backend-config="prefix=terraform/state" \
+            -input=false
+
+      - name: Terraform Plan
+        run: terraform -chdir=$TF_WORKING_DIR plan -input=false -out=tfplan_gcp
+
+      - name: Terraform Apply
+        run: terraform -chdir=$TF_WORKING_DIR apply -auto-approve tfplan_gcp
+
+  deploy-front-and-api:
+    name: Build and Deploy Front and API
+    needs: terraform
+    uses: ./.github/workflows/deploy_front_and_api.yml
+    secrets: inherit

@@ -1,4 +1,9 @@
 import json
+import logging
+import os
+import shutil
+import subprocess
+import sys
 
 import numpy as np
 import pandas as pd
@@ -21,15 +26,12 @@ from src.volatility_models.data_utils import BASE_FEATURE_COLS, TrainingDataHand
 from src.volatility_models.visualization_utils import Visualizer
 
 TARGET_COLUMN = config.volatility_models_config.training_data_config.target_column
+logger = logging.getLogger(__name__)
 
 
 class Trainer:
     def __init__(self, model_family: VolatilityModelFamilyABC):
         self.model_family = model_family
-
-    @staticmethod
-    def _dataset_suffix(use_atm: bool = False) -> str:
-        return "_atm" if use_atm else ""
 
     @staticmethod
     def add_custom_error1(
@@ -147,12 +149,11 @@ class Trainer:
         model_params,
         phase: TrainingPhase,
         evaluation_label: TrainingDataSplitEnum = TrainingDataSplitEnum.VAL,
-        use_atm: bool = False,
         folds: dict | None = None,
     ):
         training_registry = {}
         if folds is None:
-            folds = TrainingDataHandler.load_kfolds(False, use_atm=use_atm)
+            folds = TrainingDataHandler.load_kfolds(verbose=False)
         model_folds_metrics = []
         for k, v in folds.items():
             fold_name = k
@@ -263,7 +264,6 @@ class Trainer:
         metrics_table: pd.DataFrame,
         model_params_registry: dict,
         training_registry: dict,
-        use_atm: bool = False,
     ):
         """Guarda metadatos estructurados de la familia entrenada en JSON."""
 
@@ -277,7 +277,7 @@ class Trainer:
             "training_registry": cls._training_registry_for_json(training_registry),
         }
 
-        file_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{cls._dataset_suffix(use_atm)}_metadata.json"
+        file_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -290,7 +290,6 @@ class Trainer:
         phase: TrainingPhase,
         model_params: dict,
         training_information: dict,
-        use_atm: bool = False,
     ):
         """Guarda metadatos del modelo reentrenado en JSON."""
 
@@ -311,7 +310,7 @@ class Trainer:
             },
         }
 
-        file_path = VOLATILITY_RETRAINED_METADATA_DIR_PATH / f"{family_name}{cls._dataset_suffix(use_atm)}_{phase_suffix}_retrained_metadata.json"
+        file_path = VOLATILITY_RETRAINED_METADATA_DIR_PATH / f"{family_name}_{phase_suffix}_retrained_metadata.json"
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -347,10 +346,9 @@ class Trainer:
     def run_kfolds_training(
         self,
         force_reload: bool = False,
-        use_atm: bool = False,
     ) -> tuple[pd.DataFrame, str]:
         family_name = self.model_family.get_family_name()
-        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{self._dataset_suffix(use_atm)}_metadata.json"
+        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
 
         if not force_reload and metadata_path.exists():
             with open(metadata_path, "r", encoding="utf-8") as f:
@@ -388,7 +386,7 @@ class Trainer:
         )
         training_registry = {}
         model_params_registry = {}
-        folds = TrainingDataHandler.load_kfolds(False, use_atm=use_atm)
+        folds = TrainingDataHandler.load_kfolds(verbose=False)
 
         for model_i_name, model_i_params in tqdm(
             models.items(),
@@ -400,7 +398,6 @@ class Trainer:
                 model_name=model_i_name,
                 model_params=model_i_params,
                 phase=phase,
-                use_atm=use_atm,
                 folds=folds,
             )
             family_models_metrics_table.loc[model_i_name] = metrics
@@ -441,7 +438,6 @@ class Trainer:
             metrics_table=family_models_metrics_table,
             model_params_registry=model_params_registry,
             training_registry=training_registry,
-            use_atm=use_atm,
         )
         return family_models_metrics_table, best_model_name
     
@@ -476,19 +472,22 @@ class Trainer:
     def retrain_best_params_family(
         self,
         phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
-        force_reload: bool = False,
-        use_atm: bool = False,
+        upload_to_gcp: bool = True,
     ):
         family_name = self.model_family.get_family_name()
         model_name = f"{family_name}_best"
-        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}{self._dataset_suffix(use_atm)}_metadata.json"
+        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
         phase_suffix = str(getattr(phase, "value", phase)).lower().replace(" ", "_")
         retrained_metadata_path = (
             VOLATILITY_RETRAINED_METADATA_DIR_PATH
-            / f"{family_name}{self._dataset_suffix(use_atm)}_{phase_suffix}_retrained_metadata.json"
+            / f"{family_name}_{phase_suffix}_retrained_metadata.json"
         )
 
-        if not force_reload and retrained_metadata_path.exists():
+        can_use_retrained_cache = (
+            phase is TrainingPhase.TRAIN_VAL and retrained_metadata_path.exists()
+        )
+
+        if can_use_retrained_cache:
             with open(retrained_metadata_path, "r", encoding="utf-8") as f:
                 payload = json.load(f)
 
@@ -509,28 +508,11 @@ class Trainer:
                 }
             )
 
-            if phase is TrainingPhase.FINAL_TEST:
-                Visualizer.info_confirmation(self.model_family.get_model_path(), label="Modelo guardado previamente en")
-                get_scaler_path = getattr(self.model_family, "get_scaler_path", None)
-                scaler_path = None
-                if callable(get_scaler_path):
-                    scaler_path = get_scaler_path()
-                elif family_name == "sequential_nn":
-                    scaler_path = (
-                        VOLATILITY_TRAINED_MODELS_DIR_PATH
-                        / f"{family_name}_scaler.joblib"
-                    )
-
-                if scaler_path is not None and scaler_path.exists():
-                    Visualizer.info_confirmation(
-                        scaler_path,
-                        label="Scaler guardado previamente en",
-                    )
             return result_series
 
         if not metadata_path.exists():
-            Visualizer.missing_metadata_warning(family_name)
-            Trainer(self.model_family).run_kfolds_training(use_atm=use_atm)
+            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
             payload = json.load(f)
@@ -539,7 +521,7 @@ class Trainer:
         custom_error_1 = payload["best_model_metrics"][config.volatility_models_config.training_data_config.custom_error_1["metric"]]
 
         if phase is TrainingPhase.TRAIN_VAL:
-            train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
+            train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()      
             y_train = train_data[TARGET_COLUMN].to_numpy()
@@ -548,8 +530,8 @@ class Trainer:
 
             evaluation_label = TrainingDataSplitEnum.VAL
 
-        if phase is TrainingPhase.FINAL_TEST:
-            train_data, val_data, test_data = TrainingDataHandler.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
+        elif phase is TrainingPhase.FINAL_TEST:
+            train_data, val_data, test_data = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
             train_data = pd.concat([train_data, val_data], ignore_index=True)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()
@@ -615,7 +597,6 @@ class Trainer:
             phase=phase,
             model_params=best_model_params,
             training_information=training_information,
-            use_atm=use_atm,
         )
 
         if phase is TrainingPhase.FINAL_TEST:
@@ -624,4 +605,227 @@ class Trainer:
                 scaler=fit_result.feature_scaler,
             )
 
+            model_path = self.model_family.get_model_path()
+            get_scaler_path = getattr(self.model_family, "get_scaler_path", None)
+            scaler_path = get_scaler_path() if callable(get_scaler_path) else None
+
+            _run_model2dashboard_pipeline(family_name=family_name)
+
+            if upload_to_gcp:
+                _upload_models_to_gcp(
+                    family_name=family_name,
+                    model_path=model_path,
+                    scaler_path=scaler_path,
+                )
+
         return result_series
+
+def _run_model2dashboard_pipeline(family_name: str):
+    try:
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "src.model2dashboard.pipeline",
+                "--family",
+                family_name,
+            ],
+            check=True,
+        )
+        logger.info(
+            "Pipeline de model2dashboard para familia '%s' ejecutada correctamente.",
+            family_name,
+        )
+    except Exception as e:
+        logger.exception("Error ejecutando pipeline de model2dashboard: %s", e)
+        raise
+
+def _find_gcloud():
+    for name in ("gcloud", "gcloud.cmd", "gcloud.exe"):
+        gcloud = shutil.which(name)
+        if gcloud:
+            return gcloud
+
+    possible_paths = []
+
+    # Windows
+    if os.name == "nt":
+        possible_paths.extend([
+            r"%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
+            r"%PROGRAMFILES%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
+            r"%PROGRAMFILES(X86)%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
+        ])
+
+    else: # Linux y macOS
+        possible_paths.extend([
+            "/usr/local/bin/gcloud",
+            "/opt/homebrew/bin/gcloud",
+        ])
+        possible_paths.append(os.path.expanduser("~/google-cloud-sdk/bin/gcloud"))
+        possible_paths.append("/snap/bin/gcloud")
+        possible_paths.extend([
+            "/usr/bin/gcloud",
+            "/usr/local/sbin/gcloud",
+        ])
+
+    for path in possible_paths:
+        expanded = os.path.expandvars(os.path.expanduser(path))
+        if os.path.exists(expanded) and os.access(expanded, os.X_OK):
+            return expanded
+
+    return None
+
+
+def _upload_models_to_gcp(
+    family_name: str,
+    model_path,
+    scaler_path=None,
+):
+    env = os.environ.copy()
+    gcloud_path = _find_gcloud()
+
+    if not gcloud_path:
+        logger.warning(
+            "No se encontró 'gcloud'. Se omite subida a GCP para la familia '%s'.",
+            family_name,
+        )
+        return
+
+    if "VIRTUAL_ENV" in env:
+        python_rel = os.path.join("Scripts", "python.exe") if os.name == "nt" else os.path.join("bin", "python")
+        env["CLOUDSDK_PYTHON"] = os.path.join(env["VIRTUAL_ENV"], python_rel)
+
+    credentials_path = getattr(config.clientserver_config.gcp_storage, "credentials_path", None)
+    if credentials_path:
+        env["GOOGLE_APPLICATION_CREDENTIALS"] = str(credentials_path)
+
+    dashboard_family_path = os.path.join("src", "dashboard", "saved_models", family_name)
+
+    gcp_storage = config.clientserver_config.gcp_storage
+    VOLATILITY_BUCKET = gcp_storage.trained_models_bucket
+    DASHBOARD_BUCKET = gcp_storage.explainability_artifacts_bucket
+    TRAINED_MODELS_PREFIX = gcp_storage.trained_models_prefix.strip("/")
+    RETRAINED_METADATA_PREFIX = gcp_storage.retrained_metadata_prefix.strip("/")
+
+    model_destination = (
+        f"gs://{VOLATILITY_BUCKET}/{TRAINED_MODELS_PREFIX}/"
+        if TRAINED_MODELS_PREFIX
+        else f"gs://{VOLATILITY_BUCKET}/"
+    )
+    metadata_destination = (
+        f"gs://{VOLATILITY_BUCKET}/{RETRAINED_METADATA_PREFIX}/"
+        if RETRAINED_METADATA_PREFIX
+        else f"gs://{VOLATILITY_BUCKET}/"
+    )
+    final_test_metadata_path = (
+        VOLATILITY_RETRAINED_METADATA_DIR_PATH
+        / f"{family_name}_final_test_retrained_metadata.json"
+    )
+
+    if not VOLATILITY_BUCKET:
+        logger.warning(
+            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler/metadatos para '%s'.",
+            family_name,
+        )
+
+    if not DASHBOARD_BUCKET:
+        logger.warning(
+            "explainability_artifacts_bucket no está configurado. Se omite subida de artefactos dashboard para '%s'.",
+            family_name,
+        )
+
+    try:
+        if VOLATILITY_BUCKET and model_path and os.path.isfile(model_path):
+            subprocess.run(
+                [
+                    gcloud_path,
+                    "storage",
+                    "cp",
+                    str(model_path),
+                    model_destination,
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt")
+            )
+            logger.info(
+                "Modelo entrenado '%s' subido a GCP: %s -> %s",
+                family_name,
+                model_path,
+                model_destination,
+            )
+        else:
+            logger.warning("No existe modelo entrenado para subir: %s", model_path)
+
+        if VOLATILITY_BUCKET and scaler_path and os.path.isfile(scaler_path):
+            subprocess.run(
+                [
+                    gcloud_path,
+                    "storage",
+                    "cp",
+                    str(scaler_path),
+                    model_destination,
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt")
+            )
+            logger.info(
+                "Scaler de modelo entrenado '%s' subido a GCP: %s -> %s",
+                family_name,
+                scaler_path,
+                model_destination,
+            )
+
+        if VOLATILITY_BUCKET and os.path.isfile(final_test_metadata_path):
+            subprocess.run(
+                [
+                    gcloud_path,
+                    "storage",
+                    "cp",
+                    str(final_test_metadata_path),
+                    metadata_destination,
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt"),
+            )
+            logger.info(
+                "Metadata final-test '%s' subida a GCP: %s -> %s",
+                family_name,
+                final_test_metadata_path,
+                metadata_destination,
+            )
+        else:
+            logger.warning(
+                "No existe metadata final-test para subir: %s",
+                final_test_metadata_path,
+            )
+
+        if DASHBOARD_BUCKET and os.path.isdir(dashboard_family_path):
+            dashboard_destination = f"gs://{DASHBOARD_BUCKET}/{family_name}/"
+            subprocess.run(
+                [
+                    gcloud_path,
+                    "storage",
+                    "cp",
+                    "--recursive",
+                    os.path.join(dashboard_family_path, "*"),
+                    dashboard_destination,
+                ],
+                check=True,
+                env=env,
+                shell=(os.name == "nt"),
+            )
+            logger.info(
+                "Artefactos de dashboard '%s' subidos a GCP: %s -> %s",
+                family_name,
+                dashboard_family_path,
+                dashboard_destination,
+            )
+        else:
+            logger.warning("No existe carpeta de dashboard para '%s', omitiendo.", family_name)
+
+    except Exception as e:
+        logger.exception("Error al subir modelos a GCP: %s", e)
+        raise

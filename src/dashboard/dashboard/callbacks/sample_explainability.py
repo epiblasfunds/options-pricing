@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import ALL, Input, Output, State, dcc, html
 
+from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
@@ -106,6 +107,32 @@ def _neighbors_table(frame: pd.DataFrame):
     )
 
 
+def _validate_manual_payload(services, sample_payload: dict) -> dict[str, str]:
+    errors: dict[str, str] = {}
+    mandatory_names = config.clientserver_config.dashboard_manual_input_features
+    normalized = services.feature_schema.normalize_sample(sample_payload)
+    for feature_name in mandatory_names:
+        feature = services.feature_schema.get(feature_name)
+        value = normalized.get(feature_name)
+        if value in (None, ""):
+            errors[feature_name] = "Value is required."
+            continue
+        if feature.allowed_values is not None and value not in feature.allowed_values:
+            errors[feature_name] = "Value is outside the allowed set."
+            continue
+        if feature.is_numerical:
+            try:
+                numeric_value = float(value)
+            except (TypeError, ValueError):
+                errors[feature_name] = "Value must be numeric."
+                continue
+            if feature.min_value is not None and numeric_value < feature.min_value:
+                errors[feature_name] = "Value is below the minimum."
+            if feature.max_value is not None and numeric_value > feature.max_value:
+                errors[feature_name] = "Value is above the maximum."
+    return errors
+
+
 def register_sample_callbacks(app, services) -> None:
     """Register sample-explainability callbacks."""
 
@@ -120,6 +147,9 @@ def register_sample_callbacks(app, services) -> None:
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
+        mandatory_names = set(
+            config.clientserver_config.dashboard_manual_input_features
+        )
         return (
             html.Div(
                 style={
@@ -131,6 +161,7 @@ def register_sample_callbacks(app, services) -> None:
                 children=[
                     _manual_field(feature, defaults.get(feature.name))
                     for feature in services.feature_schema.raw_input_features()
+                    if feature.name in mandatory_names
                 ],
             ),
             {"display": "none"},
@@ -166,7 +197,7 @@ def register_sample_callbacks(app, services) -> None:
                 sample_payload = services.feature_schema.normalize_sample(
                     sample_payload
                 )
-                errors = services.feature_schema.validate_sample(sample_payload)
+                errors = _validate_manual_payload(services, sample_payload)
                 if errors:
                     return (
                         html.Ul(
@@ -179,40 +210,32 @@ def register_sample_callbacks(app, services) -> None:
                         html.Div(),
                         _empty_figure(),
                     )
-                api_result = services.prediction_service.call_manual_prediction_api(
-                    model_id,
-                    sample_payload,
+                api_result = (
+                    services.prediction_service.call_manual_sample_explainability_api(
+                        model_id,
+                        sample_payload,
+                    )
                 )
-                reference_index = api_result.get("reference_sample_index")
-                reference_sample = (
-                    dataset.loc[[reference_index]].copy()
-                    if reference_index is not None and reference_index in dataset.index
-                    else dataset.head(1).copy()
+                neighbors = pd.DataFrame(api_result.get("neighbors", []))
+                comparison = (
+                    neighbors_distance_figure(neighbors)
+                    if not neighbors.empty
+                    else _empty_figure()
                 )
-                explanation = services.shap_service.explain_sample(
-                    model_id,
-                    reference_sample,
-                )
-                neighbors = services.neighbors_service.find_neighbors(
-                    model_id,
-                    reference_sample,
-                    k=10,
-                )
-                comparison = neighbors_distance_figure(neighbors)
                 sample_summary = html.Div(
                     [
                         html.H3("Manual Input"),
                         html.P(
-                            f"Predicted volatility (API stub): {float(api_result['prediction']):.4f}"
+                            f"Predicted volatility: {float(api_result['prediction']):.4f}"
                         ),
-                        html.P(str(api_result.get("summary", ""))),
+                        html.P(
+                            f"Reference sample: {api_result.get('reference_sample_index')}"
+                        ),
                     ]
                 )
                 return (
                     sample_summary,
-                    waterfall_image(
-                        explanation, reference_sample.index[0], services.feature_schema
-                    ),
+                    api_result.get("waterfall_image"),
                     _neighbors_table(neighbors),
                     comparison,
                 )

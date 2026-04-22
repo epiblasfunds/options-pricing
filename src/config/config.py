@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from src.config.clientserver_config.clientserver_config import ClientserverConfig
 from src.config.dashboard_models_config.dashboard_models_config import (
     DashboardModelsConfig,
 )
@@ -62,6 +63,7 @@ for pth in [
 
 
 class Config:
+    CLIENTSERVER_CONFIG_FILE_PATH = RESOURCES_PATH / "clientserver.json"
     DATA_CONFIG_FILE_PATH = RESOURCES_PATH / "data_config.json"
     DASHBOARD_MODELS_CONFIG_FILE_PATH = RESOURCES_PATH / "dashboard_models_config.json"
     VOLATILITY_MODELS_CONFIG_FILE_PATH = (
@@ -69,6 +71,9 @@ class Config:
     )
 
     def __init__(self):
+        self.clientserver_config = ClientserverConfig(
+            clientserver_config_file_path=Config.CLIENTSERVER_CONFIG_FILE_PATH
+        )
         self.data_config = DataConfig(
             data_config_file_path=Config.DATA_CONFIG_FILE_PATH
         )

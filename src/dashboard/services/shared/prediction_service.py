@@ -1,9 +1,15 @@
 """Access helpers for dashboard-ready volatility bundles."""
 
+import json
 from typing import Any
+from urllib.error import HTTPError
+from urllib.error import URLError
+from urllib.request import Request
+from urllib.request import urlopen
 
 import pandas as pd
 
+from src.config.config import config
 from src.dashboard.services.shared.feature_schema import FeatureSchema
 from src.dashboard.services.shared.model_loader import LoadedModelBundle, ModelLoader
 from src.dashboard.services.shared.model_registry import ModelRegistry
@@ -50,17 +56,91 @@ class PredictionService:
         model_id: str,
         sample_payload: dict[str, Any],
     ) -> dict[str, Any]:
-        bundle = self.load_bundle(model_id)
-        return {
-            "status": "stubbed",
-            "prediction": float(bundle.dashboard_model.manual_api_stub.prediction),
-            "summary": bundle.dashboard_model.manual_api_stub.summary,
-            "reference_sample_index": bundle.dashboard_model.manual_api_stub.reference_sample_index,
-            "payload_echo": dict(sample_payload),
-        }
+        return self._post_manual_api(
+            endpoint="/run_model/predict/",
+            model_id=model_id,
+            sample_payload=sample_payload,
+        )
+
+    def call_manual_sample_explainability_api(
+        self,
+        model_id: str,
+        sample_payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        return self._post_manual_api(
+            endpoint="/run_model/sample_explainability/",
+            model_id=model_id,
+            sample_payload=sample_payload,
+        )
 
     @staticmethod
     def _can_use_precomputed_predictions(dashboard_model, frame: pd.DataFrame) -> bool:
         if frame.empty:
             return False
         return pd.Index(frame.index).isin(dashboard_model.dataset_frame.index).all()
+
+    def _post_manual_api(
+        self,
+        *,
+        endpoint: str,
+        model_id: str,
+        sample_payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        url = f"{config.clientserver_config.api_base_url}{endpoint}"
+        body = {
+            "modelo": model_id,
+            "caracteristicas": self._api_features_from_dashboard_sample(
+                sample_payload
+            ),
+        }
+        request = Request(
+            url=url,
+            data=json.dumps(body, default=str).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urlopen(
+                request,
+                timeout=config.clientserver_config.api_timeout_seconds,
+            ) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8")
+            raise RuntimeError(f"Manual API call failed ({exc.code}): {detail}") from exc
+        except URLError as exc:
+            raise RuntimeError(f"Manual API is not reachable at {url}: {exc}") from exc
+
+    def _api_features_from_dashboard_sample(
+        self,
+        sample_payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        option_type = sample_payload.get("OptionType")
+        if hasattr(option_type, "value"):
+            option_type = option_type.value
+        option_type_text = str(option_type).upper()
+        if option_type_text == "C":
+            option_type_text = "CALL"
+        if option_type_text == "P":
+            option_type_text = "PUT"
+
+        mapping = {
+            "ExecDatetime": "execDatetime",
+            "OptionType": "optionType",
+            "Quantity": "quantity",
+            "StrikePrice": "strikePrice",
+            "TradeType": "tradeType",
+            "UnderlyingLagMinutes": "underlyingLag",
+            "UnderlyingPrice": "underlyingPrice",
+            "TimeToExpiration": "timeToExpiration",
+            "Rate": "rate",
+        }
+        result: dict[str, Any] = {}
+        for dashboard_name, api_name in mapping.items():
+            if dashboard_name not in sample_payload:
+                continue
+            value = sample_payload[dashboard_name]
+            if dashboard_name == "OptionType":
+                value = option_type_text
+            result[api_name] = value
+        return result
