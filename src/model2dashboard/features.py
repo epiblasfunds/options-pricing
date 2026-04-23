@@ -1,4 +1,5 @@
 import typing as t
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ RAW_TRADE_COLUMN_NAMES = [
     column_name(column)
     for column in config.volatility_models_config.training_data_config.vol_db_cols
 ]
+EXPLAINABILITY_FEATURE_NAMES = list(RAW_TRADE_COLUMN_NAMES)
 BASE_NUMERIC_FEATURE_NAMES = [
     column_name(column)
     for column in config.volatility_models_config.training_data_config.numeric_features
@@ -38,12 +40,77 @@ TRADE_TYPE_TO_FEATURE = {
     for key, value in config.volatility_models_config.training_data_config.trade_type_to_feature.items()
 }
 ANALYSIS_FEATURE_NAMES = [
-    "Moneyness",
     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
     column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
     column_name(VolatilityDBEnum.QUANTITY),
+    column_name(VolatilityDBEnum.STRIKE_PRICE),
+    column_name(VolatilityDBEnum.UNDERLYING_PRICE),
     column_name(VolatilityDBEnum.RATE),
 ]
+_DATETIME_EXPLAINABILITY_FEATURE_NAMES = {
+    column_name(VolatilityDBEnum.EXEC_DATETIME),
+}
+_NUMERIC_EXPLAINABILITY_FEATURE_NAMES = {
+    column_name(VolatilityDBEnum.QUANTITY),
+    column_name(VolatilityDBEnum.STRIKE_PRICE),
+    column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
+    column_name(VolatilityDBEnum.UNDERLYING_PRICE),
+    column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
+    column_name(VolatilityDBEnum.RATE),
+    column_name(VolatilityDBEnum.IMPLIED_VOLATILITY),
+}
+_CATEGORICAL_EXPLAINABILITY_FEATURE_NAMES = tuple(
+    feature_name
+    for feature_name in EXPLAINABILITY_FEATURE_NAMES
+    if feature_name not in _DATETIME_EXPLAINABILITY_FEATURE_NAMES
+    and feature_name not in _NUMERIC_EXPLAINABILITY_FEATURE_NAMES
+)
+_MISSING_CATEGORY_TOKEN = "__MISSING__"
+
+
+@dataclass(frozen=True)
+class ExplainabilityEncoder:
+    feature_names: tuple[str, ...]
+    categorical_levels: dict[str, tuple[str, ...]]
+
+    def encode_frame(self, raw_frame: pd.DataFrame) -> pd.DataFrame:
+        explain_frame = build_explainability_frame(
+            raw_frame,
+            feature_names=list(self.feature_names),
+        )
+        encoded = pd.DataFrame(index=explain_frame.index)
+        for feature_name in self.feature_names:
+            series = explain_frame[feature_name]
+            if feature_name in _NUMERIC_EXPLAINABILITY_FEATURE_NAMES:
+                encoded[feature_name] = pd.to_numeric(series, errors="coerce")
+            elif feature_name in _DATETIME_EXPLAINABILITY_FEATURE_NAMES:
+                encoded[feature_name] = _encode_datetime_series(series)
+            else:
+                encoded[feature_name] = _encode_categorical_series(
+                    series,
+                    self.categorical_levels.get(feature_name, (_MISSING_CATEGORY_TOKEN,)),
+                )
+        return encoded.astype("float64")
+
+    def decode_values(self, values: t.Any) -> pd.DataFrame:
+        frame = (
+            values.copy()
+            if isinstance(values, pd.DataFrame)
+            else pd.DataFrame(values, columns=list(self.feature_names))
+        )
+        decoded = pd.DataFrame(index=frame.index)
+        for feature_name in self.feature_names:
+            series = frame[feature_name]
+            if feature_name in _NUMERIC_EXPLAINABILITY_FEATURE_NAMES:
+                decoded[feature_name] = pd.to_numeric(series, errors="coerce")
+            elif feature_name in _DATETIME_EXPLAINABILITY_FEATURE_NAMES:
+                decoded[feature_name] = _decode_datetime_series(series)
+            else:
+                decoded[feature_name] = _decode_categorical_series(
+                    series,
+                    self.categorical_levels.get(feature_name, (_MISSING_CATEGORY_TOKEN,)),
+                )
+        return decoded
 
 
 def load_test_trade_frame(*, verbose: bool = False, use_atm: bool = False) -> pd.DataFrame:
@@ -61,6 +128,42 @@ def _normalize_trade_frame(frame: pd.DataFrame) -> pd.DataFrame:
     normalized.columns = [column_name(column) for column in normalized.columns]
     present = [column for column in RAW_TRADE_COLUMN_NAMES if column in normalized.columns]
     return normalized.loc[:, present].copy()
+
+
+def build_explainability_frame(
+    raw_frame: pd.DataFrame,
+    feature_names: list[str] | None = None,
+) -> pd.DataFrame:
+    selected = list(feature_names or EXPLAINABILITY_FEATURE_NAMES)
+    explain_frame = _normalize_trade_frame(raw_frame)
+    for feature_name in selected:
+        if feature_name not in explain_frame.columns:
+            explain_frame[feature_name] = np.nan
+    return explain_frame.loc[:, selected].copy()
+
+
+def build_explainability_encoder(
+    reference_frame: pd.DataFrame,
+    feature_names: list[str] | None = None,
+) -> ExplainabilityEncoder:
+    selected = tuple(feature_names or EXPLAINABILITY_FEATURE_NAMES)
+    explain_frame = build_explainability_frame(reference_frame, list(selected))
+    categorical_levels: dict[str, tuple[str, ...]] = {}
+    for feature_name in selected:
+        if feature_name not in _CATEGORICAL_EXPLAINABILITY_FEATURE_NAMES:
+            continue
+        raw_values = (
+            explain_frame[feature_name]
+            .astype("string")
+            .fillna(_MISSING_CATEGORY_TOKEN)
+            .tolist()
+        )
+        levels = tuple(dict.fromkeys(str(value) for value in raw_values))
+        categorical_levels[feature_name] = levels or (_MISSING_CATEGORY_TOKEN,)
+    return ExplainabilityEncoder(
+        feature_names=selected,
+        categorical_levels=categorical_levels,
+    )
 
 
 def build_feature_frame_from_trades(raw_frame: pd.DataFrame) -> pd.DataFrame:
@@ -130,9 +233,57 @@ def apply_feature_override(
         adjusted[column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.QUANTITY):
         adjusted[column_name(VolatilityDBEnum.QUANTITY)] = float(value)
+    elif feature_name == column_name(VolatilityDBEnum.STRIKE_PRICE):
+        adjusted[column_name(VolatilityDBEnum.STRIKE_PRICE)] = float(value)
+    elif feature_name == column_name(VolatilityDBEnum.UNDERLYING_PRICE):
+        adjusted[column_name(VolatilityDBEnum.UNDERLYING_PRICE)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.RATE):
         adjusted[column_name(VolatilityDBEnum.RATE)] = float(value)
     return adjusted
+
+
+def _encode_datetime_series(series: pd.Series) -> pd.Series:
+    datetimes = pd.to_datetime(series, errors="coerce", utc=True)
+    encoded = pd.Series(
+        datetimes.astype("int64"),
+        index=series.index,
+        dtype="float64",
+    ) / 1_000_000_000.0
+    encoded.loc[datetimes.isna()] = np.nan
+    return encoded
+
+
+def _decode_datetime_series(series: pd.Series) -> pd.Series:
+    numeric = pd.to_numeric(series, errors="coerce")
+    return pd.to_datetime(numeric, unit="s", utc=True, errors="coerce")
+
+
+def _encode_categorical_series(
+    series: pd.Series,
+    levels: tuple[str, ...],
+) -> pd.Series:
+    values = series.astype("string").fillna(_MISSING_CATEGORY_TOKEN)
+    mapping = {level: float(index) for index, level in enumerate(levels)}
+    encoded = values.map(mapping).astype("float64")
+    return encoded.fillna(mapping.get(_MISSING_CATEGORY_TOKEN, 0.0))
+
+
+def _decode_categorical_series(
+    series: pd.Series,
+    levels: tuple[str, ...],
+) -> pd.Series:
+    numeric = pd.to_numeric(series, errors="coerce")
+
+    def _decode(value: float) -> str | float:
+        if pd.isna(value):
+            return np.nan
+        index = int(round(float(value)))
+        if index < 0 or index >= len(levels):
+            return np.nan
+        decoded = levels[index]
+        return np.nan if decoded == _MISSING_CATEGORY_TOKEN else decoded
+
+    return numeric.map(_decode)
 
 
 def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:

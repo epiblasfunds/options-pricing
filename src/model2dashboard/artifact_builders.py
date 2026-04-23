@@ -17,11 +17,14 @@ from src.dashboard.utils.sampling import quantile_grid
 from src.dashboard.utils.sampling import sample_frame
 from src.enums.data_enums import VolatilityDBEnum
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import apply_feature_override
 from src.model2dashboard.features import build_dashboard_dataset
+from src.model2dashboard.features import build_explainability_encoder
+from src.model2dashboard.features import build_explainability_frame
 from src.model2dashboard.features import build_feature_frame_from_trades
 from src.model2dashboard.features import column_name
 from src.model2dashboard.model_io import TrainingModelRuntime
@@ -67,7 +70,7 @@ def build_dashboard_artifacts(
     global_shap, local_shap = build_shap_artifacts(
         runtime=runtime,
         dataset_frame=dataset_frame,
-        feature_frame=feature_frame,
+        raw_frame=raw_test_frame,
         predictions=predictions,
         sample_indices=sample_indices,
     )
@@ -136,10 +139,18 @@ def build_shap_artifacts(
     *,
     runtime: TrainingModelRuntime,
     dataset_frame: pd.DataFrame,
-    feature_frame: pd.DataFrame,
+    raw_frame: pd.DataFrame,
     predictions: pd.Series,
     sample_indices: list[t.Any],
 ) -> tuple[StoredShapExplanation, StoredShapExplanation]:
+    explainability_frame = build_explainability_frame(
+        raw_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    encoder = build_explainability_encoder(
+        explainability_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
     background_indices = sample_frame(
         dataset_frame,
         max_rows=config.dashboard_models_config.shap_background_size,
@@ -150,45 +161,44 @@ def build_shap_artifacts(
         max_rows=config.dashboard_models_config.shap_explain_size,
         random_state=config.dashboard_models_config.random_state,
     ).index
-    transformed_background = transform_feature_frame(
-        runtime,
-        feature_frame.loc[background_indices],
+    encoded_background = encoder.encode_frame(
+        explainability_frame.loc[background_indices],
     )
-    transformed_global = transform_feature_frame(runtime, feature_frame.loc[global_indices])
+    encoded_global = encoder.encode_frame(explainability_frame.loc[global_indices])
     explainer = shap.Explainer(
-        lambda values: _predict_transformed_values(runtime, values),
-        masker=transformed_background,
+        lambda values: _predict_explainability_values(runtime, encoder, values),
+        masker=encoded_background,
         algorithm="permutation",
-        feature_names=runtime.model_input_features,
+        feature_names=list(encoder.feature_names),
         seed=config.dashboard_models_config.random_state,
     )
-    max_evals = _max_evals(len(runtime.model_input_features))
+    max_evals = _max_evals(len(encoder.feature_names))
     global_explanation = explainer(
-        transformed_global,
+        encoded_global,
         max_evals=max_evals,
         silent=True,
     )
     global_shap = serialize_shap_result(
         method="shap.Explainer(permutation)",
         explanation=global_explanation,
-        transformed_frame=transformed_global,
-        display_frame=feature_frame.loc[global_indices],
-        feature_names=runtime.model_input_features,
+        transformed_frame=encoded_global,
+        display_frame=explainability_frame.loc[global_indices],
+        feature_names=list(encoder.feature_names),
         predictions=predictions.loc[global_indices],
     )
-    local_feature_frame = feature_frame.loc[sample_indices]
-    transformed_local = transform_feature_frame(runtime, local_feature_frame)
+    local_explain_frame = explainability_frame.loc[sample_indices]
+    encoded_local = encoder.encode_frame(local_explain_frame)
     local_explanation = explainer(
-        transformed_local,
+        encoded_local,
         max_evals=max_evals,
         silent=True,
     )
     local_shap = serialize_shap_result(
         method="shap.Explainer(permutation)",
         explanation=local_explanation,
-        transformed_frame=transformed_local,
-        display_frame=local_feature_frame,
-        feature_names=runtime.model_input_features,
+        transformed_frame=encoded_local,
+        display_frame=local_explain_frame,
+        feature_names=list(encoder.feature_names),
         predictions=predictions.loc[sample_indices],
     )
     return global_shap, local_shap
@@ -588,6 +598,15 @@ def _predict_transformed_values(
     else:
         predictions = runtime.model.predict(matrix)
     return np.asarray(predictions, dtype="float64").reshape(-1)
+
+
+def _predict_explainability_values(
+    runtime: TrainingModelRuntime,
+    encoder,
+    values: t.Any,
+) -> np.ndarray:
+    raw_frame = encoder.decode_values(values)
+    return predict_raw_frame(runtime, raw_frame)
 
 
 def _max_evals(n_features: int) -> int:

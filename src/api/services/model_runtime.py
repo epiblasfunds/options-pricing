@@ -18,11 +18,13 @@ from src.dashboard.domain import build_feature_schema
 from src.dashboard.plots.shap_plots import waterfall_image
 from src.dashboard.services.global_explainability import ShapExplanationResult
 from src.dashboard.services.shared.feature_schema import FeatureSchema
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import add_dashboard_derived_features
+from src.model2dashboard.features import build_explainability_encoder
+from src.model2dashboard.features import build_explainability_frame
 from src.model2dashboard.features import build_feature_frame_from_trades
 from src.model2dashboard.model_io import load_training_runtime
 from src.model2dashboard.model_io import predict_raw_frame
-from src.model2dashboard.model_io import transform_feature_frame
 from src.python_models.dashboard.artifacts import StoredShapExplanation
 from src.python_models.dashboard.dashboard_model import DashboardModel
 
@@ -117,23 +119,22 @@ class ApiModelService:
     def _request_to_raw_frame(self, request: ModelRequest) -> pd.DataFrame:
         features = request.caracteristicas
         option_type = "C" if features.optionType == ApiOptionTypeEnum.CALL else "P"
-        return pd.DataFrame(
-            [
-                {
-                    "ExecDatetime": self._format_exec_datetime(
-                        features.execDatetime
-                    ),
-                    "OptionType": option_type,
-                    "Quantity": int(features.quantity),
-                    "StrikePrice": float(features.strikePrice),
-                    "TradeType": str(features.tradeType),
-                    "UnderlyingLagMinutes": float(features.underlyingLag),
-                    "UnderlyingPrice": float(features.underlyingPrice),
-                    "TimeToExpiration": float(features.timeToExpiration),
-                    "Rate": float(features.rate),
-                }
-            ]
-        )
+        row = {
+            "ExecDatetime": self._format_exec_datetime(features.execDatetime),
+            "OptionType": option_type,
+            "Quantity": int(features.quantity),
+            "StrikePrice": float(features.strikePrice),
+            "TradeType": str(features.tradeType),
+            "UnderlyingLagMinutes": float(features.underlyingLag),
+            "UnderlyingPrice": float(features.underlyingPrice),
+            "TimeToExpiration": float(features.timeToExpiration),
+            "Rate": float(features.rate),
+        }
+        if features.optionContractCode not in (None, ""):
+            row["OptionContractCode"] = str(features.optionContractCode)
+        if features.impliedVolatility is not None:
+            row["ImpliedVolatility"] = float(features.impliedVolatility)
+        return pd.DataFrame([row])
 
     def _build_dashboard_sample_frame(
         self,
@@ -146,6 +147,9 @@ class ApiModelService:
             sample[column] = feature_frame[column].to_numpy()
         sample = add_dashboard_derived_features(sample)
         sample["PredictedVolatility"] = prediction
+        if "ImpliedVolatility" in sample.columns:
+            sample["Residual"] = sample["ImpliedVolatility"] - prediction
+            sample["AbsoluteError"] = sample["Residual"].abs()
         return sample
 
     def _find_runtime_neighbors(
@@ -202,51 +206,50 @@ class ApiModelService:
         raw_frame: pd.DataFrame,
         prediction: float,
     ) -> StoredShapExplanation:
-        feature_names = list(training_runtime.model_input_features)
+        feature_names = list(
+            dashboard_model.metadata.get("explainability_feature_names")
+            or dashboard_model.raw_feature_names
+            or EXPLAINABILITY_FEATURE_NAMES
+        )
         if not feature_names:
             raise RuntimeError("Cannot build runtime SHAP explanation without features.")
-        missing_features = [
-            name for name in feature_names if name not in dashboard_model.dataset_frame
-        ]
-        if missing_features:
-            raise RuntimeError(
-                "Cannot build runtime SHAP explanation. Missing dashboard "
-                f"features: {missing_features}."
-            )
-
-        background_source = dashboard_model.dataset_frame.loc[:, feature_names]
+        background_source = build_explainability_frame(
+            dashboard_model.dataset_frame,
+            feature_names=feature_names,
+        )
         if len(background_source) > config.dashboard_models_config.shap_background_size:
             background_source = background_source.sample(
                 n=config.dashboard_models_config.shap_background_size,
                 random_state=config.dashboard_models_config.random_state,
             ).sort_index()
 
-        sample_feature_frame = build_feature_frame_from_trades(raw_frame)
-        transformed_background = transform_feature_frame(
-            training_runtime,
-            background_source,
+        sample_explain_frame = build_explainability_frame(
+            raw_frame,
+            feature_names=feature_names,
         )
-        transformed_sample = transform_feature_frame(
-            training_runtime,
-            sample_feature_frame,
+        encoder = build_explainability_encoder(
+            pd.concat([background_source, sample_explain_frame], axis=0),
+            feature_names=feature_names,
         )
+        encoded_background = encoder.encode_frame(background_source)
+        encoded_sample = encoder.encode_frame(sample_explain_frame)
         explainer = shap.Explainer(
-            lambda values: ApiModelService._predict_transformed_values(
+            lambda values: ApiModelService._predict_explainability_values(
                 training_runtime,
-                feature_names,
+                encoder,
                 values,
             ),
-            masker=transformed_background,
+            masker=encoded_background,
             algorithm="permutation",
             feature_names=feature_names,
             seed=config.dashboard_models_config.random_state,
         )
         explanation = explainer(
-            transformed_sample,
+            encoded_sample,
             max_evals=ApiModelService._shap_max_evals(len(feature_names)),
             silent=True,
         )
-        explanation.display_data = sample_feature_frame.loc[:, feature_names].to_numpy()
+        explanation.display_data = sample_explain_frame.loc[:, feature_names].to_numpy()
         mean_abs_shap = pd.Series(
             np.abs(np.asarray(explanation.values)).mean(axis=0),
             index=feature_names,
@@ -254,10 +257,10 @@ class ApiModelService:
         return StoredShapExplanation(
             method="shap.Explainer(permutation, runtime)",
             feature_names=feature_names,
-            index=list(transformed_sample.index),
+            index=list(encoded_sample.index),
             values=np.asarray(explanation.values),
             base_values=np.asarray(explanation.base_values),
-            data=np.asarray(transformed_sample.to_numpy()),
+            data=np.asarray(encoded_sample.to_numpy()),
             display_data=np.asarray(explanation.display_data),
             predictions=np.asarray([prediction], dtype="float64"),
             mean_abs_shap={
@@ -266,20 +269,13 @@ class ApiModelService:
         )
 
     @staticmethod
-    def _predict_transformed_values(
+    def _predict_explainability_values(
         training_runtime: Any,
-        feature_names: list[str],
+        encoder,
         values: Any,
     ) -> np.ndarray:
-        if isinstance(values, pd.DataFrame):
-            matrix = values.loc[:, feature_names].to_numpy(dtype="float32", copy=False)
-        else:
-            matrix = np.asarray(values, dtype="float32")
-        if training_runtime.is_keras:
-            predictions = training_runtime.model.predict(matrix, verbose=0)
-        else:
-            predictions = training_runtime.model.predict(matrix)
-        return np.asarray(predictions, dtype="float64").reshape(-1)
+        raw_frame = encoder.decode_values(values)
+        return predict_raw_frame(training_runtime, raw_frame)
 
     @staticmethod
     def _shap_max_evals(n_features: int) -> int:

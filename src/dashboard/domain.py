@@ -7,8 +7,8 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricsRegistry,
 )
 from src.enums.data_enums import OptionTypeEnum
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
-from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
 
@@ -23,7 +23,7 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
-    features = [_raw_feature_definition(name) for name in RAW_INPUT_FEATURE_NAMES]
+    features = [_raw_feature_definition(name) for name in EXPLAINABILITY_FEATURE_NAMES]
     features.extend(
         [
             FeatureDefinition(
@@ -79,6 +79,7 @@ def build_feature_schema() -> FeatureSchema:
 def _raw_feature_definition(name: str) -> FeatureDefinition:
     labels = {
         "ExecDatetime": "Execution Datetime",
+        "OptionContractCode": "Option Contract Code",
         "OptionType": "Option Type",
         "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
@@ -87,6 +88,20 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
         "Rate": "Rate",
+        "ImpliedVolatility": "Implied Volatility",
+    }
+    descriptions = {
+        "ExecDatetime": "Execution timestamp of the option trade.",
+        "OptionContractCode": "Exchange contract code that identifies the traded option series.",
+        "OptionType": "Option side extracted from the contract family: call or put.",
+        "Quantity": "Number of contracts exchanged in the trade.",
+        "StrikePrice": "Strike price associated with the traded option.",
+        "TradeType": "Exchange trade-condition code reported for the transaction.",
+        "UnderlyingLagMinutes": "Minutes elapsed between the option trade and the matched underlying quote.",
+        "UnderlyingPrice": "Underlying futures price paired with the option trade.",
+        "TimeToExpiration": "Remaining time to maturity, measured in days.",
+        "Rate": "Risk-free rate used to back out implied volatility.",
+        "ImpliedVolatility": "Observed implied volatility for the trade. It is the prediction target and an optional reference value in manual analysis.",
     }
     if name == "ExecDatetime":
         return FeatureDefinition(
@@ -96,7 +111,17 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             category="categorical",
             raw_input=True,
             widget="text",
-            description="Execution timestamp of the option trade.",
+            description=descriptions[name],
+        )
+    if name == "OptionContractCode":
+        return FeatureDefinition(
+            name=name,
+            label=labels[name],
+            dtype="text",
+            category="categorical",
+            raw_input=True,
+            widget="text",
+            description=descriptions[name],
         )
     if name == "OptionType":
         return FeatureDefinition(
@@ -108,6 +133,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             allowed_values=(OptionTypeEnum.CALL, OptionTypeEnum.PUT),
             default_value=OptionTypeEnum.CALL,
             widget="dropdown",
+            description=descriptions[name],
         )
     if name == "TradeType":
         return FeatureDefinition(
@@ -119,6 +145,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             allowed_values=tuple(TRADE_TYPE_TO_FEATURE.keys()),
             default_value="M",
             widget="dropdown",
+            description=descriptions[name],
         )
     return FeatureDefinition(
         name=name,
@@ -128,6 +155,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         raw_input=True,
         min_value=0.0 if name != "Rate" else None,
         widget="number",
+        description=descriptions.get(name),
     )
 
 

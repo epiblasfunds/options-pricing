@@ -6,11 +6,13 @@ def test_api_features_accept_manual_call_put_labels():
 
     call_payload = service._api_features_from_dashboard_sample(
         {
+            "OptionContractCode": "",
             "OptionType": "CALL",
             "StrikePrice": 9100.0,
             "UnderlyingPrice": 9000.0,
             "TimeToExpiration": 20.0,
             "Rate": -0.6,
+            "ImpliedVolatility": 0.21,
         }
     )
     put_payload = service._api_features_from_dashboard_sample({"OptionType": "PUT"})
@@ -20,4 +22,6 @@ def test_api_features_accept_manual_call_put_labels():
     assert call_payload["underlyingPrice"] == 9000.0
     assert call_payload["timeToExpiration"] == 20.0
     assert call_payload["rate"] == -0.6
+    assert "optionContractCode" not in call_payload
+    assert call_payload["impliedVolatility"] == 0.21
     assert put_payload["optionType"] == "PUT"

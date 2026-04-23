@@ -4,8 +4,7 @@ import pandas as pd
 
 from src.api.services.model_runtime import ApiModelService
 from src.dashboard.plots.local_plots import neighbors_distance_figure
-from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
-from src.model2dashboard.features import build_feature_frame_from_trades
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 
 
 class _LinearModel:
@@ -44,14 +43,17 @@ def _raw_frame():
 
 def test_runtime_shap_explanation_uses_manual_row_not_stored_sample():
     raw = _raw_frame()
-    dataset_frame = build_feature_frame_from_trades(raw)
     runtime = SimpleNamespace(
         model=_LinearModel(),
-        model_input_features=list(MODEL_INPUT_FEATURE_NAMES),
+        model_input_features=["TTEYears", "sqrtTTEYears"],
         scaler=None,
         is_keras=False,
     )
-    dashboard_model = SimpleNamespace(dataset_frame=dataset_frame)
+    dashboard_model = SimpleNamespace(
+        dataset_frame=raw,
+        raw_feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
+        metadata={"explainability_feature_names": list(EXPLAINABILITY_FEATURE_NAMES)},
+    )
 
     stored = ApiModelService._runtime_shap_explanation(
         training_runtime=runtime,
@@ -62,7 +64,8 @@ def test_runtime_shap_explanation_uses_manual_row_not_stored_sample():
 
     assert stored.index == [0]
     assert stored.method == "shap.Explainer(permutation, runtime)"
-    assert stored.values.shape == (1, len(MODEL_INPUT_FEATURE_NAMES))
+    assert stored.feature_names == list(EXPLAINABILITY_FEATURE_NAMES)
+    assert stored.values.shape == (1, len(EXPLAINABILITY_FEATURE_NAMES))
     assert stored.predictions.tolist() == [0.123]
 
 

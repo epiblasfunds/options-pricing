@@ -12,10 +12,15 @@ from src.dashboard.plots.shap_plots import waterfall_image
 
 MANUAL_INPUT_DEFAULTS = {
     "OptionType": "CALL",
+    "Quantity": 1,
     "StrikePrice": 9100.0,
+    "TradeType": "M",
+    "UnderlyingLagMinutes": 0.0,
     "UnderlyingPrice": 9000.0,
     "TimeToExpiration": 20.0,
     "Rate": -0.6,
+    "OptionContractCode": None,
+    "ImpliedVolatility": None,
 }
 
 
@@ -134,8 +139,18 @@ def _manual_field(feature, default_value):
         )
     return html.Div(
         children=[
-            html.Label(feature.label),
+            html.Label(feature.label, title=feature.description),
             input_component,
+            html.Div(
+                feature.description,
+                style={
+                    "marginTop": "6px",
+                    "fontSize": "0.82rem",
+                    "color": "#5b6d85",
+                },
+            )
+            if feature.description
+            else html.Div(),
         ]
     )
 
@@ -379,9 +394,6 @@ def register_sample_callbacks(app, services) -> None:
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         defaults.update(MANUAL_INPUT_DEFAULTS)
-        mandatory_names = set(
-            config.clientserver_config.dashboard_manual_input_features
-        )
         return (
             html.Div(
                 style={
@@ -393,7 +405,6 @@ def register_sample_callbacks(app, services) -> None:
                 children=[
                     _manual_field(feature, defaults.get(feature.name))
                     for feature in services.feature_schema.raw_input_features()
-                    if feature.name in mandatory_names
                 ],
             ),
             {"display": "none"},
@@ -454,9 +465,15 @@ def register_sample_callbacks(app, services) -> None:
                     if not neighbors.empty
                     else _empty_figure()
                 )
+                actual = api_result.get("input", {}).get("ImpliedVolatility")
                 sample_summary = _prediction_indicator(
                     title="Manual Input",
                     prediction=float(api_result["prediction"]),
+                    actual=(
+                        float(actual)
+                        if actual not in (None, "")
+                        else None
+                    ),
                 )
                 return (
                     sample_summary,

@@ -20,8 +20,9 @@ def _model_info_panel(
     *,
     model_name: str,
     format_label: str,
-    model_features: list[str],
+    explained_features: list[str],
     metric_names: list[str],
+    feature_schema,
 ) -> html.Div:
     return html.Div(
         style={
@@ -69,7 +70,7 @@ def _model_info_panel(
             html.Div(
                 children=[
                     html.Div(
-                        "Model inputs",
+                        "Explained variables",
                         style={
                             "fontSize": "0.78rem",
                             "fontWeight": "800",
@@ -89,7 +90,16 @@ def _model_info_panel(
                         },
                         children=[
                             html.Span(
-                                str(feature_name),
+                                (
+                                    feature_schema.get(str(feature_name)).label
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
+                                title=(
+                                    feature_schema.get(str(feature_name)).description
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
                                 style={
                                     "display": "inline-flex",
                                     "alignItems": "center",
@@ -103,7 +113,7 @@ def _model_info_panel(
                                     "fontWeight": "600",
                                 },
                             )
-                            for feature_name in model_features
+                            for feature_name in explained_features
                         ],
                     ),
                 ]
@@ -219,8 +229,18 @@ def register_model_loading_callbacks(app, services) -> None:
             for index in bundle.dashboard_model.behaviour_anchor_indices
             if index in dataset.index
         ]
-        model_features = metadata.get("model_input_features", [])
-        shap_feature_names = metadata.get("transformed_feature_names", model_features)
+        explained_feature_names = metadata.get("explainability_feature_names") or metadata.get(
+            "raw_feature_names",
+            [],
+        )
+        shap_feature_names = [
+            str(feature_name)
+            for feature_name in explained_feature_names
+            if (
+                str(feature_name) in services.feature_schema.names()
+                and services.feature_schema.get(str(feature_name)).is_numerical
+            )
+        ]
         shap_options = [
             {
                 "label": display_feature_label(
@@ -237,8 +257,9 @@ def register_model_loading_callbacks(app, services) -> None:
         info_panel = _model_info_panel(
             model_name=model.name if model else str(model_id),
             format_label=format_label,
-            model_features=[str(feature) for feature in model_features],
+            explained_features=[str(feature) for feature in explained_feature_names],
             metric_names=[str(metric) for metric in metric_names],
+            feature_schema=services.feature_schema,
         )
         return (
             info_panel,
