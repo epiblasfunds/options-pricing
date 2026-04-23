@@ -15,6 +15,21 @@ def build_sample_label(row: pd.Series) -> str:
     )
 
 
+def build_manual_input_sample_label(row: pd.Series) -> str:
+    exec_datetime = _display_datetime(row.get("ExecDatetime"))
+    option_type = _display_option_type(row.get("OptionType", "?"))
+    strike = _display_number(row.get("StrikePrice"))
+    underlying = _display_number(row.get("UnderlyingPrice"))
+    maturity = _display_number(row.get("TimeToExpiration"), decimals=1)
+    rate = _display_number(row.get("Rate"), decimals=2)
+    return (
+        f"ID: {row.name} | Exec datetime: {exec_datetime} | "
+        f"Type: {option_type} | Strike: {strike} | "
+        f"Underlying: {underlying} | Time to expiration: {maturity} | "
+        f"Rate: {rate}"
+    )
+
+
 def _display_option_type(value) -> str:
     text = str(value.value if hasattr(value, "value") else value).strip().upper()
     if text == "C":
@@ -22,6 +37,21 @@ def _display_option_type(value) -> str:
     if text == "P":
         return "PUT"
     return text or "?"
+
+
+def _display_datetime(value) -> str:
+    timestamp = pd.to_datetime(value, errors="coerce")
+    if pd.isna(timestamp):
+        return "?"
+    return timestamp.isoformat(sep=" ", timespec="seconds")
+
+
+def _display_number(value, decimals: int = 0) -> str:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "?"
+    return f"{numeric:,.{decimals}f}"
 
 
 def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> str:
@@ -59,6 +89,7 @@ def replace_feature_names_in_text(text: str, feature_schema: FeatureSchema) -> s
 
 
 __all__ = [
+    "build_manual_input_sample_label",
     "build_sample_label",
     "display_feature_label",
     "replace_feature_names_in_text",

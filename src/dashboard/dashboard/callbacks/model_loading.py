@@ -4,6 +4,7 @@ from dash import Input, Output, State, html
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
+from src.dashboard.utils.feature_utils import build_manual_input_sample_label
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
@@ -258,7 +259,7 @@ def register_model_loading_callbacks(app, services) -> None:
 
         if not model_id:
             sample_options = [
-                {"label": build_sample_label(row), "value": int(index)}
+                {"label": build_manual_input_sample_label(row), "value": int(index)}
                 for index, row in sampled.iterrows()
             ]
             return (
@@ -278,7 +279,10 @@ def register_model_loading_callbacks(app, services) -> None:
         metadata = model.metadata if model else {}
         bundle = services.prediction_service.load_bundle(model_id)
         sample_options = [
-            {"label": build_sample_label(dataset.loc[index]), "value": int(index)}
+            {
+                "label": build_manual_input_sample_label(dataset.loc[index]),
+                "value": int(index),
+            }
             for index in bundle.dashboard_model.sample_indices
             if index in dataset.index
         ]

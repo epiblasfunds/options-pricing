@@ -22,6 +22,12 @@ MANUAL_INPUT_DEFAULTS = {
     "Rate": -0.6,
 }
 
+MANUAL_INPUT_LABEL_OVERRIDES = {
+    "OptionType": "Type",
+    "StrikePrice": "Strike",
+    "UnderlyingPrice": "Underlying",
+}
+
 
 def _empty_figure():
     return go.Figure()
@@ -181,7 +187,10 @@ def _manual_field(feature, default_value):
         )
     return html.Div(
         children=[
-            html.Label(feature.label, title=feature.description),
+            html.Label(
+                MANUAL_INPUT_LABEL_OVERRIDES.get(feature.name, feature.label),
+                title=feature.description,
+            ),
             input_component,
             html.Div(
                 feature.description,
