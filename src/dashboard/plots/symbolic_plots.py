@@ -15,6 +15,8 @@ matplotlib.use("Agg")
 
 from matplotlib import pyplot as plt
 
+from src.dashboard.utils.feature_utils import display_feature_label
+
 
 def symbolic_frontier_figure(model: SymbolicRegressorModel):
     if model.candidate_equations.empty:
@@ -201,8 +203,8 @@ def symbolic_expression_tree_figure(model: SymbolicRegressorModel):
     return fig
 
 
-def symbolic_formula_image_src(model: SymbolicRegressorModel) -> str:
-    latex_expression, _ = _aliased_formula(model)
+def symbolic_formula_image_src(model: SymbolicRegressorModel, schema=None) -> str:
+    latex_expression, _ = _aliased_formula(model, schema=schema)
     formula_text = f"${latex_expression}$"
     figure = plt.figure(figsize=(13, 1.9), dpi=180)
     figure.patch.set_facecolor("#f7fbff")
@@ -228,12 +230,12 @@ def symbolic_formula_image_src(model: SymbolicRegressorModel) -> str:
     return f"data:image/svg+xml;base64,{encoded}"
 
 
-def symbolic_formula_aliases(model: SymbolicRegressorModel) -> list[tuple[str, str]]:
-    _, aliases = _aliased_formula(model)
+def symbolic_formula_aliases(model: SymbolicRegressorModel, schema=None) -> list[tuple[str, str]]:
+    _, aliases = _aliased_formula(model, schema=schema)
     return aliases
 
 
-def _aliased_formula(model: SymbolicRegressorModel) -> tuple[str, list[tuple[str, str]]]:
+def _aliased_formula(model: SymbolicRegressorModel, schema=None) -> tuple[str, list[tuple[str, str]]]:
     expression = sympy.sympify(model.sympy_expression)
     symbols = sorted(expression.free_symbols, key=lambda item: item.name)
     alias_map = {
@@ -247,7 +249,13 @@ def _aliased_formula(model: SymbolicRegressorModel) -> tuple[str, list[tuple[str
         long_frac_ratio=2,
     )
     aliases = [
-        (f"x_{index}", symbol.name) for index, symbol in enumerate(symbols, start=1)
+        (
+            f"x_{index}",
+            display_feature_label(symbol.name, schema)
+            if schema is not None
+            else symbol.name,
+        )
+        for index, symbol in enumerate(symbols, start=1)
     ]
     return latex_expression, aliases
 

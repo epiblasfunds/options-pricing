@@ -48,7 +48,18 @@ def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> s
     return transformed_name
 
 
+def replace_feature_names_in_text(text: str, feature_schema: FeatureSchema) -> str:
+    updated = str(text)
+    for feature_name in sorted(feature_schema.names(), key=len, reverse=True):
+        updated = updated.replace(
+            feature_name,
+            display_feature_label(feature_name, feature_schema),
+        )
+    return updated
+
+
 __all__ = [
     "build_sample_label",
     "display_feature_label",
+    "replace_feature_names_in_text",
 ]

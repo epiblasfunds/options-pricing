@@ -228,8 +228,9 @@ class ApiModelService:
             feature_names=feature_names,
         )
         encoder = build_explainability_encoder(
-            pd.concat([background_source, sample_explain_frame], axis=0),
+            pd.concat([background_source, raw_frame], axis=0),
             feature_names=feature_names,
+            defaults_override=raw_frame.iloc[0].to_dict(),
         )
         encoded_background = encoder.encode_frame(background_source)
         encoded_sample = encoder.encode_frame(sample_explain_frame)
@@ -274,7 +275,7 @@ class ApiModelService:
         encoder,
         values: Any,
     ) -> np.ndarray:
-        raw_frame = encoder.decode_values(values)
+        raw_frame = encoder.reconstruct_raw_frame(values)
         return predict_raw_frame(training_runtime, raw_frame)
 
     @staticmethod

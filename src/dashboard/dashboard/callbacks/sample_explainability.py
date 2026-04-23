@@ -1,5 +1,7 @@
 """Callbacks for local sample explainability."""
 
+from datetime import datetime
+
 import pandas as pd
 import plotly.graph_objects as go
 from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
@@ -8,19 +10,16 @@ from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
 MANUAL_INPUT_DEFAULTS = {
+    "ExecDatetime": None,
     "OptionType": "CALL",
-    "Quantity": 1,
     "StrikePrice": 9100.0,
-    "TradeType": "M",
-    "UnderlyingLagMinutes": 0.0,
     "UnderlyingPrice": 9000.0,
     "TimeToExpiration": 20.0,
     "Rate": -0.6,
-    "OptionContractCode": None,
-    "ImpliedVolatility": None,
 }
 
 
@@ -123,11 +122,54 @@ def _manual_field(feature, default_value):
             id=component_id, options=options, value=default_value
         )
     elif feature.dtype == "datetime":
-        input_component = dcc.Input(
-            id=component_id,
-            type="text",
-            value="" if default_value is None else str(default_value),
-            placeholder="YYYY-MM-DD HH:MM:SS",
+        input_component = html.Div(
+            style={"display": "grid", "gap": "8px"},
+            children=[
+                dcc.Input(
+                    id=component_id,
+                    type="text",
+                    value=_manual_datetime_value(default_value),
+                    placeholder="YYYY-MM-DDTHH:MM:SS+02:00",
+                    style={
+                        "height": "34px",
+                        "width": "100%",
+                        "boxSizing": "border-box",
+                        "borderRadius": "8px",
+                        "border": "1px solid rgba(23,48,79,0.18)",
+                        "padding": "0 10px",
+                    },
+                ),
+                html.Div(
+                    style={
+                        "display": "flex",
+                        "justifyContent": "space-between",
+                        "alignItems": "center",
+                        "gap": "10px",
+                    },
+                    children=[
+                        html.Span(
+                            "Filled with your current local time.",
+                            style={"fontSize": "0.82rem", "color": "#5b6d85"},
+                        ),
+                        html.Button(
+                            "Use Current Time",
+                            id={"type": "manual-now", "feature": feature.name},
+                            n_clicks=0,
+                            type="button",
+                            style={
+                                "height": "30px",
+                                "padding": "0 10px",
+                                "borderRadius": "999px",
+                                "border": "1px solid rgba(23,48,79,0.18)",
+                                "background": "#edf5ff",
+                                "color": "#17304f",
+                                "fontWeight": "700",
+                                "cursor": "pointer",
+                            },
+                        ),
+                    ],
+                ),
+            ],
         )
     elif feature.is_numerical:
         input_component = _manual_number_control(feature, default_value)
@@ -257,6 +299,21 @@ def _manual_numeric_value(default_value):
     return numeric_value
 
 
+def _manual_datetime_value(default_value):
+    if default_value in (None, ""):
+        return _current_local_timestamp()
+    timestamp = pd.to_datetime(default_value, errors="coerce")
+    if pd.isna(timestamp):
+        return _current_local_timestamp()
+    if getattr(timestamp, "tzinfo", None) is None:
+        return timestamp.isoformat(timespec="seconds")
+    return timestamp.isoformat(timespec="seconds")
+
+
+def _current_local_timestamp():
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
 def _stepped_manual_value(feature_schema, feature_name, current_value, direction):
     feature = feature_schema.get(feature_name)
     step = float(_manual_numeric_step(feature) or 1)
@@ -383,6 +440,14 @@ def register_sample_callbacks(app, services) -> None:
         )
 
     @app.callback(
+        Output({"type": "manual-feature", "feature": MATCH}, "value", allow_duplicate=True),
+        Input({"type": "manual-now", "feature": MATCH}, "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def set_manual_datetime_now(_):
+        return _current_local_timestamp()
+
+    @app.callback(
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),
         Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
@@ -394,6 +459,7 @@ def register_sample_callbacks(app, services) -> None:
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         defaults.update(MANUAL_INPUT_DEFAULTS)
+        defaults["ExecDatetime"] = _current_local_timestamp()
         return (
             html.Div(
                 style={
@@ -405,6 +471,7 @@ def register_sample_callbacks(app, services) -> None:
                 children=[
                     _manual_field(feature, defaults.get(feature.name))
                     for feature in services.feature_schema.raw_input_features()
+                    if feature.name in VISIBLE_RAW_INPUT_FEATURE_NAMES
                 ],
             ),
             {"display": "none"},
@@ -465,15 +532,9 @@ def register_sample_callbacks(app, services) -> None:
                     if not neighbors.empty
                     else _empty_figure()
                 )
-                actual = api_result.get("input", {}).get("ImpliedVolatility")
                 sample_summary = _prediction_indicator(
                     title="Manual Input",
                     prediction=float(api_result["prediction"]),
-                    actual=(
-                        float(actual)
-                        if actual not in (None, "")
-                        else None
-                    ),
                 )
                 return (
                     sample_summary,

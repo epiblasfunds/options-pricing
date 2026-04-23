@@ -12,12 +12,17 @@ from src.dashboard.plots.plot_style import (
     STANDARD_MARGIN,
     STANDARD_TEMPLATE,
 )
+from src.dashboard.utils.feature_utils import display_feature_label
 from src.python_models.dashboard.artifacts import SurrogateTreeModel
 
 
-def feature_importance_figure(result: SurrogateTreeModel):
+def feature_importance_figure(result: SurrogateTreeModel, schema=None):
     frame = result.feature_importances.rename("importance").reset_index()
     frame.columns = ["feature", "importance"]
+    if schema is not None:
+        frame["feature"] = frame["feature"].map(
+            lambda name: display_feature_label(str(name), schema)
+        )
     fig = px.bar(
         frame,
         x="importance",
@@ -64,14 +69,20 @@ def fidelity_figure(result: SurrogateTreeModel):
     return fig
 
 
-def tree_png_base64(result: SurrogateTreeModel) -> str:
+def tree_png_base64(result: SurrogateTreeModel, schema=None) -> str:
     width = max(20, min(48, result.n_leaves * 2.1))
     height = max(8, min(24, result.tree_depth * 2.2 + result.n_leaves * 0.28))
     font_size = max(7, 12 - min(result.tree_depth, 6) // 2)
+    feature_names = result.feature_names or result.feature_importances.index.tolist()
+    if schema is not None:
+        feature_names = [
+            display_feature_label(str(feature_name), schema)
+            for feature_name in feature_names
+        ]
     figure = plt.figure(figsize=(width, height))
     tree.plot_tree(
         result.model,
-        feature_names=result.feature_names or result.feature_importances.index.tolist(),
+        feature_names=feature_names,
         filled=True,
         rounded=True,
         fontsize=font_size,

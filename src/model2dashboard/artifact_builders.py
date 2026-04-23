@@ -96,11 +96,13 @@ def build_dashboard_artifacts(
             runtime=runtime,
             feature_frame=feature_frame,
             predictions=predictions,
+            dataset_frame=dataset_frame,
         ),
         "symbolic_model": build_symbolic_regressor_model(
             runtime=runtime,
             feature_frame=feature_frame,
             predictions=predictions,
+            dataset_frame=dataset_frame,
         ),
         "global_shap": global_shap,
         "local_shap": local_shap,
@@ -238,8 +240,18 @@ def build_surrogate_tree_models(
     runtime: TrainingModelRuntime,
     feature_frame: pd.DataFrame,
     predictions: pd.Series,
+    dataset_frame: pd.DataFrame | None = None,
 ) -> dict[int, SurrogateTreeModel]:
-    transformed = transform_feature_frame(runtime, feature_frame)
+    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
+    explainability_frame = build_explainability_frame(
+        reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    encoder = build_explainability_encoder(
+        explainability_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    transformed = encoder.encode_frame(explainability_frame)
     sampled = sample_frame(
         transformed,
         max_rows=config.dashboard_models_config.surrogate_sample_size,
@@ -268,7 +280,7 @@ def build_surrogate_tree_models(
         )
         importances = pd.Series(
             surrogate.feature_importances_,
-            index=runtime.model_input_features,
+            index=EXPLAINABILITY_FEATURE_NAMES,
         ).sort_values(ascending=False)
         top_features = importances[importances > 0].head(3).index.tolist()
         tree_models[int(depth)] = SurrogateTreeModel(
@@ -276,7 +288,10 @@ def build_surrogate_tree_models(
             feature_importances=importances,
             tree_depth=surrogate.get_depth(),
             n_leaves=surrogate.get_n_leaves(),
-            text_rules=export_text(surrogate, feature_names=runtime.model_input_features),
+            text_rules=export_text(
+                surrogate,
+                feature_names=EXPLAINABILITY_FEATURE_NAMES,
+            ),
             interpretation=(
                 f"The surrogate approximates {runtime.family_name} on final-test "
                 f"predictions with RMSE {metrics['rmse']:.4f} at max depth {int(depth)}. "
@@ -289,7 +304,7 @@ def build_surrogate_tree_models(
                     "surrogate_prediction": surrogate_predictions.reset_index(drop=True),
                 }
             ),
-            feature_names=list(runtime.model_input_features),
+            feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
             metrics={str(name): float(value) for name, value in metrics.items()},
         )
     return tree_models
@@ -300,8 +315,18 @@ def build_symbolic_regressor_model(
     runtime: TrainingModelRuntime,
     feature_frame: pd.DataFrame,
     predictions: pd.Series,
+    dataset_frame: pd.DataFrame | None = None,
 ) -> SymbolicRegressorModel:
-    transformed = transform_feature_frame(runtime, feature_frame)
+    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
+    explainability_frame = build_explainability_frame(
+        reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    encoder = build_explainability_encoder(
+        explainability_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    transformed = encoder.encode_frame(explainability_frame)
     sampled = sample_frame(
         transformed,
         max_rows=config.dashboard_models_config.symbolic_sample_size,
@@ -605,7 +630,7 @@ def _predict_explainability_values(
     encoder,
     values: t.Any,
 ) -> np.ndarray:
-    raw_frame = encoder.decode_values(values)
+    raw_frame = encoder.reconstruct_raw_frame(values)
     return predict_raw_frame(runtime, raw_frame)
 
 

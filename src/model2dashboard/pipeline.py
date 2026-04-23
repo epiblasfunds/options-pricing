@@ -10,9 +10,11 @@ from src.config.config import config
 from src.enums.volatility_model_enums import ModelFormatEnum
 from src.model2dashboard.artifact_builders import build_dashboard_artifacts
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
+from src.model2dashboard.features import CONTEXT_FEATURE_NAMES
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import load_test_trade_frame
 from src.model2dashboard.model_io import discover_model_families
 from src.model2dashboard.model_io import load_training_runtime
@@ -108,7 +110,7 @@ def build_explainable_model(
         model_name=_display_model_name(family_name),
         metadata=metadata_payload,
         dataset_frame=artifacts["dataset_frame"],
-        raw_feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
+        raw_feature_names=list(VISIBLE_RAW_INPUT_FEATURE_NAMES),
         transformed_feature_names=list(runtime.model_input_features),
         tree_models=artifacts["tree_models"],
         symbolic_model=artifacts["symbolic_model"],
@@ -149,7 +151,8 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
     return {
         "model_input_features": list(MODEL_INPUT_FEATURE_NAMES),
         "transformed_feature_names": list(MODEL_INPUT_FEATURE_NAMES),
-        "raw_feature_names": list(EXPLAINABILITY_FEATURE_NAMES),
+        "raw_feature_names": list(VISIBLE_RAW_INPUT_FEATURE_NAMES),
+        "context_feature_names": list(CONTEXT_FEATURE_NAMES),
         "explainability_feature_names": list(EXPLAINABILITY_FEATURE_NAMES),
         "analysis_feature_names": list(ANALYSIS_FEATURE_NAMES),
         "target_column": TARGET_COLUMN,
