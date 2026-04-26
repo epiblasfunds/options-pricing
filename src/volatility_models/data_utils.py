@@ -37,28 +37,25 @@ class TrainingDataHandler:
     SPLIT_PRIORITY = {
         TrainingDataSplitEnum.TRAIN.value: 0,
         TrainingDataSplitEnum.VAL.value: 1,
+        TrainingDataSplitEnum.TRAIN_VAL.value: 1,
         TrainingDataSplitEnum.TEST.value: 2,
     }
 
     @staticmethod
-    def _dataset_suffix(use_atm: bool = False) -> str:
-        return "_atm" if use_atm else ""
-
-    @staticmethod
-    def _get_splitted_data_filename(split: TrainingDataSplitEnum, use_atm: bool = False):
-        filename = f"{split.value}_splitted_data{TrainingDataHandler._dataset_suffix(use_atm)}.csv"
+    def _get_splitted_data_filename(split: TrainingDataSplitEnum):
+        filename = f"{split.value}_splitted_data{TrainingDataHandler}.csv"
         return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod
-    def _get_splitted_features_data_filename(split: TrainingDataSplitEnum, use_atm: bool = False):
-        filename = f"{split.value}_splitted_features_data{TrainingDataHandler._dataset_suffix(use_atm)}.csv"
+    def _get_splitted_features_data_filename(split: TrainingDataSplitEnum):
+        filename = f"{split.value}_splitted_features_data{TrainingDataHandler}.csv"
         return TRAINING_DATA_SPLITTED_FEATURES_DIR / filename
 
     @staticmethod
-    def _get_kfolds_filename(split: TrainingDataSplitEnum, kfold_name: str, use_atm: bool = False):
+    def _get_kfolds_filename(split: TrainingDataSplitEnum, kfold_name: str):
         if split == TrainingDataSplitEnum.TEST:
             raise ValueError
-        filename = f"{split.value}_kfolds_{kfold_name}{TrainingDataHandler._dataset_suffix(use_atm)}.csv"
+        filename = f"{split.value}_kfolds_{kfold_name}{TrainingDataHandler}.csv"
         return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod
@@ -158,9 +155,31 @@ class TrainingDataHandler:
         exec_dates = data_df[VolatilityDBEnum.EXEC_DATETIME].dt.date
         unique_dates_total = np.array(sorted(exec_dates.unique()))
         n_dates_total = len(unique_dates_total)
-        train_end = int(n_dates_total * train_size)
+        if n_dates_total < 2:
+            logger.warning(
+                "Split temporal omitido por falta de fechas suficientes (n_dates=%s).",
+                n_dates_total,
+            )
+            train_df = data_df.sort_values(VolatilityDBEnum.EXEC_DATETIME).copy()
+            test_df = data_df.iloc[0:0].copy()
+            return train_df, test_df
 
-        train_dates = unique_dates_total[:train_end-lag]
+        train_end = int(n_dates_total * train_size)
+        train_end = min(max(train_end, 1), n_dates_total - 1)
+
+        max_applicable_lag = max(0, min(train_end - 1, n_dates_total - train_end - 1))
+        applied_lag = min(max(int(lag), 0), max_applicable_lag)
+
+        if applied_lag < lag:
+            logger.warning(
+                "Lag solicitado (%s) no aplicable con n_dates=%s y train_size=%s. Se aplica lag=%s.",
+                lag,
+                n_dates_total,
+                train_size,
+                applied_lag,
+            )
+
+        train_dates = unique_dates_total[:train_end - applied_lag]
         test_dates = unique_dates_total[train_end:]
 
         train_df = data_df[exec_dates.isin(train_dates)].copy()
@@ -172,23 +191,22 @@ class TrainingDataHandler:
         return train_df, test_df
 
     @classmethod
-    def enforce_unique_option_contract_split(
+    def enforce_unique_option_contract_pair(
         cls,
-        train_df: pd.DataFrame,
-        val_df: pd.DataFrame,
-        test_df: pd.DataFrame,
+        left_df: pd.DataFrame,
+        right_df: pd.DataFrame,
+        left_split: TrainingDataSplitEnum,
+        right_split: TrainingDataSplitEnum,
         verbose: bool = True,
-    ) -> t.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    ) -> t.Tuple[pd.DataFrame, pd.DataFrame]:
         contract_col = VolatilityDBEnum.OPTION_CONTRACT_CODE.value
         contract_key_col = "_option_contract_code_key"
         split_col = "_split"
         count_col = "_count"
-        missing_contract_key = "__MISSING_OPTION_CONTRACT_CODE__"
 
         split_frames = {
-            TrainingDataSplitEnum.TRAIN.value: train_df.copy(),
-            TrainingDataSplitEnum.VAL.value: val_df.copy(),
-            TrainingDataSplitEnum.TEST.value: test_df.copy(),
+            left_split.value: left_df.copy(),
+            right_split.value: right_df.copy(),
         }
 
         for split_name, df in split_frames.items():
@@ -199,9 +217,8 @@ class TrainingDataHandler:
 
         split_assignments = pd.concat(
             [
-                split_frames[TrainingDataSplitEnum.TRAIN.value][[contract_key_col, split_col]],
-                split_frames[TrainingDataSplitEnum.VAL.value][[contract_key_col, split_col]],
-                split_frames[TrainingDataSplitEnum.TEST.value][[contract_key_col, split_col]],
+                split_frames[left_split.value][[contract_key_col, split_col]],
+                split_frames[right_split.value][[contract_key_col, split_col]],
             ],
             axis=0,
             ignore_index=True,
@@ -225,9 +242,8 @@ class TrainingDataHandler:
             for df in split_frames.values():
                 df.drop(columns=[contract_key_col, split_col], inplace=True)
             return (
-                split_frames[TrainingDataSplitEnum.TRAIN.value],
-                split_frames[TrainingDataSplitEnum.VAL.value],
-                split_frames[TrainingDataSplitEnum.TEST.value],
+                split_frames[left_split.value],
+                split_frames[right_split.value],
             )
 
         per_split_counts["_priority"] = per_split_counts[split_col].map(cls.SPLIT_PRIORITY)
@@ -251,17 +267,19 @@ class TrainingDataHandler:
 
         if verbose:
             logger.info(
-                "Contract-code leakage control applied | overlapping contracts: %s | removed rows -> train: %s, val: %s, test: %s",
+                "Contract-code leakage control applied between %s and %s | overlapping contracts: %s | removed rows -> %s: %s, %s: %s",
+                left_split.value,
+                right_split.value,
                 int(overlap_contracts),
-                removal_stats[TrainingDataSplitEnum.TRAIN.value],
-                removal_stats[TrainingDataSplitEnum.VAL.value],
-                removal_stats[TrainingDataSplitEnum.TEST.value],
+                left_split.value,
+                removal_stats[left_split.value],
+                right_split.value,
+                removal_stats[right_split.value],
             )
 
         return (
-            filtered_frames[TrainingDataSplitEnum.TRAIN.value],
-            filtered_frames[TrainingDataSplitEnum.VAL.value],
-            filtered_frames[TrainingDataSplitEnum.TEST.value],
+            filtered_frames[left_split.value],
+            filtered_frames[right_split.value],
         )
 
     @classmethod
@@ -276,50 +294,32 @@ class TrainingDataHandler:
         return result
 
     @staticmethod
-    def load_volatility_db(use_atm: bool = False, verbose: bool = True) -> pd.DataFrame:
+    def load_volatility_db() -> pd.DataFrame:
         volatility_df = VolatilityStepLoader.load()
         volatility_df = volatility_df[SELECTED_TRADE_COLUMNS]
-
-        if use_atm:
-            total_rows = len(volatility_df)
-            tte_years = volatility_df[VolatilityDBEnum.TIME_TO_EXPIRATION] / 365.0
-            rate = volatility_df[VolatilityDBEnum.RATE]
-
-            forward_price = (
-                volatility_df[VolatilityDBEnum.UNDERLYING_PRICE]
-                * np.exp(rate * tte_years)
-            )
-
-            log_forward_moneyness = np.log(
-                forward_price / volatility_df[VolatilityDBEnum.STRIKE_PRICE]
-            )
-
-            atm_threshold = 0.03
-            volatility_df = volatility_df[np.abs(log_forward_moneyness) < atm_threshold]
-
-            if verbose:
-                kept_rows = len(volatility_df)
-                logger.info(
-                    "ATM filter applied | threshold: %s | kept rows: %s / %s (%.2f%%)",
-                    atm_threshold,
-                    kept_rows,
-                    total_rows,
-                    (100.0 * kept_rows / total_rows) if total_rows else 0.0,
-                )
-
         volatility_df = volatility_df.sort_values(VolatilityDBEnum.EXEC_DATETIME)
         volatility_df = volatility_df.reset_index(drop=True)
         return volatility_df
 
     @classmethod
-    def load_splitted_data(cls, verbose: bool = True, use_atm: bool = False):
-        volatility_df = cls.load_volatility_db(use_atm=use_atm, verbose=verbose)
+    def load_splitted_data(cls, verbose: bool = True):
+        volatility_df = cls.load_volatility_db()
         trainval_df, test_df = cls.split_train_test(volatility_df)
         train_df, val_df = cls.split_train_test(trainval_df)
-        train_df, val_df, test_df = cls.enforce_unique_option_contract_split(
-            train_df=train_df,
-            val_df=val_df,
-            test_df=test_df,
+
+        train_df, val_df = cls.enforce_unique_option_contract_pair(
+            left_df=train_df,
+            right_df=val_df,
+            left_split=TrainingDataSplitEnum.TRAIN,
+            right_split=TrainingDataSplitEnum.VAL,
+            verbose=verbose,
+        )
+
+        _, test_df = cls.enforce_unique_option_contract_pair(
+            left_df=trainval_df,
+            right_df=test_df,
+            left_split=TrainingDataSplitEnum.TRAIN_VAL,
+            right_split=TrainingDataSplitEnum.TEST,
             verbose=verbose,
         )
 
@@ -327,10 +327,23 @@ class TrainingDataHandler:
             DataInfoDisplay.display_split_info(train_df, val_df, test_df)
         return train_df, val_df, test_df
 
+    @classmethod
+    def load_trainval_test_data(cls, verbose: bool = True):
+        volatility_df = cls.load_volatility_db()
+        trainval_df, test_df = cls.split_train_test(volatility_df)
+        trainval_df, test_df = cls.enforce_unique_option_contract_pair(
+            left_df=trainval_df,
+            right_df=test_df,
+            left_split=TrainingDataSplitEnum.TRAIN_VAL,
+            right_split=TrainingDataSplitEnum.TEST,
+            verbose=verbose,
+        )
+        return trainval_df, test_df
+
     @staticmethod
-    def read_features_splitted_data(split: TrainingDataSplitEnum, use_atm: bool = False):
+    def read_features_splitted_data(split: TrainingDataSplitEnum):
         df = pd.read_csv(
-            TrainingDataHandler._get_splitted_features_data_filename(split, use_atm=use_atm),
+            TrainingDataHandler._get_splitted_features_data_filename(split),
             sep=";",
             header=0,
             dtype="string",
@@ -360,21 +373,21 @@ class TrainingDataHandler:
         )
 
     @classmethod
-    def load_full_features_splitted_data(cls, verbose: bool = True, use_atm: bool = False):
-        train_df, val_df, test_df = cls.load_splitted_data(verbose=verbose, use_atm=use_atm)
+    def load_full_features_splitted_data(cls, verbose: bool = True):
+        train_df, val_df, test_df = cls.load_splitted_data(verbose=verbose)
         for data_df, split in [
             (train_df, TrainingDataSplitEnum.TRAIN),
             (val_df, TrainingDataSplitEnum.VAL),
             (test_df, TrainingDataSplitEnum.TEST),
         ]:
-            filename = cls._get_splitted_features_data_filename(split, use_atm=use_atm)
+            filename = cls._get_splitted_features_data_filename(split)
             if not filename.exists():
                 df = cls.add_features(data_df, split=split, verbose=verbose)
                 cls._to_csv(df, filename=filename)
 
-        train_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TRAIN, use_atm=use_atm)
-        val_df = cls.read_features_splitted_data(TrainingDataSplitEnum.VAL, use_atm=use_atm)
-        test_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TEST, use_atm=use_atm)
+        train_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TRAIN)
+        val_df = cls.read_features_splitted_data(TrainingDataSplitEnum.VAL)
+        test_df = cls.read_features_splitted_data(TrainingDataSplitEnum.TEST)
         if verbose:
             DataInfoDisplay.describe_dataset(
                 pd.concat([train_df, val_df, test_df], axis=0)
@@ -382,8 +395,28 @@ class TrainingDataHandler:
         return train_df, val_df, test_df
 
     @classmethod
-    def load_kfolds(cls, verbose: bool = True, use_atm: bool = False):
-        train_df, _, _ = cls.load_full_features_splitted_data(verbose=False, use_atm=use_atm)
+    def load_full_features_trainval_test_data(cls, verbose: bool = True):
+        trainval_df, test_df = cls.load_trainval_test_data(verbose=verbose)
+        for data_df, split in [
+            (trainval_df, TrainingDataSplitEnum.TRAIN_VAL),
+            (test_df, TrainingDataSplitEnum.TEST),
+        ]:
+            filename = cls._get_splitted_features_data_filename(split)
+            if not filename.exists():
+                df = cls.add_features(data_df, split=split, verbose=verbose)
+                cls._to_csv(df, filename=filename)
+
+        trainval_df = cls.read_features_splitted_data(
+            TrainingDataSplitEnum.TRAIN_VAL,
+        )
+        test_df = cls.read_features_splitted_data(
+            TrainingDataSplitEnum.TEST,
+        )
+        return trainval_df, test_df
+
+    @classmethod
+    def load_kfolds(cls, verbose: bool = True):
+        train_df, _, _ = cls.load_full_features_splitted_data(verbose=False)
         n_folds = TRAINING_DATA_CONFIG.kfolds_config.n_folds
         extra_blocks = TRAINING_DATA_CONFIG.kfolds_config.extra_blocks
 

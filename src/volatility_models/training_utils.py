@@ -531,8 +531,7 @@ class Trainer:
             evaluation_label = TrainingDataSplitEnum.VAL
 
         elif phase is TrainingPhase.FINAL_TEST:
-            train_data, val_data, test_data = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
-            train_data = pd.concat([train_data, val_data], ignore_index=True)
+            train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()
             y_train = train_data[TARGET_COLUMN].to_numpy()
