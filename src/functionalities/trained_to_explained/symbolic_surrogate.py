@@ -41,9 +41,10 @@ def build_symbolic_regressor_model(
         random_state=config.dashboard_models_config.random_state,
     )
     regressor = PySRRegressor(
-        model_selection="accuracy",
-        binary_operators=["+", "-", "*", "/"],
+        model_selection="best",
+        binary_operators=["+", "-", "*", "/", "^"],
         unary_operators=["square", "cube"],
+        constraints={"^": (-1, 1)},
         niterations=config.dashboard_models_config.symbolic_niterations,
         populations=config.dashboard_models_config.symbolic_populations,
         population_size=config.dashboard_models_config.symbolic_population_size,

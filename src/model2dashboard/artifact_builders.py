@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import shap
 import sympy
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
@@ -18,7 +17,6 @@ from src.dashboard.utils.sampling import sample_frame
 from src.enums.data_enums import VolatilityDBEnum
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
-from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import apply_feature_override
@@ -317,6 +315,8 @@ def build_symbolic_regressor_model(
     predictions: pd.Series,
     dataset_frame: pd.DataFrame | None = None,
 ) -> SymbolicRegressorModel:
+    from pysr import PySRRegressor
+
     reference_frame = dataset_frame if dataset_frame is not None else feature_frame
     explainability_frame = build_explainability_frame(
         reference_frame,
@@ -333,17 +333,41 @@ def build_symbolic_regressor_model(
         random_state=config.dashboard_models_config.random_state + 5,
     )
     sampled_predictions = predictions.loc[sampled.index]
-    selected_features = _select_symbolic_features(sampled, sampled_predictions)
+    selected_features = list(EXPLAINABILITY_FEATURE_NAMES)
     X_train, X_test, y_train, y_test = train_test_split(
         sampled.loc[:, selected_features],
         sampled_predictions,
         test_size=0.2,
         random_state=config.dashboard_models_config.random_state,
     )
-    regressor = LinearRegression()
-    regressor.fit(X_train, y_train)
+    regressor = PySRRegressor(
+        model_selection="best",
+        binary_operators=["+", "-", "*", "/", "^"],
+        unary_operators=["square", "cube"],
+        constraints={"^": (-1, 1)},
+        niterations=config.dashboard_models_config.symbolic_niterations,
+        populations=config.dashboard_models_config.symbolic_populations,
+        population_size=config.dashboard_models_config.symbolic_population_size,
+        maxsize=config.dashboard_models_config.symbolic_maxsize,
+        maxdepth=config.dashboard_models_config.symbolic_maxdepth,
+        timeout_in_seconds=config.dashboard_models_config.symbolic_timeout_seconds,
+        random_state=config.dashboard_models_config.random_state,
+        deterministic=False,
+        batching=True,
+        batch_size=min(256, len(X_train)),
+        precision=32,
+        progress=False,
+        verbosity=0,
+        update=False,
+        parallelism="multithreading",
+    )
+    regressor.fit(
+        X_train.to_numpy(dtype="float32"),
+        y_train.to_numpy(dtype="float32"),
+        variable_names=selected_features,
+    )
     symbolic_predictions = pd.Series(
-        regressor.predict(X_test),
+        regressor.predict(X_test.to_numpy(dtype="float32")),
         index=y_test.index,
         name="symbolic_prediction",
     )
@@ -352,39 +376,29 @@ def build_symbolic_regressor_model(
         symbolic_predictions.reset_index(drop=True),
         config.dashboard_models_config.error_metrics,
     )
-    expression = _linear_expression(
-        intercept=float(regressor.intercept_),
-        coefficients={
-            feature: float(coef)
-            for feature, coef in zip(selected_features, regressor.coef_)
-        },
-    )
-    sympy_expression = sympy.sympify(expression)
-    loss = float(((y_test - symbolic_predictions) ** 2).mean())
-    candidate_equations = pd.DataFrame(
-        [
-            {
-                "complexity": max(1, 1 + 2 * len(selected_features)),
-                "loss": loss,
-                "score": float(metrics.get("r2", 0.0)),
-                "equation": expression,
-                "selected": True,
-            }
-        ]
-    )
+    candidate_equations = _normalize_symbolic_equation_table(regressor)
+    best_equation = regressor.get_best()
+    sympy_expression = regressor.sympy()
+    expression = sympy.sympify(str(sympy_expression))
+    used_feature_names = [
+        feature_name
+        for feature_name in selected_features
+        if sympy.Symbol(feature_name) in expression.free_symbols
+    ]
     return SymbolicRegressorModel(
-        equation=expression,
+        equation=str(best_equation["equation"]),
         sympy_expression=str(sympy_expression),
-        latex_expression=str(sympy.latex(sympy_expression)),
+        latex_expression=str(regressor.latex(precision=4)),
         interpretation=(
-            f"Closed-form linear symbolic surrogate fitted on final-test predictions. "
-            f"It uses {', '.join(selected_features)} and approximates {runtime.family_name} "
-            f"with RMSE {metrics['rmse']:.4f}."
+            f"Symbolic PySR surrogate fitted on final-test predictions. "
+            f"It uses {', '.join(used_feature_names) or 'an intercept-like constant'} "
+            f"and approximates {runtime.family_name} with RMSE {metrics['rmse']:.4f} "
+            f"at complexity {int(best_equation['complexity'])}."
         ),
         feature_names=list(selected_features),
-        used_feature_names=list(selected_features),
-        complexity=int(candidate_equations.loc[0, "complexity"]),
-        model_selection="linear_symbolic_surrogate",
+        used_feature_names=list(used_feature_names),
+        complexity=int(best_equation["complexity"]),
+        model_selection=str(regressor.model_selection),
         metrics={name: float(value) for name, value in metrics.items()},
         candidate_equations=candidate_equations,
         fidelity_frame=pd.DataFrame(
@@ -638,36 +652,20 @@ def _max_evals(n_features: int) -> int:
     return 2 * n_features + 1
 
 
-def _select_symbolic_features(
-    feature_frame: pd.DataFrame,
-    predictions: pd.Series,
-    max_features: int = 8,
-) -> list[str]:
-    correlations = {}
-    y = predictions.astype(float)
-    for feature_name in feature_frame.columns:
-        series = feature_frame[feature_name].astype(float)
-        if int(series.nunique(dropna=False)) <= 1:
-            continue
-        corr = float(series.corr(y))
-        correlations[feature_name] = abs(corr) if np.isfinite(corr) else 0.0
-    selected = [
-        feature
-        for feature, _ in sorted(
-            correlations.items(), key=lambda item: item[1], reverse=True
-        )[:max_features]
+def _normalize_symbolic_equation_table(regressor) -> pd.DataFrame:
+    equations = regressor.equations_
+    frame = equations[0].copy() if isinstance(equations, list) else equations.copy()
+    keep_columns = [
+        column_name
+        for column_name in ("complexity", "loss", "score", "equation")
+        if column_name in frame.columns
     ]
-    return selected or [MODEL_INPUT_FEATURE_NAMES[0]]
-
-
-def _linear_expression(
-    *,
-    intercept: float,
-    coefficients: dict[str, float],
-) -> str:
-    terms = [f"({intercept:.12g})"]
-    for feature_name, coefficient in coefficients.items():
-        if abs(coefficient) < 1e-12:
-            continue
-        terms.append(f"({coefficient:.12g})*{feature_name}")
-    return " + ".join(terms)
+    normalized = frame.loc[:, keep_columns].copy().reset_index(drop=True)
+    normalized["complexity"] = normalized["complexity"].astype("int64")
+    normalized["loss"] = normalized["loss"].astype("float64")
+    if "score" in normalized.columns:
+        normalized["score"] = normalized["score"].astype("float64")
+    normalized["selected"] = False
+    normalized.loc[int(regressor.get_best().name), "selected"] = True
+    normalized["equation"] = normalized["equation"].astype(str)
+    return normalized

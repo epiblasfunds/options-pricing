@@ -1,6 +1,7 @@
 from dash import dcc
 from dash import html
 
+from src.dashboard.plots.symbolic_plots import format_symbolic_equation_text
 from src.dashboard.plots.symbolic_plots import symbolic_formula_aliases
 from src.dashboard.plots.symbolic_plots import symbolic_formula_image_src
 from src.dashboard.plots.symbolic_plots import symbolic_expression_tree_figure
@@ -86,9 +87,9 @@ def build_symbolic_panel(symbolic_model, services):
                         children=[
                             html.H4("Equation Source", style={"margin": "0 0 8px 0"}),
                             html.Pre(
-                                replace_feature_names_in_text(
+                                format_symbolic_equation_text(
                                     symbolic_model.equation,
-                                    services.feature_schema,
+                                    schema=services.feature_schema,
                                 ),
                                 style=_dark_pre_style(),
                             ),
@@ -123,7 +124,10 @@ def build_symbolic_panel(symbolic_model, services):
                                 style=_subcard_style(),
                                 children=[
                                     dcc.Graph(
-                                        figure=symbolic_expression_tree_figure(symbolic_model)
+                                        figure=symbolic_expression_tree_figure(
+                                            symbolic_model,
+                                            schema=services.feature_schema,
+                                        )
                                     )
                                 ],
                             ),
@@ -131,7 +135,10 @@ def build_symbolic_panel(symbolic_model, services):
                                 style=_subcard_style(),
                                 children=[
                                     dcc.Graph(
-                                        figure=symbolic_frontier_figure(symbolic_model)
+                                        figure=symbolic_frontier_figure(
+                                            symbolic_model,
+                                            schema=services.feature_schema,
+                                        )
                                     )
                                 ],
                             ),
@@ -180,12 +187,12 @@ def _candidate_rows(symbolic_model, services=None):
                     html.Td(f"{float(row['loss']):.6f}", style=_table_cell_style()),
                     html.Td(f"{float(row.get('score', 0.0)):.4f}", style=_table_cell_style()),
                     html.Td(
-                        replace_feature_names_in_text(
+                        format_symbolic_equation_text(
                             str(row["equation"]),
-                            services.feature_schema,
+                            schema=services.feature_schema if services is not None else None,
                         )
                         if services is not None
-                        else str(row["equation"]),
+                        else format_symbolic_equation_text(str(row["equation"])),
                         style=_table_cell_style(),
                     ),
                 ],
