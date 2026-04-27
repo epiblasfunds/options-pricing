@@ -38,6 +38,14 @@ class TrainingDataConfig:
         self.custom_error_2: t.Dict = training_data_config["custom_error_2"]
         self.models_metrics: t.List = training_data_config["models_metrics"]
         self.required_scaler_models: t.List = training_data_config.get("required_scaler_models", [])
+        self.progressive_training_config: t.Dict = training_data_config.get("progressive_training_config", {})
+        self.n_segments: int = int(self.progressive_training_config.get("n_segments", 5))
+        self.moneyness_column: str = str(
+            self.progressive_training_config.get(
+                "moneyness_column",
+                TrainingDataEnum.LOG_MONEYNESS.value,
+            )
+        )
 
     def __init__(self, data_config_file_path: str):
         self._load_config(data_config_file_path)

@@ -284,10 +284,40 @@ class VolatilityBuilder:
         )
 
     @staticmethod
+    def _filter_trades_by_type(df: pd.DataFrame) -> pd.DataFrame:
+        expected_trade_type = str(
+            config.data_config.volatility_config.trade_type_filter
+        ).strip().upper()
+
+        trade_type_series = (
+            df[OptionTradesUnderlyingDBEnum.TRADE_TYPE].astype(str).str.strip().str.upper()
+        )
+        filtered_df = df[trade_type_series == expected_trade_type].copy()
+
+        n_before = len(df)
+        n_after = len(filtered_df)
+        n_dropped = n_before - n_after
+        if n_dropped > 0:
+            pct_dropped = n_dropped / n_before * 100
+            logger.info(
+                "Filtering by TradeType=%s removed %s/%s rows (%.2f%%).",
+                expected_trade_type,
+                n_dropped,
+                n_before,
+                pct_dropped,
+            )
+
+        return filtered_df
+
+    @staticmethod
     def build(
         options_trades_underlying_df: pd.DataFrame,
         rates_df: pd.DataFrame,
     ) -> pd.DataFrame:
+        options_trades_underlying_df = VolatilityBuilder._filter_trades_by_type(
+            options_trades_underlying_df
+        )
+
         # Calculate compound rate
         volatility_df = VolatilityBuilder.create_rate_column(
             df=options_trades_underlying_df, rates_df=rates_df

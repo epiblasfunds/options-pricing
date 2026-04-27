@@ -46,12 +46,11 @@ ANALYSIS_FEATURE_NAMES = [
 ]
 
 
-def load_test_trade_frame(*, verbose: bool = False, use_atm: bool = False) -> pd.DataFrame:
+def load_test_trade_frame(*, verbose: bool = False) -> pd.DataFrame:
     from src.volatility_models.data_utils import TrainingDataHandler
 
     _, _, test_frame = TrainingDataHandler.load_splitted_data(
         verbose=verbose,
-        use_atm=use_atm,
     )
     return _normalize_trade_frame(test_frame).reset_index(drop=True)
 

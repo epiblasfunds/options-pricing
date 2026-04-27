@@ -1,6 +1,8 @@
+import logging
 import typing as t
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from math import prod
 
 import joblib
 import keras
@@ -20,6 +22,8 @@ from src.volatility_models.data_utils import (
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -186,6 +190,7 @@ class VolatilityModelFamilyABC(ABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         raise NotImplementedError
 
@@ -194,12 +199,27 @@ class VolatilityModelFamilyABC(ABC):
         cls,
     ) -> t.Dict[str, t.Dict[str, t.Any]]:
         search_space = cls.get_hyperparameter_search_space()
+        max_configurations = cls.get_max_configurations()
+
         if not search_space:
+            logger.info("La familia '%s' no tiene hiperparametros para explorar. Se entrenara un unico modelo con los parametros fijos.", cls.get_family_name())
             return {cls.get_family_name(): cls.get_fixed_params()}
+
+        requested_iterations = int(cls.get_n_iter())
+        explored_configurations = min(requested_iterations, max_configurations)
+        explored_ratio = (100.0 * explored_configurations / max_configurations) if max_configurations > 0 else 0.0
+
+        logger.info(
+            "Exploracion de hiperparametros para '%s': %s/%s configuraciones (%.2f%%).",
+            cls.get_family_name(),
+            explored_configurations,
+            max_configurations,
+            explored_ratio,
+        )
 
         rng = np.random.default_rng(cls.RANDOM_SEED)
         candidates: t.Dict[str, t.Dict[str, t.Any]] = {}
-        for model_index in range(cls.get_n_iter()):
+        for model_index in range(requested_iterations):
             sampled_params = {}
             for param_name, values in search_space.items():
                 value_list = list(values)
@@ -211,6 +231,19 @@ class VolatilityModelFamilyABC(ABC):
                 **sampled_params,
             }
         return candidates
+
+    @classmethod
+    def get_max_configurations(cls) -> int:
+        search_space = cls.get_hyperparameter_search_space()
+        if not search_space:
+            return 1
+
+        cardinalities = [len(list(values)) for values in search_space.values()]
+        if any(cardinality <= 0 for cardinality in cardinalities):
+            raise ValueError(
+                f"La familia '{cls.get_family_name()}' tiene hiperparametros con dominio vacio."
+            )
+        return int(prod(cardinalities))
 
     @staticmethod
     def temporal_inner_split_for_early_stopping(
@@ -291,11 +324,13 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{LinearRegressionFamily.get_family_name()}.joblib"
+        family_name = family_name_override or LinearRegressionFamily.get_family_name()
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}.joblib"
         joblib.dump(model, model_path)
 
         Visualizer.info_confirmation(
@@ -345,7 +380,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 1
+        return 120
 
     @classmethod
     def fit_model(
@@ -370,11 +405,13 @@ class RandomForestFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{RandomForestFamily.get_family_name()}.joblib"
+        family_name = family_name_override or RandomForestFamily.get_family_name()
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}.joblib"
         joblib.dump(model, model_path)
 
         Visualizer.info_confirmation(
@@ -436,7 +473,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 1 #200
+        return 200
 
     @classmethod
     def fit_model(
@@ -481,11 +518,13 @@ class XGBoostFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         _ = scaler
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{XGBoostFamily.get_family_name()}.joblib"
+        family_name = family_name_override or XGBoostFamily.get_family_name()
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}.joblib"
         joblib.dump(model, model_path)
 
         Visualizer.info_confirmation(
@@ -626,7 +665,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 1 #75
+        return 75
 
     @classmethod
     def fit_model(
@@ -719,18 +758,20 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
+        family_name = family_name_override or SequentialNNFamily.get_family_name()
         model_path = (
             VOLATILITY_TRAINED_MODELS_DIR_PATH
-            / f"{SequentialNNFamily.get_family_name()}.keras"
+            / f"{family_name}.keras"
         )
 
         model.save(model_path)
 
         if scaler is not None:
-            scaler_path = SequentialNNFamily.get_scaler_path()
+            scaler_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
@@ -881,24 +922,26 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
 
     @staticmethod
     def get_n_iter():
-        return 1 #50
+        return 50
 
     @staticmethod
     def save_model(
         model: t.Any,
         scaler: StandardScaler | None = None,
+        family_name_override: str | None = None,
     ) -> None:
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
+        family_name = family_name_override or QuantumInspiredNNFamily.get_family_name()
         model_path = (
             VOLATILITY_TRAINED_MODELS_DIR_PATH
-            / f"{QuantumInspiredNNFamily.get_family_name()}.keras"
+            / f"{family_name}.keras"
         )
 
         model.save(model_path)
 
         if scaler is not None:
-            scaler_path = QuantumInspiredNNFamily.get_scaler_path()
+            scaler_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
