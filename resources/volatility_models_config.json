@@ -50,7 +50,7 @@
         },
         "train_test_split_config": {
             "train_size": 0.85,
-            "lag": 0
+            "lag": 15
         },
         "kfolds_config": {
             "n_folds": 5,
@@ -81,6 +81,10 @@
         "required_scaler_models": [
             "sequential_nn",
             "quantum_inspired_nn"
-        ]
+        ],
+        "progressive_training_config": {
+            "n_segments": 5,
+            "moneyness_column": "logMoneyness"
+        }
     }
 }

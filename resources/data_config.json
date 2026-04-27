@@ -173,6 +173,7 @@
         "solver_min_sigma": 1e-8,
         "solver_max_sigma": 10.0,
         "solver_tol": 1e-8,
+        "trade_type_filter": "M",
         "underlying_lag_max_minutes": 180,
         "output_filename": "VOLATILITY_DB",
         "volatility_db_columns": {

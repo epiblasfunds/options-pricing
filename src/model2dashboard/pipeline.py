@@ -3,21 +3,29 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.config.config import DASHBOARD_SAVED_MODELS_DIR_PATH
-from src.config.config import VOLATILITY_RETRAINED_METADATA_DIR_PATH
-from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
-from src.config.config import config
+from src.config.config import (
+    DASHBOARD_SAVED_MODELS_DIR_PATH,
+    VOLATILITY_RETRAINED_METADATA_DIR_PATH,
+    VOLATILITY_TRAINED_MODELS_DIR_PATH,
+    config,
+)
 from src.enums.volatility_model_enums import ModelFormatEnum
 from src.model2dashboard.artifact_builders import build_dashboard_artifacts
-from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
-from src.model2dashboard.features import CONTEXT_FEATURE_NAMES
-from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
-from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
-from src.model2dashboard.features import TARGET_COLUMN
-from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
-from src.model2dashboard.features import load_test_trade_frame
-from src.model2dashboard.model_io import discover_model_families
-from src.model2dashboard.model_io import load_training_runtime
+from src.model2dashboard.features import (
+    ANALYSIS_FEATURE_NAMES,
+    CONTEXT_FEATURE_NAMES,
+    EXPLAINABILITY_FEATURE_NAMES,
+    MODEL_INPUT_FEATURE_NAMES,
+    RAW_INPUT_FEATURE_NAMES,
+    TARGET_COLUMN,
+    VISIBLE_RAW_INPUT_FEATURE_NAMES,
+    load_test_trade_frame,
+)
+from src.model2dashboard.model_io import (
+    _resolve_retrained_metadata_path,
+    discover_model_families,
+    load_training_runtime,
+)
 from src.python_models.dashboard.artifacts import DashboardBundleMetadata
 from src.python_models.dashboard.dashboard_model import DashboardModel
 
@@ -35,14 +43,12 @@ def run_pipeline(
     trained_models_dir: Path = VOLATILITY_TRAINED_MODELS_DIR_PATH,
     retrained_metadata_dir: Path = VOLATILITY_RETRAINED_METADATA_DIR_PATH,
     bundle_dir: Path = DASHBOARD_SAVED_MODELS_DIR_PATH,
-    use_atm: bool = False,
     overwrite: bool = True,
 ) -> list[ExportedDashboardBundle]:
     return build_all_explainable_models(
         trained_models_dir=trained_models_dir,
         retrained_metadata_dir=retrained_metadata_dir,
         bundle_dir=bundle_dir,
-        use_atm=use_atm,
         overwrite=overwrite,
     )
 
@@ -52,10 +58,9 @@ def build_all_explainable_models(
     trained_models_dir: Path = VOLATILITY_TRAINED_MODELS_DIR_PATH,
     retrained_metadata_dir: Path = VOLATILITY_RETRAINED_METADATA_DIR_PATH,
     bundle_dir: Path = DASHBOARD_SAVED_MODELS_DIR_PATH,
-    use_atm: bool = False,
     overwrite: bool = True,
 ) -> list[ExportedDashboardBundle]:
-    raw_test_frame = load_test_trade_frame(verbose=False, use_atm=use_atm)
+    raw_test_frame = load_test_trade_frame(verbose=False)
     exported: list[ExportedDashboardBundle] = []
     for family_name in discover_model_families(trained_models_dir):
         exported.append(
@@ -138,13 +143,15 @@ def build_explainable_model(
 
 
 def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) -> dict:
-    final_test_metadata_path = (
-        retrained_metadata_dir
-        / f"{runtime.family_name}_final_test_retrained_metadata.json"
+    final_test_metadata_path = _resolve_retrained_metadata_path(
+        retrained_metadata_dir=retrained_metadata_dir,
+        family_name=runtime.family_name,
+        phase="final_test",
     )
-    train_val_metadata_path = (
-        retrained_metadata_dir
-        / f"{runtime.family_name}_train_val_retrained_metadata.json"
+    train_val_metadata_path = _resolve_retrained_metadata_path(
+        retrained_metadata_dir=retrained_metadata_dir,
+        family_name=runtime.family_name,
+        phase="train_val",
     )
     symbolic_model = artifacts.get("symbolic_model")
     tree_models = artifacts.get("tree_models", {})
