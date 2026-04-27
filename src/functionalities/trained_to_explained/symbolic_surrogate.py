@@ -48,6 +48,10 @@ def build_symbolic_regressor_model(
         niterations=config.dashboard_models_config.symbolic_niterations,
         populations=config.dashboard_models_config.symbolic_populations,
         population_size=config.dashboard_models_config.symbolic_population_size,
+        topn=config.dashboard_models_config.symbolic_topn,
+        ncycles_per_iteration=(
+            config.dashboard_models_config.symbolic_ncycles_per_iteration
+        ),
         maxsize=config.dashboard_models_config.symbolic_maxsize,
         maxdepth=config.dashboard_models_config.symbolic_maxdepth,
         timeout_in_seconds=config.dashboard_models_config.symbolic_timeout_seconds,
@@ -76,7 +80,10 @@ def build_symbolic_regressor_model(
         symbolic_predictions.reset_index(drop=True),
         config.dashboard_models_config.error_metrics,
     )
-    candidate_equations = _normalize_equation_table(regressor)
+    candidate_equations = _normalize_equation_table(
+        regressor,
+        min_equations=config.dashboard_models_config.symbolic_min_candidate_equations,
+    )
     best_equation = regressor.get_best()
     sympy_expression = regressor.sympy()
     expression = sympy.sympify(str(sympy_expression))
@@ -110,7 +117,11 @@ def build_symbolic_regressor_model(
     )
 
 
-def _normalize_equation_table(regressor: PySRRegressor) -> pd.DataFrame:
+def _normalize_equation_table(
+    regressor: PySRRegressor,
+    *,
+    min_equations: int,
+) -> pd.DataFrame:
     equations = regressor.equations_
     frame = equations[0].copy() if isinstance(equations, list) else equations.copy()
     keep_columns = [
@@ -123,10 +134,47 @@ def _normalize_equation_table(regressor: PySRRegressor) -> pd.DataFrame:
     normalized["loss"] = normalized["loss"].astype("float64")
     if "score" in normalized.columns:
         normalized["score"] = normalized["score"].astype("float64")
-    normalized["selected"] = False
-    normalized.loc[int(regressor.get_best().name), "selected"] = True
     normalized["equation"] = normalized["equation"].astype(str)
-    return normalized
+    normalized = normalized.drop_duplicates(subset=["equation"]).reset_index(drop=True)
+    selected_equation = str(regressor.get_best()["equation"])
+    selected_complexity = int(regressor.get_best()["complexity"])
+
+    if normalized.empty:
+        normalized["selected"] = pd.Series(dtype="bool")
+        return normalized
+
+    primary = (
+        normalized.sort_values(["complexity", "loss"], ascending=[True, True])
+        .drop_duplicates(subset=["complexity"], keep="first")
+        .reset_index(drop=True)
+    )
+    if len(primary) < min_equations:
+        remaining = normalized.loc[
+            ~normalized["equation"].isin(primary["equation"])
+        ].sort_values(["loss", "complexity"], ascending=[True, True])
+        needed = min_equations - len(primary)
+        primary = pd.concat(
+            [primary, remaining.head(max(0, needed))],
+            ignore_index=True,
+        )
+
+    selected_row = normalized.loc[
+        normalized["equation"] == selected_equation
+    ].head(1)
+    if selected_row.empty:
+        selected_row = normalized.loc[
+            normalized["complexity"] == selected_complexity
+        ].head(1)
+    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(primary["equation"]):
+        primary = pd.concat([selected_row, primary], ignore_index=True)
+
+    primary = (
+        primary.drop_duplicates(subset=["equation"])
+        .sort_values(["loss", "complexity"], ascending=[True, True])
+        .reset_index(drop=True)
+    )
+    primary["selected"] = primary["equation"] == selected_equation
+    return primary
 
 
 def _build_interpretation(
