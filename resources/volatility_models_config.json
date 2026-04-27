@@ -81,6 +81,10 @@
         "required_scaler_models": [
             "sequential_nn",
             "quantum_inspired_nn"
-        ]
+        ],
+        "progressive_training_config": {
+            "n_segments": 5,
+            "moneyness_column": "logMoneyness"
+        }
     }
 }

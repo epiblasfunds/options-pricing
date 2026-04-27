@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 TRAINING_DATA_CONFIG = config.volatility_models_config.training_data_config
 
 SELECTED_TRADE_COLUMNS = TRAINING_DATA_CONFIG.vol_db_cols
-TARGET_COL = VolatilityDBEnum.IMPLIED_VOLATILITY
+TARGET_COL = TRAINING_DATA_CONFIG.target_column
 BASE_NUMERIC_FEATURE_COLS = TRAINING_DATA_CONFIG.numeric_features
 AUX_CONTEXT_COLS = TRAINING_DATA_CONFIG.aux_context_cols
 BASE_CATEGORICAL_FEATURE_COLS = [
@@ -48,14 +48,14 @@ class TrainingDataHandler:
 
     @staticmethod
     def _get_splitted_features_data_filename(split: TrainingDataSplitEnum):
-        filename = f"{split.value}_splitted_features_data{TrainingDataHandler}.csv"
+        filename = f"{split.value}_splitted_features_data.csv"
         return TRAINING_DATA_SPLITTED_FEATURES_DIR / filename
 
     @staticmethod
     def _get_kfolds_filename(split: TrainingDataSplitEnum, kfold_name: str):
         if split == TrainingDataSplitEnum.TEST:
             raise ValueError
-        filename = f"{split.value}_kfolds_{kfold_name}{TrainingDataHandler}.csv"
+        filename = f"{split.value}_kfolds_{kfold_name}.csv"
         return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod
@@ -305,6 +305,16 @@ class TrainingDataHandler:
     def load_splitted_data(cls, verbose: bool = True):
         volatility_df = cls.load_volatility_db()
         trainval_df, test_df = cls.split_train_test(volatility_df)
+
+        # Dedup trainval vs test FIRST so no test-contract rows enter train/val
+        trainval_df, test_df = cls.enforce_unique_option_contract_pair(
+            left_df=trainval_df,
+            right_df=test_df,
+            left_split=TrainingDataSplitEnum.TRAIN_VAL,
+            right_split=TrainingDataSplitEnum.TEST,
+            verbose=verbose,
+        )
+
         train_df, val_df = cls.split_train_test(trainval_df)
 
         train_df, val_df = cls.enforce_unique_option_contract_pair(
@@ -312,14 +322,6 @@ class TrainingDataHandler:
             right_df=val_df,
             left_split=TrainingDataSplitEnum.TRAIN,
             right_split=TrainingDataSplitEnum.VAL,
-            verbose=verbose,
-        )
-
-        _, test_df = cls.enforce_unique_option_contract_pair(
-            left_df=trainval_df,
-            right_df=test_df,
-            left_split=TrainingDataSplitEnum.TRAIN_VAL,
-            right_split=TrainingDataSplitEnum.TEST,
             verbose=verbose,
         )
 
@@ -392,6 +394,14 @@ class TrainingDataHandler:
             DataInfoDisplay.describe_dataset(
                 pd.concat([train_df, val_df, test_df], axis=0)
             )
+        date_col = VolatilityDBEnum.EXEC_DATETIME
+        logger.info(
+            "Train/Val/Test split | rows: train=%d [%s -> %s]  val=%d [%s -> %s]  test=%d [%s -> %s]  total=%d",
+            len(train_df), train_df[date_col].min().date(), train_df[date_col].max().date(),
+            len(val_df), val_df[date_col].min().date(), val_df[date_col].max().date(),
+            len(test_df), test_df[date_col].min().date(), test_df[date_col].max().date(),
+            len(train_df) + len(val_df) + len(test_df),
+        )
         return train_df, val_df, test_df
 
     @classmethod
@@ -411,6 +421,13 @@ class TrainingDataHandler:
         )
         test_df = cls.read_features_splitted_data(
             TrainingDataSplitEnum.TEST,
+        )
+        date_col = VolatilityDBEnum.EXEC_DATETIME
+        logger.info(
+            "Final split | rows: trainval=%d [%s -> %s]  test=%d [%s -> %s]  total=%d",
+            len(trainval_df), trainval_df[date_col].min().date(), trainval_df[date_col].max().date(),
+            len(test_df), test_df[date_col].min().date(), test_df[date_col].max().date(),
+            len(trainval_df) + len(test_df),
         )
         return trainval_df, test_df
 

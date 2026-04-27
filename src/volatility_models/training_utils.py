@@ -13,7 +13,6 @@ from tqdm import tqdm
 from src.config.config import (
     VOLATILITY_FAMILY_METADATA_DIR_PATH,
     VOLATILITY_RETRAINED_METADATA_DIR_PATH,
-    VOLATILITY_TRAINED_MODELS_DIR_PATH,
     config,
 )
 from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
@@ -358,6 +357,22 @@ class Trainer:
             training_registry = payload["training_registry"]
             best_model_name = payload["best_model_name"]
 
+            model_params_registry = payload.get("model_params_registry", {})
+            explored_configurations = int(len(model_params_registry))
+            max_configurations = int(self.model_family.get_max_configurations())
+            explored_ratio = (
+                100.0 * explored_configurations / max_configurations
+                if max_configurations > 0
+                else 0.0
+            )
+            logger.info(
+                "Exploracion de hiperparametros para '%s' (metadata cache): %s/%s configuraciones (%.2f%%).",
+                family_name,
+                explored_configurations,
+                max_configurations,
+                explored_ratio,
+            )
+
             Visualizer.top_n_family_models_table(
                 family_models_metrics_table=family_models_metrics_table,
                 n=15,
@@ -448,15 +463,18 @@ class Trainer:
         X_val: np.ndarray,
         phase: TrainingPhase,
         model_params: dict,
+        model=None,
+        reuse_model: bool = False,
     ) -> ModelFitResult:
         indices = np.random.permutation(len(X_train))
         X_train = X_train[indices]
         y_train = y_train[indices]
 
-        model = self.model_family.instantiate_model(
-            input_dim=X_train.shape[1],
-            model_params=model_params,
-        )
+        if model is None or not reuse_model:
+            model = self.model_family.instantiate_model(
+                input_dim=X_train.shape[1],
+                model_params=model_params,
+            )
 
         fit_result = self.model_family.fit_model(
             model=model,
@@ -477,14 +495,16 @@ class Trainer:
         family_name = self.model_family.get_family_name()
         model_name = f"{family_name}_best"
         metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
-        phase_suffix = str(getattr(phase, "value", phase)).lower().replace(" ", "_")
+        phase_suffix = str(getattr(phase, "value", phase)).lower()
+        is_train_val = phase_suffix == TrainingPhase.TRAIN_VAL.value
+        is_final_test = phase_suffix == TrainingPhase.FINAL_TEST.value
         retrained_metadata_path = (
             VOLATILITY_RETRAINED_METADATA_DIR_PATH
             / f"{family_name}_{phase_suffix}_retrained_metadata.json"
         )
 
         can_use_retrained_cache = (
-            phase is TrainingPhase.TRAIN_VAL and retrained_metadata_path.exists()
+            is_train_val and retrained_metadata_path.exists()
         )
 
         if can_use_retrained_cache:
@@ -520,7 +540,7 @@ class Trainer:
         best_model_params = payload["best_model_params"]
         custom_error_1 = payload["best_model_metrics"][config.volatility_models_config.training_data_config.custom_error_1["metric"]]
 
-        if phase is TrainingPhase.TRAIN_VAL:
+        if is_train_val:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()      
@@ -530,7 +550,7 @@ class Trainer:
 
             evaluation_label = TrainingDataSplitEnum.VAL
 
-        elif phase is TrainingPhase.FINAL_TEST:
+        elif is_final_test:
             train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
 
             X_train = train_data[BASE_FEATURE_COLS].to_numpy()
@@ -556,7 +576,7 @@ class Trainer:
             evaluation_label=evaluation_label,
         )
 
-        if phase is TrainingPhase.TRAIN_VAL:
+        if is_train_val:
             metrics_dict = self.add_custom_error2(
                 metrics_dict=metrics_dict,
                 custom_error_1=custom_error_1,
@@ -564,7 +584,7 @@ class Trainer:
 
         result_series = pd.Series(metrics_dict, name=model_name)
 
-        if phase is TrainingPhase.FINAL_TEST:
+        if is_final_test:
             result_series = self.rename_metrics(result_series)
 
         Visualizer.best_model_family_retrained(
@@ -598,7 +618,7 @@ class Trainer:
             training_information=training_information,
         )
 
-        if phase is TrainingPhase.FINAL_TEST:
+        if is_final_test:
             self.model_family.save_model(
                 model=model,
                 scaler=fit_result.feature_scaler,
@@ -615,9 +635,268 @@ class Trainer:
                     family_name=family_name,
                     model_path=model_path,
                     scaler_path=scaler_path,
+                    retrained_metadata_path=retrained_metadata_path,
                 )
 
         return result_series
+
+    def retrain_best_params_family_progressive(
+        self,
+        phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
+        upload_to_gcp: bool = True,
+    ):
+        family_name = self.model_family.get_family_name()
+        progressive_family_name = f"{family_name}_retrained_progressive"
+        phase_value = str(getattr(phase, "value", phase)).lower()
+        is_train_val = phase_value == TrainingPhase.TRAIN_VAL.value
+        is_final_test = phase_value == TrainingPhase.FINAL_TEST.value
+        metadata_path = VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
+        retrained_metadata_path = (
+            VOLATILITY_RETRAINED_METADATA_DIR_PATH
+            / f"{family_name}_{phase_value}_retrained_progressive_metadata.json"
+        )
+
+        can_use_retrained_cache = (
+            is_train_val and retrained_metadata_path.exists()
+        )
+
+        if can_use_retrained_cache:
+            with open(retrained_metadata_path, "r", encoding="utf-8") as f:
+                cached_payload = json.load(f)
+
+            cached_progressive_results = cached_payload.get("progressive_results", {})
+            Visualizer.progressive_training_segments_graphics(
+                progressive_results=cached_progressive_results,
+                family_name=progressive_family_name,
+                phase=phase,
+            )
+
+            result_series = pd.Series(
+                cached_payload.get("result_metrics", {}),
+                name=f"{progressive_family_name}_best",
+            )
+            Visualizer.best_model_family_retrained(
+                result_series=result_series,
+                phase=phase,
+                cache_path=retrained_metadata_path,
+            )
+
+            training_information = cached_payload.get("training_information", {})
+            training_information = {
+                **training_information,
+                "progressive_results": cached_progressive_results,
+            }
+            self.model_family.plots(
+                {
+                    "training_information": training_information,
+                    "best_model_name": f"{progressive_family_name}_best",
+                    "family_name": progressive_family_name,
+                    "phase": phase,
+                }
+            )
+
+            return cached_progressive_results
+
+        if not is_final_test and upload_to_gcp:
+            upload_to_gcp = False
+        
+        if not metadata_path.exists():
+            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            Trainer(self.model_family).run_kfolds_training()
+
+        with open(metadata_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+
+        best_model_params = payload["best_model_params"]
+        custom_error_1 = payload["best_model_metrics"][config.volatility_models_config.training_data_config.custom_error_1["metric"]]
+
+        # Load data
+        if is_train_val:
+            train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
+            evaluation_label = TrainingDataSplitEnum.VAL
+        elif is_final_test:
+            train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
+            train_data = train_data.copy()
+            test_data = test_data.copy()
+            evaluation_label = TrainingDataSplitEnum.TEST
+            val_data = test_data
+
+        PROGRESSIVE_TRAINING_CONFIG = config.volatility_models_config.training_data_config
+        n_segments = int(PROGRESSIVE_TRAINING_CONFIG.n_segments)
+        moneyness_col = PROGRESSIVE_TRAINING_CONFIG.moneyness_column
+
+        # Segment by distance to ATM: increasing |log(S/K)| (ATM -> further from ATM)
+        train_data_sorted = train_data.assign(_atm_distance=train_data[moneyness_col].abs())
+        train_data_sorted = train_data_sorted.sort_values("_atm_distance").drop(columns=["_atm_distance"]).reset_index(drop=True)
+        segment_size = len(train_data_sorted) // n_segments
+        segments = [
+            train_data_sorted.iloc[i * segment_size : (i + 1) * segment_size]
+            for i in range(n_segments - 1)
+        ]
+        segments.append(train_data_sorted.iloc[(n_segments - 1) * segment_size :])
+
+        progressive_results = {}
+        model = None
+
+        for seg_idx, segment in enumerate(tqdm(segments, desc=f"Progressive training: {family_name}")):
+            segment_name = f"segment_{seg_idx}_{n_segments}"
+            
+            # Accumulate data up to the current segment
+            accumulated_data = pd.concat(segments[: seg_idx + 1], ignore_index=True)
+            
+            X_train = accumulated_data[BASE_FEATURE_COLS].to_numpy()
+            y_train = accumulated_data[TARGET_COLUMN].to_numpy()
+            X_val = val_data[BASE_FEATURE_COLS].to_numpy()
+            y_val = val_data[TARGET_COLUMN].to_numpy()
+
+            fit_result, model = self.fit_model(
+                model_params=best_model_params,
+                X_train=X_train,
+                y_train=y_train,
+                X_val=X_val,
+                phase=phase,
+                model=model,
+                reuse_model=True,
+            )
+
+            metrics_dict = self.calculate_regression_metrics(
+                y_train,
+                fit_result.train_predictions,
+                y_val,
+                fit_result.validation_predictions,
+                evaluation_label=evaluation_label,
+            )
+
+            if is_train_val:
+                metrics_dict = self.add_custom_error2(
+                    metrics_dict=metrics_dict,
+                    custom_error_1=custom_error_1,
+                )
+
+            result_series = pd.Series(metrics_dict, name=f"{family_name}_best_{segment_name}")
+            progressive_results[segment_name] = {
+                "metrics": result_series.to_dict(),
+                "n_train_samples": len(accumulated_data),
+                "best_iteration": fit_result.best_iteration,
+                "best_score": fit_result.best_score,
+                "epoch_history": fit_result.epoch_history or {},
+                "y_val_true": y_val.tolist(),
+                "y_val_pred": fit_result.validation_predictions.tolist(),
+            }
+
+        Visualizer.progressive_training_segments_graphics(
+            progressive_results=progressive_results,
+            family_name=progressive_family_name,
+            phase=phase,
+        )
+
+        selected_segment_key = f"segment_{n_segments-1}_{n_segments}"
+        if is_train_val:
+            custom_error_2_config = config.volatility_models_config.training_data_config.custom_error_2
+            custom_error_2_metric = custom_error_2_config["metric"]
+            custom_error_2_mode = custom_error_2_config.get("mode", "min")
+
+            candidate_segment_keys = [
+                k for k, v in progressive_results.items()
+                if custom_error_2_metric in v.get("metrics", {})
+            ]
+            if candidate_segment_keys:
+                if custom_error_2_mode == "min":
+                    selected_segment_key = min(
+                        candidate_segment_keys,
+                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
+                    )
+                else:
+                    selected_segment_key = min(
+                        candidate_segment_keys,
+                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
+                    )
+
+        selected_segment = progressive_results[selected_segment_key]
+        result_series = pd.Series(
+            selected_segment["metrics"],
+            name=f"{progressive_family_name}_best",
+        )
+        if is_final_test:
+            result_series = self.rename_metrics(result_series)
+
+        Visualizer.best_model_family_retrained(
+            result_series=result_series,
+            phase=phase,
+            cache_path=None,
+        )
+
+        training_information = {
+            "model": model,
+            "best_iteration": selected_segment.get("best_iteration"),
+            "best_score": selected_segment.get("best_score"),
+            "epoch_history": selected_segment.get("epoch_history", {}),
+            "result_series": result_series,
+            "progressive_results": progressive_results,
+            "y_val_true": selected_segment["y_val_true"],
+            "y_val_pred": selected_segment["y_val_pred"],
+        }
+
+        self.model_family.plots(
+            {
+                "training_information": training_information,
+                "best_model_name": f"{progressive_family_name}_best",
+                "family_name": progressive_family_name,
+                "phase": phase,
+            }
+        )
+
+        payload = {
+            "family_name": progressive_family_name,
+            "model_params": self._to_builtin(best_model_params),
+            "result_metrics": self._to_builtin(result_series.to_dict()),
+            "progressive_results": self._to_builtin(progressive_results),
+            "training_information": {
+                "best_iteration": self._to_builtin(training_information.get("best_iteration")),
+                "best_score": self._to_builtin(training_information.get("best_score")),
+                "epoch_history": self._to_builtin(training_information.get("epoch_history", {})),
+                "y_val_true": training_information.get("y_val_true", []),
+                "y_val_pred": training_information.get("y_val_pred", []),
+            },
+        }
+
+        with open(retrained_metadata_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        Visualizer.info_confirmation(retrained_metadata_path, label="Metadata progresiva guardada")
+
+        if is_final_test:
+            self.model_family.save_model(
+                model=model,
+                scaler=fit_result.feature_scaler,
+                family_name_override=progressive_family_name,
+            )
+
+            model_path_progressive = self.model_family.get_model_path()
+            model_path_progressive = model_path_progressive.with_name(
+                f"{progressive_family_name}{model_path_progressive.suffix}"
+            )
+            
+            get_scaler_path = getattr(self.model_family, "get_scaler_path", None)
+            scaler_path_progressive = None
+            if callable(get_scaler_path):
+                scaler_path_base = get_scaler_path()
+                if scaler_path_base:
+                    scaler_path_progressive = scaler_path_base.with_name(
+                        f"{progressive_family_name}_scaler{scaler_path_base.suffix}"
+                    )
+
+            _run_model2dashboard_pipeline(family_name=progressive_family_name)
+
+            if upload_to_gcp:
+                _upload_models_to_gcp(
+                    family_name=progressive_family_name,
+                    model_path=model_path_progressive,
+                    scaler_path=scaler_path_progressive,
+                    retrained_metadata_path=retrained_metadata_path,
+                )
+
+        return progressive_results
 
 def _run_model2dashboard_pipeline(family_name: str):
     try:
@@ -679,6 +958,7 @@ def _upload_models_to_gcp(
     family_name: str,
     model_path,
     scaler_path=None,
+    retrained_metadata_path=None,
 ):
     env = os.environ.copy()
     gcloud_path = _find_gcloud()
@@ -716,10 +996,7 @@ def _upload_models_to_gcp(
         if RETRAINED_METADATA_PREFIX
         else f"gs://{VOLATILITY_BUCKET}/"
     )
-    final_test_metadata_path = (
-        VOLATILITY_RETRAINED_METADATA_DIR_PATH
-        / f"{family_name}_final_test_retrained_metadata.json"
-    )
+    final_test_metadata_path = retrained_metadata_path
 
     if not VOLATILITY_BUCKET:
         logger.warning(
@@ -776,7 +1053,7 @@ def _upload_models_to_gcp(
                 model_destination,
             )
 
-        if VOLATILITY_BUCKET and os.path.isfile(final_test_metadata_path):
+        if VOLATILITY_BUCKET and final_test_metadata_path and os.path.isfile(final_test_metadata_path):
             subprocess.run(
                 [
                     gcloud_path,

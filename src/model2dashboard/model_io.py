@@ -49,11 +49,15 @@ def load_training_runtime(
     retrained_metadata_dir: Path,
 ) -> TrainingModelRuntime:
     model_path = _resolve_model_path(trained_models_dir, family_name)
-    final_test_metadata_path = (
-        retrained_metadata_dir / f"{family_name}_final_test_retrained_metadata.json"
+    final_test_metadata_path = _resolve_retrained_metadata_path(
+        retrained_metadata_dir=retrained_metadata_dir,
+        family_name=family_name,
+        phase="final_test",
     )
-    train_val_metadata_path = (
-        retrained_metadata_dir / f"{family_name}_train_val_retrained_metadata.json"
+    train_val_metadata_path = _resolve_retrained_metadata_path(
+        retrained_metadata_dir=retrained_metadata_dir,
+        family_name=family_name,
+        phase="train_val",
     )
     if not final_test_metadata_path.exists():
         raise FileNotFoundError(
@@ -124,6 +128,30 @@ def _resolve_model_path(trained_models_dir: Path, family_name: str) -> Path:
     raise FileNotFoundError(
         f"No model artifact found for '{family_name}' under {trained_models_dir}."
     )
+
+
+def _resolve_retrained_metadata_path(
+    *,
+    retrained_metadata_dir: Path,
+    family_name: str,
+    phase: str,
+) -> Path:
+    candidates = [
+        retrained_metadata_dir / f"{family_name}_{phase}_retrained_metadata.json",
+    ]
+
+    progressive_suffix = "_retrained_progressive"
+    if family_name.endswith(progressive_suffix):
+        base_family_name = family_name[: -len(progressive_suffix)]
+        candidates.append(
+            retrained_metadata_dir / f"{base_family_name}_{phase}_retrained_progressive_metadata.json"
+        )
+
+    for path in candidates:
+        if path.exists():
+            return path
+
+    return candidates[0]
 
 
 def _load_model(path: Path):
