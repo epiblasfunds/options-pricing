@@ -176,6 +176,7 @@ class Trainer:
                 y_train=y_train_fold,
                 X_val=X_val_fold,
                 phase=phase,
+                shuffle=True,
             )
 
             metrics = self.calculate_regression_metrics(
@@ -314,6 +315,29 @@ class Trainer:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
         Visualizer.info_confirmation(file_path, label="Metadata de reentrenamiento guardada")
+    
+    @staticmethod
+    def _build_progressive_training_data(
+        segments: list,
+        feature_cols: list,
+        target_col: str,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Construye bloques acumulativos ATM->menos ATM.
+        En cada iteracion se concatena hasta el segmento actual, se aplica shuffle
+        sobre ese acumulado, y al final se concatenan todos los acumulados.
+        """
+        progressive_blocks = []
+        for idx in range(len(segments)):
+            accumulated_segment = pd.concat(segments[: idx + 1], ignore_index=True)
+            accumulated_segment = accumulated_segment.sample(frac=1.0).reset_index(drop=True)
+            progressive_blocks.append(accumulated_segment)
+
+        accumulated_data = pd.concat(progressive_blocks, ignore_index=True)
+        X_train = accumulated_data[feature_cols].to_numpy()
+        y_train = accumulated_data[target_col].to_numpy()
+        
+        return X_train, y_train
     
     @classmethod
     def rename_metrics(
@@ -463,18 +487,17 @@ class Trainer:
         X_val: np.ndarray,
         phase: TrainingPhase,
         model_params: dict,
-        model=None,
-        reuse_model: bool = False,
-    ) -> ModelFitResult:
-        indices = np.random.permutation(len(X_train))
-        X_train = X_train[indices]
-        y_train = y_train[indices]
+        shuffle: bool = True,
+    ) -> tuple:
+        if shuffle:
+            indices = np.random.permutation(len(X_train))
+            X_train = X_train[indices]
+            y_train = y_train[indices]
 
-        if model is None or not reuse_model:
-            model = self.model_family.instantiate_model(
-                input_dim=X_train.shape[1],
-                model_params=model_params,
-            )
+        model = self.model_family.instantiate_model(
+            input_dim=X_train.shape[1],
+            model_params=model_params,
+        )
 
         fit_result = self.model_family.fit_model(
             model=model,
@@ -483,6 +506,7 @@ class Trainer:
             y_train=y_train,
             X_val=X_val,
             phase=phase,
+            shuffle=shuffle,
         )
 
         return fit_result, model
@@ -560,12 +584,22 @@ class Trainer:
 
             evaluation_label = TrainingDataSplitEnum.TEST
 
+        logger.info(
+            "Reentrenamiento '%s' | phase=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            family_name,
+            phase.value if hasattr(phase, "value") else phase,
+            len(X_train),
+            len(X_val),
+            len(X_train) + len(X_val),
+        )
+
         fit_result, model = self.fit_model(
             model_params=best_model_params,
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
             phase=phase,
+            shuffle=True,
         )
         
         metrics_dict = self.calculate_regression_metrics(
@@ -664,13 +698,6 @@ class Trainer:
             with open(retrained_metadata_path, "r", encoding="utf-8") as f:
                 cached_payload = json.load(f)
 
-            cached_progressive_results = cached_payload.get("progressive_results", {})
-            Visualizer.progressive_training_segments_graphics(
-                progressive_results=cached_progressive_results,
-                family_name=progressive_family_name,
-                phase=phase,
-            )
-
             result_series = pd.Series(
                 cached_payload.get("result_metrics", {}),
                 name=f"{progressive_family_name}_best",
@@ -682,10 +709,6 @@ class Trainer:
             )
 
             training_information = cached_payload.get("training_information", {})
-            training_information = {
-                **training_information,
-                "progressive_results": cached_progressive_results,
-            }
             self.model_family.plots(
                 {
                     "training_information": training_information,
@@ -695,7 +718,17 @@ class Trainer:
                 }
             )
 
-            return cached_progressive_results
+            progressive_results = {
+                "progressive": {
+                    "metrics": cached_payload.get("result_metrics", {}),
+                    "best_iteration": training_information.get("best_iteration"),
+                    "best_score": training_information.get("best_score"),
+                    "epoch_history": training_information.get("epoch_history", {}),
+                    "y_val_true": training_information.get("y_val_true", []),
+                    "y_val_pred": training_information.get("y_val_pred", []),
+                }
+            }
+            return progressive_results
 
         if not is_final_test and upload_to_gcp:
             upload_to_gcp = False
@@ -735,88 +768,65 @@ class Trainer:
         ]
         segments.append(train_data_sorted.iloc[(n_segments - 1) * segment_size :])
 
-        progressive_results = {}
-        model = None
+        # Prepare training data progressively and fit model
+        X_train, y_train = self._build_progressive_training_data(
+            segments=segments,
+            feature_cols=BASE_FEATURE_COLS,
+            target_col=TARGET_COLUMN,
+        )
+        X_val = val_data[BASE_FEATURE_COLS].to_numpy()
+        y_val = val_data[TARGET_COLUMN].to_numpy()
 
-        for seg_idx, segment in enumerate(tqdm(segments, desc=f"Progressive training: {family_name}")):
-            segment_name = f"segment_{seg_idx}_{n_segments}"
-            
-            # Accumulate data up to the current segment
-            accumulated_data = pd.concat(segments[: seg_idx + 1], ignore_index=True)
-            
-            X_train = accumulated_data[BASE_FEATURE_COLS].to_numpy()
-            y_train = accumulated_data[TARGET_COLUMN].to_numpy()
-            X_val = val_data[BASE_FEATURE_COLS].to_numpy()
-            y_val = val_data[TARGET_COLUMN].to_numpy()
+        logger.info(
+            "Reentrenamiento progresivo '%s' | phase=%s | n_segments=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            progressive_family_name,
+            phase.value if hasattr(phase, "value") else phase,
+            n_segments,
+            len(X_train),
+            len(X_val),
+            len(X_train) + len(X_val),
+        )
 
-            fit_result, model = self.fit_model(
-                model_params=best_model_params,
-                X_train=X_train,
-                y_train=y_train,
-                X_val=X_val,
-                phase=phase,
-                model=model,
-                reuse_model=True,
+        fit_result, model = self.fit_model(
+            model_params=best_model_params,
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            phase=phase,
+            shuffle=False,
+        )
+
+        metrics_dict = self.calculate_regression_metrics(
+            y_train,
+            fit_result.train_predictions,
+            y_val,
+            fit_result.validation_predictions,
+            evaluation_label=evaluation_label,
+        )
+
+        if is_train_val:
+            metrics_dict = self.add_custom_error2(
+                metrics_dict=metrics_dict,
+                custom_error_1=custom_error_1,
             )
 
-            metrics_dict = self.calculate_regression_metrics(
-                y_train,
-                fit_result.train_predictions,
-                y_val,
-                fit_result.validation_predictions,
-                evaluation_label=evaluation_label,
-            )
-
-            if is_train_val:
-                metrics_dict = self.add_custom_error2(
-                    metrics_dict=metrics_dict,
-                    custom_error_1=custom_error_1,
-                )
-
-            result_series = pd.Series(metrics_dict, name=f"{family_name}_best_{segment_name}")
-            progressive_results[segment_name] = {
+        result_series = pd.Series(
+            metrics_dict,
+            name=f"{progressive_family_name}_best",
+        )
+        
+        progressive_results = {
+            "progressive": {
                 "metrics": result_series.to_dict(),
-                "n_train_samples": len(accumulated_data),
+                "n_train_samples": len(X_train),
                 "best_iteration": fit_result.best_iteration,
                 "best_score": fit_result.best_score,
                 "epoch_history": fit_result.epoch_history or {},
                 "y_val_true": y_val.tolist(),
                 "y_val_pred": fit_result.validation_predictions.tolist(),
             }
-
-        Visualizer.progressive_training_segments_graphics(
-            progressive_results=progressive_results,
-            family_name=progressive_family_name,
-            phase=phase,
-        )
-
-        selected_segment_key = f"segment_{n_segments-1}_{n_segments}"
-        if is_train_val:
-            custom_error_2_config = config.volatility_models_config.training_data_config.custom_error_2
-            custom_error_2_metric = custom_error_2_config["metric"]
-            custom_error_2_mode = custom_error_2_config.get("mode", "min")
-
-            candidate_segment_keys = [
-                k for k, v in progressive_results.items()
-                if custom_error_2_metric in v.get("metrics", {})
-            ]
-            if candidate_segment_keys:
-                if custom_error_2_mode == "min":
-                    selected_segment_key = min(
-                        candidate_segment_keys,
-                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
-                    )
-                else:
-                    selected_segment_key = min(
-                        candidate_segment_keys,
-                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
-                    )
-
-        selected_segment = progressive_results[selected_segment_key]
-        result_series = pd.Series(
-            selected_segment["metrics"],
-            name=f"{progressive_family_name}_best",
-        )
+        }
+        
         if is_final_test:
             result_series = self.rename_metrics(result_series)
 
@@ -828,13 +838,12 @@ class Trainer:
 
         training_information = {
             "model": model,
-            "best_iteration": selected_segment.get("best_iteration"),
-            "best_score": selected_segment.get("best_score"),
-            "epoch_history": selected_segment.get("epoch_history", {}),
+            "best_iteration": fit_result.best_iteration,
+            "best_score": fit_result.best_score,
+            "epoch_history": fit_result.epoch_history or {},
             "result_series": result_series,
-            "progressive_results": progressive_results,
-            "y_val_true": selected_segment["y_val_true"],
-            "y_val_pred": selected_segment["y_val_pred"],
+            "y_val_true": y_val.tolist(),
+            "y_val_pred": fit_result.validation_predictions.tolist(),
         }
 
         self.model_family.plots(
@@ -850,7 +859,6 @@ class Trainer:
             "family_name": progressive_family_name,
             "model_params": self._to_builtin(best_model_params),
             "result_metrics": self._to_builtin(result_series.to_dict()),
-            "progressive_results": self._to_builtin(progressive_results),
             "training_information": {
                 "best_iteration": self._to_builtin(training_information.get("best_iteration")),
                 "best_score": self._to_builtin(training_information.get("best_score")),

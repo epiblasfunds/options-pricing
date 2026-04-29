@@ -174,6 +174,7 @@ class VolatilityModelFamilyABC(ABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
         raise NotImplementedError
 
@@ -311,8 +312,9 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -392,8 +394,9 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -485,8 +488,9 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
 
         X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
             X_train,
@@ -677,6 +681,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
         numeric_col_indices = cls._resolve_numeric_col_indices()
 
@@ -728,6 +733,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             validation_data=(X_es_scaled, y_es),
             callbacks=callbacks,
             verbose=model_params["verbose"],
+            shuffle=shuffle,
         )
 
         train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
