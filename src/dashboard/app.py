@@ -53,7 +53,7 @@ def build_services() -> Services:
     model_registry = ModelRegistry(model_dir=model_dir)
     logger.info("Dashboard model directory resolved to %s", model_dir)
     if not model_registry.discover_models():
-        logger.warning(
+        logger.info(
             "No valid explainable-model bundles were discovered under %s. "
             "Check that each bundle contains metadata.json and dashboard_model/metadata.json.",
             model_dir,

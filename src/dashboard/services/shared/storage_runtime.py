@@ -59,7 +59,7 @@ class DashboardModelStorageRuntime:
         nested_candidates = [path for path in target_dir.iterdir() if path.is_dir()]
         for nested in nested_candidates:
             if self._contains_bundle_dirs(nested):
-                logger.warning(
+                logger.info(
                     "Dashboard bundles were found under nested folder %s. "
                     "Using this folder as runtime model root.",
                     nested,

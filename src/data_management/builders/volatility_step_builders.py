@@ -381,7 +381,7 @@ class VolatilityBuilder:
         n_dropped_iv = n_before - len(volatility_df)
         if n_dropped_iv > 0:
             pct_dropped_iv = n_dropped_iv / n_before * 100
-            logger.warning(
+            logger.info(
                 "Dropping %s/%s rows (%.2f%%) where implied volatility has no Black-76 solution.",
                 n_dropped_iv,
                 n_before,

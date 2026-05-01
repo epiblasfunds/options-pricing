@@ -625,7 +625,7 @@ class Trainer:
             return result_series
 
         if not metadata_path.exists():
-            logger.warning(
+            logger.info(
                 "Family metadata not found for '%s'. Running k-fold training...",
                 family_name,
             )
@@ -815,7 +815,7 @@ class Trainer:
             upload_to_gcp = False
 
         if not metadata_path.exists():
-            logger.warning(
+            logger.info(
                 "Family metadata not found for '%s'. Running k-fold training...",
                 family_name,
             )
@@ -1094,7 +1094,7 @@ def _upload_models_to_gcp(
     gcloud_path = _find_gcloud()
 
     if not gcloud_path:
-        logger.warning(
+        logger.info(
             "'gcloud' was not found. Skipping GCP upload for family '%s'.",
             family_name,
         )
@@ -1137,13 +1137,13 @@ def _upload_models_to_gcp(
     final_test_metadata_path = retrained_metadata_path
 
     if not VOLATILITY_BUCKET:
-        logger.warning(
+        logger.info(
             "trained_models_bucket is not configured. Skipping model/scaler/metadata upload for '%s'.",
             family_name,
         )
 
     if not DASHBOARD_BUCKET:
-        logger.warning(
+        logger.info(
             "explainability_artifacts_bucket is not configured. Skipping dashboard artifact upload for '%s'.",
             family_name,
         )
@@ -1169,7 +1169,7 @@ def _upload_models_to_gcp(
                 model_destination,
             )
         else:
-            logger.warning("No trained model exists to upload: %s", model_path)
+            logger.info("No trained model exists to upload: %s", model_path)
 
         if VOLATILITY_BUCKET and scaler_path and os.path.isfile(scaler_path):
             subprocess.run(
@@ -1215,7 +1215,7 @@ def _upload_models_to_gcp(
                 metadata_destination,
             )
         else:
-            logger.warning(
+            logger.info(
                 "No final-test metadata exists to upload: %s",
                 final_test_metadata_path,
             )
@@ -1242,7 +1242,7 @@ def _upload_models_to_gcp(
                 dashboard_destination,
             )
         else:
-            logger.warning(
+            logger.info(
                 "No dashboard folder exists for '%s'; skipping.", family_name
             )
 
