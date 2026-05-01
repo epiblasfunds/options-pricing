@@ -114,7 +114,10 @@ class FeatureSchema:
         if feature.is_numerical:
             if normalized in (None, ""):
                 return normalized
-            numeric_value = float(normalized)
+            try:
+                numeric_value = float(normalized)
+            except (TypeError, ValueError):
+                return normalized
             if feature.dtype == "int":
                 return int(round(numeric_value))
             return numeric_value

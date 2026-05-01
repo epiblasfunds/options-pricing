@@ -10,6 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import export_text
 
+from pysr import PySRRegressor
+
 from src.config.config import config
 from src.dashboard.domain import build_metrics_registry
 from src.dashboard.utils.sampling import quantile_grid
@@ -402,8 +404,6 @@ def build_symbolic_regressor_model(
     predictions: pd.Series,
     dataset_frame: pd.DataFrame | None = None,
 ) -> SymbolicRegressorModel:
-    from pysr import PySRRegressor
-
     reference_frame = dataset_frame if dataset_frame is not None else feature_frame
     explainability_frame = build_explainability_frame(
         reference_frame,
@@ -716,23 +716,6 @@ def build_diagnosis_artifact(
         error_heatmap=error_heatmap,
         financial_warnings=list(financial_warnings),
     )
-
-
-def _predict_transformed_values(
-    runtime: TrainingModelRuntime,
-    values: t.Any,
-) -> np.ndarray:
-    frame = (
-        values.copy()
-        if isinstance(values, pd.DataFrame)
-        else pd.DataFrame(values, columns=runtime.model_input_features)
-    )
-    matrix = frame.to_numpy(dtype="float32", copy=False)
-    if runtime.is_keras:
-        predictions = runtime.model.predict(matrix, verbose=0)
-    else:
-        predictions = runtime.model.predict(matrix)
-    return np.asarray(predictions, dtype="float64").reshape(-1)
 
 
 def _predict_explainability_values(

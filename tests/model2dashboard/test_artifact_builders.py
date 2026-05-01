@@ -5,6 +5,7 @@ import pandas as pd
 import shap
 
 from src.model2dashboard import artifact_builders
+from src.model2dashboard.artifact_builders import _normalize_symbolic_equation_table
 
 
 class _FakeExplainer:
@@ -31,6 +32,17 @@ class _FakeExplainer:
             data=encoded_frame.to_numpy(),
             feature_names=self.feature_names,
         )
+
+
+class _FakeRegressor:
+    def __init__(self, equations: pd.DataFrame, best_equation: str):
+        self.equations_ = equations
+        self._best_equation = best_equation
+
+    def get_best(self) -> pd.Series:
+        return self.equations_.loc[
+            self.equations_["equation"] == self._best_equation
+        ].iloc[0]
 
 
 def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
@@ -101,8 +113,29 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
 
     local_prediction = float(local_shap.waterfall_predictions()[0])
 
-    assert captured_raw_frames, (
-        "The SHAP builder should evaluate reconstructed raw rows."
-    )
+    assert captured_raw_frames
     assert local_prediction == 1543.0
     assert local_shap.index == [11]
+
+
+def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():
+    equations = pd.DataFrame(
+        [
+            {"complexity": 1, "loss": 0.50, "score": 0.00, "equation": "c0"},
+            {"complexity": 2, "loss": 0.40, "score": 0.01, "equation": "c1"},
+            {"complexity": 2, "loss": 0.39, "score": 0.02, "equation": "c1b"},
+            {"complexity": 3, "loss": 0.30, "score": 0.03, "equation": "c2"},
+            {"complexity": 4, "loss": 0.25, "score": 0.04, "equation": "c3"},
+            {"complexity": 5, "loss": 0.20, "score": 0.05, "equation": "c4"},
+            {"complexity": 6, "loss": 0.15, "score": 0.06, "equation": "best_eq"},
+            {"complexity": 7, "loss": 0.14, "score": 0.07, "equation": "c6"},
+        ]
+    )
+    regressor = _FakeRegressor(equations=equations, best_equation="best_eq")
+
+    normalized = _normalize_symbolic_equation_table(regressor, min_equations=5)
+
+    assert len(normalized) >= 5
+    assert normalized["equation"].is_unique
+    assert normalized["selected"].sum() == 1
+    assert "best_eq" in set(normalized["equation"])

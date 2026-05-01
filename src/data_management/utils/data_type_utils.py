@@ -47,21 +47,22 @@ def convert_data_types(
     format_time="%H:%M:%S.%f",
 ) -> pd.DataFrame:
     for col, dtype in selected_columns_dict.items():
+        normalized_dtype = dtype.value if isinstance(dtype, Enum) else dtype
         try:
-            if dtype == DataTypeEnum.DATE.value:
+            if normalized_dtype == DataTypeEnum.DATE.value:
                 df[col] = pd.to_datetime(df[col], format=format_date).dt.date
-            elif dtype == DataTypeEnum.DATETIME:
+            elif normalized_dtype == DataTypeEnum.DATETIME.value:
                 df[col] = pd.to_datetime(df[col], format=format_datetime)
-            elif dtype == DataTypeEnum.TIME:
+            elif normalized_dtype == DataTypeEnum.TIME.value:
                 df[col] = df[col].str.strip().str.split(" ").str[-1].apply(prepare_time)
                 df[col] = pd.to_datetime(df[col], format=format_time)
-            elif dtype == DataTypeEnum.FLOAT.value:
+            elif normalized_dtype == DataTypeEnum.FLOAT.value:
                 df[col] = pd.to_numeric(df[col].str.replace(",", "."), downcast="float")
-            elif dtype == DataTypeEnum.INT.value:
+            elif normalized_dtype == DataTypeEnum.INT.value:
                 df[col] = pd.to_numeric(df[col], downcast="integer")
         except Exception as e:
             raise DataTypeConversionError(
-                f"DataTypeConversionError: {col} cannot be converted to {dtype}"
+                f"DataTypeConversionError: {col} cannot be converted to {normalized_dtype}"
             ) from e
 
     return df

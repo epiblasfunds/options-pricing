@@ -14,6 +14,10 @@ src/volatility_models/trained_models/*
 src/volatility_models/trained_metadata/*
 src/dashboard/saved_models/*
 
+# tests
+.coverage
+.coveragerc
+
 # IDE
 *.csv
 __pycache__/
