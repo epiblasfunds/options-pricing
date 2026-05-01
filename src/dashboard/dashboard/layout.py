@@ -10,6 +10,7 @@ from src.dashboard.dashboard.styles import (
     HEADER_STYLE,
     HELP_TEXT_STYLE,
     IMAGE_STYLE,
+    INLINE_BUTTON_STYLE,
     INFO_ICON_STYLE,
     PAGE_STYLE,
     SECTION_CONTROL_CARD_STYLE,
@@ -90,14 +91,14 @@ def _behaviour_tab():
                                             html.Div(
                                                 children=[
                                                     _section_title_with_info(
-                                                        "Local Surface Analysis",
+                                                        "Surface Analysis",
                                                         "This block groups every visualization driven by the selected anchor observation. "
-                                                        "Changing the anchor sample updates the local volatility heatmap, the 3D surface, "
+                                                        "Changing the sample updates the volatility heatmap, the 3D surface, "
                                                         "the smile slices, the term structure slices and the associated financial checks.",
                                                         level=3,
                                                     ),
                                                     html.P(
-                                                        "Analyse one representative sample and inspect the full local volatility surface built around it, including its smile and term-structure cross-sections.",
+                                                        "Analyse one representative sample and inspect locally the full volatility surface built around it, including its smile and term-structure cross-sections.",
                                                         style=SECTION_PANEL_INTRO_STYLE,
                                                     ),
                                                 ]
@@ -105,12 +106,12 @@ def _behaviour_tab():
                                             html.Div(
                                                 style=SECTION_CONTROL_CARD_STYLE,
                                                 children=[
-                                                    html.Label("Anchor Sample"),
+                                                    html.Label("Sample"),
                                                     dcc.Dropdown(
                                                         id=IDS.BEHAVIOUR_ANCHOR_INDEX
                                                     ),
                                                     html.P(
-                                                        "Reference observation used to build the local surface views in this block.",
+                                                        "Reference observation used to build the surface views in this block.",
                                                         style=HELP_TEXT_STYLE,
                                                     ),
                                                 ],
@@ -129,7 +130,7 @@ def _behaviour_tab():
                                                 children=[
                                                     _section_title_with_info(
                                                         "Surface Heatmap",
-                                                        "2D local volatility surface predicted by the selected model on a grid of moneyness and time to expiration. "
+                                                        "2D volatility surface predicted by the selected model on a grid of moneyness and time to expiration. "
                                                         "Use it to identify level, skew and curvature patterns. The axes and color scale are aligned with the 3D surface "
                                                         "and the smile and term-structure slices so visual comparisons are directly consistent.",
                                                     ),
@@ -144,8 +145,8 @@ def _behaviour_tab():
                                                 style=SUBCARD_STYLE,
                                                 children=[
                                                     _section_title_with_info(
-                                                        "Local Surface Slice",
-                                                        "Three-dimensional rendering of the same local volatility surface around the selected anchor sample. "
+                                                        "Surface Slice",
+                                                        "Three-dimensional rendering of the same volatility surface around the selected sample. "
                                                         "This view is useful for assessing smoothness, slope changes and interaction effects between moneyness and maturity "
                                                         "while preserving the exact same volatility scale used by the heatmap and related slices.",
                                                     ),
@@ -161,7 +162,7 @@ def _behaviour_tab():
                                                 children=[
                                                     _section_title_with_info(
                                                         "Smile Curve",
-                                                        "Cross-sections of the local surface at fixed maturities. Each line shows how predicted volatility changes across "
+                                                        "Cross-sections of the surface at fixed maturities. Each line shows how predicted volatility changes across "
                                                         "moneyness, making it easier to inspect smile shape, skew asymmetry and differences in volatility level between expiries.",
                                                     ),
                                                     _bounded_graph(
@@ -176,7 +177,7 @@ def _behaviour_tab():
                                                 children=[
                                                     _section_title_with_info(
                                                         "Term Structure",
-                                                        "Cross-sections of the local surface at fixed moneyness levels. This chart shows how predicted volatility evolves with "
+                                                        "Cross-sections of the surface at fixed moneyness levels. This chart shows how predicted volatility evolves with "
                                                         "time to expiration and helps detect maturity-dependent regimes, slope changes and non-linear term-structure behaviour.",
                                                     ),
                                                     _bounded_graph(
@@ -193,7 +194,7 @@ def _behaviour_tab():
                                         children=[
                                             _section_title_with_info(
                                                 "Surface Checks",
-                                                "Automatic heuristic checks applied to the generated local surface to detect abrupt smile jumps, maturity discontinuities or other "
+                                                "Automatic heuristic checks applied to the generated surface to detect abrupt smile jumps, maturity discontinuities or other "
                                                 "signs of financially implausible local behaviour.",
                                             ),
                                             html.Div(id=IDS.BEHAVIOUR_WARNINGS),
@@ -212,7 +213,7 @@ def _behaviour_tab():
                                                     _section_title_with_info(
                                                         "Feature Response Analysis",
                                                         "This block contains only the feature-response diagnostics driven by the ICE/ALE feature selector. "
-                                                        "Changing the feature here updates the ICE and ALE views without affecting the local surface charts.",
+                                                        "Changing the feature here updates the ICE and ALE views without affecting the surface charts.",
                                                         level=3,
                                                     ),
                                                     html.P(
@@ -462,7 +463,16 @@ def _sample_tab():
                                 ],
                             ),
                             html.Div(id=IDS.SAMPLE_MANUAL_FORM),
-                            html.Button("Analyze Sample", id=IDS.SAMPLE_RUN_BUTTON),
+                            html.Div(
+                                style={"marginTop": "16px", "display": "flex"},
+                                children=[
+                                    html.Button(
+                                        "Analyze Sample",
+                                        id=IDS.SAMPLE_RUN_BUTTON,
+                                        style=INLINE_BUTTON_STYLE,
+                                    )
+                                ],
+                            ),
                             html.Div(id=IDS.SAMPLE_OUTPUT, style={"marginTop": "12px"}),
                             html.Div(
                                 style=SUBCARD_STYLE,

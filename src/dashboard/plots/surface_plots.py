@@ -14,20 +14,20 @@ from src.dashboard.plots.plot_style import (
 )
 
 HEATMAP_DESCRIPTION = (
-    "This heatmap represents the model-implied local volatility surface around the "
+    "This heatmap represents the model-implied volatility surface around the "
     "selected anchor observation. Each cell corresponds to one predicted volatility "
     "for a specific combination of moneyness and time to expiration. The color scale "
     "is shared with the 3D surface and the slice charts, so identical colors always "
     "indicate identical predicted-volatility levels across views."
 )
 SMILE_DESCRIPTION = (
-    "This chart shows volatility-smile cross-sections extracted from the same local "
+    "This chart shows volatility-smile cross-sections extracted from the same "
     "surface. Each curve keeps maturity fixed and varies moneyness, allowing you to "
     "compare curvature, skew, and level changes across expiries. Marker colors use "
     "the same volatility scale as the heatmap and 3D surface."
 )
 TERM_DESCRIPTION = (
-    "This chart shows term-structure cross-sections extracted from the same local "
+    "This chart shows term-structure cross-sections extracted from the same "
     "surface. Each curve keeps moneyness fixed and tracks how predicted volatility "
     "evolves with time to expiration. Marker colors use the same shared volatility "
     "scale as the rest of the surface views."
@@ -45,7 +45,7 @@ ALE_DESCRIPTION = (
     "more robust than naive ceteris-paribus perturbations under feature dependence."
 )
 LOCAL_SURFACE_DESCRIPTION = (
-    "This 3D surface is the same local volatility surface shown in the heatmap, now "
+    "This 3D surface is the same volatility surface shown in the heatmap, now "
     "rendered as a continuous geometry. It helps assess slope, curvature, and local "
     "smoothness across moneyness and maturity while preserving the exact same shared "
     "volatility color range used in the other surface visualizations."
@@ -443,7 +443,7 @@ def local_surface_figure(surface_frame, volatility_range=None):
         ]
     )
     fig.update_layout(
-        title="Local Volatility Surface",
+        title="Volatility Surface",
         template=STANDARD_TEMPLATE,
         margin=dict(l=0, r=0, t=48, b=0),
         hoverlabel=HOVERLABEL_STYLE,

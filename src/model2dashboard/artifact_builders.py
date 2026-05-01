@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import shap
 import sympy
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
@@ -17,11 +16,13 @@ from src.dashboard.utils.sampling import quantile_grid
 from src.dashboard.utils.sampling import sample_frame
 from src.enums.data_enums import VolatilityDBEnum
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
-from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import apply_feature_override
 from src.model2dashboard.features import build_dashboard_dataset
+from src.model2dashboard.features import build_explainability_encoder
+from src.model2dashboard.features import build_explainability_frame
 from src.model2dashboard.features import build_feature_frame_from_trades
 from src.model2dashboard.features import column_name
 from src.model2dashboard.model_io import TrainingModelRuntime
@@ -67,7 +68,7 @@ def build_dashboard_artifacts(
     global_shap, local_shap = build_shap_artifacts(
         runtime=runtime,
         dataset_frame=dataset_frame,
-        feature_frame=feature_frame,
+        raw_frame=raw_test_frame,
         predictions=predictions,
         sample_indices=sample_indices,
     )
@@ -93,11 +94,13 @@ def build_dashboard_artifacts(
             runtime=runtime,
             feature_frame=feature_frame,
             predictions=predictions,
+            dataset_frame=dataset_frame,
         ),
         "symbolic_model": build_symbolic_regressor_model(
             runtime=runtime,
             feature_frame=feature_frame,
             predictions=predictions,
+            dataset_frame=dataset_frame,
         ),
         "global_shap": global_shap,
         "local_shap": local_shap,
@@ -136,10 +139,14 @@ def build_shap_artifacts(
     *,
     runtime: TrainingModelRuntime,
     dataset_frame: pd.DataFrame,
-    feature_frame: pd.DataFrame,
+    raw_frame: pd.DataFrame,
     predictions: pd.Series,
     sample_indices: list[t.Any],
 ) -> tuple[StoredShapExplanation, StoredShapExplanation]:
+    explainability_frame = build_explainability_frame(
+        raw_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
     background_indices = sample_frame(
         dataset_frame,
         max_rows=config.dashboard_models_config.shap_background_size,
@@ -150,48 +157,136 @@ def build_shap_artifacts(
         max_rows=config.dashboard_models_config.shap_explain_size,
         random_state=config.dashboard_models_config.random_state,
     ).index
-    transformed_background = transform_feature_frame(
-        runtime,
-        feature_frame.loc[background_indices],
+    method = "shap.Explainer(permutation)"
+    background_explain_frame = explainability_frame.loc[background_indices]
+    global_shap = _build_stored_shap_for_rows(
+        method=method,
+        runtime=runtime,
+        raw_frame=raw_frame,
+        explainability_frame=explainability_frame,
+        background_explain_frame=background_explain_frame,
+        row_indices=list(global_indices),
+        predictions=predictions,
     )
-    transformed_global = transform_feature_frame(runtime, feature_frame.loc[global_indices])
-    explainer = shap.Explainer(
-        lambda values: _predict_transformed_values(runtime, values),
-        masker=transformed_background,
-        algorithm="permutation",
-        feature_names=runtime.model_input_features,
-        seed=config.dashboard_models_config.random_state,
-    )
-    max_evals = _max_evals(len(runtime.model_input_features))
-    global_explanation = explainer(
-        transformed_global,
-        max_evals=max_evals,
-        silent=True,
-    )
-    global_shap = serialize_shap_result(
-        method="shap.Explainer(permutation)",
-        explanation=global_explanation,
-        transformed_frame=transformed_global,
-        display_frame=feature_frame.loc[global_indices],
-        feature_names=runtime.model_input_features,
-        predictions=predictions.loc[global_indices],
-    )
-    local_feature_frame = feature_frame.loc[sample_indices]
-    transformed_local = transform_feature_frame(runtime, local_feature_frame)
-    local_explanation = explainer(
-        transformed_local,
-        max_evals=max_evals,
-        silent=True,
-    )
-    local_shap = serialize_shap_result(
-        method="shap.Explainer(permutation)",
-        explanation=local_explanation,
-        transformed_frame=transformed_local,
-        display_frame=local_feature_frame,
-        feature_names=runtime.model_input_features,
-        predictions=predictions.loc[sample_indices],
+    local_shap = _build_stored_shap_for_rows(
+        method=method,
+        runtime=runtime,
+        raw_frame=raw_frame,
+        explainability_frame=explainability_frame,
+        background_explain_frame=background_explain_frame,
+        row_indices=list(sample_indices),
+        predictions=predictions,
     )
     return global_shap, local_shap
+
+
+def _build_stored_shap_for_rows(
+    *,
+    method: str,
+    runtime: TrainingModelRuntime,
+    raw_frame: pd.DataFrame,
+    explainability_frame: pd.DataFrame,
+    background_explain_frame: pd.DataFrame,
+    row_indices: list[t.Any],
+    predictions: pd.Series,
+) -> StoredShapExplanation:
+    stored_rows: list[StoredShapExplanation] = []
+    max_evals = _max_evals(len(EXPLAINABILITY_FEATURE_NAMES))
+    for row_index in row_indices:
+        row_raw = raw_frame.loc[[row_index]].copy()
+        row_explain_frame = explainability_frame.loc[[row_index]].copy()
+        row_encoder = build_explainability_encoder(
+            pd.concat([background_explain_frame, row_raw], axis=0),
+            feature_names=EXPLAINABILITY_FEATURE_NAMES,
+            defaults_override=row_raw.iloc[0].to_dict(),
+        )
+        encoded_background = row_encoder.encode_frame(background_explain_frame)
+        encoded_row = row_encoder.encode_frame(row_explain_frame)
+        explainer = shap.Explainer(
+            lambda values, encoder=row_encoder: _predict_explainability_values(
+                runtime, encoder, values
+            ),
+            masker=encoded_background,
+            algorithm="permutation",
+            feature_names=list(row_encoder.feature_names),
+            seed=config.dashboard_models_config.random_state,
+        )
+        explanation = explainer(
+            encoded_row,
+            max_evals=max_evals,
+            silent=True,
+        )
+        stored_rows.append(
+            serialize_shap_result(
+                method=method,
+                explanation=explanation,
+                transformed_frame=encoded_row,
+                display_frame=row_explain_frame,
+                feature_names=list(row_encoder.feature_names),
+                predictions=predictions.loc[[row_index]],
+            )
+        )
+    return _merge_stored_shap_rows(
+        method="shap.Explainer(permutation)",
+        feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
+        stored_rows=stored_rows,
+    )
+
+
+def _merge_stored_shap_rows(
+    *,
+    method: str,
+    feature_names: list[str],
+    stored_rows: list[StoredShapExplanation],
+) -> StoredShapExplanation:
+    feature_count = len(feature_names)
+    if not stored_rows:
+        return StoredShapExplanation(
+            method=method,
+            feature_names=list(feature_names),
+            index=[],
+            values=np.empty((0, feature_count), dtype="float64"),
+            base_values=np.empty((0,), dtype="float64"),
+            data=np.empty((0, feature_count), dtype="float64"),
+            display_data=np.empty((0, feature_count), dtype="float64"),
+            predictions=np.empty((0,), dtype="float64"),
+            mean_abs_shap={str(name): 0.0 for name in feature_names},
+        )
+    values = np.concatenate([np.asarray(row.values) for row in stored_rows], axis=0)
+    base_values = np.concatenate(
+        [np.asarray(row.base_values).reshape(-1) for row in stored_rows],
+        axis=0,
+    )
+    data = np.concatenate([np.asarray(row.data) for row in stored_rows], axis=0)
+    display_data = (
+        None
+        if any(row.display_data is None for row in stored_rows)
+        else np.concatenate(
+            [np.asarray(row.display_data) for row in stored_rows],
+            axis=0,
+        )
+    )
+    predictions = np.concatenate(
+        [np.asarray(row.predictions).reshape(-1) for row in stored_rows],
+        axis=0,
+    )
+    mean_abs_shap = pd.Series(
+        np.abs(values).mean(axis=0),
+        index=feature_names,
+    ).sort_values(ascending=False)
+    return StoredShapExplanation(
+        method=method,
+        feature_names=list(feature_names),
+        index=[index for row in stored_rows for index in row.index],
+        values=values,
+        base_values=base_values,
+        data=data,
+        display_data=display_data,
+        predictions=predictions,
+        mean_abs_shap={
+            str(name): float(value) for name, value in mean_abs_shap.items()
+        },
+    )
 
 
 def serialize_shap_result(
@@ -228,8 +323,18 @@ def build_surrogate_tree_models(
     runtime: TrainingModelRuntime,
     feature_frame: pd.DataFrame,
     predictions: pd.Series,
+    dataset_frame: pd.DataFrame | None = None,
 ) -> dict[int, SurrogateTreeModel]:
-    transformed = transform_feature_frame(runtime, feature_frame)
+    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
+    explainability_frame = build_explainability_frame(
+        reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    encoder = build_explainability_encoder(
+        explainability_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    transformed = encoder.encode_frame(explainability_frame)
     sampled = sample_frame(
         transformed,
         max_rows=config.dashboard_models_config.surrogate_sample_size,
@@ -258,7 +363,7 @@ def build_surrogate_tree_models(
         )
         importances = pd.Series(
             surrogate.feature_importances_,
-            index=runtime.model_input_features,
+            index=EXPLAINABILITY_FEATURE_NAMES,
         ).sort_values(ascending=False)
         top_features = importances[importances > 0].head(3).index.tolist()
         tree_models[int(depth)] = SurrogateTreeModel(
@@ -266,7 +371,10 @@ def build_surrogate_tree_models(
             feature_importances=importances,
             tree_depth=surrogate.get_depth(),
             n_leaves=surrogate.get_n_leaves(),
-            text_rules=export_text(surrogate, feature_names=runtime.model_input_features),
+            text_rules=export_text(
+                surrogate,
+                feature_names=EXPLAINABILITY_FEATURE_NAMES,
+            ),
             interpretation=(
                 f"The surrogate approximates {runtime.family_name} on final-test "
                 f"predictions with RMSE {metrics['rmse']:.4f} at max depth {int(depth)}. "
@@ -279,7 +387,7 @@ def build_surrogate_tree_models(
                     "surrogate_prediction": surrogate_predictions.reset_index(drop=True),
                 }
             ),
-            feature_names=list(runtime.model_input_features),
+            feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
             metrics={str(name): float(value) for name, value in metrics.items()},
         )
     return tree_models
@@ -290,25 +398,65 @@ def build_symbolic_regressor_model(
     runtime: TrainingModelRuntime,
     feature_frame: pd.DataFrame,
     predictions: pd.Series,
+    dataset_frame: pd.DataFrame | None = None,
 ) -> SymbolicRegressorModel:
-    transformed = transform_feature_frame(runtime, feature_frame)
+    from pysr import PySRRegressor
+
+    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
+    explainability_frame = build_explainability_frame(
+        reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    encoder = build_explainability_encoder(
+        explainability_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    transformed = encoder.encode_frame(explainability_frame)
     sampled = sample_frame(
         transformed,
         max_rows=config.dashboard_models_config.symbolic_sample_size,
         random_state=config.dashboard_models_config.random_state + 5,
     )
     sampled_predictions = predictions.loc[sampled.index]
-    selected_features = _select_symbolic_features(sampled, sampled_predictions)
+    selected_features = list(EXPLAINABILITY_FEATURE_NAMES)
     X_train, X_test, y_train, y_test = train_test_split(
         sampled.loc[:, selected_features],
         sampled_predictions,
         test_size=0.2,
         random_state=config.dashboard_models_config.random_state,
     )
-    regressor = LinearRegression()
-    regressor.fit(X_train, y_train)
+    regressor = PySRRegressor(
+        model_selection="best",
+        binary_operators=["+", "-", "*", "/", "^"],
+        unary_operators=["square", "cube"],
+        constraints={"^": (-1, 1)},
+        niterations=config.dashboard_models_config.symbolic_niterations,
+        populations=config.dashboard_models_config.symbolic_populations,
+        population_size=config.dashboard_models_config.symbolic_population_size,
+        topn=config.dashboard_models_config.symbolic_topn,
+        ncycles_per_iteration=(
+            config.dashboard_models_config.symbolic_ncycles_per_iteration
+        ),
+        maxsize=config.dashboard_models_config.symbolic_maxsize,
+        maxdepth=config.dashboard_models_config.symbolic_maxdepth,
+        timeout_in_seconds=config.dashboard_models_config.symbolic_timeout_seconds,
+        random_state=config.dashboard_models_config.random_state,
+        deterministic=False,
+        batching=True,
+        batch_size=min(256, len(X_train)),
+        precision=32,
+        progress=False,
+        verbosity=0,
+        update=False,
+        parallelism="multithreading",
+    )
+    regressor.fit(
+        X_train.to_numpy(dtype="float32"),
+        y_train.to_numpy(dtype="float32"),
+        variable_names=selected_features,
+    )
     symbolic_predictions = pd.Series(
-        regressor.predict(X_test),
+        regressor.predict(X_test.to_numpy(dtype="float32")),
         index=y_test.index,
         name="symbolic_prediction",
     )
@@ -317,39 +465,32 @@ def build_symbolic_regressor_model(
         symbolic_predictions.reset_index(drop=True),
         config.dashboard_models_config.error_metrics,
     )
-    expression = _linear_expression(
-        intercept=float(regressor.intercept_),
-        coefficients={
-            feature: float(coef)
-            for feature, coef in zip(selected_features, regressor.coef_)
-        },
+    candidate_equations = _normalize_symbolic_equation_table(
+        regressor,
+        min_equations=config.dashboard_models_config.symbolic_min_candidate_equations,
     )
-    sympy_expression = sympy.sympify(expression)
-    loss = float(((y_test - symbolic_predictions) ** 2).mean())
-    candidate_equations = pd.DataFrame(
-        [
-            {
-                "complexity": max(1, 1 + 2 * len(selected_features)),
-                "loss": loss,
-                "score": float(metrics.get("r2", 0.0)),
-                "equation": expression,
-                "selected": True,
-            }
-        ]
-    )
+    best_equation = regressor.get_best()
+    sympy_expression = regressor.sympy()
+    expression = sympy.sympify(str(sympy_expression))
+    used_feature_names = [
+        feature_name
+        for feature_name in selected_features
+        if sympy.Symbol(feature_name) in expression.free_symbols
+    ]
     return SymbolicRegressorModel(
-        equation=expression,
+        equation=str(best_equation["equation"]),
         sympy_expression=str(sympy_expression),
-        latex_expression=str(sympy.latex(sympy_expression)),
+        latex_expression=str(regressor.latex(precision=4)),
         interpretation=(
-            f"Closed-form linear symbolic surrogate fitted on final-test predictions. "
-            f"It uses {', '.join(selected_features)} and approximates {runtime.family_name} "
-            f"with RMSE {metrics['rmse']:.4f}."
+            f"Symbolic PySR surrogate fitted on final-test predictions. "
+            f"It uses {', '.join(used_feature_names) or 'an intercept-like constant'} "
+            f"and approximates {runtime.family_name} with RMSE {metrics['rmse']:.4f} "
+            f"at complexity {int(best_equation['complexity'])}."
         ),
         feature_names=list(selected_features),
-        used_feature_names=list(selected_features),
-        complexity=int(candidate_equations.loc[0, "complexity"]),
-        model_selection="linear_symbolic_surrogate",
+        used_feature_names=list(used_feature_names),
+        complexity=int(best_equation["complexity"]),
+        model_selection=str(regressor.model_selection),
         metrics={name: float(value) for name, value in metrics.items()},
         candidate_equations=candidate_equations,
         fidelity_frame=pd.DataFrame(
@@ -590,40 +731,74 @@ def _predict_transformed_values(
     return np.asarray(predictions, dtype="float64").reshape(-1)
 
 
+def _predict_explainability_values(
+    runtime: TrainingModelRuntime,
+    encoder,
+    values: t.Any,
+) -> np.ndarray:
+    raw_frame = encoder.reconstruct_raw_frame(values)
+    return predict_raw_frame(runtime, raw_frame)
+
+
 def _max_evals(n_features: int) -> int:
     return 2 * n_features + 1
 
 
-def _select_symbolic_features(
-    feature_frame: pd.DataFrame,
-    predictions: pd.Series,
-    max_features: int = 8,
-) -> list[str]:
-    correlations = {}
-    y = predictions.astype(float)
-    for feature_name in feature_frame.columns:
-        series = feature_frame[feature_name].astype(float)
-        if int(series.nunique(dropna=False)) <= 1:
-            continue
-        corr = float(series.corr(y))
-        correlations[feature_name] = abs(corr) if np.isfinite(corr) else 0.0
-    selected = [
-        feature
-        for feature, _ in sorted(
-            correlations.items(), key=lambda item: item[1], reverse=True
-        )[:max_features]
-    ]
-    return selected or [MODEL_INPUT_FEATURE_NAMES[0]]
-
-
-def _linear_expression(
+def _normalize_symbolic_equation_table(
+    regressor,
     *,
-    intercept: float,
-    coefficients: dict[str, float],
-) -> str:
-    terms = [f"({intercept:.12g})"]
-    for feature_name, coefficient in coefficients.items():
-        if abs(coefficient) < 1e-12:
-            continue
-        terms.append(f"({coefficient:.12g})*{feature_name}")
-    return " + ".join(terms)
+    min_equations: int,
+) -> pd.DataFrame:
+    equations = regressor.equations_
+    frame = equations[0].copy() if isinstance(equations, list) else equations.copy()
+    keep_columns = [
+        column_name
+        for column_name in ("complexity", "loss", "score", "equation")
+        if column_name in frame.columns
+    ]
+    normalized = frame.loc[:, keep_columns].copy().reset_index(drop=True)
+    normalized["complexity"] = normalized["complexity"].astype("int64")
+    normalized["loss"] = normalized["loss"].astype("float64")
+    if "score" in normalized.columns:
+        normalized["score"] = normalized["score"].astype("float64")
+    normalized["equation"] = normalized["equation"].astype(str)
+    normalized = normalized.drop_duplicates(subset=["equation"]).reset_index(drop=True)
+    selected_equation = str(regressor.get_best()["equation"])
+    selected_complexity = int(regressor.get_best()["complexity"])
+
+    if normalized.empty:
+        normalized["selected"] = pd.Series(dtype="bool")
+        return normalized
+
+    primary = (
+        normalized.sort_values(["complexity", "loss"], ascending=[True, True])
+        .drop_duplicates(subset=["complexity"], keep="first")
+        .reset_index(drop=True)
+    )
+    if len(primary) < min_equations:
+        remaining = normalized.loc[
+            ~normalized["equation"].isin(primary["equation"])
+        ].sort_values(["loss", "complexity"], ascending=[True, True])
+        needed = min_equations - len(primary)
+        primary = pd.concat(
+            [primary, remaining.head(max(0, needed))],
+            ignore_index=True,
+        )
+
+    selected_row = normalized.loc[
+        normalized["equation"] == selected_equation
+    ].head(1)
+    if selected_row.empty:
+        selected_row = normalized.loc[
+            normalized["complexity"] == selected_complexity
+        ].head(1)
+    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(primary["equation"]):
+        primary = pd.concat([selected_row, primary], ignore_index=True)
+
+    primary = (
+        primary.drop_duplicates(subset=["equation"])
+        .sort_values(["loss", "complexity"], ascending=[True, True])
+        .reset_index(drop=True)
+    )
+    primary["selected"] = primary["equation"] == selected_equation
+    return primary

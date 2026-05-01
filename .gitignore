@@ -1,5 +1,9 @@
 data/*
 tfmenv/*
+
+# Ignore symbolic regressor training output
+outputs/*
+
 src/volatility_models/trained_models/*
 src/volatility_models/trained_metadata/*
 src/dashboard/saved_models/*

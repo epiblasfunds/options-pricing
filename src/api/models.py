@@ -16,6 +16,7 @@ class ApiOptionTypeEnum(StrEnum):
 
 class PredictionFeatures(BaseModel):
     execDatetime: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    optionContractCode: str | None = None
     optionType: ApiOptionTypeEnum
     quantity: int = 1
     strikePrice: float
@@ -24,6 +25,7 @@ class PredictionFeatures(BaseModel):
     underlyingPrice: float
     timeToExpiration: float
     rate: float
+    impliedVolatility: float | None = None
 
 
 class ModelRequest(BaseModel):

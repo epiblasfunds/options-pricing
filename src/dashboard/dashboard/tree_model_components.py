@@ -5,6 +5,7 @@ from src.dashboard.dashboard.ids import IDS
 from src.dashboard.plots.tree_plots import feature_importance_figure
 from src.dashboard.plots.tree_plots import fidelity_figure
 from src.dashboard.plots.tree_plots import tree_png_base64
+from src.dashboard.utils.feature_utils import replace_feature_names_in_text
 
 
 def build_tree_shell(available_depths, requested_depth):
@@ -34,7 +35,7 @@ def build_tree_shell(available_depths, requested_depth):
 
 
 def build_tree_panel_content(result, requested_depth, services):
-    image_src = f"data:image/png;base64,{tree_png_base64(result)}"
+    image_src = f"data:image/png;base64,{tree_png_base64(result, services.feature_schema)}"
     metric_cards = [
         html.Div(
             style={
@@ -65,7 +66,13 @@ def build_tree_panel_content(result, requested_depth, services):
                 style=_subcard_style(),
                 children=[
                     html.H4(f"Tree Depth {requested_depth}", style={"margin": "0 0 8px 0"}),
-                    html.P(result.interpretation, style={"marginTop": "0"}),
+                    html.P(
+                        replace_feature_names_in_text(
+                            result.interpretation,
+                            services.feature_schema,
+                        ),
+                        style={"marginTop": "0"},
+                    ),
                     html.Div(style=_metric_row_style(), children=metric_cards),
                     html.Div(
                         style=_summary_card_style(),
@@ -78,7 +85,12 @@ def build_tree_panel_content(result, requested_depth, services):
                         ],
                     ),
                     html.H4("Feature Importance", style={"margin": "16px 0 8px 0"}),
-                    dcc.Graph(figure=feature_importance_figure(result)),
+                    dcc.Graph(
+                        figure=feature_importance_figure(
+                            result,
+                            schema=services.feature_schema,
+                        )
+                    ),
                     html.H4("Surrogate Fidelity", style={"margin": "16px 0 8px 0"}),
                     dcc.Graph(figure=fidelity_figure(result)),
                 ],
@@ -111,7 +123,13 @@ def build_tree_panel_content(result, requested_depth, services):
                         ],
                     ),
                     html.H4("Decision Rules", style={"margin": "0 0 8px 0"}),
-                    html.Pre(result.text_rules, style=_rules_style()),
+                    html.Pre(
+                        replace_feature_names_in_text(
+                            result.text_rules,
+                            services.feature_schema,
+                        ),
+                        style=_rules_style(),
+                    ),
                 ],
             ),
         ],

@@ -60,7 +60,7 @@ class ShapService:
             explanation=stored.to_explanation(),
             explain_frame=explain_frame,
             predictions=pd.Series(
-                stored.predictions,
+                stored.waterfall_predictions(),
                 index=stored.index,
                 name="PredictedVolatility",
             ),

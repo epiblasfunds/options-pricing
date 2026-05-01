@@ -33,7 +33,7 @@ class LoggingConfig:
         """
         cfg = dict(LOGGING_CONFIG)
 
-        # nivel por env o param
+        # Log level from environment or parameter
         final_level = (level or os.getenv("LOG_LEVEL") or "INFO").upper()
         cfg["root"]["level"] = final_level
 

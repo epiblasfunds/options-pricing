@@ -126,6 +126,7 @@ class PredictionService:
 
         mapping = {
             "ExecDatetime": "execDatetime",
+            "OptionContractCode": "optionContractCode",
             "OptionType": "optionType",
             "Quantity": "quantity",
             "StrikePrice": "strikePrice",
@@ -134,12 +135,15 @@ class PredictionService:
             "UnderlyingPrice": "underlyingPrice",
             "TimeToExpiration": "timeToExpiration",
             "Rate": "rate",
+            "ImpliedVolatility": "impliedVolatility",
         }
         result: dict[str, Any] = {}
         for dashboard_name, api_name in mapping.items():
             if dashboard_name not in sample_payload:
                 continue
             value = sample_payload[dashboard_name]
+            if value in (None, ""):
+                continue
             if dashboard_name == "OptionType":
                 value = option_type_text
             result[api_name] = value

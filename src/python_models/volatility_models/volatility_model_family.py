@@ -7,6 +7,7 @@ from math import prod
 import joblib
 import keras
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from keras import callbacks, layers, ops, regularizers
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -18,7 +19,6 @@ from xgboost import XGBRegressor
 from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.volatility_models.data_utils import (
-    BASE_FEATURE_COLS,
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
@@ -39,7 +39,7 @@ class ModelFitResult:
 
 @keras.utils.register_keras_serializable(package="volatility_models")
 class TensorTrainLayer(keras.layers.Layer):
-    """Tensor-network feature extractor basado en una factorizacion tensor-train."""
+    """Tensor-network feature extractor based on a tensor-train factorization."""
 
     def __init__(
         self,
@@ -56,15 +56,15 @@ class TensorTrainLayer(keras.layers.Layer):
         self.activation = keras.activations.get(activation)
 
         if len(self.tt_ranks) != len(self.input_dims) + 1:
-            raise ValueError("tt_ranks debe tener longitud len(input_dims) + 1.")
+            raise ValueError("tt_ranks must have length len(input_dims) + 1.")
         if self.tt_ranks[0] != 1 or self.tt_ranks[-1] != 1:
-            raise ValueError("TensorTrainLayer requiere fronteras TT [1, ..., 1].")
+            raise ValueError("TensorTrainLayer requires TT boundary ranks [1, ..., 1].")
         if any(dim <= 0 for dim in self.input_dims):
-            raise ValueError("input_dims debe contener solo enteros positivos.")
+            raise ValueError("input_dims must contain only positive integers.")
         if any(rank <= 0 for rank in self.tt_ranks):
-            raise ValueError("tt_ranks debe contener solo enteros positivos.")
+            raise ValueError("tt_ranks must contain only positive integers.")
         if self.output_dim <= 0:
-            raise ValueError("output_dim debe ser positivo.")
+            raise ValueError("output_dim must be positive.")
 
     def build(self, input_shape):
         expected_shape = tuple(self.input_dims)
@@ -74,7 +74,7 @@ class TensorTrainLayer(keras.layers.Layer):
 
         if len(received_shape) != len(expected_shape):
             raise ValueError(
-                f"Se esperaba un tensor de orden {len(expected_shape)}, pero llego shape={input_shape}."
+                f"Expected a tensor of order {len(expected_shape)}, but got shape={input_shape}."
             )
 
         for expected_dim, received_dim in zip(expected_shape, received_shape):
@@ -174,6 +174,7 @@ class VolatilityModelFamilyABC(ABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
         raise NotImplementedError
 
@@ -202,7 +203,7 @@ class VolatilityModelFamilyABC(ABC):
         max_configurations = cls.get_max_configurations()
 
         if not search_space:
-            logger.info("La familia '%s' no tiene hiperparametros para explorar. Se entrenara un unico modelo con los parametros fijos.", cls.get_family_name())
+            logger.info("Family '%s' has no hyperparameters to explore. A single model will be trained with the fixed parameters.", cls.get_family_name())
             return {cls.get_family_name(): cls.get_fixed_params()}
 
         requested_iterations = int(cls.get_n_iter())
@@ -210,7 +211,7 @@ class VolatilityModelFamilyABC(ABC):
         explored_ratio = (100.0 * explored_configurations / max_configurations) if max_configurations > 0 else 0.0
 
         logger.info(
-            "Exploracion de hiperparametros para '%s': %s/%s configuraciones (%.2f%%).",
+            "Hyperparameter exploration for '%s': %s/%s configurations (%.2f%%).",
             cls.get_family_name(),
             explored_configurations,
             max_configurations,
@@ -241,7 +242,7 @@ class VolatilityModelFamilyABC(ABC):
         cardinalities = [len(list(values)) for values in search_space.values()]
         if any(cardinality <= 0 for cardinality in cardinalities):
             raise ValueError(
-                f"La familia '{cls.get_family_name()}' tiene hiperparametros con dominio vacio."
+                f"Family '{cls.get_family_name()}' has hyperparameters with an empty domain."
             )
         return int(prod(cardinalities))
 
@@ -253,9 +254,9 @@ class VolatilityModelFamilyABC(ABC):
         min_valid_samples: int = 256,
     ):
         """
-        Crea un split temporal interno dentro de X_train para el early stopping.
-        El fold-valid externo queda reservado únicamente para evaluación final de métricas,
-        evitando así cualquier sesgo de overfitting hacia ese conjunto.
+        Creates an internal temporal split within X_train for early stopping.
+        The outer validation fold is reserved exclusively for final metric evaluation,
+        avoiding any overfitting bias toward that set.
         """
         n_samples = len(X_train)
 
@@ -311,8 +312,9 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -335,7 +337,7 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
     
 class RandomForestFamily(VolatilityModelFamilyABC):
@@ -380,7 +382,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 120
+        return 80
 
     @classmethod
     def fit_model(
@@ -392,8 +394,9 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -416,7 +419,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
 
@@ -444,7 +447,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
             "colsample_bynode": 1.0,
             "max_delta_step": 0.0,
             "grow_policy": "depthwise",
-            "base_score": 0.20,  # Ajustado a la media del target para mejorar convergencia
+            "base_score": 0.20,  # Adjusted to the target mean to improve convergence
         }
 
     @staticmethod
@@ -485,8 +488,9 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _ = model_params, phase
+        _, _, _ = model_params, phase, shuffle
 
         X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
             X_train,
@@ -529,7 +533,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
 
@@ -615,18 +619,9 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled, scaler
 
     @staticmethod
-    def _resolve_numeric_col_indices() -> tuple[int, ...]:
-        def _feature_name(col: t.Any) -> str:
-            return str(col.value) if hasattr(col, "value") else str(col)
-
-        base_feature_names = [_feature_name(col) for col in BASE_FEATURE_COLS]
-        feature_to_index = {
-            feature_name: idx for idx, feature_name in enumerate(base_feature_names)
-        }
-
-        numeric_feature_names = [_feature_name(col) for col in BASE_NUMERIC_FEATURE_COLS]
-
-        return tuple(feature_to_index[name] for name in numeric_feature_names)
+    def _resolve_numeric_col_indices(*, data: pd.DataFrame) -> tuple[int, ...]:
+        numeric_cols = list(BASE_NUMERIC_FEATURE_COLS)
+        return tuple(int(data.columns.get_loc(col)) for col in numeric_cols)
 
     @staticmethod
     def instantiate_model(
@@ -665,7 +660,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 75
+        return 120
 
     @classmethod
     def fit_model(
@@ -677,8 +672,12 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         y_train: np.ndarray,
         X_val: np.ndarray,
         phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
     ) -> ModelFitResult:
-        numeric_col_indices = cls._resolve_numeric_col_indices()
+        numeric_col_indices = cls._resolve_numeric_col_indices(data=X_train)
+
+        X_train = np.asarray(X_train)
+        X_val = np.asarray(X_val)
 
         X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
             X_train,
@@ -728,6 +727,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             validation_data=(X_es_scaled, y_es),
             callbacks=callbacks,
             verbose=model_params["verbose"],
+            shuffle=shuffle,
         )
 
         train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
@@ -775,12 +775,12 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
-                label="Scaler guardado en",
+                label="Scaler saved to",
             )
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
     @classmethod
@@ -945,10 +945,10 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
-                label="Scaler guardado en",
+                label="Scaler saved to",
             )
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )

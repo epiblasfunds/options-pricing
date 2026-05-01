@@ -45,6 +45,23 @@ BUTTON_STYLE = {
     "cursor": "pointer",
 }
 
+INLINE_BUTTON_STYLE = {
+    **BUTTON_STYLE,
+    "width": "auto",
+    "minWidth": "180px",
+}
+
+PILL_BUTTON_STYLE = {
+    **BUTTON_STYLE,
+    "width": "auto",
+    "minWidth": "0",
+    "padding": "0 12px",
+    "height": "30px",
+    "borderRadius": "999px",
+    "fontSize": "0.82rem",
+    "boxShadow": "0 6px 14px rgba(23,48,79,0.14)",
+}
+
 HELP_TEXT_STYLE = {
     "margin": "4px 0 0 0",
     "fontSize": "0.93rem",

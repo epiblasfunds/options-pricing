@@ -1,10 +1,16 @@
 import base64
 import io
+from fractions import Fraction
 
 import matplotlib
 import plotly.express as px
 import plotly.graph_objects as go
 import sympy
+from sympy.printing.latex import LatexPrinter
+from sympy.printing.str import StrPrinter
+from sympy.parsing.sympy_parser import convert_xor
+from sympy.parsing.sympy_parser import parse_expr
+from sympy.parsing.sympy_parser import standard_transformations
 
 from src.dashboard.plots.plot_style import HOVERLABEL_STYLE
 from src.dashboard.plots.plot_style import STANDARD_MARGIN
@@ -15,17 +21,68 @@ matplotlib.use("Agg")
 
 from matplotlib import pyplot as plt
 
+from src.dashboard.utils.feature_utils import display_feature_label
 
-def symbolic_frontier_figure(model: SymbolicRegressorModel):
+_SYMBOLIC_FORMULA_NAME_ALIASES = {
+    "OptionType": "OptionType",
+    "Rate": "Rate",
+    "StrikePrice": "Strike",
+    "TimeToExpiration": "TimeToExpiration",
+    "UnderlyingPrice": "Underlying",
+}
+_SYMBOLIC_FORMULA_SYMBOL_ORDER = {
+    "OptionType": 0,
+    "Rate": 1,
+    "StrikePrice": 2,
+    "TimeToExpiration": 3,
+    "UnderlyingPrice": 4,
+}
+_SYMBOLIC_PARSE_LOCALS = {
+    "square": lambda value: value**2,
+    "cube": lambda value: value**3,
+    "pow": lambda base, exponent: base**exponent,
+}
+_SYMBOLIC_PARSE_TRANSFORMATIONS = standard_transformations + (convert_xor,)
+
+
+class _SymbolicTextPrinter(StrPrinter):
+    def _print_Float(self, expr):
+        return _format_decimal_or_scientific(float(expr))
+
+
+class _SymbolicLatexPrinter(LatexPrinter):
+    def _print_Float(self, expr):
+        value = float(expr)
+        magnitude = abs(value)
+        if magnitude > 0.0 and magnitude < 0.01:
+            mantissa, exponent = f"{value:.2e}".split("e")
+            mantissa = mantissa.rstrip("0").rstrip(".")
+            return rf"{mantissa} \cdot 10^{{{int(exponent)}}}"
+        return _format_decimal_or_scientific(value)
+
+
+_TEXT_PRINTER = _SymbolicTextPrinter()
+_LATEX_PRINTER = _SymbolicLatexPrinter()
+
+
+def symbolic_frontier_figure(
+    model: SymbolicRegressorModel,
+    schema=None,
+):
     if model.candidate_equations.empty:
         return _empty_figure("No symbolic-equation frontier was persisted.")
     frame = model.candidate_equations.copy()
+    if "score" not in frame.columns:
+        frame["score"] = 0.0
+    frame["display_equation"] = frame["equation"].map(
+        lambda value: format_symbolic_equation_text(value, schema=schema)
+    )
     fig = px.scatter(
         frame,
         x="complexity",
         y="loss",
         color="selected",
-        hover_data={"equation": True, "score": True, "selected": False},
+        hover_data={"display_equation": True, "score": True, "selected": False},
         title="Equation Frontier",
         color_discrete_map={True: "#17304f", False: "#7aa5d2"},
     )
@@ -95,8 +152,8 @@ def symbolic_fidelity_figure(model: SymbolicRegressorModel):
     return fig
 
 
-def symbolic_expression_tree_figure(model: SymbolicRegressorModel):
-    expression = sympy.sympify(model.sympy_expression)
+def symbolic_expression_tree_figure(model: SymbolicRegressorModel, schema=None):
+    expression = _format_expression_for_display(model.sympy_expression)
     nodes = []
     edges = []
     next_x = 0
@@ -117,7 +174,7 @@ def symbolic_expression_tree_figure(model: SymbolicRegressorModel):
             {
                 "x": x,
                 "y": -float(depth) * depth_step,
-                "label": _node_label(node),
+                "label": _node_label(node, schema=schema),
                 "depth": depth,
             }
         )
@@ -201,8 +258,11 @@ def symbolic_expression_tree_figure(model: SymbolicRegressorModel):
     return fig
 
 
-def symbolic_formula_image_src(model: SymbolicRegressorModel) -> str:
-    latex_expression, _ = _aliased_formula(model)
+def symbolic_formula_image_src(model: SymbolicRegressorModel, schema=None) -> str:
+    latex_expression = format_symbolic_equation_latex(
+        model.sympy_expression,
+        schema=schema,
+    )
     formula_text = f"${latex_expression}$"
     figure = plt.figure(figsize=(13, 1.9), dpi=180)
     figure.patch.set_facecolor("#f7fbff")
@@ -228,41 +288,119 @@ def symbolic_formula_image_src(model: SymbolicRegressorModel) -> str:
     return f"data:image/svg+xml;base64,{encoded}"
 
 
-def symbolic_formula_aliases(model: SymbolicRegressorModel) -> list[tuple[str, str]]:
-    _, aliases = _aliased_formula(model)
+def symbolic_formula_aliases(model: SymbolicRegressorModel, schema=None) -> list[tuple[str, str]]:
+    expression = _parse_symbolic_expression(model.sympy_expression)
+    aliases = []
+    for symbol in _sorted_symbols(expression.free_symbols):
+        aliases.append(
+            (
+                _symbolic_formula_alias(symbol.name),
+                display_feature_label(symbol.name, schema)
+                if schema is not None
+                else symbol.name,
+            )
+        )
     return aliases
 
 
-def _aliased_formula(model: SymbolicRegressorModel) -> tuple[str, list[tuple[str, str]]]:
-    expression = sympy.sympify(model.sympy_expression)
-    symbols = sorted(expression.free_symbols, key=lambda item: item.name)
+def format_symbolic_equation_text(expression_text, schema=None) -> str:
+    try:
+        expression = _format_expression_for_display(expression_text)
+        return _TEXT_PRINTER.doprint(expression)
+    except Exception:
+        return str(expression_text)
+
+
+def format_symbolic_equation_latex(expression_text, schema=None) -> str:
+    expression = _format_expression_for_display(expression_text)
+    return _LATEX_PRINTER.doprint(expression)
+
+
+def _format_expression_for_display(expression_text):
+    expression = _parse_symbolic_expression(expression_text)
     alias_map = {
-        symbol: sympy.Symbol(f"x_{index}") for index, symbol in enumerate(symbols, start=1)
+        symbol: sympy.Symbol(_symbolic_formula_alias(symbol.name))
+        for symbol in expression.free_symbols
     }
-    aliased_expression = expression.xreplace(alias_map)
-    latex_expression = sympy.latex(
-        aliased_expression,
-        fold_short_frac=False,
-        fold_frac_powers=False,
-        long_frac_ratio=2,
+    expression = expression.xreplace(alias_map)
+    replacements = {
+        number: _format_number_atom(number)
+        for number in expression.atoms(sympy.Float)
+    }
+    return expression.xreplace(replacements)
+
+
+def _parse_symbolic_expression(expression_text):
+    return parse_expr(
+        str(expression_text),
+        local_dict=_SYMBOLIC_PARSE_LOCALS,
+        transformations=_SYMBOLIC_PARSE_TRANSFORMATIONS,
+        evaluate=True,
     )
-    aliases = [
-        (f"x_{index}", symbol.name) for index, symbol in enumerate(symbols, start=1)
-    ]
-    return latex_expression, aliases
 
 
-def _node_label(node) -> str:
+def _format_number_atom(number: sympy.Float):
+    value = float(number)
+    if abs(value - round(value)) < 1e-10:
+        return sympy.Integer(int(round(value)))
+    magnitude = abs(value)
+    if magnitude > 0.0 and magnitude < 0.01:
+        return sympy.Float(f"{value:.2e}")
+    rounded_value = round(value, 2)
+    rounded_error = abs(rounded_value - value)
+    fraction = Fraction(value).limit_denominator(12)
+    fraction_value = fraction.numerator / fraction.denominator
+    fraction_error = abs(fraction_value - value)
+    if (
+        fraction.denominator != 1
+        and fraction_error + 1e-12 < rounded_error
+        and fraction_error <= 0.01
+    ):
+        return sympy.Rational(fraction.numerator, fraction.denominator)
+    return sympy.Float(f"{value:.2f}")
+
+
+def _format_decimal_or_scientific(value: float) -> str:
+    magnitude = abs(value)
+    if magnitude > 0.0 and magnitude < 0.01:
+        mantissa, exponent = f"{value:.2e}".split("e")
+        mantissa = mantissa.rstrip("0").rstrip(".")
+        return f"{mantissa}e{int(exponent)}"
+    text = f"{value:.2f}".rstrip("0").rstrip(".")
+    return "0" if text == "-0" else text
+
+
+def _sorted_symbols(symbols) -> list[sympy.Symbol]:
+    return sorted(
+        symbols,
+        key=lambda item: (
+            _SYMBOLIC_FORMULA_SYMBOL_ORDER.get(item.name, 999),
+            item.name,
+        ),
+    )
+
+
+def _symbolic_formula_alias(feature_name: str) -> str:
+    return _SYMBOLIC_FORMULA_NAME_ALIASES.get(feature_name, feature_name)
+
+
+def _node_label(node, schema=None) -> str:
     if isinstance(node, sympy.Symbol):
-        return str(node)
+        return _symbolic_formula_alias(str(node))
     if node.is_Number:
-        return str(round(float(node), 4))
+        formatted_number = (
+            node
+            if isinstance(node, (sympy.Integer, sympy.Rational))
+            else _format_number_atom(sympy.Float(float(node)))
+        )
+        return _TEXT_PRINTER.doprint(formatted_number)
     label_map = {
         "Add": "+",
         "Mul": "*",
         "Pow": "^",
     }
     return label_map.get(node.func.__name__, node.func.__name__)
+
 
 def _empty_figure(message: str):
     fig = go.Figure()

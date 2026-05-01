@@ -1,22 +1,126 @@
 """Callbacks for local sample explainability."""
 
+from datetime import datetime
+
 import pandas as pd
 import plotly.graph_objects as go
-from dash import ALL, Input, Output, State, dcc, html
+from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
+from src.dashboard.dashboard.styles import PILL_BUTTON_STYLE
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
+
+
+MANUAL_INPUT_DEFAULTS = {
+    "ExecDatetime": None,
+    "OptionType": "CALL",
+    "StrikePrice": 9100.0,
+    "UnderlyingPrice": 9000.0,
+    "TimeToExpiration": 20.0,
+    "Rate": -0.6,
+}
+
+MANUAL_INPUT_LABEL_OVERRIDES = {
+    "OptionType": "Type",
+    "StrikePrice": "Strike",
+    "UnderlyingPrice": "Underlying",
+}
 
 
 def _empty_figure():
     return go.Figure()
 
 
+def _prediction_indicator(
+    *,
+    title: str,
+    prediction: float,
+    actual: float | None = None,
+) -> html.Div:
+    supporting_items = []
+    if actual is not None:
+        supporting_items.append(
+            html.Div(
+                [
+                    html.Span("Actual implied volatility"),
+                    html.Strong(f"{actual:.4f}"),
+                ],
+                style={
+                    "display": "flex",
+                    "justifyContent": "space-between",
+                    "gap": "18px",
+                    "fontSize": "0.96rem",
+                    "color": "#35506e",
+                },
+            )
+        )
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "minmax(0, 1fr) auto",
+            "gap": "18px",
+            "alignItems": "center",
+            "padding": "20px 22px",
+            "borderRadius": "14px",
+            "border": "1px solid rgba(33,75,122,0.18)",
+            "background": "linear-gradient(135deg, #ffffff 0%, #edf5ff 100%)",
+            "boxShadow": "0 12px 26px rgba(22,40,68,0.10)",
+            "margin": "16px 0",
+        },
+        children=[
+            html.Div(
+                [
+                    html.H3(
+                        title,
+                        style={
+                            "margin": "0 0 8px 0",
+                            "fontSize": "1.05rem",
+                            "color": "#17304f",
+                        },
+                    ),
+                    html.Div(
+                        "Predicted volatility",
+                        style={
+                            "fontSize": "0.92rem",
+                            "fontWeight": "700",
+                            "textTransform": "uppercase",
+                            "color": "#48617f",
+                        },
+                    ),
+                    html.Div(supporting_items, style={"marginTop": "12px"}),
+                ]
+            ),
+            html.Div(
+                f"{prediction:.4f}",
+                style={
+                    "minWidth": "180px",
+                    "textAlign": "right",
+                    "fontSize": "2.55rem",
+                    "fontWeight": "800",
+                    "lineHeight": "1",
+                    "color": "#17304f",
+                },
+            ),
+        ],
+    )
+
+
 def _manual_field(feature, default_value):
     component_id = {"type": "manual-feature", "feature": feature.name}
-    if feature.widget == "dropdown" and feature.allowed_values:
+    if feature.name == "OptionType":
+        input_component = dcc.Dropdown(
+            id=component_id,
+            options=[
+                {"label": "CALL", "value": "CALL"},
+                {"label": "PUT", "value": "PUT"},
+            ],
+            value=_manual_option_type_value(default_value),
+            clearable=False,
+        )
+    elif feature.widget == "dropdown" and feature.allowed_values:
         options = [
             {"label": str(value), "value": value}
             for value in feature.allowed_values or ()
@@ -25,31 +129,212 @@ def _manual_field(feature, default_value):
             id=component_id, options=options, value=default_value
         )
     elif feature.dtype == "datetime":
-        input_component = dcc.Input(
-            id=component_id,
-            type="text",
-            value="" if default_value is None else str(default_value),
-            placeholder="YYYY-MM-DD HH:MM:SS",
+        input_component = html.Div(
+            style={"display": "grid", "gap": "8px"},
+            children=[
+                dcc.Input(
+                    id=component_id,
+                    type="text",
+                    value=_manual_datetime_value(default_value),
+                    placeholder="YYYY-MM-DDTHH:MM:SS+02:00",
+                    style={
+                        "height": "34px",
+                        "width": "100%",
+                        "boxSizing": "border-box",
+                        "borderRadius": "8px",
+                        "border": "1px solid rgba(23,48,79,0.18)",
+                        "padding": "0 10px",
+                    },
+                ),
+                html.Div(
+                    style={
+                        "display": "flex",
+                        "justifyContent": "space-between",
+                        "alignItems": "center",
+                        "gap": "10px",
+                    },
+                    children=[
+                        html.Span(
+                            "Filled with your current local time.",
+                            style={"fontSize": "0.82rem", "color": "#5b6d85"},
+                        ),
+                        html.Button(
+                            "Now",
+                            id={"type": "manual-now", "feature": feature.name},
+                            n_clicks=0,
+                            type="button",
+                            style=PILL_BUTTON_STYLE,
+                        ),
+                    ],
+                ),
+            ],
         )
+    elif feature.is_numerical:
+        input_component = _manual_number_control(feature, default_value)
     else:
         input_component = dcc.Input(
             id=component_id,
-            type="number" if feature.is_numerical else "text",
+            type="text",
             value=default_value,
-            min=feature.min_value,
-            max=feature.max_value,
-            step=1 if feature.dtype == "int" else "any",
         )
     return html.Div(
         children=[
-            html.Label(feature.label),
+            html.Label(
+                MANUAL_INPUT_LABEL_OVERRIDES.get(feature.name, feature.label),
+                title=feature.description,
+            ),
             input_component,
+            html.Div(
+                feature.description,
+                style={
+                    "marginTop": "6px",
+                    "fontSize": "0.82rem",
+                    "color": "#5b6d85",
+                },
+            )
+            if feature.description
+            else html.Div(),
         ]
     )
 
 
+def _manual_number_control(feature, default_value):
+    feature_name = feature.name
+    button_style = {
+        "width": "34px",
+        "height": "34px",
+        "border": "1px solid rgba(23,48,79,0.18)",
+        "background": "#edf5ff",
+        "color": "#17304f",
+        "fontWeight": "800",
+        "cursor": "pointer",
+    }
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "34px minmax(0, 1fr) 34px",
+            "alignItems": "center",
+            "width": "100%",
+        },
+        children=[
+            html.Button(
+                "-",
+                id={
+                    "type": "manual-step",
+                    "feature": feature_name,
+                    "direction": "down",
+                },
+                n_clicks=0,
+                type="button",
+                style={
+                    **button_style,
+                    "borderRadius": "8px 0 0 8px",
+                    "borderRight": "0",
+                },
+            ),
+            dcc.Input(
+                id={"type": "manual-feature", "feature": feature_name},
+                type="text",
+                value=_manual_numeric_value(default_value),
+                style={
+                    "height": "34px",
+                    "width": "100%",
+                    "boxSizing": "border-box",
+                    "borderRadius": "0",
+                    "border": "1px solid rgba(23,48,79,0.18)",
+                    "textAlign": "right",
+                    "padding": "0 10px",
+                },
+            ),
+            html.Button(
+                "+",
+                id={
+                    "type": "manual-step",
+                    "feature": feature_name,
+                    "direction": "up",
+                },
+                n_clicks=0,
+                type="button",
+                style={
+                    **button_style,
+                    "borderRadius": "0 8px 8px 0",
+                    "borderLeft": "0",
+                },
+            ),
+        ],
+    )
+
+
+def _manual_option_type_value(default_value):
+    value = default_value.value if hasattr(default_value, "value") else default_value
+    text = str(value).strip().upper()
+    if text in {"CALL", "C"}:
+        return "CALL"
+    if text in {"PUT", "P"}:
+        return "PUT"
+    return "CALL"
+
+
+def _manual_numeric_step(feature):
+    if feature.dtype == "int":
+        return 1
+    return {
+        "StrikePrice": 1,
+        "UnderlyingPrice": 1,
+        "TimeToExpiration": 1,
+        "UnderlyingLagMinutes": 1,
+        "Quantity": 1,
+        "Rate": 0.01,
+    }.get(feature.name, 0.01 if feature.is_numerical else None)
+
+
+def _manual_numeric_value(default_value):
+    if default_value in (None, ""):
+        return None
+    try:
+        numeric_value = float(default_value)
+    except (TypeError, ValueError):
+        return default_value
+    if numeric_value.is_integer():
+        return int(numeric_value)
+    return numeric_value
+
+
+def _manual_datetime_value(default_value):
+    if default_value in (None, ""):
+        return _current_local_timestamp()
+    timestamp = pd.to_datetime(default_value, errors="coerce")
+    if pd.isna(timestamp):
+        return _current_local_timestamp()
+    if getattr(timestamp, "tzinfo", None) is None:
+        return timestamp.isoformat(timespec="seconds")
+    return timestamp.isoformat(timespec="seconds")
+
+
+def _current_local_timestamp():
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def _stepped_manual_value(feature_schema, feature_name, current_value, direction):
+    feature = feature_schema.get(feature_name)
+    step = float(_manual_numeric_step(feature) or 1)
+    try:
+        value = float(current_value)
+    except (TypeError, ValueError):
+        value = float(MANUAL_INPUT_DEFAULTS.get(feature_name, 0.0))
+    value = value + step if direction == "up" else value - step
+    if feature.min_value is not None:
+        value = max(float(feature.min_value), value)
+    if feature.max_value is not None:
+        value = min(float(feature.max_value), value)
+    if feature.dtype == "int" or float(value).is_integer():
+        return int(round(value))
+    return round(value, 10)
+
+
 def _neighbors_table(frame: pd.DataFrame):
     columns = [
+        "index",
         "OptionType",
         "TimeToExpiration",
         "UnderlyingPrice",
@@ -137,6 +422,33 @@ def register_sample_callbacks(app, services) -> None:
     """Register sample-explainability callbacks."""
 
     @app.callback(
+        Output({"type": "manual-feature", "feature": MATCH}, "value"),
+        Input({"type": "manual-step", "feature": MATCH, "direction": ALL}, "n_clicks"),
+        State({"type": "manual-feature", "feature": MATCH}, "id"),
+        State({"type": "manual-feature", "feature": MATCH}, "value"),
+        prevent_initial_call=True,
+    )
+    def step_manual_numeric_value(_, component_id, current_value):
+        triggered = ctx.triggered_id
+        if not isinstance(triggered, dict):
+            return no_update
+        feature_name = component_id["feature"]
+        return _stepped_manual_value(
+            services.feature_schema,
+            feature_name,
+            current_value,
+            triggered.get("direction"),
+        )
+
+    @app.callback(
+        Output({"type": "manual-feature", "feature": MATCH}, "value", allow_duplicate=True),
+        Input({"type": "manual-now", "feature": MATCH}, "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def set_manual_datetime_now(_):
+        return _current_local_timestamp()
+
+    @app.callback(
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),
         Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
@@ -147,9 +459,8 @@ def register_sample_callbacks(app, services) -> None:
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
-        mandatory_names = set(
-            config.clientserver_config.dashboard_manual_input_features
-        )
+        defaults.update(MANUAL_INPUT_DEFAULTS)
+        defaults["ExecDatetime"] = _current_local_timestamp()
         return (
             html.Div(
                 style={
@@ -161,7 +472,7 @@ def register_sample_callbacks(app, services) -> None:
                 children=[
                     _manual_field(feature, defaults.get(feature.name))
                     for feature in services.feature_schema.raw_input_features()
-                    if feature.name in mandatory_names
+                    if feature.name in VISIBLE_RAW_INPUT_FEATURE_NAMES
                 ],
             ),
             {"display": "none"},
@@ -222,16 +533,9 @@ def register_sample_callbacks(app, services) -> None:
                     if not neighbors.empty
                     else _empty_figure()
                 )
-                sample_summary = html.Div(
-                    [
-                        html.H3("Manual Input"),
-                        html.P(
-                            f"Predicted volatility: {float(api_result['prediction']):.4f}"
-                        ),
-                        html.P(
-                            f"Reference sample: {api_result.get('reference_sample_index')}"
-                        ),
-                    ]
+                sample_summary = _prediction_indicator(
+                    title="Manual Input",
+                    prediction=float(api_result["prediction"]),
                 )
                 return (
                     sample_summary,
@@ -240,26 +544,21 @@ def register_sample_callbacks(app, services) -> None:
                     comparison,
                 )
 
-            prediction = float(
-                services.prediction_service.predict_frame(model_id, sample_frame).iloc[
-                    0
-                ]
-            )
             explanation = services.shap_service.explain_sample(model_id, sample_frame)
+            prediction = float(explanation.predictions.iloc[0])
             neighbors = services.neighbors_service.find_neighbors(
                 model_id, sample_frame, k=10
             )
             comparison = neighbors_distance_figure(neighbors)
             actual = (
-                f" | actual IV: {float(sample_frame['ImpliedVolatility'].iloc[0]):.4f}"
+                float(sample_frame["ImpliedVolatility"].iloc[0])
                 if "ImpliedVolatility" in sample_frame.columns
-                else ""
+                else None
             )
-            sample_summary = html.Div(
-                [
-                    html.H3("Selected Sample"),
-                    html.P(f"Predicted volatility: {prediction:.4f}{actual}"),
-                ]
+            sample_summary = _prediction_indicator(
+                title="Selected Sample",
+                prediction=prediction,
+                actual=actual,
             )
             return (
                 sample_summary,

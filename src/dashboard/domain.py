@@ -7,10 +7,11 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricsRegistry,
 )
 from src.enums.data_enums import OptionTypeEnum
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
-from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
 def _r2_score(y_true, y_pred) -> float:
@@ -23,7 +24,7 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
-    features = [_raw_feature_definition(name) for name in RAW_INPUT_FEATURE_NAMES]
+    features = [_raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES]
     features.extend(
         [
             FeatureDefinition(
@@ -80,13 +81,18 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
     labels = {
         "ExecDatetime": "Execution Datetime",
         "OptionType": "Option Type",
-        "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
-        "TradeType": "Trade Type",
-        "UnderlyingLagMinutes": "Underlying Lag (minutes)",
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
         "Rate": "Rate",
+    }
+    descriptions = {
+        "ExecDatetime": "Execution timestamp used as contextual input. It is shown in the manual form but not explained as a driver.",
+        "OptionType": "Call or put option.",
+        "StrikePrice": "Strike price associated with the traded option.",
+        "UnderlyingPrice": "Underlying price paired with the option trade.",
+        "TimeToExpiration": "Remaining time to maturity, measured in days.",
+        "Rate": "Risk-free rate used to back out implied volatility.",
     }
     if name == "ExecDatetime":
         return FeatureDefinition(
@@ -96,7 +102,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             category="categorical",
             raw_input=True,
             widget="text",
-            description="Execution timestamp of the option trade.",
+            description=descriptions[name],
         )
     if name == "OptionType":
         return FeatureDefinition(
@@ -108,17 +114,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             allowed_values=(OptionTypeEnum.CALL, OptionTypeEnum.PUT),
             default_value=OptionTypeEnum.CALL,
             widget="dropdown",
-        )
-    if name == "TradeType":
-        return FeatureDefinition(
-            name=name,
-            label=labels[name],
-            dtype="category",
-            category="categorical",
-            raw_input=True,
-            allowed_values=tuple(TRADE_TYPE_TO_FEATURE.keys()),
-            default_value="M",
-            widget="dropdown",
+            description=descriptions[name],
         )
     return FeatureDefinition(
         name=name,
@@ -128,6 +124,7 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         raw_input=True,
         min_value=0.0 if name != "Rate" else None,
         widget="number",
+        description=descriptions.get(name),
     )
 
 

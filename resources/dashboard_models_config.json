@@ -31,11 +31,14 @@
     "curve_points": 25,
     "cache_entries": 64,
     "symbolic_sample_size": 2500,
-    "symbolic_niterations": 12,
-    "symbolic_populations": 6,
-    "symbolic_population_size": 26,
-    "symbolic_maxsize": 48,
-    "symbolic_maxdepth": 14,
-    "symbolic_timeout_seconds": 180
+    "symbolic_niterations": 120000,
+    "symbolic_populations": 12,
+    "symbolic_population_size": 80,
+    "symbolic_topn": 48,
+    "symbolic_ncycles_per_iteration": 1200,
+    "symbolic_min_candidate_equations": 5,
+    "symbolic_maxsize": 80,
+    "symbolic_maxdepth": 24,
+    "symbolic_timeout_seconds": 3600
   }
 }

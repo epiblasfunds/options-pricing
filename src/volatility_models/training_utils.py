@@ -33,12 +33,37 @@ class Trainer:
         self.model_family = model_family
 
     @staticmethod
+    def _metric_column(split_label: TrainingDataSplitEnum, metric_name: str) -> str:
+        return f"{split_label}_{metric_name}"
+
+    @staticmethod
+    def _compute_base_metric(metric_name: str, y_true, y_pred) -> float:
+        if metric_name == "mae":
+            return float(mean_absolute_error(y_true, y_pred))
+        if metric_name == "rmse":
+            return float(np.sqrt(mean_squared_error(y_true, y_pred)))
+        if metric_name == "r2":
+            return float(r2_score(y_true, y_pred))
+
+    @classmethod
+    def _metrics_for_splits(
+        cls,
+        split_labels: list[TrainingDataSplitEnum],
+    ) -> list[str]:
+        base_metrics = config.volatility_models_config.training_data_config.models_metrics
+        return [
+            cls._metric_column(split_label, metric_name)
+            for split_label in split_labels
+            for metric_name in base_metrics
+        ]
+
+    @staticmethod
     def add_custom_error1(
         metrics_table: pd.DataFrame,
         round_digits: int = 6
     ):
         """
-        Añade una métrica compuesta de selección que penaliza inestabilidad y sobreajuste.
+        Adds a composite selection metric that penalizes instability and overfitting.
         """
         custom_error_1_config = config.volatility_models_config.training_data_config.custom_error_1
 
@@ -46,8 +71,8 @@ class Trainer:
         alpha = custom_error_1_config["alpha"]
         beta = custom_error_1_config["beta"]
 
-        train_metric_col = f"train_{base_metric}"
-        valid_metric_col = f"val_{base_metric}"
+        train_metric_col = Trainer._metric_column(TrainingDataSplitEnum.TRAIN, base_metric)
+        valid_metric_col = Trainer._metric_column(TrainingDataSplitEnum.VAL, base_metric)
         valid_metric_std_col = f"{valid_metric_col}_std"
 
         train_metric = pd.to_numeric(metrics_table[train_metric_col])
@@ -73,7 +98,7 @@ class Trainer:
         round_digits: int = 6,
     ) -> dict[str, float]:
         """
-        Añade una métrica compuesta de selección que penaliza inestabilidad y sobreajuste.
+        Adds a composite selection metric that penalizes instability and overfitting.
         """
         custom_error_2_config = config.volatility_models_config.training_data_config.custom_error_2
 
@@ -81,8 +106,8 @@ class Trainer:
         gamma = custom_error_2_config["gamma"]
         beta = custom_error_2_config["beta"]
 
-        train_metric_col = f"train_{base_metric}"
-        valid_metric_col = f"val_{base_metric}"
+        train_metric_col = Trainer._metric_column(TrainingDataSplitEnum.TRAIN, base_metric)
+        valid_metric_col = Trainer._metric_column(TrainingDataSplitEnum.VAL, base_metric)
 
         train_metric = float(metrics_dict[train_metric_col])
         valid_metric = float(metrics_dict[valid_metric_col])
@@ -103,12 +128,17 @@ class Trainer:
 
 
     @staticmethod
-    def calculate_metrics_across_folds(fold_metrics_list, round_digits: int = 6):
+    def calculate_metrics_across_folds(
+        fold_metrics_list,
+        round_digits: int = 6,
+    ):
         """
-        Calcula estadísticas agregadas (media y desviación estándar) de métricas a través de los folds.
+        Computes aggregated metric statistics (mean and standard deviation) across folds.
         """
-        models_metrics = config.volatility_models_config.training_data_config.models_metrics
-        metric_keys = [k for k in models_metrics if k in fold_metrics_list[0]]
+        metric_keys = [
+            k for k in Trainer._metrics_for_splits([TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL])
+            if k in fold_metrics_list[0]
+        ]
         agg_metrics = {}
 
         for key in metric_keys:
@@ -125,6 +155,7 @@ class Trainer:
         y_valid_true,
         y_valid_pred,
         evaluation_label: TrainingDataSplitEnum,
+        train_label: TrainingDataSplitEnum = TrainingDataSplitEnum.TRAIN,
         round_digits: int = 6,
     ) -> dict[str, float]:
         y_train_true = np.asarray(y_train_true)
@@ -132,14 +163,14 @@ class Trainer:
         y_valid_true = np.asarray(y_valid_true)
         y_valid_pred = np.asarray(y_valid_pred)
 
-        metrics = {
-            "train_mae": mean_absolute_error(y_train_true, y_train_pred),
-            "train_rmse": np.sqrt(mean_squared_error(y_train_true, y_train_pred)),
-            "train_r2": r2_score(y_train_true, y_train_pred),
-            f"{evaluation_label.value}_mae": mean_absolute_error(y_valid_true, y_valid_pred),
-            f"{evaluation_label.value}_rmse": np.sqrt(mean_squared_error(y_valid_true, y_valid_pred)),
-            f"{evaluation_label.value}_r2": r2_score(y_valid_true, y_valid_pred),
-        }
+        base_metrics = list(config.volatility_models_config.training_data_config.models_metrics)
+        metrics = {}
+        for metric_name in base_metrics:
+            train_metric_col = Trainer._metric_column(train_label, metric_name)
+            eval_metric_col = Trainer._metric_column(evaluation_label, metric_name)
+            metrics[train_metric_col] = Trainer._compute_base_metric(metric_name, y_train_true, y_train_pred)
+            metrics[eval_metric_col] = Trainer._compute_base_metric(metric_name, y_valid_true, y_valid_pred)
+
         return {name: float(np.round(value, round_digits)) for name, value in metrics.items()}
 
     def run_kfolds_training_for_specific_model(
@@ -159,9 +190,9 @@ class Trainer:
             train_fold = v["train"]
             val_fold = v["val"]
 
-            X_train_fold = train_fold[BASE_FEATURE_COLS].to_numpy()
+            X_train_fold = train_fold[BASE_FEATURE_COLS]
             y_train_fold = train_fold[TARGET_COLUMN].to_numpy()
-            X_val_fold = val_fold[BASE_FEATURE_COLS].to_numpy()
+            X_val_fold = val_fold[BASE_FEATURE_COLS]
             y_val_fold = val_fold[TARGET_COLUMN].to_numpy()
 
             model = self.model_family.instantiate_model(
@@ -176,6 +207,7 @@ class Trainer:
                 y_train=y_train_fold,
                 X_val=X_val_fold,
                 phase=phase,
+                shuffle=True,
             )
 
             metrics = self.calculate_regression_metrics(
@@ -209,7 +241,7 @@ class Trainer:
         selection_config=None,
     ):
         """
-        Selecciona el mejor modelo desde `metrics_table` según criterio configurable.
+        Selects the best model from `metrics_table` using a configurable criterion.
         """
         selected_metric = selection_config["metric"]
         selected_mode = selection_config["mode"]
@@ -264,7 +296,7 @@ class Trainer:
         model_params_registry: dict,
         training_registry: dict,
     ):
-        """Guarda metadatos estructurados de la familia entrenada en JSON."""
+        """Saves structured metadata for the trained family to JSON."""
 
         payload = {
             "family_name": family_name,
@@ -280,7 +312,7 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(file_path, label="Metadata guardada")
+        Visualizer.info_confirmation(file_path, label="Metadata saved")
 
     @classmethod
     def save_retrained_metadata(
@@ -290,7 +322,7 @@ class Trainer:
         model_params: dict,
         training_information: dict,
     ):
-        """Guarda metadatos del modelo reentrenado en JSON."""
+        """Saves metadata for the retrained model to JSON."""
 
         phase_suffix = str(getattr(phase, "value", phase)).lower().replace(" ", "_")
 
@@ -313,28 +345,39 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(file_path, label="Metadata de reentrenamiento guardada")
+        Visualizer.info_confirmation(file_path, label="Retraining metadata saved")
     
-    @classmethod
-    def rename_metrics(
-        cls,
-        metrics_series: pd.Series,
-    ) -> pd.Series:
-        renamed_metrics = {}
-        for k, v in metrics_series.items():
-            if k.startswith("val_"):
-                new_key = k.replace("val_", "test_")
-            else:
-                new_key = k
-            renamed_metrics[new_key] = v
-        return pd.Series(renamed_metrics, name=metrics_series.name)
+    @staticmethod
+    def _build_progressive_training_data(
+        segments: list,
+        feature_cols: list,
+        target_col: str,
+    ) -> tuple[pd.DataFrame, np.ndarray]:
+        """
+        Builds cumulative ATM-to-less-ATM blocks.
+        In each iteration, data is concatenated up to the current segment, shuffled
+        within that cumulative set, and all cumulative sets are concatenated at the end.
+        """
+        progressive_blocks = []
+        for idx in range(len(segments)):
+            accumulated_segment = pd.concat(segments[: idx + 1], ignore_index=True)
+            accumulated_segment = accumulated_segment.sample(frac=1.0).reset_index(drop=True)
+            progressive_blocks.append(accumulated_segment)
 
+        accumulated_data = pd.concat(progressive_blocks, ignore_index=True)
+        X_train = accumulated_data[feature_cols]
+        y_train = accumulated_data[target_col].to_numpy()
+        
+        return X_train, y_train
+    
     @classmethod
     def create_empty_metrics_table(
         cls,
         selection_config
     ) -> pd.DataFrame:
-        model_metrics = list(config.volatility_models_config.training_data_config.models_metrics)
+        model_metrics = cls._metrics_for_splits(
+            [TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL]
+        )
         columns = model_metrics.copy()
         
         if selection_config is config.volatility_models_config.training_data_config.custom_error_1:
@@ -366,7 +409,7 @@ class Trainer:
                 else 0.0
             )
             logger.info(
-                "Exploracion de hiperparametros para '%s' (metadata cache): %s/%s configuraciones (%.2f%%).",
+                "Hyperparameter exploration for '%s' (metadata cache): %s/%s configurations (%.2f%%).",
                 family_name,
                 explored_configurations,
                 max_configurations,
@@ -406,7 +449,7 @@ class Trainer:
         for model_i_name, model_i_params in tqdm(
             models.items(),
             total=total_family_models,
-            desc=f"Entrenando familia: {family_name}",
+            desc=f"Training family: {family_name}",
         ):
             model_params_registry[model_i_name] = model_i_params
             tr, metrics = self.run_kfolds_training_for_specific_model(
@@ -458,23 +501,22 @@ class Trainer:
     
     def fit_model(
         self,
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
         phase: TrainingPhase,
         model_params: dict,
-        model=None,
-        reuse_model: bool = False,
-    ) -> ModelFitResult:
-        indices = np.random.permutation(len(X_train))
-        X_train = X_train[indices]
-        y_train = y_train[indices]
+        shuffle: bool = True,
+    ) -> tuple:
+        if shuffle:
+            indices = np.random.permutation(len(X_train))
+            X_train = X_train.iloc[indices]
+            y_train = y_train[indices]
 
-        if model is None or not reuse_model:
-            model = self.model_family.instantiate_model(
-                input_dim=X_train.shape[1],
-                model_params=model_params,
-            )
+        model = self.model_family.instantiate_model(
+            input_dim=X_train.shape[1],
+            model_params=model_params,
+        )
 
         fit_result = self.model_family.fit_model(
             model=model,
@@ -483,6 +525,7 @@ class Trainer:
             y_train=y_train,
             X_val=X_val,
             phase=phase,
+            shuffle=shuffle,
         )
 
         return fit_result, model
@@ -531,7 +574,7 @@ class Trainer:
             return result_series
 
         if not metadata_path.exists():
-            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            logger.warning("Family metadata not found for '%s'. Running k-fold training...", family_name)
             Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
@@ -543,22 +586,33 @@ class Trainer:
         if is_train_val:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
 
-            X_train = train_data[BASE_FEATURE_COLS].to_numpy()      
+            X_train = train_data[BASE_FEATURE_COLS]
             y_train = train_data[TARGET_COLUMN].to_numpy()
-            X_val = val_data[BASE_FEATURE_COLS].to_numpy()
+            X_val = val_data[BASE_FEATURE_COLS]
             y_val = val_data[TARGET_COLUMN].to_numpy()
 
+            train_label = TrainingDataSplitEnum.TRAIN
             evaluation_label = TrainingDataSplitEnum.VAL
 
         elif is_final_test:
             train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
 
-            X_train = train_data[BASE_FEATURE_COLS].to_numpy()
+            X_train = train_data[BASE_FEATURE_COLS]
             y_train = train_data[TARGET_COLUMN].to_numpy()
-            X_val = test_data[BASE_FEATURE_COLS].to_numpy()
+            X_val = test_data[BASE_FEATURE_COLS]
             y_val = test_data[TARGET_COLUMN].to_numpy()
 
+            train_label = TrainingDataSplitEnum.TRAIN_VAL
             evaluation_label = TrainingDataSplitEnum.TEST
+
+        logger.info(
+            "Retraining '%s' | phase=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            family_name,
+            phase.value if hasattr(phase, "value") else phase,
+            len(X_train),
+            len(X_val),
+            len(X_train) + len(X_val),
+        )
 
         fit_result, model = self.fit_model(
             model_params=best_model_params,
@@ -566,6 +620,7 @@ class Trainer:
             y_train=y_train,
             X_val=X_val,
             phase=phase,
+            shuffle=True,
         )
         
         metrics_dict = self.calculate_regression_metrics(
@@ -574,6 +629,7 @@ class Trainer:
             y_val,
             fit_result.validation_predictions,
             evaluation_label=evaluation_label,
+            train_label=train_label,
         )
 
         if is_train_val:
@@ -583,9 +639,6 @@ class Trainer:
             )
 
         result_series = pd.Series(metrics_dict, name=model_name)
-
-        if is_final_test:
-            result_series = self.rename_metrics(result_series)
 
         Visualizer.best_model_family_retrained(
             result_series=result_series,
@@ -664,13 +717,6 @@ class Trainer:
             with open(retrained_metadata_path, "r", encoding="utf-8") as f:
                 cached_payload = json.load(f)
 
-            cached_progressive_results = cached_payload.get("progressive_results", {})
-            Visualizer.progressive_training_segments_graphics(
-                progressive_results=cached_progressive_results,
-                family_name=progressive_family_name,
-                phase=phase,
-            )
-
             result_series = pd.Series(
                 cached_payload.get("result_metrics", {}),
                 name=f"{progressive_family_name}_best",
@@ -682,10 +728,6 @@ class Trainer:
             )
 
             training_information = cached_payload.get("training_information", {})
-            training_information = {
-                **training_information,
-                "progressive_results": cached_progressive_results,
-            }
             self.model_family.plots(
                 {
                     "training_information": training_information,
@@ -695,13 +737,23 @@ class Trainer:
                 }
             )
 
-            return cached_progressive_results
+            progressive_results = {
+                "progressive": {
+                    "metrics": cached_payload.get("result_metrics", {}),
+                    "best_iteration": training_information.get("best_iteration"),
+                    "best_score": training_information.get("best_score"),
+                    "epoch_history": training_information.get("epoch_history", {}),
+                    "y_val_true": training_information.get("y_val_true", []),
+                    "y_val_pred": training_information.get("y_val_pred", []),
+                }
+            }
+            return progressive_results
 
         if not is_final_test and upload_to_gcp:
             upload_to_gcp = False
         
         if not metadata_path.exists():
-            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            logger.warning("Family metadata not found for '%s'. Running k-fold training...", family_name)
             Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
@@ -713,11 +765,13 @@ class Trainer:
         # Load data
         if is_train_val:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
+            train_label = TrainingDataSplitEnum.TRAIN
             evaluation_label = TrainingDataSplitEnum.VAL
         elif is_final_test:
             train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
             train_data = train_data.copy()
             test_data = test_data.copy()
+            train_label = TrainingDataSplitEnum.TRAIN_VAL
             evaluation_label = TrainingDataSplitEnum.TEST
             val_data = test_data
 
@@ -735,91 +789,66 @@ class Trainer:
         ]
         segments.append(train_data_sorted.iloc[(n_segments - 1) * segment_size :])
 
-        progressive_results = {}
-        model = None
+        # Prepare training data progressively and fit model
+        X_train, y_train = self._build_progressive_training_data(
+            segments=segments,
+            feature_cols=BASE_FEATURE_COLS,
+            target_col=TARGET_COLUMN,
+        )
+        X_val = val_data[BASE_FEATURE_COLS]
+        y_val = val_data[TARGET_COLUMN].to_numpy()
 
-        for seg_idx, segment in enumerate(tqdm(segments, desc=f"Progressive training: {family_name}")):
-            segment_name = f"segment_{seg_idx}_{n_segments}"
-            
-            # Accumulate data up to the current segment
-            accumulated_data = pd.concat(segments[: seg_idx + 1], ignore_index=True)
-            
-            X_train = accumulated_data[BASE_FEATURE_COLS].to_numpy()
-            y_train = accumulated_data[TARGET_COLUMN].to_numpy()
-            X_val = val_data[BASE_FEATURE_COLS].to_numpy()
-            y_val = val_data[TARGET_COLUMN].to_numpy()
+        logger.info(
+            "Progressive retraining '%s' | phase=%s | n_segments=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            progressive_family_name,
+            phase.value if hasattr(phase, "value") else phase,
+            n_segments,
+            len(X_train),
+            len(X_val),
+            len(X_train) + len(X_val),
+        )
 
-            fit_result, model = self.fit_model(
-                model_params=best_model_params,
-                X_train=X_train,
-                y_train=y_train,
-                X_val=X_val,
-                phase=phase,
-                model=model,
-                reuse_model=True,
+        fit_result, model = self.fit_model(
+            model_params=best_model_params,
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            phase=phase,
+            shuffle=False,
+        )
+
+        metrics_dict = self.calculate_regression_metrics(
+            y_train,
+            fit_result.train_predictions,
+            y_val,
+            fit_result.validation_predictions,
+            evaluation_label=evaluation_label,
+            train_label=train_label,
+        )
+
+        if is_train_val:
+            metrics_dict = self.add_custom_error2(
+                metrics_dict=metrics_dict,
+                custom_error_1=custom_error_1,
             )
 
-            metrics_dict = self.calculate_regression_metrics(
-                y_train,
-                fit_result.train_predictions,
-                y_val,
-                fit_result.validation_predictions,
-                evaluation_label=evaluation_label,
-            )
-
-            if is_train_val:
-                metrics_dict = self.add_custom_error2(
-                    metrics_dict=metrics_dict,
-                    custom_error_1=custom_error_1,
-                )
-
-            result_series = pd.Series(metrics_dict, name=f"{family_name}_best_{segment_name}")
-            progressive_results[segment_name] = {
+        result_series = pd.Series(
+            metrics_dict,
+            name=f"{progressive_family_name}_best",
+        )
+        
+        progressive_results = {
+            "progressive": {
                 "metrics": result_series.to_dict(),
-                "n_train_samples": len(accumulated_data),
+                "n_train_samples": len(X_train),
                 "best_iteration": fit_result.best_iteration,
                 "best_score": fit_result.best_score,
                 "epoch_history": fit_result.epoch_history or {},
                 "y_val_true": y_val.tolist(),
                 "y_val_pred": fit_result.validation_predictions.tolist(),
             }
-
-        Visualizer.progressive_training_segments_graphics(
-            progressive_results=progressive_results,
-            family_name=progressive_family_name,
-            phase=phase,
-        )
-
-        selected_segment_key = f"segment_{n_segments-1}_{n_segments}"
-        if is_train_val:
-            custom_error_2_config = config.volatility_models_config.training_data_config.custom_error_2
-            custom_error_2_metric = custom_error_2_config["metric"]
-            custom_error_2_mode = custom_error_2_config.get("mode", "min")
-
-            candidate_segment_keys = [
-                k for k, v in progressive_results.items()
-                if custom_error_2_metric in v.get("metrics", {})
-            ]
-            if candidate_segment_keys:
-                if custom_error_2_mode == "min":
-                    selected_segment_key = min(
-                        candidate_segment_keys,
-                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
-                    )
-                else:
-                    selected_segment_key = min(
-                        candidate_segment_keys,
-                        key=lambda k: progressive_results[k]["metrics"][custom_error_2_metric],
-                    )
-
-        selected_segment = progressive_results[selected_segment_key]
-        result_series = pd.Series(
-            selected_segment["metrics"],
-            name=f"{progressive_family_name}_best",
-        )
-        if is_final_test:
-            result_series = self.rename_metrics(result_series)
-
+        }
+        
         Visualizer.best_model_family_retrained(
             result_series=result_series,
             phase=phase,
@@ -828,13 +857,12 @@ class Trainer:
 
         training_information = {
             "model": model,
-            "best_iteration": selected_segment.get("best_iteration"),
-            "best_score": selected_segment.get("best_score"),
-            "epoch_history": selected_segment.get("epoch_history", {}),
+            "best_iteration": fit_result.best_iteration,
+            "best_score": fit_result.best_score,
+            "epoch_history": fit_result.epoch_history or {},
             "result_series": result_series,
-            "progressive_results": progressive_results,
-            "y_val_true": selected_segment["y_val_true"],
-            "y_val_pred": selected_segment["y_val_pred"],
+            "y_val_true": y_val.tolist(),
+            "y_val_pred": fit_result.validation_predictions.tolist(),
         }
 
         self.model_family.plots(
@@ -850,7 +878,6 @@ class Trainer:
             "family_name": progressive_family_name,
             "model_params": self._to_builtin(best_model_params),
             "result_metrics": self._to_builtin(result_series.to_dict()),
-            "progressive_results": self._to_builtin(progressive_results),
             "training_information": {
                 "best_iteration": self._to_builtin(training_information.get("best_iteration")),
                 "best_score": self._to_builtin(training_information.get("best_score")),
@@ -863,7 +890,7 @@ class Trainer:
         with open(retrained_metadata_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(retrained_metadata_path, label="Metadata progresiva guardada")
+        Visualizer.info_confirmation(retrained_metadata_path, label="Progressive metadata saved")
 
         if is_final_test:
             self.model_family.save_model(
@@ -911,11 +938,11 @@ def _run_model2dashboard_pipeline(family_name: str):
             check=True,
         )
         logger.info(
-            "Pipeline de model2dashboard para familia '%s' ejecutada correctamente.",
+            "model2dashboard pipeline for family '%s' completed successfully.",
             family_name,
         )
     except Exception as e:
-        logger.exception("Error ejecutando pipeline de model2dashboard: %s", e)
+        logger.exception("Error while running the model2dashboard pipeline: %s", e)
         raise
 
 def _find_gcloud():
@@ -932,9 +959,11 @@ def _find_gcloud():
             r"%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
             r"%PROGRAMFILES%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
             r"%PROGRAMFILES(X86)%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
+            r"%PROGRAMDATA%\chocolatey\bin\gcloud.cmd",
+            r"%USERPROFILE%\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
         ])
 
-    else: # Linux y macOS
+    else:  # Linux and macOS
         possible_paths.extend([
             "/usr/local/bin/gcloud",
             "/opt/homebrew/bin/gcloud",
@@ -944,12 +973,15 @@ def _find_gcloud():
         possible_paths.extend([
             "/usr/bin/gcloud",
             "/usr/local/sbin/gcloud",
+            "/opt/google-cloud-sdk/bin/gcloud",
         ])
 
     for path in possible_paths:
         expanded = os.path.expandvars(os.path.expanduser(path))
         if os.path.exists(expanded) and os.access(expanded, os.X_OK):
             return expanded
+
+    logger.debug("No working gcloud executable was found in PATH or in known locations.")
 
     return None
 
@@ -965,7 +997,7 @@ def _upload_models_to_gcp(
 
     if not gcloud_path:
         logger.warning(
-            "No se encontró 'gcloud'. Se omite subida a GCP para la familia '%s'.",
+            "'gcloud' was not found. Skipping GCP upload for family '%s'.",
             family_name,
         )
         return
@@ -1000,13 +1032,13 @@ def _upload_models_to_gcp(
 
     if not VOLATILITY_BUCKET:
         logger.warning(
-            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler/metadatos para '%s'.",
+            "trained_models_bucket is not configured. Skipping model/scaler/metadata upload for '%s'.",
             family_name,
         )
 
     if not DASHBOARD_BUCKET:
         logger.warning(
-            "explainability_artifacts_bucket no está configurado. Se omite subida de artefactos dashboard para '%s'.",
+            "explainability_artifacts_bucket is not configured. Skipping dashboard artifact upload for '%s'.",
             family_name,
         )
 
@@ -1025,13 +1057,13 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt")
             )
             logger.info(
-                "Modelo entrenado '%s' subido a GCP: %s -> %s",
+                "Trained model '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 model_path,
                 model_destination,
             )
         else:
-            logger.warning("No existe modelo entrenado para subir: %s", model_path)
+            logger.warning("No trained model exists to upload: %s", model_path)
 
         if VOLATILITY_BUCKET and scaler_path and os.path.isfile(scaler_path):
             subprocess.run(
@@ -1047,7 +1079,7 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt")
             )
             logger.info(
-                "Scaler de modelo entrenado '%s' subido a GCP: %s -> %s",
+                "Scaler for trained model '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 scaler_path,
                 model_destination,
@@ -1067,14 +1099,14 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt"),
             )
             logger.info(
-                "Metadata final-test '%s' subida a GCP: %s -> %s",
+                "Final-test metadata '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 final_test_metadata_path,
                 metadata_destination,
             )
         else:
             logger.warning(
-                "No existe metadata final-test para subir: %s",
+                "No final-test metadata exists to upload: %s",
                 final_test_metadata_path,
             )
 
@@ -1094,14 +1126,14 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt"),
             )
             logger.info(
-                "Artefactos de dashboard '%s' subidos a GCP: %s -> %s",
+                "Dashboard artifacts '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 dashboard_family_path,
                 dashboard_destination,
             )
         else:
-            logger.warning("No existe carpeta de dashboard para '%s', omitiendo.", family_name)
+            logger.warning("No dashboard folder exists for '%s'; skipping.", family_name)
 
     except Exception as e:
-        logger.exception("Error al subir modelos a GCP: %s", e)
+        logger.exception("Error while uploading models to GCP: %s", e)
         raise

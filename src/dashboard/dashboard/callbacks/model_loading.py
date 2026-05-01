@@ -4,9 +4,203 @@ from dash import Input, Output, State, html
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
+from src.dashboard.utils.feature_utils import build_manual_input_sample_label
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
+
+
+def _default_ice_feature(ice_options: list[dict]) -> str | None:
+    option_values = [option["value"] for option in ice_options]
+    if "StrikePrice" in option_values:
+        return "StrikePrice"
+    return option_values[0] if option_values else None
+
+
+def _model_info_panel(
+    *,
+    model_name: str,
+    format_label: str,
+    explained_features: list[str],
+    context_features: list[str],
+    metric_names: list[str],
+    feature_schema,
+) -> html.Div:
+    return html.Div(
+        style={
+            "display": "grid",
+            "gridTemplateColumns": "minmax(220px, 0.9fr) minmax(320px, 1.8fr)",
+            "gap": "16px",
+            "alignItems": "stretch",
+            "padding": "14px 16px",
+            "border": "1px solid rgba(33,75,122,0.14)",
+            "borderRadius": "14px",
+            "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            "boxShadow": "0 8px 18px rgba(22,40,68,0.05)",
+        },
+        children=[
+            html.Div(
+                children=[
+                    html.Div(
+                        "Selected model",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                            "marginBottom": "5px",
+                        },
+                    ),
+                    html.H3(
+                        model_name,
+                        style={
+                            "margin": "0 0 10px 0",
+                            "fontSize": "1.18rem",
+                            "lineHeight": "1.25",
+                            "color": "#17304f",
+                        },
+                    ),
+                    html.Div(
+                        style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
+                        children=[
+                            _metadata_chip("Format", format_label),
+                            *[_metadata_chip("Metric", metric) for metric in metric_names],
+                        ],
+                    ),
+                ]
+            ),
+            html.Div(
+                children=[
+                    html.Div(
+                        "Explained variables",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.Div(
+                        style={
+                            "display": "flex",
+                            "gap": "8px",
+                            "overflowX": "auto",
+                            "padding": "2px 2px 8px 2px",
+                            "maxWidth": "100%",
+                            "scrollbarWidth": "thin",
+                        },
+                        children=[
+                            html.Span(
+                                (
+                                    feature_schema.get(str(feature_name)).label
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
+                                title=(
+                                    feature_schema.get(str(feature_name)).description
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
+                                style={
+                                    "display": "inline-flex",
+                                    "alignItems": "center",
+                                    "whiteSpace": "nowrap",
+                                    "padding": "6px 10px",
+                                    "borderRadius": "999px",
+                                    "border": "1px solid rgba(33,75,122,0.14)",
+                                    "background": "#ffffff",
+                                    "color": "#243b5a",
+                                    "fontSize": "0.86rem",
+                                    "fontWeight": "600",
+                                },
+                            )
+                            for feature_name in explained_features
+                        ],
+                    ),
+                ]
+            ),
+            html.Div(
+                children=[
+                    html.Div(
+                        "Context variable",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.Div(
+                        style={
+                            "display": "flex",
+                            "gap": "8px",
+                            "flexWrap": "wrap",
+                        },
+                        children=[
+                            html.Span(
+                                (
+                                    feature_schema.get(str(feature_name)).label
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
+                                title=(
+                                    feature_schema.get(str(feature_name)).description
+                                    if str(feature_name) in feature_schema.names()
+                                    else str(feature_name)
+                                ),
+                                style={
+                                    "display": "inline-flex",
+                                    "alignItems": "center",
+                                    "whiteSpace": "nowrap",
+                                    "padding": "6px 10px",
+                                    "borderRadius": "999px",
+                                    "border": "1px solid rgba(33,75,122,0.14)",
+                                    "background": "#ffffff",
+                                    "color": "#243b5a",
+                                    "fontSize": "0.86rem",
+                                    "fontWeight": "600",
+                                },
+                            )
+                            for feature_name in context_features
+                        ]
+                        or [
+                            html.Span(
+                                "None",
+                                style={
+                                    "color": "#5b6d85",
+                                    "fontSize": "0.86rem",
+                                },
+                            )
+                        ],
+                    ),
+                ]
+            ),
+        ],
+    )
+
+
+def _metadata_chip(label: str, value: str) -> html.Span:
+    return html.Span(
+        [
+            html.Span(
+                f"{label}:",
+                style={"color": "#5b6d85", "fontWeight": "700"},
+            ),
+            html.Span(str(value), style={"color": "#17304f", "fontWeight": "800"}),
+        ],
+        style={
+            "display": "inline-flex",
+            "alignItems": "center",
+            "gap": "4px",
+            "padding": "6px 10px",
+            "borderRadius": "999px",
+            "background": "#edf5ff",
+            "border": "1px solid rgba(47,93,138,0.18)",
+            "fontSize": "0.84rem",
+        },
+    )
 
 
 def register_model_loading_callbacks(app, services) -> None:
@@ -65,7 +259,7 @@ def register_model_loading_callbacks(app, services) -> None:
 
         if not model_id:
             sample_options = [
-                {"label": build_sample_label(row), "value": int(index)}
+                {"label": build_manual_input_sample_label(row), "value": int(index)}
                 for index, row in sampled.iterrows()
             ]
             return (
@@ -76,7 +270,7 @@ def register_model_loading_callbacks(app, services) -> None:
                 shap_options,
                 None,
                 ice_options,
-                ice_options[0]["value"] if ice_options else None,
+                _default_ice_feature(ice_options),
                 sample_options,
                 sample_options,
             )
@@ -85,7 +279,10 @@ def register_model_loading_callbacks(app, services) -> None:
         metadata = model.metadata if model else {}
         bundle = services.prediction_service.load_bundle(model_id)
         sample_options = [
-            {"label": build_sample_label(dataset.loc[index]), "value": int(index)}
+            {
+                "label": build_manual_input_sample_label(dataset.loc[index]),
+                "value": int(index),
+            }
             for index in bundle.dashboard_model.sample_indices
             if index in dataset.index
         ]
@@ -94,8 +291,19 @@ def register_model_loading_callbacks(app, services) -> None:
             for index in bundle.dashboard_model.behaviour_anchor_indices
             if index in dataset.index
         ]
-        model_features = metadata.get("model_input_features", [])
-        shap_feature_names = metadata.get("transformed_feature_names", model_features)
+        explained_feature_names = metadata.get("explainability_feature_names") or metadata.get(
+            "raw_feature_names",
+            [],
+        )
+        context_feature_names = metadata.get("context_feature_names", [])
+        shap_feature_names = [
+            str(feature_name)
+            for feature_name in explained_feature_names
+            if (
+                str(feature_name) in services.feature_schema.names()
+                and services.feature_schema.get(str(feature_name)).is_numerical
+            )
+        ]
         shap_options = [
             {
                 "label": display_feature_label(
@@ -106,25 +314,23 @@ def register_model_loading_callbacks(app, services) -> None:
             for feature_name in shap_feature_names
         ]
         format_label = model.format.value if model else "unknown"
-        info_children = [
-            html.H3(model.name if model else model_id, style={"marginBottom": "6px"}),
-            html.P(f"Format: {format_label}"),
-            html.P(f"Inputs: {', '.join(model_features)}"),
-            html.P(
-                "Metadata metrics: "
-                + ", ".join(
-                    metadata.get(
-                        "error_metrics", config.dashboard_models_config.error_metrics
-                    )
-                )
-            ),
-        ]
+        metric_names = list(
+            metadata.get("error_metrics", config.dashboard_models_config.error_metrics)
+        )
+        info_panel = _model_info_panel(
+            model_name=model.name if model else str(model_id),
+            format_label=format_label,
+            explained_features=[str(feature) for feature in explained_feature_names],
+            context_features=[str(feature) for feature in context_feature_names],
+            metric_names=[str(metric) for metric in metric_names],
+            feature_schema=services.feature_schema,
+        )
         return (
-            html.Div(info_children),
+            info_panel,
             shap_options,
             shap_options[0]["value"] if shap_options else None,
             ice_options,
-            ice_options[0]["value"] if ice_options else None,
+            _default_ice_feature(ice_options),
             anchor_options,
             sample_options,
         )

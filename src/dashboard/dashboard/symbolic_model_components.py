@@ -1,11 +1,14 @@
 from dash import dcc
 from dash import html
 
+from src.dashboard.plots.symbolic_plots import format_symbolic_equation_text
 from src.dashboard.plots.symbolic_plots import symbolic_formula_aliases
 from src.dashboard.plots.symbolic_plots import symbolic_formula_image_src
 from src.dashboard.plots.symbolic_plots import symbolic_expression_tree_figure
 from src.dashboard.plots.symbolic_plots import symbolic_fidelity_figure
 from src.dashboard.plots.symbolic_plots import symbolic_frontier_figure
+from src.dashboard.utils.feature_utils import display_feature_label
+from src.dashboard.utils.feature_utils import replace_feature_names_in_text
 
 
 def build_symbolic_panel(symbolic_model, services):
@@ -15,8 +18,11 @@ def build_symbolic_panel(symbolic_model, services):
         _metric_card("Selection", symbolic_model.model_selection.title()),
         _metric_card("Used Features", str(len(symbolic_model.used_feature_names))),
     ]
-    equation_rows = _candidate_rows(symbolic_model)
-    formula_aliases = symbolic_formula_aliases(symbolic_model)
+    equation_rows = _candidate_rows(symbolic_model, services=services)
+    formula_aliases = symbolic_formula_aliases(
+        symbolic_model,
+        schema=services.feature_schema,
+    )
     return html.Div(
         style=_panel_style(),
         children=[
@@ -41,7 +47,10 @@ def build_symbolic_panel(symbolic_model, services):
                                 style=_formula_canvas_style(),
                                 children=[
                                     html.Img(
-                                        src=symbolic_formula_image_src(symbolic_model),
+                                        src=symbolic_formula_image_src(
+                                            symbolic_model,
+                                            schema=services.feature_schema,
+                                        ),
                                         style={
                                             "display": "block",
                                             "minWidth": "980px",
@@ -77,17 +86,32 @@ def build_symbolic_panel(symbolic_model, services):
                         style=_subcard_style(),
                         children=[
                             html.H4("Equation Source", style={"margin": "0 0 8px 0"}),
-                            html.Pre(symbolic_model.equation, style=_dark_pre_style()),
+                            html.Pre(
+                                format_symbolic_equation_text(
+                                    symbolic_model.equation,
+                                    schema=services.feature_schema,
+                                ),
+                                style=_dark_pre_style(),
+                            ),
                             html.H4("Interpretation", style={"margin": "14px 0 8px 0"}),
                             html.P(
-                                symbolic_model.interpretation,
+                                replace_feature_names_in_text(
+                                    symbolic_model.interpretation,
+                                    services.feature_schema,
+                                ),
                                 style={"margin": "0 0 12px 0"},
                             ),
                             html.H4("Active Inputs", style={"margin": "14px 0 8px 0"}),
                             html.Div(
                                 style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
                                 children=[
-                                    html.Span(feature_name, style=_chip_style())
+                                    html.Span(
+                                        display_feature_label(
+                                            feature_name,
+                                            services.feature_schema,
+                                        ),
+                                        style=_chip_style(),
+                                    )
                                     for feature_name in symbolic_model.used_feature_names
                                 ],
                             ),
@@ -100,7 +124,10 @@ def build_symbolic_panel(symbolic_model, services):
                                 style=_subcard_style(),
                                 children=[
                                     dcc.Graph(
-                                        figure=symbolic_expression_tree_figure(symbolic_model)
+                                        figure=symbolic_expression_tree_figure(
+                                            symbolic_model,
+                                            schema=services.feature_schema,
+                                        )
                                     )
                                 ],
                             ),
@@ -108,7 +135,10 @@ def build_symbolic_panel(symbolic_model, services):
                                 style=_subcard_style(),
                                 children=[
                                     dcc.Graph(
-                                        figure=symbolic_frontier_figure(symbolic_model)
+                                        figure=symbolic_frontier_figure(
+                                            symbolic_model,
+                                            schema=services.feature_schema,
+                                        )
                                     )
                                 ],
                             ),
@@ -138,7 +168,7 @@ def build_symbolic_panel(symbolic_model, services):
     )
 
 
-def _candidate_rows(symbolic_model):
+def _candidate_rows(symbolic_model, services=None):
     header = html.Tr(
         children=[
             html.Th("Complexity", style=_table_header_style()),
@@ -156,7 +186,15 @@ def _candidate_rows(symbolic_model):
                     html.Td(str(int(row["complexity"])), style=_table_cell_style()),
                     html.Td(f"{float(row['loss']):.6f}", style=_table_cell_style()),
                     html.Td(f"{float(row.get('score', 0.0)):.4f}", style=_table_cell_style()),
-                    html.Td(str(row["equation"]), style=_table_cell_style()),
+                    html.Td(
+                        format_symbolic_equation_text(
+                            str(row["equation"]),
+                            schema=services.feature_schema if services is not None else None,
+                        )
+                        if services is not None
+                        else format_symbolic_equation_text(str(row["equation"])),
+                        style=_table_cell_style(),
+                    ),
                 ],
             )
         )

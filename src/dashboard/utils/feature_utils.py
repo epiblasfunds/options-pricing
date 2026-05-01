@@ -6,10 +6,54 @@ from src.dashboard.services.shared.feature_schema import FeatureSchema
 
 
 def build_sample_label(row: pd.Series) -> str:
-    option_type = row.get("OptionType", "?")
+    option_type = _display_option_type(row.get("OptionType", "?"))
+    strike = _display_number(row.get("StrikePrice"))
     maturity = float(row.get("TimeToExpiration", 0.0))
     moneyness = float(row.get("Moneyness", 0.0)) if "Moneyness" in row else float("nan")
-    return f"{row.name} | {option_type} | T={maturity:.1f}d | M={moneyness:.3f}"
+    return (
+        f"Sample ID: {row.name} | Option type: {option_type} | "
+        f"Strike: {strike} | Time to expiration: {maturity:.1f} days | "
+        f"Moneyness: {moneyness:.3f}"
+    )
+
+
+def build_manual_input_sample_label(row: pd.Series) -> str:
+    exec_datetime = _display_datetime(row.get("ExecDatetime"))
+    option_type = _display_option_type(row.get("OptionType", "?"))
+    strike = _display_number(row.get("StrikePrice"))
+    underlying = _display_number(row.get("UnderlyingPrice"))
+    maturity = _display_number(row.get("TimeToExpiration"), decimals=1)
+    rate = _display_number(row.get("Rate"), decimals=2)
+    return (
+        f"ID: {row.name} | Exec datetime: {exec_datetime} | "
+        f"Type: {option_type} | Strike: {strike} | "
+        f"Underlying: {underlying} | Time to expiration: {maturity} | "
+        f"Rate: {rate}"
+    )
+
+
+def _display_option_type(value) -> str:
+    text = str(value.value if hasattr(value, "value") else value).strip().upper()
+    if text == "C":
+        return "CALL"
+    if text == "P":
+        return "PUT"
+    return text or "?"
+
+
+def _display_datetime(value) -> str:
+    timestamp = pd.to_datetime(value, errors="coerce")
+    if pd.isna(timestamp):
+        return "?"
+    return timestamp.isoformat(sep=" ", timespec="seconds")
+
+
+def _display_number(value, decimals: int = 0) -> str:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "?"
+    return f"{numeric:,.{decimals}f}"
 
 
 def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> str:
@@ -36,7 +80,19 @@ def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> s
     return transformed_name
 
 
+def replace_feature_names_in_text(text: str, feature_schema: FeatureSchema) -> str:
+    updated = str(text)
+    for feature_name in sorted(feature_schema.names(), key=len, reverse=True):
+        updated = updated.replace(
+            feature_name,
+            display_feature_label(feature_name, feature_schema),
+        )
+    return updated
+
+
 __all__ = [
+    "build_manual_input_sample_label",
     "build_sample_label",
     "display_feature_label",
+    "replace_feature_names_in_text",
 ]

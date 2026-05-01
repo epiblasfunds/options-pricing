@@ -24,7 +24,7 @@ class _FakeModelService:
             "modelo": request.modelo,
             "prediction": np.float64(0.31),
             "input": {"TradeType": request.caracteristicas.tradeType},
-            "reference_sample_index": np.int64(10),
+            "reference_sample_index": None,
             "waterfall_image": "data:image/png;base64,abc",
             "local_explanation": {"feature_names": ["rate"], "value": np.float64(1.2)},
             "neighbors": [{"index": np.int64(10), "distance": np.float64(0.0)}],
@@ -74,6 +74,6 @@ def test_sample_explainability_endpoint_returns_dashboard_payload():
     body = response.json()
     assert response.status_code == 200
     assert body["prediction"] == 0.31
-    assert body["reference_sample_index"] == 10
+    assert body["reference_sample_index"] is None
     assert body["waterfall_image"].startswith("data:image/png;base64,")
     assert body["neighbors"][0]["distance"] == 0.0

@@ -45,6 +45,13 @@ class DashboardModelsConfig:
         self.symbolic_population_size = int(
             settings_config["symbolic_population_size"]
         )
+        self.symbolic_topn = int(settings_config["symbolic_topn"])
+        self.symbolic_ncycles_per_iteration = int(
+            settings_config["symbolic_ncycles_per_iteration"]
+        )
+        self.symbolic_min_candidate_equations = int(
+            settings_config["symbolic_min_candidate_equations"]
+        )
         self.symbolic_maxsize = int(settings_config["symbolic_maxsize"])
         self.symbolic_maxdepth = int(settings_config["symbolic_maxdepth"])
         self.symbolic_timeout_seconds = int(
