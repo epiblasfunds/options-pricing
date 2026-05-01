@@ -454,7 +454,7 @@ def _global_tab():
                         children=[
                             html.P(
                                 (
-                                    "Understand which transformed inputs drive "
+                                    "Understand which inputs drive "
                                     "the volatility model globally and inspect "
                                     "the precomputed surrogate trees that "
                                     "summarize its logic."
@@ -960,7 +960,6 @@ def build_layout():
                         children=[
                             html.Div(
                                 children=[
-                                    html.Label("Model"),
                                     dcc.Dropdown(
                                         id=IDS.MODEL_SELECTOR,
                                         placeholder="Select a Keras model",
@@ -969,16 +968,11 @@ def build_layout():
                             ),
                             html.Div(
                                 children=[
-                                    html.Label("Refresh"),
                                     html.Button(
                                         "Refresh Model Catalog",
                                         id=IDS.MODEL_REFRESH_BUTTON,
                                         style=BUTTON_STYLE,
-                                    ),
-                                    html.P(
-                                        "Reload the saved explainable-model bundles discovered on disk.",
-                                        style=HELP_TEXT_STYLE,
-                                    ),
+                                    )
                                 ]
                             ),
                         ],
