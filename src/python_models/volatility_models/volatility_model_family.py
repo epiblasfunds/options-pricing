@@ -203,7 +203,7 @@ class VolatilityModelFamilyABC(ABC):
         max_configurations = cls.get_max_configurations()
 
         if not search_space:
-            logger.info("La familia '%s' no tiene hiperparametros para explorar. Se entrenara un unico modelo con los parametros fijos.", cls.get_family_name())
+            logger.info("Family '%s' has no hyperparameters to explore. A single model will be trained with the fixed parameters.", cls.get_family_name())
             return {cls.get_family_name(): cls.get_fixed_params()}
 
         requested_iterations = int(cls.get_n_iter())
@@ -211,7 +211,7 @@ class VolatilityModelFamilyABC(ABC):
         explored_ratio = (100.0 * explored_configurations / max_configurations) if max_configurations > 0 else 0.0
 
         logger.info(
-            "Exploracion de hiperparametros para '%s': %s/%s configuraciones (%.2f%%).",
+            "Hyperparameter exploration for '%s': %s/%s configurations (%.2f%%).",
             cls.get_family_name(),
             explored_configurations,
             max_configurations,

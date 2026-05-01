@@ -12,28 +12,27 @@ logger = logging.getLogger(__name__)
 
 
 class Visualizer:
-
     @staticmethod
-    def info_confirmation(info_path, label="Información guardada en"):
+    def info_confirmation(info_path, label="Information saved to"):
         logger.info(f"{label}: {info_path}")
 
     @staticmethod
     def missing_metadata_warning(family_name: str):
         logger.error(
-            f"No se encontró metadata para la familia {family_name}. "
-            "Se requiere ejecutar `run_kfolds_training`."
+            f"No metadata was found for family {family_name}. "
+            "You must run `run_kfolds_training`."
         )
 
     @staticmethod
     def best_model_family_retrained(result_series, phase, cache_path=None):
         if cache_path is not None:
-            logger.info(f"Metadata de reentrenamiento cargada desde cache: {cache_path}")
+            logger.info(f"Retraining metadata loaded from cache: {cache_path}")
         if phase is TrainingPhase.TRAIN_VAL:
-            title = "Resultados del mejor modelo de la familia tras el reentrenamiento:"
+            title = "Best family model results after retraining:"
         elif phase is TrainingPhase.FINAL_TEST:
-            title = "Resultados del mejor modelo de la familia tras el reentrenamiento con train + val:"
+            title = "Best family model results after retraining on train + val:"
         else:
-            title = "Resultados del mejor modelo de la familia:"
+            title = "Best family model results:"
         result_df = pd.DataFrame([result_series], index=["retrained_best"])
         logger.info("%s\n%s", title, result_df.to_string())
 
@@ -44,9 +43,9 @@ class Visualizer:
         cache_path=None,
     ):
         if cache_path is not None:
-            logger.info(f"Metadata cargada desde cache: {cache_path}")
+            logger.info(f"Metadata loaded from cache: {cache_path}")
         top_n_models = family_models_metrics_table.head(n)
-        logger.info("Mostrando top %s modelos de la familia\n%s", n, top_n_models.to_string())
+        logger.info("Showing top %s family models\n%s", n, top_n_models.to_string())
 
     @staticmethod
     def plot_nn_learning_curves(
@@ -69,7 +68,7 @@ class Visualizer:
             best_epoch = training_information.get("best_iteration", None)
 
             if not train_rmse and not val_rmse:
-                logger.info("No hay historial de epocas para graficar curvas de aprendizaje.")
+                logger.info("No epoch history is available to plot learning curves.")
                 return
 
             phase_value = phase.value
@@ -113,7 +112,7 @@ class Visualizer:
             return
 
         if training_registry is None or best_model_name is None:
-            logger.info("Faltan datos para graficar curvas de aprendizaje.")
+            logger.info("Missing data to plot learning curves.")
             return
 
         fold_keys = sorted(

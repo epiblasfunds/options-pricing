@@ -409,7 +409,7 @@ class Trainer:
                 else 0.0
             )
             logger.info(
-                "Exploracion de hiperparametros para '%s' (metadata cache): %s/%s configuraciones (%.2f%%).",
+                "Hyperparameter exploration for '%s' (metadata cache): %s/%s configurations (%.2f%%).",
                 family_name,
                 explored_configurations,
                 max_configurations,
@@ -574,7 +574,7 @@ class Trainer:
             return result_series
 
         if not metadata_path.exists():
-            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            logger.warning("Family metadata not found for '%s'. Running k-fold training...", family_name)
             Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
@@ -753,7 +753,7 @@ class Trainer:
             upload_to_gcp = False
         
         if not metadata_path.exists():
-            logger.warning("Metadata de familia no encontrada para '%s'. Ejecutando entrenamiento con k-folds...", family_name)
+            logger.warning("Family metadata not found for '%s'. Running k-fold training...", family_name)
             Trainer(self.model_family).run_kfolds_training()
 
         with open(metadata_path, "r", encoding="utf-8") as f:
@@ -938,11 +938,11 @@ def _run_model2dashboard_pipeline(family_name: str):
             check=True,
         )
         logger.info(
-            "Pipeline de model2dashboard para familia '%s' ejecutada correctamente.",
+            "model2dashboard pipeline for family '%s' completed successfully.",
             family_name,
         )
     except Exception as e:
-        logger.exception("Error ejecutando pipeline de model2dashboard: %s", e)
+        logger.exception("Error while running the model2dashboard pipeline: %s", e)
         raise
 
 def _find_gcloud():
@@ -981,7 +981,7 @@ def _find_gcloud():
         if os.path.exists(expanded) and os.access(expanded, os.X_OK):
             return expanded
 
-    logger.debug("No se encontro un ejecutable funcional de gcloud en PATH ni en rutas conocidas.")
+    logger.debug("No working gcloud executable was found in PATH or in known locations.")
 
     return None
 
@@ -997,7 +997,7 @@ def _upload_models_to_gcp(
 
     if not gcloud_path:
         logger.warning(
-            "No se encontró 'gcloud'. Se omite subida a GCP para la familia '%s'.",
+            "'gcloud' was not found. Skipping GCP upload for family '%s'.",
             family_name,
         )
         return
@@ -1032,13 +1032,13 @@ def _upload_models_to_gcp(
 
     if not VOLATILITY_BUCKET:
         logger.warning(
-            "trained_models_bucket no está configurado. Se omite subida de modelo/scaler/metadatos para '%s'.",
+            "trained_models_bucket is not configured. Skipping model/scaler/metadata upload for '%s'.",
             family_name,
         )
 
     if not DASHBOARD_BUCKET:
         logger.warning(
-            "explainability_artifacts_bucket no está configurado. Se omite subida de artefactos dashboard para '%s'.",
+            "explainability_artifacts_bucket is not configured. Skipping dashboard artifact upload for '%s'.",
             family_name,
         )
 
@@ -1057,13 +1057,13 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt")
             )
             logger.info(
-                "Modelo entrenado '%s' subido a GCP: %s -> %s",
+                "Trained model '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 model_path,
                 model_destination,
             )
         else:
-            logger.warning("No existe modelo entrenado para subir: %s", model_path)
+            logger.warning("No trained model exists to upload: %s", model_path)
 
         if VOLATILITY_BUCKET and scaler_path and os.path.isfile(scaler_path):
             subprocess.run(
@@ -1079,7 +1079,7 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt")
             )
             logger.info(
-                "Scaler de modelo entrenado '%s' subido a GCP: %s -> %s",
+                "Scaler for trained model '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 scaler_path,
                 model_destination,
@@ -1099,14 +1099,14 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt"),
             )
             logger.info(
-                "Metadata final-test '%s' subida a GCP: %s -> %s",
+                "Final-test metadata '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 final_test_metadata_path,
                 metadata_destination,
             )
         else:
             logger.warning(
-                "No existe metadata final-test para subir: %s",
+                "No final-test metadata exists to upload: %s",
                 final_test_metadata_path,
             )
 
@@ -1126,14 +1126,14 @@ def _upload_models_to_gcp(
                 shell=(os.name == "nt"),
             )
             logger.info(
-                "Artefactos de dashboard '%s' subidos a GCP: %s -> %s",
+                "Dashboard artifacts '%s' uploaded to GCP: %s -> %s",
                 family_name,
                 dashboard_family_path,
                 dashboard_destination,
             )
         else:
-            logger.warning("No existe carpeta de dashboard para '%s', omitiendo.", family_name)
+            logger.warning("No dashboard folder exists for '%s'; skipping.", family_name)
 
     except Exception as e:
-        logger.exception("Error al subir modelos a GCP: %s", e)
+        logger.exception("Error while uploading models to GCP: %s", e)
         raise

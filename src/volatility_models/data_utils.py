@@ -157,7 +157,7 @@ class TrainingDataHandler:
         n_dates_total = len(unique_dates_total)
         if n_dates_total < 2:
             logger.warning(
-                "Split temporal omitido por falta de fechas suficientes (n_dates=%s).",
+                "Temporal split skipped because there are not enough dates (n_dates=%s).",
                 n_dates_total,
             )
             train_df = data_df.sort_values(VolatilityDBEnum.EXEC_DATETIME).copy()
@@ -172,7 +172,7 @@ class TrainingDataHandler:
 
         if applied_lag < lag:
             logger.warning(
-                "Lag solicitado (%s) no aplicable con n_dates=%s y train_size=%s. Se aplica lag=%s.",
+                "Requested lag (%s) is not applicable with n_dates=%s and train_size=%s. Applying lag=%s instead.",
                 lag,
                 n_dates_total,
                 train_size,
@@ -289,7 +289,7 @@ class TrainingDataHandler:
         )
         columns = BASE_FEATURE_COLS + [TARGET_COL] + AUX_CONTEXT_COLS
         if verbose:
-            logger.info(f"Rows after feature engineering ({split.value}) : {len(data_df)}")
+            logger.info(f"Rows after feature engineering ({split.value}): {len(data_df)}")
         result = pd.concat([data_df, new_features], axis=1)[columns]
         return result
 
@@ -472,28 +472,28 @@ class DataInfoDisplay:
             }
         )
 
-        logger.info("Resumen de columnas del dataset:")
+        logger.info("Dataset column summary:")
         logger.info(feature_inventory)
 
-        logger.info("\nResumen de features:")
+        logger.info("\nFeature summary:")
         logger.info(
-            f"  - Numéricas ({len(BASE_NUMERIC_FEATURE_COLS)}): {BASE_NUMERIC_FEATURE_COLS}"
+            f"  - Numerical ({len(BASE_NUMERIC_FEATURE_COLS)}): {BASE_NUMERIC_FEATURE_COLS}"
         )
         logger.info(
-            f"  - Categóricas ({len(BASE_CATEGORICAL_FEATURE_COLS)}): {BASE_CATEGORICAL_FEATURE_COLS}"
+            f"  - Categorical ({len(BASE_CATEGORICAL_FEATURE_COLS)}): {BASE_CATEGORICAL_FEATURE_COLS}"
         )
-        logger.info(f"  - Total features modelo: {len(BASE_FEATURE_COLS)}")
+        logger.info(f"  - Total model features: {len(BASE_FEATURE_COLS)}")
         logger.info(
-            f"\nColumnas auxiliares NO usadas para entrenar: {AUX_CONTEXT_COLS}"
+            f"\nAuxiliary columns NOT used for training: {AUX_CONTEXT_COLS}"
         )
 
         logger.info("\n" + "=" * 60)
-        logger.info("FEATURE STATISTICS (numéricas):")
+        logger.info("FEATURE STATISTICS (numerical):")
         logger.info("=" * 60)
         logger.info(data_df[BASE_NUMERIC_FEATURE_COLS].describe())
 
         logger.info("\n" + "=" * 60)
-        logger.info("FEATURE DISTRIBUTION (categóricas):")
+        logger.info("FEATURE DISTRIBUTION (categorical):")
         logger.info("=" * 60)
 
         categorical_summary_groups = {
@@ -573,9 +573,9 @@ class DataInfoDisplay:
         total_dates = sum([len(t[2]) for t in splits])
 
         logger.info("=" * 95)
-        logger.info("SPLIT TEMPORAL INICIAL (sobre todo el dataset): Train / Valid / Test")
+        logger.info("INITIAL TEMPORAL SPLIT (entire dataset): Train / Valid / Test")
         logger.info("=" * 95)
-        logger.info(f"Total filas: {total_rows:,} | Total fechas: {total_dates:,}")
+        logger.info(f"Total rows: {total_rows:,} | Total dates: {total_dates:,}")
 
         for name, split_df, split_dates in splits:
             rows = len(split_df)
@@ -593,11 +593,11 @@ class DataInfoDisplay:
         full_df_dates = TrainingDataHandler.get_df_dates(full_df)
         logger.info("\n" + "=" * 95)
         logger.info(
-            "K-FOLDS TEMPORALES (solo dentro de Train) para validación por familia de modelos"
+            "TEMPORAL K-FOLDS (within Train only) for model-family validation"
         )
         logger.info("=" * 95)
         logger.info(
-            f"Train global -> filas: {len(full_df):,} | fechas: {len(full_df_dates):,}"
+            f"Global Train -> rows: {len(full_df):,} | dates: {len(full_df_dates):,}"
         )
         for fold_name in sorted(folds.keys(), key=lambda x: int(x.split("-")[-1])):
             fold_train_df = folds[fold_name]["train"]
@@ -618,12 +618,12 @@ class DataInfoDisplay:
 
             logger.info(f"{fold_name.upper()}")
             logger.info(
-                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / len(full_df):>7.2%} de train) "
-                f"| dates: {train_n_dates:>5,} ({train_n_dates / len(full_df_dates):>7.2%} de train) "
+                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / len(full_df):>7.2%} of train) "
+                f"| dates: {train_n_dates:>5,} ({train_n_dates / len(full_df_dates):>7.2%} of train) "
                 f"| range: {train_start} -> {train_end_date}"
             )
             logger.info(
-                f"  VALID | rows: {val_rows:>8,} ({val_rows / len(full_df):>7.2%} de train) "
-                f"| dates: {val_n_dates:>5,} ({val_n_dates / len(full_df_dates):>7.2%} de train) "
+                f"  VALID | rows: {val_rows:>8,} ({val_rows / len(full_df):>7.2%} of train) "
+                f"| dates: {val_n_dates:>5,} ({val_n_dates / len(full_df_dates):>7.2%} of train) "
                 f"| range: {val_start} -> {val_end_date}"
             )
