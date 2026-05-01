@@ -69,6 +69,23 @@ class StoredShapExplanation:
     predictions: np.ndarray
     mean_abs_shap: dict[str, float]
 
+    def waterfall_predictions(self) -> np.ndarray:
+        values = np.asarray(self.values, dtype="float64")
+        if values.ndim == 1:
+            values = values.reshape(1, -1)
+        base_values = np.asarray(self.base_values, dtype="float64")
+        if base_values.ndim == 0:
+            base = np.full(values.shape[0], float(base_values), dtype="float64")
+        else:
+            base = base_values.reshape(-1).astype("float64", copy=False)
+            if base.size == 1 and values.shape[0] != 1:
+                base = np.repeat(base, values.shape[0])
+        if base.shape[0] != values.shape[0]:
+            raise ValueError(
+                "Stored SHAP explanation has inconsistent base values and rows."
+            )
+        return base + values.sum(axis=1)
+
     def select(self, row_index: t.Any) -> t.Self:
         position = self.index.index(row_index)
         return type(self)(

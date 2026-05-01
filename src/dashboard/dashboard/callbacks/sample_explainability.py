@@ -544,12 +544,8 @@ def register_sample_callbacks(app, services) -> None:
                     comparison,
                 )
 
-            prediction = float(
-                services.prediction_service.predict_frame(model_id, sample_frame).iloc[
-                    0
-                ]
-            )
             explanation = services.shap_service.explain_sample(model_id, sample_frame)
+            prediction = float(explanation.predictions.iloc[0])
             neighbors = services.neighbors_service.find_neighbors(
                 model_id, sample_frame, k=10
             )

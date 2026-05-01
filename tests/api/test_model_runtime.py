@@ -1,10 +1,12 @@
 from types import SimpleNamespace
 
+import numpy as np
 import pandas as pd
 
 from src.api.services.model_runtime import ApiModelService
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
+from src.python_models.dashboard.artifacts import StoredShapExplanation
 
 
 class _LinearModel:
@@ -75,3 +77,23 @@ def test_neighbors_distance_figure_uses_api_neighbor_index_column():
     )
 
     assert list(figure.data[0].x) == ["101", "205"]
+
+
+def test_stored_shap_to_result_uses_waterfall_final_prediction():
+    stored = StoredShapExplanation(
+        method="shap.Explainer(permutation, runtime)",
+        feature_names=["StrikePrice", "Rate"],
+        index=[7],
+        values=np.asarray([[0.20, -0.05]]),
+        base_values=np.asarray([0.30]),
+        data=np.asarray([[9100.0, -0.6]]),
+        display_data=np.asarray([[9100.0, -0.6]]),
+        predictions=np.asarray([9.99]),
+        mean_abs_shap={"StrikePrice": 0.20, "Rate": 0.05},
+    )
+
+    result = ApiModelService._stored_shap_to_result(stored)
+    payload = ApiModelService._stored_shap_to_payload(stored)
+
+    assert result.predictions.loc[7] == 0.45
+    assert payload["predictions"] == [0.45]

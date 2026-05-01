@@ -84,6 +84,7 @@ class ApiModelService:
             self.feature_schema,
         )
         explanation_payload = self._stored_shap_to_payload(stored)
+        aligned_prediction = float(explanation_result.predictions.iloc[0])
 
         neighbor_distances = [
             {"row_id": str(index), "distance": row["distance"]}
@@ -91,7 +92,7 @@ class ApiModelService:
         ]
         return {
             "modelo": request.modelo.value,
-            "prediction": prediction,
+            "prediction": aligned_prediction,
             "input": self._json_safe(raw_frame.iloc[0].to_dict()),
             "reference_sample_index": None,
             "waterfall_image": waterfall_src,
@@ -294,7 +295,7 @@ class ApiModelService:
             explanation=stored.to_explanation(),
             explain_frame=explain_frame,
             predictions=pd.Series(
-                stored.predictions,
+                stored.waterfall_predictions(),
                 index=stored.index,
                 name="PredictedVolatility",
             ),
@@ -311,7 +312,7 @@ class ApiModelService:
             "values": np.asarray(stored.values).tolist(),
             "base_values": np.asarray(stored.base_values).tolist(),
             "data": np.asarray(stored.data).tolist(),
-            "predictions": np.asarray(stored.predictions).tolist(),
+            "predictions": np.asarray(stored.waterfall_predictions()).tolist(),
             "mean_abs_shap": dict(stored.mean_abs_shap),
         }
 

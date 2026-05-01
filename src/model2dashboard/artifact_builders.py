@@ -147,10 +147,6 @@ def build_shap_artifacts(
         raw_frame,
         feature_names=EXPLAINABILITY_FEATURE_NAMES,
     )
-    encoder = build_explainability_encoder(
-        explainability_frame,
-        feature_names=EXPLAINABILITY_FEATURE_NAMES,
-    )
     background_indices = sample_frame(
         dataset_frame,
         max_rows=config.dashboard_models_config.shap_background_size,
@@ -161,47 +157,136 @@ def build_shap_artifacts(
         max_rows=config.dashboard_models_config.shap_explain_size,
         random_state=config.dashboard_models_config.random_state,
     ).index
-    encoded_background = encoder.encode_frame(
-        explainability_frame.loc[background_indices],
+    method = "shap.Explainer(permutation)"
+    background_explain_frame = explainability_frame.loc[background_indices]
+    global_shap = _build_stored_shap_for_rows(
+        method=method,
+        runtime=runtime,
+        raw_frame=raw_frame,
+        explainability_frame=explainability_frame,
+        background_explain_frame=background_explain_frame,
+        row_indices=list(global_indices),
+        predictions=predictions,
     )
-    encoded_global = encoder.encode_frame(explainability_frame.loc[global_indices])
-    explainer = shap.Explainer(
-        lambda values: _predict_explainability_values(runtime, encoder, values),
-        masker=encoded_background,
-        algorithm="permutation",
-        feature_names=list(encoder.feature_names),
-        seed=config.dashboard_models_config.random_state,
-    )
-    max_evals = _max_evals(len(encoder.feature_names))
-    global_explanation = explainer(
-        encoded_global,
-        max_evals=max_evals,
-        silent=True,
-    )
-    global_shap = serialize_shap_result(
-        method="shap.Explainer(permutation)",
-        explanation=global_explanation,
-        transformed_frame=encoded_global,
-        display_frame=explainability_frame.loc[global_indices],
-        feature_names=list(encoder.feature_names),
-        predictions=predictions.loc[global_indices],
-    )
-    local_explain_frame = explainability_frame.loc[sample_indices]
-    encoded_local = encoder.encode_frame(local_explain_frame)
-    local_explanation = explainer(
-        encoded_local,
-        max_evals=max_evals,
-        silent=True,
-    )
-    local_shap = serialize_shap_result(
-        method="shap.Explainer(permutation)",
-        explanation=local_explanation,
-        transformed_frame=encoded_local,
-        display_frame=local_explain_frame,
-        feature_names=list(encoder.feature_names),
-        predictions=predictions.loc[sample_indices],
+    local_shap = _build_stored_shap_for_rows(
+        method=method,
+        runtime=runtime,
+        raw_frame=raw_frame,
+        explainability_frame=explainability_frame,
+        background_explain_frame=background_explain_frame,
+        row_indices=list(sample_indices),
+        predictions=predictions,
     )
     return global_shap, local_shap
+
+
+def _build_stored_shap_for_rows(
+    *,
+    method: str,
+    runtime: TrainingModelRuntime,
+    raw_frame: pd.DataFrame,
+    explainability_frame: pd.DataFrame,
+    background_explain_frame: pd.DataFrame,
+    row_indices: list[t.Any],
+    predictions: pd.Series,
+) -> StoredShapExplanation:
+    stored_rows: list[StoredShapExplanation] = []
+    max_evals = _max_evals(len(EXPLAINABILITY_FEATURE_NAMES))
+    for row_index in row_indices:
+        row_raw = raw_frame.loc[[row_index]].copy()
+        row_explain_frame = explainability_frame.loc[[row_index]].copy()
+        row_encoder = build_explainability_encoder(
+            pd.concat([background_explain_frame, row_raw], axis=0),
+            feature_names=EXPLAINABILITY_FEATURE_NAMES,
+            defaults_override=row_raw.iloc[0].to_dict(),
+        )
+        encoded_background = row_encoder.encode_frame(background_explain_frame)
+        encoded_row = row_encoder.encode_frame(row_explain_frame)
+        explainer = shap.Explainer(
+            lambda values, encoder=row_encoder: _predict_explainability_values(
+                runtime, encoder, values
+            ),
+            masker=encoded_background,
+            algorithm="permutation",
+            feature_names=list(row_encoder.feature_names),
+            seed=config.dashboard_models_config.random_state,
+        )
+        explanation = explainer(
+            encoded_row,
+            max_evals=max_evals,
+            silent=True,
+        )
+        stored_rows.append(
+            serialize_shap_result(
+                method=method,
+                explanation=explanation,
+                transformed_frame=encoded_row,
+                display_frame=row_explain_frame,
+                feature_names=list(row_encoder.feature_names),
+                predictions=predictions.loc[[row_index]],
+            )
+        )
+    return _merge_stored_shap_rows(
+        method="shap.Explainer(permutation)",
+        feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
+        stored_rows=stored_rows,
+    )
+
+
+def _merge_stored_shap_rows(
+    *,
+    method: str,
+    feature_names: list[str],
+    stored_rows: list[StoredShapExplanation],
+) -> StoredShapExplanation:
+    feature_count = len(feature_names)
+    if not stored_rows:
+        return StoredShapExplanation(
+            method=method,
+            feature_names=list(feature_names),
+            index=[],
+            values=np.empty((0, feature_count), dtype="float64"),
+            base_values=np.empty((0,), dtype="float64"),
+            data=np.empty((0, feature_count), dtype="float64"),
+            display_data=np.empty((0, feature_count), dtype="float64"),
+            predictions=np.empty((0,), dtype="float64"),
+            mean_abs_shap={str(name): 0.0 for name in feature_names},
+        )
+    values = np.concatenate([np.asarray(row.values) for row in stored_rows], axis=0)
+    base_values = np.concatenate(
+        [np.asarray(row.base_values).reshape(-1) for row in stored_rows],
+        axis=0,
+    )
+    data = np.concatenate([np.asarray(row.data) for row in stored_rows], axis=0)
+    display_data = (
+        None
+        if any(row.display_data is None for row in stored_rows)
+        else np.concatenate(
+            [np.asarray(row.display_data) for row in stored_rows],
+            axis=0,
+        )
+    )
+    predictions = np.concatenate(
+        [np.asarray(row.predictions).reshape(-1) for row in stored_rows],
+        axis=0,
+    )
+    mean_abs_shap = pd.Series(
+        np.abs(values).mean(axis=0),
+        index=feature_names,
+    ).sort_values(ascending=False)
+    return StoredShapExplanation(
+        method=method,
+        feature_names=list(feature_names),
+        index=[index for row in stored_rows for index in row.index],
+        values=values,
+        base_values=base_values,
+        data=data,
+        display_data=display_data,
+        predictions=predictions,
+        mean_abs_shap={
+            str(name): float(value) for name, value in mean_abs_shap.items()
+        },
+    )
 
 
 def serialize_shap_result(
