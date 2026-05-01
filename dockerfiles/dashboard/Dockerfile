@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY src/dashboard/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src/dashboard ./src/dashboard
+COPY src/ ./src
 COPY resources/ ./resources
 
 EXPOSE 8080
