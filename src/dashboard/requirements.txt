@@ -1,6 +1,5 @@
 dash==4.1.0
-plotly==6.7.0
-pytest==8.4.2
+plotly==6.6.0
 scikit-learn==1.8.0
 gunicorn
 pandas==3.0.0
