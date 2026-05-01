@@ -103,7 +103,11 @@ def build_symbolic_panel(symbolic_model, services):
                             ),
                             html.H4("Active Inputs", style={"margin": "14px 0 8px 0"}),
                             html.Div(
-                                style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
+                                style={
+                                    "display": "flex",
+                                    "gap": "8px",
+                                    "flexWrap": "wrap",
+                                },
                                 children=[
                                     html.Span(
                                         display_feature_label(
@@ -153,7 +157,10 @@ def build_symbolic_panel(symbolic_model, services):
                             html.Div(
                                 style=_subcard_style(),
                                 children=[
-                                    html.H4("Candidate Equations", style={"margin": "0 0 10px 0"}),
+                                    html.H4(
+                                        "Candidate Equations",
+                                        style={"margin": "0 0 10px 0"},
+                                    ),
                                     html.Table(
                                         style=_table_style(),
                                         children=equation_rows,
@@ -181,15 +188,21 @@ def _candidate_rows(symbolic_model, services=None):
     for _, row in symbolic_model.candidate_equations.head(6).iterrows():
         body.append(
             html.Tr(
-                style={"background": "#eef4fb" if bool(row["selected"]) else "transparent"},
+                style={
+                    "background": "#eef4fb" if bool(row["selected"]) else "transparent"
+                },
                 children=[
                     html.Td(str(int(row["complexity"])), style=_table_cell_style()),
                     html.Td(f"{float(row['loss']):.6f}", style=_table_cell_style()),
-                    html.Td(f"{float(row.get('score', 0.0)):.4f}", style=_table_cell_style()),
+                    html.Td(
+                        f"{float(row.get('score', 0.0)):.4f}", style=_table_cell_style()
+                    ),
                     html.Td(
                         format_symbolic_equation_text(
                             str(row["equation"]),
-                            schema=services.feature_schema if services is not None else None,
+                            schema=services.feature_schema
+                            if services is not None
+                            else None,
                         )
                         if services is not None
                         else format_symbolic_equation_text(str(row["equation"])),

@@ -2,10 +2,10 @@ import base64
 import io
 from fractions import Fraction
 
-import matplotlib
 import plotly.express as px
 import plotly.graph_objects as go
 import sympy
+from matplotlib import pyplot as plt
 from sympy.printing.latex import LatexPrinter
 from sympy.printing.str import StrPrinter
 from sympy.parsing.sympy_parser import convert_xor
@@ -15,13 +15,10 @@ from sympy.parsing.sympy_parser import standard_transformations
 from src.dashboard.plots.plot_style import HOVERLABEL_STYLE
 from src.dashboard.plots.plot_style import STANDARD_MARGIN
 from src.dashboard.plots.plot_style import STANDARD_TEMPLATE
+from src.dashboard.utils.feature_utils import display_feature_label
 from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
 
-matplotlib.use("Agg")
-
-from matplotlib import pyplot as plt
-
-from src.dashboard.utils.feature_utils import display_feature_label
+plt.switch_backend("Agg")
 
 _SYMBOLIC_FORMULA_NAME_ALIASES = {
     "OptionType": "OptionType",
@@ -137,8 +134,7 @@ def symbolic_fidelity_figure(model: SymbolicRegressorModel):
     )
     fig.update_traces(
         hovertemplate=(
-            "Original model: %{x:.4f}<br>"
-            "Symbolic surrogate: %{y:.4f}<extra></extra>"
+            "Original model: %{x:.4f}<br>Symbolic surrogate: %{y:.4f}<extra></extra>"
         ),
         selector={"mode": "markers"},
     )
@@ -288,7 +284,9 @@ def symbolic_formula_image_src(model: SymbolicRegressorModel, schema=None) -> st
     return f"data:image/svg+xml;base64,{encoded}"
 
 
-def symbolic_formula_aliases(model: SymbolicRegressorModel, schema=None) -> list[tuple[str, str]]:
+def symbolic_formula_aliases(
+    model: SymbolicRegressorModel, schema=None
+) -> list[tuple[str, str]]:
     expression = _parse_symbolic_expression(model.sympy_expression)
     aliases = []
     for symbol in _sorted_symbols(expression.free_symbols):
@@ -324,8 +322,7 @@ def _format_expression_for_display(expression_text):
     }
     expression = expression.xreplace(alias_map)
     replacements = {
-        number: _format_number_atom(number)
-        for number in expression.atoms(sympy.Float)
+        number: _format_number_atom(number) for number in expression.atoms(sympy.Float)
     }
     return expression.xreplace(replacements)
 

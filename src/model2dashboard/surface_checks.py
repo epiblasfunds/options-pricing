@@ -23,5 +23,7 @@ def financial_checks_from_surface(surface_frame: pd.DataFrame) -> list[str]:
             "Heuristic warning: adjacent maturity points show large term-structure jumps."
         )
     if not warnings:
-        warnings.append("No large discontinuities were detected by the heuristic checks.")
+        warnings.append(
+            "No large discontinuities were detected by the heuristic checks."
+        )
     return warnings

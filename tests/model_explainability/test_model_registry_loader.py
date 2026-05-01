@@ -2,8 +2,12 @@ import json
 
 import joblib
 
-from src.volatility_models.model_explainability.services.model_loader import KerasModelLoader
-from src.volatility_models.model_explainability.services.model_registry import ModelRegistry
+from src.volatility_models.model_explainability.services.model_loader import (
+    KerasModelLoader,
+)
+from src.volatility_models.model_explainability.services.model_registry import (
+    ModelRegistry,
+)
 
 
 class _FakeKerasModels:

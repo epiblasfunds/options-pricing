@@ -14,9 +14,18 @@ def test_validation_and_preprocessing_pipeline(tmp_path):
     dataset_path = tmp_path / "VOLATILITY_DB.csv"
     frame = pd.DataFrame(
         {
-            "ExecDatetime": ["2020-01-06 09:15:00.000000", "2020-01-07 10:30:00.000000"],
-            "UnderlyingExecDatetime": ["2020-01-06 09:10:00.000000", "2020-01-07 10:29:00.000000"],
-            "MaturityDatetime": ["2020-01-17 17:30:00.000000", "2020-01-24 17:30:00.000000"],
+            "ExecDatetime": [
+                "2020-01-06 09:15:00.000000",
+                "2020-01-07 10:30:00.000000",
+            ],
+            "UnderlyingExecDatetime": [
+                "2020-01-06 09:10:00.000000",
+                "2020-01-07 10:29:00.000000",
+            ],
+            "MaturityDatetime": [
+                "2020-01-17 17:30:00.000000",
+                "2020-01-24 17:30:00.000000",
+            ],
             "TimeToExpiration": [10.0, 17.0],
             "Rate": [1.0, 1.1],
             "UnderlyingPrice": [9000.0, 9050.0],
@@ -33,10 +42,28 @@ def test_validation_and_preprocessing_pipeline(tmp_path):
 
     preprocessor = build_similarity_preprocessor(
         DEFAULT_FEATURE_SCHEMA,
-        ["TimeToExpiration", "Rate", "UnderlyingPrice", "StrikePrice", "OptionType", "ExecHour", "ExecWeekday"],
+        [
+            "TimeToExpiration",
+            "Rate",
+            "UnderlyingPrice",
+            "StrikePrice",
+            "OptionType",
+            "ExecHour",
+            "ExecWeekday",
+        ],
     )
     transformed = preprocessor.fit_transform(
-        loaded[["TimeToExpiration", "Rate", "UnderlyingPrice", "StrikePrice", "OptionType", "ExecHour", "ExecWeekday"]]
+        loaded[
+            [
+                "TimeToExpiration",
+                "Rate",
+                "UnderlyingPrice",
+                "StrikePrice",
+                "OptionType",
+                "ExecHour",
+                "ExecWeekday",
+            ]
+        ]
     )
 
     assert transformed.shape[0] == 2

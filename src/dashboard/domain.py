@@ -7,7 +7,6 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricsRegistry,
 )
 from src.enums.data_enums import OptionTypeEnum
-from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
@@ -24,7 +23,9 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
-    features = [_raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES]
+    features = [
+        _raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES
+    ]
     features.extend(
         [
             FeatureDefinition(
@@ -87,7 +88,10 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         "Rate": "Rate",
     }
     descriptions = {
-        "ExecDatetime": "Execution timestamp used as contextual input. It is shown in the manual form but not explained as a driver.",
+        "ExecDatetime": (
+            "Execution timestamp used as contextual input. It is shown in the "
+            "manual form but not explained as a driver."
+        ),
         "OptionType": "Call or put option.",
         "StrikePrice": "Strike price associated with the traded option.",
         "UnderlyingPrice": "Underlying price paired with the option trade.",

@@ -44,7 +44,7 @@ def convert_data_types(
     selected_columns_dict: t.Dict[Enum, DataTypeEnum],
     format_date="%Y%m%d",
     format_datetime="%Y-%m-%d %H:%M:%S",
-    format_time="%H:%M:%S.%f"
+    format_time="%H:%M:%S.%f",
 ) -> pd.DataFrame:
     for col, dtype in selected_columns_dict.items():
         try:

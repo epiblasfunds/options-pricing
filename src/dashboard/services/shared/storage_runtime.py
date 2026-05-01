@@ -56,9 +56,7 @@ class DashboardModelStorageRuntime:
         if self._contains_bundle_dirs(target_dir):
             return target_dir
 
-        nested_candidates = [
-            path for path in target_dir.iterdir() if path.is_dir()
-        ]
+        nested_candidates = [path for path in target_dir.iterdir() if path.is_dir()]
         for nested in nested_candidates:
             if self._contains_bundle_dirs(nested):
                 logger.warning(
@@ -125,9 +123,7 @@ class DashboardModelStorageRuntime:
                 if normalized_prefix
                 else f"gs://{bucket_name}"
             )
-            raise FileNotFoundError(
-                f"No GCP objects found under {location}."
-            )
+            raise FileNotFoundError(f"No GCP objects found under {location}.")
         normalized_strip_prefix = strip_prefix.strip("/")
         downloaded = 0
         for blob in blobs:

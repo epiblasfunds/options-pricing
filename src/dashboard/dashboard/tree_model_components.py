@@ -35,7 +35,9 @@ def build_tree_shell(available_depths, requested_depth):
 
 
 def build_tree_panel_content(result, requested_depth, services):
-    image_src = f"data:image/png;base64,{tree_png_base64(result, services.feature_schema)}"
+    image_src = (
+        f"data:image/png;base64,{tree_png_base64(result, services.feature_schema)}"
+    )
     metric_cards = [
         html.Div(
             style={
@@ -65,7 +67,9 @@ def build_tree_panel_content(result, requested_depth, services):
             html.Div(
                 style=_subcard_style(),
                 children=[
-                    html.H4(f"Tree Depth {requested_depth}", style={"margin": "0 0 8px 0"}),
+                    html.H4(
+                        f"Tree Depth {requested_depth}", style={"margin": "0 0 8px 0"}
+                    ),
                     html.P(
                         replace_feature_names_in_text(
                             result.interpretation,

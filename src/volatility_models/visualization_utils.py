@@ -3,9 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from IPython.display import display
 
-from src.config.config import config
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 
 logger = logging.getLogger(__name__)
@@ -72,7 +70,9 @@ class Visualizer:
                 return
 
             phase_value = phase.value
-            validation_label = "test RMSE" if phase is TrainingPhase.FINAL_TEST else "val RMSE"
+            validation_label = (
+                "test RMSE" if phase is TrainingPhase.FINAL_TEST else "val RMSE"
+            )
             fig, ax = plt.subplots(1, 1, figsize=(10, 4))
 
             if train_rmse:
@@ -116,7 +116,11 @@ class Visualizer:
             return
 
         fold_keys = sorted(
-            [k for k in training_registry.keys() if k.startswith(f"{best_model_name}_fold-")],
+            [
+                k
+                for k in training_registry.keys()
+                if k.startswith(f"{best_model_name}_fold-")
+            ],
             key=lambda x: int(x.split("fold-")[-1]),
         )
 
@@ -160,8 +164,11 @@ class Visualizer:
 
             if best_epoch and best_epoch <= max_epochs:
                 ax.axvline(
-                    best_epoch, color="red", linestyle="--", linewidth=1,
-                    label=f"best epoch ({best_epoch})"
+                    best_epoch,
+                    color="red",
+                    linestyle="--",
+                    linewidth=1,
+                    label=f"best epoch ({best_epoch})",
                 )
 
             ax.set_title(fold_name)
@@ -192,7 +199,11 @@ class Visualizer:
         best_model_name = str(best_model_row.index[0])
         plot_title = family_name if family_name is not None else best_model_name
         fold_keys = sorted(
-            [k for k in training_registry.keys() if k.startswith(f"{best_model_name}_fold-")],
+            [
+                k
+                for k in training_registry.keys()
+                if k.startswith(f"{best_model_name}_fold-")
+            ],
             key=lambda x: int(x.split("fold-")[-1]),
         )
 
@@ -226,10 +237,16 @@ class Visualizer:
         fig, axes = plt.subplots(2, 2, figsize=(14, 9))
 
         axes[0, 0].plot(
-            fold_metrics_df["fold"], fold_metrics_df["train_rmse"], marker="o", label="train RMSE"
+            fold_metrics_df["fold"],
+            fold_metrics_df["train_rmse"],
+            marker="o",
+            label="train RMSE",
         )
         axes[0, 0].plot(
-            fold_metrics_df["fold"], fold_metrics_df["val_rmse"], marker="o", label="val RMSE"
+            fold_metrics_df["fold"],
+            fold_metrics_df["val_rmse"],
+            marker="o",
+            label="val RMSE",
         )
         axes[0, 0].set_title(f"{plot_title} - RMSE by fold")
         axes[0, 0].set_xlabel("Fold")
@@ -238,10 +255,16 @@ class Visualizer:
         axes[0, 0].grid(alpha=0.25)
 
         axes[0, 1].plot(
-            fold_metrics_df["fold"], fold_metrics_df["train_mae"], marker="o", label="train MAE"
+            fold_metrics_df["fold"],
+            fold_metrics_df["train_mae"],
+            marker="o",
+            label="train MAE",
         )
         axes[0, 1].plot(
-            fold_metrics_df["fold"], fold_metrics_df["val_mae"], marker="o", label="val MAE"
+            fold_metrics_df["fold"],
+            fold_metrics_df["val_mae"],
+            marker="o",
+            label="val MAE",
         )
         axes[0, 1].set_title(f"{plot_title} - MAE by fold")
         axes[0, 1].set_xlabel("Fold")
@@ -251,8 +274,12 @@ class Visualizer:
 
         x = np.arange(len(fold_metrics_df["fold"]))
         width = 0.38
-        axes[1, 0].bar(x - width / 2, fold_metrics_df["train_r2"], width=width, label="train R2")
-        axes[1, 0].bar(x + width / 2, fold_metrics_df["val_r2"], width=width, label="val R2")
+        axes[1, 0].bar(
+            x - width / 2, fold_metrics_df["train_r2"], width=width, label="train R2"
+        )
+        axes[1, 0].bar(
+            x + width / 2, fold_metrics_df["val_r2"], width=width, label="val R2"
+        )
         axes[1, 0].set_xticks(x)
         axes[1, 0].set_xticklabels(fold_metrics_df["fold"])
         axes[1, 0].axhline(0.0, color="black", linestyle="--", linewidth=1)
@@ -263,12 +290,14 @@ class Visualizer:
         axes[1, 0].grid(alpha=0.25)
 
         # Build the scatter plot from the fold with the highest index
-        max_fold_key = (
-            max(fold_keys, key=lambda k: int(k.split("fold-")[-1]))
-        )
+        max_fold_key = max(fold_keys, key=lambda k: int(k.split("fold-")[-1]))
         last_fold_record = training_registry[max_fold_key] if max_fold_key else {}
-        last_fold_valid_true = last_fold_record.get("y_val_true", last_fold_record.get("y_valid_true", []))
-        last_fold_valid_pred = last_fold_record.get("y_val_pred", last_fold_record.get("y_valid_pred", []))
+        last_fold_valid_true = last_fold_record.get(
+            "y_val_true", last_fold_record.get("y_valid_true", [])
+        )
+        last_fold_valid_pred = last_fold_record.get(
+            "y_val_pred", last_fold_record.get("y_valid_pred", [])
+        )
         if last_fold_valid_true and last_fold_valid_pred:
             scatter_df = pd.DataFrame(
                 {
@@ -279,8 +308,12 @@ class Visualizer:
             if len(scatter_df) > sample_size:
                 scatter_df = scatter_df.sample(sample_size, random_state=42)
 
-            min_value = float(min(scatter_df["y_true"].min(), scatter_df["y_pred"].min()))
-            max_value = float(max(scatter_df["y_true"].max(), scatter_df["y_pred"].max()))
+            min_value = float(
+                min(scatter_df["y_true"].min(), scatter_df["y_pred"].min())
+            )
+            max_value = float(
+                max(scatter_df["y_true"].max(), scatter_df["y_pred"].max())
+            )
 
             axes[1, 1].scatter(
                 scatter_df["y_true"],
@@ -289,7 +322,9 @@ class Visualizer:
                 alpha=0.30,
             )
             axes[1, 1].plot([min_value, max_value], [min_value, max_value], "k--")
-            axes[1, 1].set_title(f"{plot_title} - validation: actual vs predicted ({best_model_name})")
+            axes[1, 1].set_title(
+                f"{plot_title} - validation: actual vs predicted ({best_model_name})"
+            )
             axes[1, 1].set_xlabel("Actual IV")
             axes[1, 1].set_ylabel("Predicted IV")
             axes[1, 1].grid(alpha=0.25)

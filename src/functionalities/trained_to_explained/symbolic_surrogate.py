@@ -158,14 +158,14 @@ def _normalize_equation_table(
             ignore_index=True,
         )
 
-    selected_row = normalized.loc[
-        normalized["equation"] == selected_equation
-    ].head(1)
+    selected_row = normalized.loc[normalized["equation"] == selected_equation].head(1)
     if selected_row.empty:
         selected_row = normalized.loc[
             normalized["complexity"] == selected_complexity
         ].head(1)
-    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(primary["equation"]):
+    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(
+        primary["equation"]
+    ):
         primary = pd.concat([selected_row, primary], ignore_index=True)
 
     primary = (

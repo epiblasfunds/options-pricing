@@ -58,9 +58,7 @@ def build_services() -> Services:
             "Check that each bundle contains metadata.json and dashboard_model/metadata.json.",
             model_dir,
         )
-    model_loader = ModelLoader(
-        cache_size=config.dashboard_models_config.cache_entries
-    )
+    model_loader = ModelLoader(cache_size=config.dashboard_models_config.cache_entries)
     data_provider = VolatilityDataProvider(
         dataset_path=VOLATILITY_MODEL_DATA_DIR_PATH / "test.csv",
     )

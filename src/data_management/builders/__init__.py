@@ -23,5 +23,5 @@ __all__ = [
     "FutureTradesBuilder",
     "OptionUnderlyingBuilder",
     "OptionTradesUnderlyingBuilder",
-    "VolatilityBuilder"
+    "VolatilityBuilder",
 ]

@@ -92,7 +92,9 @@ def transform_feature_frame(
         return ordered.astype("float32")
     transformed = ordered.copy()
     numeric_columns = [
-        feature for feature in BASE_NUMERIC_FEATURE_NAMES if feature in transformed.columns
+        feature
+        for feature in BASE_NUMERIC_FEATURE_NAMES
+        if feature in transformed.columns
     ]
     transformed.loc[:, numeric_columns] = runtime.scaler.transform(
         transformed.loc[:, numeric_columns].to_numpy(dtype="float64", copy=False)
@@ -144,7 +146,8 @@ def _resolve_retrained_metadata_path(
     if family_name.endswith(progressive_suffix):
         base_family_name = family_name[: -len(progressive_suffix)]
         candidates.append(
-            retrained_metadata_dir / f"{base_family_name}_{phase}_retrained_progressive_metadata.json"
+            retrained_metadata_dir
+            / f"{base_family_name}_{phase}_retrained_progressive_metadata.json"
         )
 
     for path in candidates:

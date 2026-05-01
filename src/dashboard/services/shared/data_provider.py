@@ -47,7 +47,11 @@ class VolatilityDataProvider:
                 if bundle.dashboard_model is not None:
                     return bundle.dashboard_model.dataset_frame.copy()
 
-        if model_id is None and self.model_registry is not None and self.model_loader is not None:
+        if (
+            model_id is None
+            and self.model_registry is not None
+            and self.model_loader is not None
+        ):
             discovered_models = self.model_registry.discover_models()
             if discovered_models:
                 first_bundle = self.model_loader.load(discovered_models[0])
@@ -65,7 +69,9 @@ class VolatilityDataProvider:
                 "Persisted dashboard split not found at %s. Loading Test split via TrainingDataHandler.",
                 self.dataset_path,
             )
-            dataset = add_dashboard_derived_features(load_test_trade_frame(verbose=False))
+            dataset = add_dashboard_derived_features(
+                load_test_trade_frame(verbose=False)
+            )
 
         ensure_non_empty_frame(dataset, "The volatility dataset is empty.")
         self._cache = dataset.copy()

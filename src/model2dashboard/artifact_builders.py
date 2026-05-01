@@ -384,7 +384,9 @@ def build_surrogate_tree_models(
             fidelity_frame=pd.DataFrame(
                 {
                     "model_prediction": y_test.reset_index(drop=True),
-                    "surrogate_prediction": surrogate_predictions.reset_index(drop=True),
+                    "surrogate_prediction": surrogate_predictions.reset_index(
+                        drop=True
+                    ),
                 }
             ),
             feature_names=list(EXPLAINABILITY_FEATURE_NAMES),
@@ -700,7 +702,9 @@ def build_diagnosis_artifact(
     error_heatmap = (
         sampled.assign(
             moneyness_bin=pd.cut(sampled["Moneyness"], bins=12),
-            maturity_bin=pd.cut(sampled[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12),
+            maturity_bin=pd.cut(
+                sampled[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12
+            ),
         )
         .groupby(["moneyness_bin", "maturity_bin"], observed=False)["AbsoluteError"]
         .mean()
@@ -785,14 +789,14 @@ def _normalize_symbolic_equation_table(
             ignore_index=True,
         )
 
-    selected_row = normalized.loc[
-        normalized["equation"] == selected_equation
-    ].head(1)
+    selected_row = normalized.loc[normalized["equation"] == selected_equation].head(1)
     if selected_row.empty:
         selected_row = normalized.loc[
             normalized["complexity"] == selected_complexity
         ].head(1)
-    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(primary["equation"]):
+    if not selected_row.empty and selected_row.iloc[0]["equation"] not in set(
+        primary["equation"]
+    ):
         primary = pd.concat([selected_row, primary], ignore_index=True)
 
     primary = (

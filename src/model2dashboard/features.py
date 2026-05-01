@@ -94,7 +94,9 @@ class ExplainabilityEncoder:
             else:
                 encoded[feature_name] = _encode_categorical_series(
                     series,
-                    self.categorical_levels.get(feature_name, (_MISSING_CATEGORY_TOKEN,)),
+                    self.categorical_levels.get(
+                        feature_name, (_MISSING_CATEGORY_TOKEN,)
+                    ),
                 )
         return encoded.astype("float64")
 
@@ -114,7 +116,9 @@ class ExplainabilityEncoder:
             else:
                 decoded[feature_name] = _decode_categorical_series(
                     series,
-                    self.categorical_levels.get(feature_name, (_MISSING_CATEGORY_TOKEN,)),
+                    self.categorical_levels.get(
+                        feature_name, (_MISSING_CATEGORY_TOKEN,)
+                    ),
                 )
         return decoded
 
@@ -140,7 +144,9 @@ def load_test_trade_frame(*, verbose: bool = False) -> pd.DataFrame:
 def _normalize_trade_frame(frame: pd.DataFrame) -> pd.DataFrame:
     normalized = frame.copy()
     normalized.columns = [column_name(column) for column in normalized.columns]
-    present = [column for column in RAW_TRADE_COLUMN_NAMES if column in normalized.columns]
+    present = [
+        column for column in RAW_TRADE_COLUMN_NAMES if column in normalized.columns
+    ]
     return normalized.loc[:, present].copy()
 
 
@@ -230,7 +236,9 @@ def build_dashboard_dataset(
     for feature_name in feature_frame.columns:
         dataset[feature_name] = feature_frame[feature_name].to_numpy()
     dataset = add_dashboard_derived_features(dataset)
-    dataset["PredictedVolatility"] = np.asarray(predictions, dtype="float64").reshape(-1)
+    dataset["PredictedVolatility"] = np.asarray(predictions, dtype="float64").reshape(
+        -1
+    )
     if TARGET_COLUMN in dataset.columns:
         dataset["Residual"] = (
             dataset[TARGET_COLUMN].astype(float) - dataset["PredictedVolatility"]
@@ -246,7 +254,9 @@ def apply_feature_override(
 ) -> pd.DataFrame:
     adjusted = _normalize_trade_frame(raw_frame)
     if feature_name == "Moneyness":
-        underlying = adjusted[column_name(VolatilityDBEnum.UNDERLYING_PRICE)].astype(float)
+        underlying = adjusted[column_name(VolatilityDBEnum.UNDERLYING_PRICE)].astype(
+            float
+        )
         adjusted[column_name(VolatilityDBEnum.STRIKE_PRICE)] = underlying / float(value)
     elif feature_name == column_name(VolatilityDBEnum.TIME_TO_EXPIRATION):
         adjusted[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)] = float(value)
@@ -265,11 +275,14 @@ def apply_feature_override(
 
 def _encode_datetime_series(series: pd.Series) -> pd.Series:
     datetimes = pd.to_datetime(series, errors="coerce", utc=True)
-    encoded = pd.Series(
-        datetimes.astype("int64"),
-        index=series.index,
-        dtype="float64",
-    ) / 1_000_000_000.0
+    encoded = (
+        pd.Series(
+            datetimes.astype("int64"),
+            index=series.index,
+            dtype="float64",
+        )
+        / 1_000_000_000.0
+    )
     encoded.loc[datetimes.isna()] = np.nan
     return encoded
 
@@ -338,7 +351,9 @@ def _build_raw_defaults(
                     column_name(VolatilityDBEnum.QUANTITY),
                     column_name(VolatilityDBEnum.IMPLIED_VOLATILITY),
                 }:
-                    defaults[feature_name] = float(pd.to_numeric(series, errors="coerce").median())
+                    defaults[feature_name] = float(
+                        pd.to_numeric(series, errors="coerce").median()
+                    )
                 else:
                     defaults[feature_name] = series.mode().iloc[0]
     if defaults_override:
@@ -373,7 +388,9 @@ def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     ].astype(float)
     result["quantityLog1p"] = np.log1p(quantity)
 
-    option_type = frame[column_name(VolatilityDBEnum.OPTION_TYPE)].astype(str).str.upper()
+    option_type = (
+        frame[column_name(VolatilityDBEnum.OPTION_TYPE)].astype(str).str.upper()
+    )
     result["isCall"] = (option_type == OptionTypeEnum.CALL.value).astype(float)
     result["isPut"] = (option_type == OptionTypeEnum.PUT.value).astype(float)
 

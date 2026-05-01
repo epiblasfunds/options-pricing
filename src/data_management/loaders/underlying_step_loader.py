@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 
 class UnderlyingStepLoader:
-
     @staticmethod
     def read_step_databases() -> pd.DataFrame:
         output_file = OptionTradesUnderlyingBuilder.get_output_filename()

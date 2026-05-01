@@ -9,7 +9,7 @@ import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from keras import callbacks, layers, ops, regularizers
+from keras import layers, ops, regularizers
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -184,7 +184,10 @@ class VolatilityModelFamilyABC(ABC):
 
     @classmethod
     def get_model_path(cls):
-        return VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{cls.get_family_name()}{cls.MODEL_EXTENSION}"
+        return (
+            VOLATILITY_TRAINED_MODELS_DIR_PATH
+            / f"{cls.get_family_name()}{cls.MODEL_EXTENSION}"
+        )
 
     @staticmethod
     @abstractmethod
@@ -203,12 +206,20 @@ class VolatilityModelFamilyABC(ABC):
         max_configurations = cls.get_max_configurations()
 
         if not search_space:
-            logger.info("Family '%s' has no hyperparameters to explore. A single model will be trained with the fixed parameters.", cls.get_family_name())
+            logger.info(
+                "Family '%s' has no hyperparameters to explore."
+                " A single model will be trained with the fixed parameters.",
+                cls.get_family_name(),
+            )
             return {cls.get_family_name(): cls.get_fixed_params()}
 
         requested_iterations = int(cls.get_n_iter())
         explored_configurations = min(requested_iterations, max_configurations)
-        explored_ratio = (100.0 * explored_configurations / max_configurations) if max_configurations > 0 else 0.0
+        explored_ratio = (
+            (100.0 * explored_configurations / max_configurations)
+            if max_configurations > 0
+            else 0.0
+        )
 
         logger.info(
             "Hyperparameter exploration for '%s': %s/%s configurations (%.2f%%).",
@@ -339,7 +350,8 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
             model_path,
             label="Model saved to",
         )
-    
+
+
 class RandomForestFamily(VolatilityModelFamilyABC):
     MODEL_EXTENSION = ".joblib"
 
@@ -370,7 +382,6 @@ class RandomForestFamily(VolatilityModelFamilyABC):
             "max_samples": [None, 0.6, 0.8, 0.9],
             "min_impurity_decrease": [0.0, 1e-6, 1e-5, 1e-4],
             "ccp_alpha": [0.0, 1e-6, 1e-5, 1e-4],
-
         }
 
     @staticmethod
@@ -731,7 +742,9 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         )
 
         train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
-        val_rmse_history = [float(value) for value in history.history.get("val_rmse", [])]
+        val_rmse_history = [
+            float(value) for value in history.history.get("val_rmse", [])
+        ]
 
         metric_history = val_rmse_history if val_rmse_history else train_rmse_history
         best_epoch = int(np.argmin(metric_history)) + 1 if metric_history else None
@@ -752,8 +765,11 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @classmethod
     def get_scaler_path(cls):
-        return VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{cls.get_family_name()}_scaler.joblib"
-    
+        return (
+            VOLATILITY_TRAINED_MODELS_DIR_PATH
+            / f"{cls.get_family_name()}_scaler.joblib"
+        )
+
     @staticmethod
     def save_model(
         model: t.Any,
@@ -763,15 +779,14 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         family_name = family_name_override or SequentialNNFamily.get_family_name()
-        model_path = (
-            VOLATILITY_TRAINED_MODELS_DIR_PATH
-            / f"{family_name}.keras"
-        )
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}.keras"
 
         model.save(model_path)
 
         if scaler is not None:
-            scaler_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
+            scaler_path = (
+                VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
+            )
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
@@ -902,7 +917,9 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
         )(x)
 
         if model_params["dropout_rate"] > 0.0:
-            x = layers.Dropout(model_params["dropout_rate"], name="qi_post_tt_dropout")(x)
+            x = layers.Dropout(model_params["dropout_rate"], name="qi_post_tt_dropout")(
+                x
+            )
 
         outputs = layers.Dense(1, activation="linear", name="qi_output")(x)
 
@@ -933,15 +950,14 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
         VOLATILITY_TRAINED_MODELS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
         family_name = family_name_override or QuantumInspiredNNFamily.get_family_name()
-        model_path = (
-            VOLATILITY_TRAINED_MODELS_DIR_PATH
-            / f"{family_name}.keras"
-        )
+        model_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}.keras"
 
         model.save(model_path)
 
         if scaler is not None:
-            scaler_path = VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
+            scaler_path = (
+                VOLATILITY_TRAINED_MODELS_DIR_PATH / f"{family_name}_scaler.joblib"
+            )
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,

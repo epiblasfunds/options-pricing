@@ -285,12 +285,15 @@ class VolatilityBuilder:
 
     @staticmethod
     def _filter_trades_by_type(df: pd.DataFrame) -> pd.DataFrame:
-        expected_trade_type = str(
-            config.data_config.volatility_config.trade_type_filter
-        ).strip().upper()
+        expected_trade_type = (
+            str(config.data_config.volatility_config.trade_type_filter).strip().upper()
+        )
 
         trade_type_series = (
-            df[OptionTradesUnderlyingDBEnum.TRADE_TYPE].astype(str).str.strip().str.upper()
+            df[OptionTradesUnderlyingDBEnum.TRADE_TYPE]
+            .astype(str)
+            .str.strip()
+            .str.upper()
         )
         filtered_df = df[trade_type_series == expected_trade_type].copy()
 

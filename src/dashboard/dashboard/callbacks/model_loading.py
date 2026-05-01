@@ -64,7 +64,10 @@ def _model_info_panel(
                         style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
                         children=[
                             _metadata_chip("Format", format_label),
-                            *[_metadata_chip("Metric", metric) for metric in metric_names],
+                            *[
+                                _metadata_chip("Metric", metric)
+                                for metric in metric_names
+                            ],
                         ],
                     ),
                 ]
@@ -264,7 +267,10 @@ def register_model_loading_callbacks(app, services) -> None:
             ]
             return (
                 html.Div(
-                    "No model selected. Publish explainable-model bundles to the configured storage backend and select one.",
+                    (
+                        "No model selected. Publish explainable-model bundles to "
+                        "the configured storage backend and select one."
+                    ),
                     style={"color": "#8a1c1c"},
                 ),
                 shap_options,
@@ -291,7 +297,9 @@ def register_model_loading_callbacks(app, services) -> None:
             for index in bundle.dashboard_model.behaviour_anchor_indices
             if index in dataset.index
         ]
-        explained_feature_names = metadata.get("explainability_feature_names") or metadata.get(
+        explained_feature_names = metadata.get(
+            "explainability_feature_names"
+        ) or metadata.get(
             "raw_feature_names",
             [],
         )

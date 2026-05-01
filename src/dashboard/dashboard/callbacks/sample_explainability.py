@@ -441,7 +441,9 @@ def register_sample_callbacks(app, services) -> None:
         )
 
     @app.callback(
-        Output({"type": "manual-feature", "feature": MATCH}, "value", allow_duplicate=True),
+        Output(
+            {"type": "manual-feature", "feature": MATCH}, "value", allow_duplicate=True
+        ),
         Input({"type": "manual-now", "feature": MATCH}, "n_clicks"),
         prevent_initial_call=True,
     )

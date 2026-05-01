@@ -102,7 +102,9 @@ class ApiModelService:
         }
 
     def _load_model(self, model_name: str) -> LoadedApiModel:
-        return self.cache.get_or_load(model_name, lambda: self._load_uncached(model_name))
+        return self.cache.get_or_load(
+            model_name, lambda: self._load_uncached(model_name)
+        )
 
     def _load_uncached(self, model_name: str) -> LoadedApiModel:
         prepared = self.storage.prepare_model(model_name)
@@ -168,9 +170,13 @@ class ApiModelService:
             pd.to_numeric,
             errors="coerce",
         )
-        sample_vector = sample_frame.loc[:, feature_names].iloc[0].apply(
-            pd.to_numeric,
-            errors="coerce",
+        sample_vector = (
+            sample_frame.loc[:, feature_names]
+            .iloc[0]
+            .apply(
+                pd.to_numeric,
+                errors="coerce",
+            )
         )
         center = dataset_matrix.mean()
         scale = dataset_matrix.std(ddof=0).replace(0.0, 1.0).fillna(1.0)
@@ -196,7 +202,8 @@ class ApiModelService:
         return [
             name
             for name in candidates
-            if name in dashboard_model.dataset_frame.columns and name in sample_frame.columns
+            if name in dashboard_model.dataset_frame.columns
+            and name in sample_frame.columns
         ]
 
     @staticmethod
@@ -213,7 +220,9 @@ class ApiModelService:
             or EXPLAINABILITY_FEATURE_NAMES
         )
         if not feature_names:
-            raise RuntimeError("Cannot build runtime SHAP explanation without features.")
+            raise RuntimeError(
+                "Cannot build runtime SHAP explanation without features."
+            )
         background_source = build_explainability_frame(
             dashboard_model.dataset_frame,
             feature_names=feature_names,

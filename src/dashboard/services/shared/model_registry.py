@@ -44,6 +44,9 @@ class ModelRegistry:
         payload = json.loads(metadata_path.read_text(encoding="utf-8"))
         if payload.get("format") != ModelFormatEnum.EXPLAINABLE_MODEL.value:
             return False
-        if payload.get("metadata", {}).get("builder") != "src.model2dashboard.run_pipeline":
+        if (
+            payload.get("metadata", {}).get("builder")
+            != "src.model2dashboard.run_pipeline"
+        ):
             return False
         return (path / "dashboard_model" / "metadata.json").exists()

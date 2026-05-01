@@ -13,7 +13,9 @@ class VolatilityConfig:
         self.solver_max_sigma = volatility_config["solver_max_sigma"]
         self.solver_tol = volatility_config["solver_tol"]
         self.trade_type_filter = volatility_config["trade_type_filter"]
-        self.underlying_lag_max_minutes = volatility_config["underlying_lag_max_minutes"]
+        self.underlying_lag_max_minutes = volatility_config[
+            "underlying_lag_max_minutes"
+        ]
         self.output_filename = volatility_config["output_filename"]
         self.volatility_db_columns = volatility_config["volatility_db_columns"]
 

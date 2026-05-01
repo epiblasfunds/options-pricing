@@ -10,6 +10,7 @@ def main() -> None:
     port = int(os.environ.get("PORT", 8080))
     app.run(debug=False, host="0.0.0.0", port=port)
 
+
 app = create_app()
 server = app.server
 

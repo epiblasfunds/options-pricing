@@ -4,8 +4,12 @@ from src.volatility_models.model_explainability.config import DEFAULT_FEATURE_SC
 
 
 def test_feature_schema_exposes_raw_and_derived_features():
-    raw_names = [feature.name for feature in DEFAULT_FEATURE_SCHEMA.raw_input_features()]
-    explain_names = [feature.name for feature in DEFAULT_FEATURE_SCHEMA.explainability_features()]
+    raw_names = [
+        feature.name for feature in DEFAULT_FEATURE_SCHEMA.raw_input_features()
+    ]
+    explain_names = [
+        feature.name for feature in DEFAULT_FEATURE_SCHEMA.explainability_features()
+    ]
 
     assert "OptionType" in raw_names
     assert "Moneyness" in explain_names

@@ -13,7 +13,7 @@ def run_data_pipeline():
         MergeRawStepLoader,
         ProductSplitStepLoader,
         UnderlyingStepLoader,
-        VolatilityStepLoader
+        VolatilityStepLoader,
     ]:
         loader.load()
 

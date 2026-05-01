@@ -130,7 +130,7 @@ class ReadRawStepLoader:
                     # Columns
                     total_columns = df.shape[1]
                     unknown_names = [
-                        f"unknown_{i+1}"
+                        f"unknown_{i + 1}"
                         for i in range(max(0, total_columns - len(columns_list)))
                     ]
                     column_names = [c for c in columns_list] + unknown_names

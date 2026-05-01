@@ -179,7 +179,7 @@ class TrainingDataHandler:
                 applied_lag,
             )
 
-        train_dates = unique_dates_total[:train_end - applied_lag]
+        train_dates = unique_dates_total[: train_end - applied_lag]
         test_dates = unique_dates_total[train_end:]
 
         train_df = data_df[exec_dates.isin(train_dates)].copy()
@@ -210,9 +210,7 @@ class TrainingDataHandler:
         }
 
         for split_name, df in split_frames.items():
-            df[contract_key_col] = (
-                df[contract_col]#.astype("string")
-            )
+            df[contract_key_col] = df[contract_col]  # .astype("string")
             df[split_col] = split_name
 
         split_assignments = pd.concat(
@@ -246,7 +244,9 @@ class TrainingDataHandler:
                 split_frames[right_split.value],
             )
 
-        per_split_counts["_priority"] = per_split_counts[split_col].map(cls.SPLIT_PRIORITY)
+        per_split_counts["_priority"] = per_split_counts[split_col].map(
+            cls.SPLIT_PRIORITY
+        )
         winner_split_by_contract = (
             per_split_counts.sort_values(
                 by=[contract_key_col, count_col, "_priority"],
@@ -267,7 +267,10 @@ class TrainingDataHandler:
 
         if verbose:
             logger.info(
-                "Contract-code leakage control applied between %s and %s | overlapping contracts: %s | removed rows -> %s: %s, %s: %s",
+                (
+                    "Contract-code leakage control applied between %s and %s | "
+                    "overlapping contracts: %s | removed rows -> %s: %s, %s: %s"
+                ),
                 left_split.value,
                 right_split.value,
                 int(overlap_contracts),
@@ -283,13 +286,17 @@ class TrainingDataHandler:
         )
 
     @classmethod
-    def add_features(cls, data_df: pd.DataFrame, split: TrainingDataSplitEnum, verbose: bool = True):
+    def add_features(
+        cls, data_df: pd.DataFrame, split: TrainingDataSplitEnum, verbose: bool = True
+    ):
         new_features = data_df.apply(
             lambda row: pd.Series(cls.build_features_from_trade(row)), axis=1
         )
         columns = BASE_FEATURE_COLS + [TARGET_COL] + AUX_CONTEXT_COLS
         if verbose:
-            logger.info(f"Rows after feature engineering ({split.value}): {len(data_df)}")
+            logger.info(
+                f"Rows after feature engineering ({split.value}): {len(data_df)}"
+            )
         result = pd.concat([data_df, new_features], axis=1)[columns]
         return result
 
@@ -351,7 +358,7 @@ class TrainingDataHandler:
             dtype="string",
         )
 
-        for col in (BASE_FEATURE_COLS + [TARGET_COL]):
+        for col in BASE_FEATURE_COLS + [TARGET_COL]:
             df[col] = df[col].astype("float64")
 
         if VolatilityDBEnum.EXEC_DATETIME.value in df.columns:
@@ -397,9 +404,15 @@ class TrainingDataHandler:
         date_col = VolatilityDBEnum.EXEC_DATETIME
         logger.info(
             "Train/Val/Test split | rows: train=%d [%s -> %s]  val=%d [%s -> %s]  test=%d [%s -> %s]  total=%d",
-            len(train_df), train_df[date_col].min().date(), train_df[date_col].max().date(),
-            len(val_df), val_df[date_col].min().date(), val_df[date_col].max().date(),
-            len(test_df), test_df[date_col].min().date(), test_df[date_col].max().date(),
+            len(train_df),
+            train_df[date_col].min().date(),
+            train_df[date_col].max().date(),
+            len(val_df),
+            val_df[date_col].min().date(),
+            val_df[date_col].max().date(),
+            len(test_df),
+            test_df[date_col].min().date(),
+            test_df[date_col].max().date(),
             len(train_df) + len(val_df) + len(test_df),
         )
         return train_df, val_df, test_df
@@ -425,8 +438,12 @@ class TrainingDataHandler:
         date_col = VolatilityDBEnum.EXEC_DATETIME
         logger.info(
             "Final split | rows: trainval=%d [%s -> %s]  test=%d [%s -> %s]  total=%d",
-            len(trainval_df), trainval_df[date_col].min().date(), trainval_df[date_col].max().date(),
-            len(test_df), test_df[date_col].min().date(), test_df[date_col].max().date(),
+            len(trainval_df),
+            trainval_df[date_col].min().date(),
+            trainval_df[date_col].max().date(),
+            len(test_df),
+            test_df[date_col].min().date(),
+            test_df[date_col].max().date(),
             len(trainval_df) + len(test_df),
         )
         return trainval_df, test_df
@@ -442,7 +459,7 @@ class TrainingDataHandler:
 
         folds = {}
         for i in range(n_folds):
-            fold_name = f"fold-{n_folds-i}"
+            fold_name = f"fold-{n_folds - i}"
             kfold_full_df = train_df.iloc[: -block_size * i] if i > 0 else train_df
             fold_train_df, fold_val_df = cls.split_train_test(kfold_full_df)
             folds[fold_name] = {"train": fold_train_df, "val": fold_val_df}
@@ -483,9 +500,7 @@ class DataInfoDisplay:
             f"  - Categorical ({len(BASE_CATEGORICAL_FEATURE_COLS)}): {BASE_CATEGORICAL_FEATURE_COLS}"
         )
         logger.info(f"  - Total model features: {len(BASE_FEATURE_COLS)}")
-        logger.info(
-            f"\nAuxiliary columns NOT used for training: {AUX_CONTEXT_COLS}"
-        )
+        logger.info(f"\nAuxiliary columns NOT used for training: {AUX_CONTEXT_COLS}")
 
         logger.info("\n" + "=" * 60)
         logger.info("FEATURE STATISTICS (numerical):")
@@ -592,9 +607,7 @@ class DataInfoDisplay:
     def display_kfolds_info(folds: t.Dict[str, pd.DataFrame], full_df: pd.DataFrame):
         full_df_dates = TrainingDataHandler.get_df_dates(full_df)
         logger.info("\n" + "=" * 95)
-        logger.info(
-            "TEMPORAL K-FOLDS (within Train only) for model-family validation"
-        )
+        logger.info("TEMPORAL K-FOLDS (within Train only) for model-family validation")
         logger.info("=" * 95)
         logger.info(
             f"Global Train -> rows: {len(full_df):,} | dates: {len(full_df_dates):,}"
