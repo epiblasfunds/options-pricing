@@ -3,7 +3,7 @@ name: Backend GCP Project Terraform Apply
 on:
   push:
     branches:
-      - main
+      - chore/infra
   workflow_dispatch:
 
 permissions:
