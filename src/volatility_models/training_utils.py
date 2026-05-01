@@ -63,7 +63,7 @@ class Trainer:
         round_digits: int = 6
     ):
         """
-        Añade una métrica compuesta de selección que penaliza inestabilidad y sobreajuste.
+        Adds a composite selection metric that penalizes instability and overfitting.
         """
         custom_error_1_config = config.volatility_models_config.training_data_config.custom_error_1
 
@@ -98,7 +98,7 @@ class Trainer:
         round_digits: int = 6,
     ) -> dict[str, float]:
         """
-        Añade una métrica compuesta de selección que penaliza inestabilidad y sobreajuste.
+        Adds a composite selection metric that penalizes instability and overfitting.
         """
         custom_error_2_config = config.volatility_models_config.training_data_config.custom_error_2
 
@@ -133,7 +133,7 @@ class Trainer:
         round_digits: int = 6,
     ):
         """
-        Calcula estadísticas agregadas (media y desviación estándar) de métricas a través de los folds.
+        Computes aggregated metric statistics (mean and standard deviation) across folds.
         """
         metric_keys = [
             k for k in Trainer._metrics_for_splits([TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL])
@@ -241,7 +241,7 @@ class Trainer:
         selection_config=None,
     ):
         """
-        Selecciona el mejor modelo desde `metrics_table` según criterio configurable.
+        Selects the best model from `metrics_table` using a configurable criterion.
         """
         selected_metric = selection_config["metric"]
         selected_mode = selection_config["mode"]
@@ -296,7 +296,7 @@ class Trainer:
         model_params_registry: dict,
         training_registry: dict,
     ):
-        """Guarda metadatos estructurados de la familia entrenada en JSON."""
+        """Saves structured metadata for the trained family to JSON."""
 
         payload = {
             "family_name": family_name,
@@ -312,7 +312,7 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(file_path, label="Metadata guardada")
+        Visualizer.info_confirmation(file_path, label="Metadata saved")
 
     @classmethod
     def save_retrained_metadata(
@@ -322,7 +322,7 @@ class Trainer:
         model_params: dict,
         training_information: dict,
     ):
-        """Guarda metadatos del modelo reentrenado en JSON."""
+        """Saves metadata for the retrained model to JSON."""
 
         phase_suffix = str(getattr(phase, "value", phase)).lower().replace(" ", "_")
 
@@ -345,7 +345,7 @@ class Trainer:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(file_path, label="Metadata de reentrenamiento guardada")
+        Visualizer.info_confirmation(file_path, label="Retraining metadata saved")
     
     @staticmethod
     def _build_progressive_training_data(
@@ -354,9 +354,9 @@ class Trainer:
         target_col: str,
     ) -> tuple[pd.DataFrame, np.ndarray]:
         """
-        Construye bloques acumulativos ATM->menos ATM.
-        En cada iteracion se concatena hasta el segmento actual, se aplica shuffle
-        sobre ese acumulado, y al final se concatenan todos los acumulados.
+        Builds cumulative ATM-to-less-ATM blocks.
+        In each iteration, data is concatenated up to the current segment, shuffled
+        within that cumulative set, and all cumulative sets are concatenated at the end.
         """
         progressive_blocks = []
         for idx in range(len(segments)):
@@ -449,7 +449,7 @@ class Trainer:
         for model_i_name, model_i_params in tqdm(
             models.items(),
             total=total_family_models,
-            desc=f"Entrenando familia: {family_name}",
+            desc=f"Training family: {family_name}",
         ):
             model_params_registry[model_i_name] = model_i_params
             tr, metrics = self.run_kfolds_training_for_specific_model(
@@ -606,7 +606,7 @@ class Trainer:
             evaluation_label = TrainingDataSplitEnum.TEST
 
         logger.info(
-            "Reentrenamiento '%s' | phase=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            "Retraining '%s' | phase=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
             family_name,
             phase.value if hasattr(phase, "value") else phase,
             len(X_train),
@@ -799,7 +799,7 @@ class Trainer:
         y_val = val_data[TARGET_COLUMN].to_numpy()
 
         logger.info(
-            "Reentrenamiento progresivo '%s' | phase=%s | n_segments=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
+            "Progressive retraining '%s' | phase=%s | n_segments=%s | input fit: train_rows=%s eval_rows=%s total_rows=%s",
             progressive_family_name,
             phase.value if hasattr(phase, "value") else phase,
             n_segments,
@@ -890,7 +890,7 @@ class Trainer:
         with open(retrained_metadata_path, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
-        Visualizer.info_confirmation(retrained_metadata_path, label="Metadata progresiva guardada")
+        Visualizer.info_confirmation(retrained_metadata_path, label="Progressive metadata saved")
 
         if is_final_test:
             self.model_family.save_model(
@@ -963,7 +963,7 @@ def _find_gcloud():
             r"%USERPROFILE%\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
         ])
 
-    else: # Linux y macOS
+    else:  # Linux and macOS
         possible_paths.extend([
             "/usr/local/bin/gcloud",
             "/opt/homebrew/bin/gcloud",

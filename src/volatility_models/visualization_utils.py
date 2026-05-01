@@ -56,8 +56,8 @@ class Visualizer:
         phase=None,
     ):
         """
-        Muestra las curvas de aprendizaje (train vs val por epoch) del mejor modelo
-        en cada fold, con una línea vertical en best_epoch.
+        Show the learning curves (train vs val by epoch) of the best model
+        for each fold, with a vertical line at best_epoch.
         """
         plot_title = family_name
 
@@ -102,7 +102,7 @@ class Visualizer:
                     label=f"best epoch ({best_epoch})",
                 )
 
-            ax.set_title(f"{plot_title} - curvas de aprendizaje ({phase_value})")
+            ax.set_title(f"{plot_title} - learning curves ({phase_value})")
             ax.set_xlabel("Epoch")
             ax.set_ylabel("RMSE")
             ax.legend(fontsize=9)
@@ -173,7 +173,7 @@ class Visualizer:
         for ax_idx in range(n_folds, len(axes_flat)):
             axes_flat[ax_idx].set_visible(False)
 
-        fig.suptitle(f"{plot_title} - curvas de aprendizaje por fold", y=1.02)
+        fig.suptitle(f"{plot_title} - learning curves by fold", y=1.02)
         plt.tight_layout()
         plt.show()
 
@@ -185,8 +185,8 @@ class Visualizer:
         sample_size: int = 7000,
     ):
         """
-        Gráficas representativas del mejor modelo a lo largo de los folds:
-        evolución de métricas train/val, gap de sobreajuste y scatter agregado real vs pred.
+        Representative charts of the best model across the folds:
+        evolution of train/val metrics, overfitting gap, and aggregated actual-vs-predicted scatter.
         """
 
         best_model_name = str(best_model_row.index[0])
@@ -231,7 +231,7 @@ class Visualizer:
         axes[0, 0].plot(
             fold_metrics_df["fold"], fold_metrics_df["val_rmse"], marker="o", label="val RMSE"
         )
-        axes[0, 0].set_title(f"{plot_title} - RMSE por fold")
+        axes[0, 0].set_title(f"{plot_title} - RMSE by fold")
         axes[0, 0].set_xlabel("Fold")
         axes[0, 0].set_ylabel("RMSE")
         axes[0, 0].legend()
@@ -243,7 +243,7 @@ class Visualizer:
         axes[0, 1].plot(
             fold_metrics_df["fold"], fold_metrics_df["val_mae"], marker="o", label="val MAE"
         )
-        axes[0, 1].set_title(f"{plot_title} - MAE por fold")
+        axes[0, 1].set_title(f"{plot_title} - MAE by fold")
         axes[0, 1].set_xlabel("Fold")
         axes[0, 1].set_ylabel("MAE")
         axes[0, 1].legend()
@@ -256,13 +256,13 @@ class Visualizer:
         axes[1, 0].set_xticks(x)
         axes[1, 0].set_xticklabels(fold_metrics_df["fold"])
         axes[1, 0].axhline(0.0, color="black", linestyle="--", linewidth=1)
-        axes[1, 0].set_title(f"{plot_title} - R2 por fold")
+        axes[1, 0].set_title(f"{plot_title} - R2 by fold")
         axes[1, 0].set_xlabel("Fold")
         axes[1, 0].set_ylabel("R2")
         axes[1, 0].legend()
         axes[1, 0].grid(alpha=0.25)
 
-        # El scatter se construye con el fold de último índice
+        # Build the scatter plot from the fold with the highest index
         max_fold_key = (
             max(fold_keys, key=lambda k: int(k.split("fold-")[-1]))
         )
@@ -289,11 +289,11 @@ class Visualizer:
                 alpha=0.30,
             )
             axes[1, 1].plot([min_value, max_value], [min_value, max_value], "k--")
-            axes[1, 1].set_title(f"{plot_title} - valid: real vs pred ({best_model_name})")
-            axes[1, 1].set_xlabel("IV real")
-            axes[1, 1].set_ylabel("IV pred")
+            axes[1, 1].set_title(f"{plot_title} - validation: actual vs predicted ({best_model_name})")
+            axes[1, 1].set_xlabel("Actual IV")
+            axes[1, 1].set_ylabel("Predicted IV")
             axes[1, 1].grid(alpha=0.25)
 
-        fig.suptitle(f"{plot_title} - resumen del mejor candidato", y=1.02)
+        fig.suptitle(f"{plot_title} - best candidate summary", y=1.02)
         plt.tight_layout()
         plt.show()

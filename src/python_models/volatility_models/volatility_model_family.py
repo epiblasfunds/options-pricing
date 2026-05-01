@@ -39,7 +39,7 @@ class ModelFitResult:
 
 @keras.utils.register_keras_serializable(package="volatility_models")
 class TensorTrainLayer(keras.layers.Layer):
-    """Tensor-network feature extractor basado en una factorizacion tensor-train."""
+    """Tensor-network feature extractor based on a tensor-train factorization."""
 
     def __init__(
         self,
@@ -56,15 +56,15 @@ class TensorTrainLayer(keras.layers.Layer):
         self.activation = keras.activations.get(activation)
 
         if len(self.tt_ranks) != len(self.input_dims) + 1:
-            raise ValueError("tt_ranks debe tener longitud len(input_dims) + 1.")
+            raise ValueError("tt_ranks must have length len(input_dims) + 1.")
         if self.tt_ranks[0] != 1 or self.tt_ranks[-1] != 1:
-            raise ValueError("TensorTrainLayer requiere fronteras TT [1, ..., 1].")
+            raise ValueError("TensorTrainLayer requires TT boundary ranks [1, ..., 1].")
         if any(dim <= 0 for dim in self.input_dims):
-            raise ValueError("input_dims debe contener solo enteros positivos.")
+            raise ValueError("input_dims must contain only positive integers.")
         if any(rank <= 0 for rank in self.tt_ranks):
-            raise ValueError("tt_ranks debe contener solo enteros positivos.")
+            raise ValueError("tt_ranks must contain only positive integers.")
         if self.output_dim <= 0:
-            raise ValueError("output_dim debe ser positivo.")
+            raise ValueError("output_dim must be positive.")
 
     def build(self, input_shape):
         expected_shape = tuple(self.input_dims)
@@ -74,7 +74,7 @@ class TensorTrainLayer(keras.layers.Layer):
 
         if len(received_shape) != len(expected_shape):
             raise ValueError(
-                f"Se esperaba un tensor de orden {len(expected_shape)}, pero llego shape={input_shape}."
+                f"Expected a tensor of order {len(expected_shape)}, but got shape={input_shape}."
             )
 
         for expected_dim, received_dim in zip(expected_shape, received_shape):
@@ -242,7 +242,7 @@ class VolatilityModelFamilyABC(ABC):
         cardinalities = [len(list(values)) for values in search_space.values()]
         if any(cardinality <= 0 for cardinality in cardinalities):
             raise ValueError(
-                f"La familia '{cls.get_family_name()}' tiene hiperparametros con dominio vacio."
+                f"Family '{cls.get_family_name()}' has hyperparameters with an empty domain."
             )
         return int(prod(cardinalities))
 
@@ -254,9 +254,9 @@ class VolatilityModelFamilyABC(ABC):
         min_valid_samples: int = 256,
     ):
         """
-        Crea un split temporal interno dentro de X_train para el early stopping.
-        El fold-valid externo queda reservado únicamente para evaluación final de métricas,
-        evitando así cualquier sesgo de overfitting hacia ese conjunto.
+        Creates an internal temporal split within X_train for early stopping.
+        The outer validation fold is reserved exclusively for final metric evaluation,
+        avoiding any overfitting bias toward that set.
         """
         n_samples = len(X_train)
 
@@ -337,7 +337,7 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
     
 class RandomForestFamily(VolatilityModelFamilyABC):
@@ -419,7 +419,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
 
@@ -447,7 +447,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
             "colsample_bynode": 1.0,
             "max_delta_step": 0.0,
             "grow_policy": "depthwise",
-            "base_score": 0.20,  # Ajustado a la media del target para mejorar convergencia
+            "base_score": 0.20,  # Adjusted to the target mean to improve convergence
         }
 
     @staticmethod
@@ -533,7 +533,7 @@ class XGBoostFamily(VolatilityModelFamilyABC):
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
 
@@ -775,12 +775,12 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
-                label="Scaler guardado en",
+                label="Scaler saved to",
             )
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
 
     @classmethod
@@ -945,10 +945,10 @@ class QuantumInspiredNNFamily(SequentialNNFamily):
             joblib.dump(scaler, scaler_path)
             Visualizer.info_confirmation(
                 scaler_path,
-                label="Scaler guardado en",
+                label="Scaler saved to",
             )
 
         Visualizer.info_confirmation(
             model_path,
-            label="Modelo guardado en",
+            label="Model saved to",
         )
