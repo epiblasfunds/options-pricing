@@ -71,12 +71,9 @@
             "base_metric": "rmse"
         },
         "models_metrics": [
-            "train_mae",
-            "train_rmse",
-            "train_r2",
-            "val_mae",
-            "val_rmse",
-            "val_r2"
+            "mae",
+            "rmse",
+            "r2"
         ],
         "required_scaler_models": [
             "sequential_nn",

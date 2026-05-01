@@ -7,6 +7,7 @@ from math import prod
 import joblib
 import keras
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from keras import callbacks, layers, ops, regularizers
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -18,7 +19,6 @@ from xgboost import XGBRegressor
 from src.config.config import VOLATILITY_TRAINED_MODELS_DIR_PATH
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.volatility_models.data_utils import (
-    BASE_FEATURE_COLS,
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
@@ -382,7 +382,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 120
+        return 80
 
     @classmethod
     def fit_model(
@@ -619,18 +619,9 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         return X_fit_scaled, X_valid_scaled, X_train_full_scaled, X_eval_scaled, scaler
 
     @staticmethod
-    def _resolve_numeric_col_indices() -> tuple[int, ...]:
-        def _feature_name(col: t.Any) -> str:
-            return str(col.value) if hasattr(col, "value") else str(col)
-
-        base_feature_names = [_feature_name(col) for col in BASE_FEATURE_COLS]
-        feature_to_index = {
-            feature_name: idx for idx, feature_name in enumerate(base_feature_names)
-        }
-
-        numeric_feature_names = [_feature_name(col) for col in BASE_NUMERIC_FEATURE_COLS]
-
-        return tuple(feature_to_index[name] for name in numeric_feature_names)
+    def _resolve_numeric_col_indices(*, data: pd.DataFrame) -> tuple[int, ...]:
+        numeric_cols = list(BASE_NUMERIC_FEATURE_COLS)
+        return tuple(int(data.columns.get_loc(col)) for col in numeric_cols)
 
     @staticmethod
     def instantiate_model(
@@ -669,7 +660,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 75
+        return 120
 
     @classmethod
     def fit_model(
@@ -683,7 +674,10 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
-        numeric_col_indices = cls._resolve_numeric_col_indices()
+        numeric_col_indices = cls._resolve_numeric_col_indices(data=X_train)
+
+        X_train = np.asarray(X_train)
+        X_val = np.asarray(X_val)
 
         X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
             X_train,

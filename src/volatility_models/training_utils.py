@@ -33,6 +33,31 @@ class Trainer:
         self.model_family = model_family
 
     @staticmethod
+    def _metric_column(split_label: TrainingDataSplitEnum, metric_name: str) -> str:
+        return f"{split_label}_{metric_name}"
+
+    @staticmethod
+    def _compute_base_metric(metric_name: str, y_true, y_pred) -> float:
+        if metric_name == "mae":
+            return float(mean_absolute_error(y_true, y_pred))
+        if metric_name == "rmse":
+            return float(np.sqrt(mean_squared_error(y_true, y_pred)))
+        if metric_name == "r2":
+            return float(r2_score(y_true, y_pred))
+
+    @classmethod
+    def _metrics_for_splits(
+        cls,
+        split_labels: list[TrainingDataSplitEnum],
+    ) -> list[str]:
+        base_metrics = config.volatility_models_config.training_data_config.models_metrics
+        return [
+            cls._metric_column(split_label, metric_name)
+            for split_label in split_labels
+            for metric_name in base_metrics
+        ]
+
+    @staticmethod
     def add_custom_error1(
         metrics_table: pd.DataFrame,
         round_digits: int = 6
@@ -46,8 +71,8 @@ class Trainer:
         alpha = custom_error_1_config["alpha"]
         beta = custom_error_1_config["beta"]
 
-        train_metric_col = f"train_{base_metric}"
-        valid_metric_col = f"val_{base_metric}"
+        train_metric_col = Trainer._metric_column(TrainingDataSplitEnum.TRAIN, base_metric)
+        valid_metric_col = Trainer._metric_column(TrainingDataSplitEnum.VAL, base_metric)
         valid_metric_std_col = f"{valid_metric_col}_std"
 
         train_metric = pd.to_numeric(metrics_table[train_metric_col])
@@ -81,8 +106,8 @@ class Trainer:
         gamma = custom_error_2_config["gamma"]
         beta = custom_error_2_config["beta"]
 
-        train_metric_col = f"train_{base_metric}"
-        valid_metric_col = f"val_{base_metric}"
+        train_metric_col = Trainer._metric_column(TrainingDataSplitEnum.TRAIN, base_metric)
+        valid_metric_col = Trainer._metric_column(TrainingDataSplitEnum.VAL, base_metric)
 
         train_metric = float(metrics_dict[train_metric_col])
         valid_metric = float(metrics_dict[valid_metric_col])
@@ -103,12 +128,17 @@ class Trainer:
 
 
     @staticmethod
-    def calculate_metrics_across_folds(fold_metrics_list, round_digits: int = 6):
+    def calculate_metrics_across_folds(
+        fold_metrics_list,
+        round_digits: int = 6,
+    ):
         """
         Calcula estadísticas agregadas (media y desviación estándar) de métricas a través de los folds.
         """
-        models_metrics = config.volatility_models_config.training_data_config.models_metrics
-        metric_keys = [k for k in models_metrics if k in fold_metrics_list[0]]
+        metric_keys = [
+            k for k in Trainer._metrics_for_splits([TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL])
+            if k in fold_metrics_list[0]
+        ]
         agg_metrics = {}
 
         for key in metric_keys:
@@ -125,6 +155,7 @@ class Trainer:
         y_valid_true,
         y_valid_pred,
         evaluation_label: TrainingDataSplitEnum,
+        train_label: TrainingDataSplitEnum = TrainingDataSplitEnum.TRAIN,
         round_digits: int = 6,
     ) -> dict[str, float]:
         y_train_true = np.asarray(y_train_true)
@@ -132,14 +163,14 @@ class Trainer:
         y_valid_true = np.asarray(y_valid_true)
         y_valid_pred = np.asarray(y_valid_pred)
 
-        metrics = {
-            "train_mae": mean_absolute_error(y_train_true, y_train_pred),
-            "train_rmse": np.sqrt(mean_squared_error(y_train_true, y_train_pred)),
-            "train_r2": r2_score(y_train_true, y_train_pred),
-            f"{evaluation_label.value}_mae": mean_absolute_error(y_valid_true, y_valid_pred),
-            f"{evaluation_label.value}_rmse": np.sqrt(mean_squared_error(y_valid_true, y_valid_pred)),
-            f"{evaluation_label.value}_r2": r2_score(y_valid_true, y_valid_pred),
-        }
+        base_metrics = list(config.volatility_models_config.training_data_config.models_metrics)
+        metrics = {}
+        for metric_name in base_metrics:
+            train_metric_col = Trainer._metric_column(train_label, metric_name)
+            eval_metric_col = Trainer._metric_column(evaluation_label, metric_name)
+            metrics[train_metric_col] = Trainer._compute_base_metric(metric_name, y_train_true, y_train_pred)
+            metrics[eval_metric_col] = Trainer._compute_base_metric(metric_name, y_valid_true, y_valid_pred)
+
         return {name: float(np.round(value, round_digits)) for name, value in metrics.items()}
 
     def run_kfolds_training_for_specific_model(
@@ -159,9 +190,9 @@ class Trainer:
             train_fold = v["train"]
             val_fold = v["val"]
 
-            X_train_fold = train_fold[BASE_FEATURE_COLS].to_numpy()
+            X_train_fold = train_fold[BASE_FEATURE_COLS]
             y_train_fold = train_fold[TARGET_COLUMN].to_numpy()
-            X_val_fold = val_fold[BASE_FEATURE_COLS].to_numpy()
+            X_val_fold = val_fold[BASE_FEATURE_COLS]
             y_val_fold = val_fold[TARGET_COLUMN].to_numpy()
 
             model = self.model_family.instantiate_model(
@@ -321,7 +352,7 @@ class Trainer:
         segments: list,
         feature_cols: list,
         target_col: str,
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[pd.DataFrame, np.ndarray]:
         """
         Construye bloques acumulativos ATM->menos ATM.
         En cada iteracion se concatena hasta el segmento actual, se aplica shuffle
@@ -334,31 +365,19 @@ class Trainer:
             progressive_blocks.append(accumulated_segment)
 
         accumulated_data = pd.concat(progressive_blocks, ignore_index=True)
-        X_train = accumulated_data[feature_cols].to_numpy()
+        X_train = accumulated_data[feature_cols]
         y_train = accumulated_data[target_col].to_numpy()
         
         return X_train, y_train
     
     @classmethod
-    def rename_metrics(
-        cls,
-        metrics_series: pd.Series,
-    ) -> pd.Series:
-        renamed_metrics = {}
-        for k, v in metrics_series.items():
-            if k.startswith("val_"):
-                new_key = k.replace("val_", "test_")
-            else:
-                new_key = k
-            renamed_metrics[new_key] = v
-        return pd.Series(renamed_metrics, name=metrics_series.name)
-
-    @classmethod
     def create_empty_metrics_table(
         cls,
         selection_config
     ) -> pd.DataFrame:
-        model_metrics = list(config.volatility_models_config.training_data_config.models_metrics)
+        model_metrics = cls._metrics_for_splits(
+            [TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL]
+        )
         columns = model_metrics.copy()
         
         if selection_config is config.volatility_models_config.training_data_config.custom_error_1:
@@ -482,16 +501,16 @@ class Trainer:
     
     def fit_model(
         self,
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
         phase: TrainingPhase,
         model_params: dict,
         shuffle: bool = True,
     ) -> tuple:
         if shuffle:
             indices = np.random.permutation(len(X_train))
-            X_train = X_train[indices]
+            X_train = X_train.iloc[indices]
             y_train = y_train[indices]
 
         model = self.model_family.instantiate_model(
@@ -567,21 +586,23 @@ class Trainer:
         if is_train_val:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
 
-            X_train = train_data[BASE_FEATURE_COLS].to_numpy()      
+            X_train = train_data[BASE_FEATURE_COLS]
             y_train = train_data[TARGET_COLUMN].to_numpy()
-            X_val = val_data[BASE_FEATURE_COLS].to_numpy()
+            X_val = val_data[BASE_FEATURE_COLS]
             y_val = val_data[TARGET_COLUMN].to_numpy()
 
+            train_label = TrainingDataSplitEnum.TRAIN
             evaluation_label = TrainingDataSplitEnum.VAL
 
         elif is_final_test:
             train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
 
-            X_train = train_data[BASE_FEATURE_COLS].to_numpy()
+            X_train = train_data[BASE_FEATURE_COLS]
             y_train = train_data[TARGET_COLUMN].to_numpy()
-            X_val = test_data[BASE_FEATURE_COLS].to_numpy()
+            X_val = test_data[BASE_FEATURE_COLS]
             y_val = test_data[TARGET_COLUMN].to_numpy()
 
+            train_label = TrainingDataSplitEnum.TRAIN_VAL
             evaluation_label = TrainingDataSplitEnum.TEST
 
         logger.info(
@@ -608,6 +629,7 @@ class Trainer:
             y_val,
             fit_result.validation_predictions,
             evaluation_label=evaluation_label,
+            train_label=train_label,
         )
 
         if is_train_val:
@@ -617,9 +639,6 @@ class Trainer:
             )
 
         result_series = pd.Series(metrics_dict, name=model_name)
-
-        if is_final_test:
-            result_series = self.rename_metrics(result_series)
 
         Visualizer.best_model_family_retrained(
             result_series=result_series,
@@ -746,11 +765,13 @@ class Trainer:
         # Load data
         if is_train_val:
             train_data, val_data, _ = TrainingDataHandler.load_full_features_splitted_data(verbose=False)
+            train_label = TrainingDataSplitEnum.TRAIN
             evaluation_label = TrainingDataSplitEnum.VAL
         elif is_final_test:
             train_data, test_data = TrainingDataHandler.load_full_features_trainval_test_data(verbose=False)
             train_data = train_data.copy()
             test_data = test_data.copy()
+            train_label = TrainingDataSplitEnum.TRAIN_VAL
             evaluation_label = TrainingDataSplitEnum.TEST
             val_data = test_data
 
@@ -774,7 +795,7 @@ class Trainer:
             feature_cols=BASE_FEATURE_COLS,
             target_col=TARGET_COLUMN,
         )
-        X_val = val_data[BASE_FEATURE_COLS].to_numpy()
+        X_val = val_data[BASE_FEATURE_COLS]
         y_val = val_data[TARGET_COLUMN].to_numpy()
 
         logger.info(
@@ -802,6 +823,7 @@ class Trainer:
             y_val,
             fit_result.validation_predictions,
             evaluation_label=evaluation_label,
+            train_label=train_label,
         )
 
         if is_train_val:
@@ -827,9 +849,6 @@ class Trainer:
             }
         }
         
-        if is_final_test:
-            result_series = self.rename_metrics(result_series)
-
         Visualizer.best_model_family_retrained(
             result_series=result_series,
             phase=phase,
@@ -940,6 +959,8 @@ def _find_gcloud():
             r"%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
             r"%PROGRAMFILES%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
             r"%PROGRAMFILES(X86)%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
+            r"%PROGRAMDATA%\chocolatey\bin\gcloud.cmd",
+            r"%USERPROFILE%\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd",
         ])
 
     else: # Linux y macOS
@@ -952,12 +973,15 @@ def _find_gcloud():
         possible_paths.extend([
             "/usr/bin/gcloud",
             "/usr/local/sbin/gcloud",
+            "/opt/google-cloud-sdk/bin/gcloud",
         ])
 
     for path in possible_paths:
         expanded = os.path.expandvars(os.path.expanduser(path))
         if os.path.exists(expanded) and os.access(expanded, os.X_OK):
             return expanded
+
+    logger.debug("No se encontro un ejecutable funcional de gcloud en PATH ni en rutas conocidas.")
 
     return None
 
