@@ -1,6 +1,5 @@
 """Callbacks for behaviour and surface analysis."""
 
-
 import numpy as np
 import plotly.graph_objects as go
 from dash import Input, Output, html
@@ -78,9 +77,7 @@ def register_behaviour_callbacks(app, services) -> None:
             ice_frame = services.surface_service.compute_ice_curves(
                 model_id, selected_feature
             )
-            ale_frame = services.surface_service.compute_ale(
-                model_id, selected_feature
-            )
+            ale_frame = services.surface_service.compute_ale(model_id, selected_feature)
             warnings = html.Ul(
                 [
                     html.Li(message)

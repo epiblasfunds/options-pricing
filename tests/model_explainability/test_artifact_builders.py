@@ -21,7 +21,9 @@ class _FakeExplainer:
 
     def __call__(self, encoded_frame, max_evals, silent):
         predictions = np.asarray(self.model(encoded_frame), dtype="float64").reshape(-1)
-        values = np.zeros((len(encoded_frame), len(self.feature_names)), dtype="float64")
+        values = np.zeros(
+            (len(encoded_frame), len(self.feature_names)), dtype="float64"
+        )
         values[:, 0] = predictions
         return shap.Explanation(
             values=values,
@@ -85,7 +87,9 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
         index=[10, 11],
     )
     dataset_frame = raw_frame.copy()
-    predictions = pd.Series([0.2, 0.3], index=raw_frame.index, name="PredictedVolatility")
+    predictions = pd.Series(
+        [0.2, 0.3], index=raw_frame.index, name="PredictedVolatility"
+    )
 
     _global_shap, local_shap = artifact_builders.build_shap_artifacts(
         runtime=SimpleNamespace(),
@@ -97,6 +101,8 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
 
     local_prediction = float(local_shap.waterfall_predictions()[0])
 
-    assert captured_raw_frames, "The SHAP builder should evaluate reconstructed raw rows."
+    assert captured_raw_frames, (
+        "The SHAP builder should evaluate reconstructed raw rows."
+    )
     assert local_prediction == 1543.0
     assert local_shap.index == [11]

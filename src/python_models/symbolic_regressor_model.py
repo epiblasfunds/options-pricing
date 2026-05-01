@@ -39,10 +39,14 @@ class SymbolicRegressorModel:
         candidate_path = cls._get_candidates_path(path)
         fidelity_path = cls._get_fidelity_path(path)
         candidate_equations = (
-            pd.read_csv(candidate_path, index_col=0) if candidate_path.exists() else pd.DataFrame()
+            pd.read_csv(candidate_path, index_col=0)
+            if candidate_path.exists()
+            else pd.DataFrame()
         )
         fidelity_frame = (
-            pd.read_csv(fidelity_path, index_col=0) if fidelity_path.exists() else pd.DataFrame()
+            pd.read_csv(fidelity_path, index_col=0)
+            if fidelity_path.exists()
+            else pd.DataFrame()
         )
         return cls(
             equation=attrs["equation"],
@@ -53,7 +57,9 @@ class SymbolicRegressorModel:
             used_feature_names=list(attrs.get("used_feature_names", [])),
             complexity=int(attrs["complexity"]),
             model_selection=attrs["model_selection"],
-            metrics={name: float(value) for name, value in attrs.get("metrics", {}).items()},
+            metrics={
+                name: float(value) for name, value in attrs.get("metrics", {}).items()
+            },
             candidate_equations=candidate_equations,
             fidelity_frame=fidelity_frame,
         )
@@ -80,7 +86,8 @@ class SymbolicRegressorModel:
 
     def predict(self, frame: pd.DataFrame) -> pd.Series:
         symbol_map = {
-            feature_name: sympy.Symbol(feature_name) for feature_name in self.feature_names
+            feature_name: sympy.Symbol(feature_name)
+            for feature_name in self.feature_names
         }
         expression = sympy.sympify(self.sympy_expression, locals=symbol_map)
         evaluator = sympy.lambdify(
@@ -89,9 +96,14 @@ class SymbolicRegressorModel:
             modules="numpy",
         )
         values = evaluator(
-            *[frame[feature_name].to_numpy(dtype="float64") for feature_name in self.feature_names]
+            *[
+                frame[feature_name].to_numpy(dtype="float64")
+                for feature_name in self.feature_names
+            ]
         )
         array = np.asarray(values, dtype="float64")
         if array.ndim == 0:
             array = np.full(len(frame), float(array), dtype="float64")
-        return pd.Series(array.reshape(-1), index=frame.index, name="symbolic_prediction")
+        return pd.Series(
+            array.reshape(-1), index=frame.index, name="symbolic_prediction"
+        )

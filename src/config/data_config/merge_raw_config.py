@@ -13,7 +13,9 @@ class MergeRawConfig:
         self.contract_type_column = data_config[merge_raw_step_name][
             "contract_type_column"
         ]
-        self.maturity_hour_expiration = data_config[merge_raw_step_name]["maturity_hour_expiration"]
+        self.maturity_hour_expiration = data_config[merge_raw_step_name][
+            "maturity_hour_expiration"
+        ]
         self.output_filename = data_config[merge_raw_step_name]["output_filename"]
 
     def __init__(self, data_config_file_path: str):

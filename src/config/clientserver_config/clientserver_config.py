@@ -51,7 +51,9 @@ class ClientserverConfig:
         self.api_cache_entries = int(api_config["cache_entries"])
 
         env_backend = os.environ.get("MODEL_STORAGE_BACKEND", "").strip().lower()
-        self.model_storage_backend = env_backend if env_backend else str(storage_config["backend"]).lower()
+        self.model_storage_backend = (
+            env_backend if env_backend else str(storage_config["backend"]).lower()
+        )
         self.local_cache_dir = self._resolve_path(
             project_root,
             storage_config["local_cache_dir"],
@@ -82,7 +84,9 @@ class ClientserverConfig:
         )
         dashboard_bucket = self._first_non_empty(
             gcp_config.get("explainability_artifacts_bucket"),
-            self._nested_get(cloud_payload, "storage", "explainability_artifacts_bucket"),
+            self._nested_get(
+                cloud_payload, "storage", "explainability_artifacts_bucket"
+            ),
         )
         credentials_path = gcp_config.get("credentials_path")
         self.gcp_storage = GcpModelStorageConfig(

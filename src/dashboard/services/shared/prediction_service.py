@@ -89,9 +89,7 @@ class PredictionService:
         url = f"{config.clientserver_config.api_base_url}{endpoint}"
         body = {
             "modelo": model_id,
-            "caracteristicas": self._api_features_from_dashboard_sample(
-                sample_payload
-            ),
+            "caracteristicas": self._api_features_from_dashboard_sample(sample_payload),
         }
         request = Request(
             url=url,
@@ -107,7 +105,9 @@ class PredictionService:
                 return json.loads(response.read().decode("utf-8"))
         except HTTPError as exc:
             detail = exc.read().decode("utf-8")
-            raise RuntimeError(f"Manual API call failed ({exc.code}): {detail}") from exc
+            raise RuntimeError(
+                f"Manual API call failed ({exc.code}): {detail}"
+            ) from exc
         except URLError as exc:
             raise RuntimeError(f"Manual API is not reachable at {url}: {exc}") from exc
 

@@ -14,20 +14,20 @@ from src.exceptions.data_exceptions import (
 
 def compute_ibex_mask(contract_code_series: pd.Series) -> pd.Series:
     return contract_code_series.str.startswith(
-            tuple(config.data_config.contract_code_config.contracts_prefixes),
-            na=False,
-        )
+        tuple(config.data_config.contract_code_config.contracts_prefixes),
+        na=False,
+    )
 
 
 def compute_monthly_maturity_mask(contract_code_series: pd.Series) -> pd.Series:
     # Select only futures and options with monthly maturity
     # We can identify them because their number of characters
     return contract_code_series.str.len().isin(
-            [
-                config.data_config.contract_code_config.futures_code_len,
-                config.data_config.contract_code_config.options_code_len,
-            ]
-        )
+        [
+            config.data_config.contract_code_config.futures_code_len,
+            config.data_config.contract_code_config.options_code_len,
+        ]
+    )
 
 
 def validate_maturity_contract_code_month(
@@ -129,12 +129,14 @@ def validate_strike_contract_code(
     # Validate
     strike_starts = config.data_config.contract_code_config.strike_starts
     strike_ends = config.data_config.contract_code_config.strike_ends
-    invalid_strikes = (
-        cc_series.str[strike_starts:strike_ends].astype("float") != s_series.astype("float")
-    )
+    invalid_strikes = cc_series.str[strike_starts:strike_ends].astype(
+        "float"
+    ) != s_series.astype("float")
     if invalid_strikes.any():
         first_invalid_cc = cc_series[invalid_strikes].iloc[0]
-        first_invalid_cc_converted = cc_series.str[strike_starts:strike_ends].astype("float").iloc[0]
+        first_invalid_cc_converted = (
+            cc_series.str[strike_starts:strike_ends].astype("float").iloc[0]
+        )
         first_invalid_s = s_series[invalid_strikes].iloc[0]
         raise ContractCodeStrikeError(
             f"There are option contract codes with strike "

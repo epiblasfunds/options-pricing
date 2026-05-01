@@ -27,7 +27,9 @@ class TrainingDataConfig:
         self.numeric_features = [
             TrainingDataEnum(c).value for c in training_data_config["numeric_features"]
         ]
-        self.target_column = TrainingDataEnum(training_data_config["target_column"]).value
+        self.target_column = TrainingDataEnum(
+            training_data_config["target_column"]
+        ).value
         self.trade_type_to_feature = {
             k: TrainingDataEnum(v).value
             for k, v in training_data_config["trade_type_to_feature"].items()
@@ -37,7 +39,9 @@ class TrainingDataConfig:
         self.custom_error_1: t.Dict = training_data_config["custom_error_1"]
         self.custom_error_2: t.Dict = training_data_config["custom_error_2"]
         self.models_metrics: t.List = training_data_config["models_metrics"]
-        self.required_scaler_models: t.List = training_data_config["required_scaler_models"]
+        self.required_scaler_models: t.List = training_data_config[
+            "required_scaler_models"
+        ]
         progressive_config = training_data_config["progressive_training_config"]
         self.n_segments: int = int(progressive_config["n_segments"])
         self.moneyness_column: str = str(progressive_config["moneyness_column"])

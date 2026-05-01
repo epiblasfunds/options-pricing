@@ -578,7 +578,9 @@ def _diagnosis_tab():
                                                         "Residual pattern across moneyness. This view helps identify whether the model systematically overestimates or underestimates "
                                                         "volatility in in-the-money, at-the-money or out-of-the-money regions, which is particularly relevant for smile diagnostics.",
                                                     ),
-                                                    dcc.Graph(id=IDS.DIAGNOSIS_MONEYNESS),
+                                                    dcc.Graph(
+                                                        id=IDS.DIAGNOSIS_MONEYNESS
+                                                    ),
                                                 ],
                                             ),
                                             html.Div(
@@ -589,7 +591,9 @@ def _diagnosis_tab():
                                                         "Residual pattern across time to expiration. It helps detect short-end versus long-end calibration issues and broader term-structure "
                                                         "biases in the model predictions.",
                                                     ),
-                                                    dcc.Graph(id=IDS.DIAGNOSIS_MATURITY),
+                                                    dcc.Graph(
+                                                        id=IDS.DIAGNOSIS_MATURITY
+                                                    ),
                                                 ],
                                             ),
                                         ],

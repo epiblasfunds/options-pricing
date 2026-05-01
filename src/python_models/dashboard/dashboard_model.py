@@ -66,7 +66,9 @@ class DashboardModel:
         self.manual_api_stub = manual_api_stub or ManualApiStubResponse(
             prediction=0.0,
             summary="Manual runtime prediction is not available for this bundle.",
-            reference_sample_index=self.sample_indices[0] if self.sample_indices else None,
+            reference_sample_index=self.sample_indices[0]
+            if self.sample_indices
+            else None,
         )
 
     @staticmethod
@@ -119,7 +121,9 @@ class DashboardModel:
             metadata=payload.get("metadata", {}),
             dataset_frame=joblib.load(root / "dataset_frame.joblib"),
             raw_feature_names=list(payload.get("raw_feature_names", [])),
-            transformed_feature_names=list(payload.get("transformed_feature_names", [])),
+            transformed_feature_names=list(
+                payload.get("transformed_feature_names", [])
+            ),
             tree_models=cls._load_tree_models(root),
             symbolic_model=cls._load_symbolic_model(root),
             sample_indices=list(payload.get("sample_indices", [])),
@@ -143,9 +147,13 @@ class DashboardModel:
         return self.local_shap.select(row_index)
 
     def neighbors_for_index(self, row_index: t.Any) -> pd.DataFrame:
-        rows = self.neighbors_frame.loc[
-            self.neighbors_frame["sample_index"] == row_index
-        ].copy() if not self.neighbors_frame.empty else pd.DataFrame()
+        rows = (
+            self.neighbors_frame.loc[
+                self.neighbors_frame["sample_index"] == row_index
+            ].copy()
+            if not self.neighbors_frame.empty
+            else pd.DataFrame()
+        )
         if rows.empty:
             return pd.DataFrame()
         neighbors = self.dataset_frame.loc[rows["neighbor_index"]].copy()
@@ -204,7 +212,9 @@ class DashboardModel:
         if not symbolic_root.exists():
             return None
         try:
-            from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
+            from src.python_models.symbolic_regressor_model import (
+                SymbolicRegressorModel,
+            )
         except ImportError:
             return None
         return SymbolicRegressorModel.load(symbolic_root)

@@ -23,7 +23,9 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
-    features = [_raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES]
+    features = [
+        _raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES
+    ]
     features.extend(
         [
             FeatureDefinition(

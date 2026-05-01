@@ -3,10 +3,12 @@ import json
 
 class ProductSplitConfig:
     def _load_config(self, data_config_file_path: str):
-        with (open(data_config_file_path, "r") as f):
+        with open(data_config_file_path, "r") as f:
             data_config = json.load(f)
         product_split_step_name = "product_split_step"
-        self.filter_contract_column = data_config[product_split_step_name]["filter_contract_column"]
+        self.filter_contract_column = data_config[product_split_step_name][
+            "filter_contract_column"
+        ]
         self.options_trades_db_columns = data_config[product_split_step_name][
             "options_trades_db_columns"
         ]
@@ -17,8 +19,12 @@ class ProductSplitConfig:
             "option_underlying_db_columns"
         ]
         self.contract_types = data_config[product_split_step_name]["contract_types"]
-        self.output_filename_contracts = data_config[product_split_step_name]["output_filename_contracts"]
-        self.output_filename_relationship = data_config[product_split_step_name]["output_filename_relationship"]
+        self.output_filename_contracts = data_config[product_split_step_name][
+            "output_filename_contracts"
+        ]
+        self.output_filename_relationship = data_config[product_split_step_name][
+            "output_filename_relationship"
+        ]
 
     def __init__(self, data_config_file_path: str):
         self._load_config(data_config_file_path)

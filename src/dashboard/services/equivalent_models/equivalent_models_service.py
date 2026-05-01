@@ -23,6 +23,8 @@ class EquivalentModelsService:
     ) -> tuple[SymbolicRegressorModel | None, dict[int, SurrogateTreeModel]]:
         bundle = self.prediction_service.load_bundle(model_id)
         return (
-            t.cast(SymbolicRegressorModel | None, bundle.dashboard_model.symbolic_model),
+            t.cast(
+                SymbolicRegressorModel | None, bundle.dashboard_model.symbolic_model
+            ),
             dict(sorted(bundle.dashboard_model.tree_models.items())),
         )

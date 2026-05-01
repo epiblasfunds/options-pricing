@@ -1,6 +1,5 @@
 """Callbacks for equivalent explainable models."""
 
-
 from dash import Input, Output, html
 
 from src.dashboard.dashboard.ids import IDS

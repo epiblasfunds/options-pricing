@@ -137,8 +137,7 @@ def symbolic_fidelity_figure(model: SymbolicRegressorModel):
     )
     fig.update_traces(
         hovertemplate=(
-            "Original model: %{x:.4f}<br>"
-            "Symbolic surrogate: %{y:.4f}<extra></extra>"
+            "Original model: %{x:.4f}<br>Symbolic surrogate: %{y:.4f}<extra></extra>"
         ),
         selector={"mode": "markers"},
     )
@@ -288,7 +287,9 @@ def symbolic_formula_image_src(model: SymbolicRegressorModel, schema=None) -> st
     return f"data:image/svg+xml;base64,{encoded}"
 
 
-def symbolic_formula_aliases(model: SymbolicRegressorModel, schema=None) -> list[tuple[str, str]]:
+def symbolic_formula_aliases(
+    model: SymbolicRegressorModel, schema=None
+) -> list[tuple[str, str]]:
     expression = _parse_symbolic_expression(model.sympy_expression)
     aliases = []
     for symbol in _sorted_symbols(expression.free_symbols):
@@ -324,8 +325,7 @@ def _format_expression_for_display(expression_text):
     }
     expression = expression.xreplace(alias_map)
     replacements = {
-        number: _format_number_atom(number)
-        for number in expression.atoms(sympy.Float)
+        number: _format_number_atom(number) for number in expression.atoms(sympy.Float)
     }
     return expression.xreplace(replacements)
 

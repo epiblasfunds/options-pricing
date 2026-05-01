@@ -175,14 +175,16 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         ),
         "model_params": runtime.final_test_metadata.get("model_params", {}),
         "result_metrics": runtime.final_test_metadata.get("result_metrics", {}),
-        "train_val_result_metrics": runtime.train_val_metadata.get("result_metrics", {}),
+        "train_val_result_metrics": runtime.train_val_metadata.get(
+            "result_metrics", {}
+        ),
         "training_information": {
             "best_iteration": runtime.final_test_metadata.get(
                 "training_information", {}
             ).get("best_iteration"),
-            "best_score": runtime.final_test_metadata.get("training_information", {}).get(
-                "best_score"
-            ),
+            "best_score": runtime.final_test_metadata.get(
+                "training_information", {}
+            ).get("best_score"),
             "epoch_history": runtime.final_test_metadata.get(
                 "training_information", {}
             ).get("epoch_history", {}),
@@ -195,7 +197,9 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
             dict(symbolic_model.metrics) if symbolic_model is not None else {}
         ),
         "symbolic_feature_names": (
-            list(symbolic_model.used_feature_names) if symbolic_model is not None else []
+            list(symbolic_model.used_feature_names)
+            if symbolic_model is not None
+            else []
         ),
         "symbolic_complexity": (
             int(symbolic_model.complexity) if symbolic_model is not None else None

@@ -92,15 +92,15 @@ class StoredShapExplanation:
             method=self.method,
             feature_names=list(self.feature_names),
             index=[row_index],
-            values=np.asarray(self.values[position: position + 1]),
-            base_values=np.asarray(self.base_values[position: position + 1]),
-            data=np.asarray(self.data[position: position + 1]),
+            values=np.asarray(self.values[position : position + 1]),
+            base_values=np.asarray(self.base_values[position : position + 1]),
+            data=np.asarray(self.data[position : position + 1]),
             display_data=(
                 None
                 if self.display_data is None
-                else np.asarray(self.display_data[position: position + 1])
+                else np.asarray(self.display_data[position : position + 1])
             ),
-            predictions=np.asarray(self.predictions[position: position + 1]),
+            predictions=np.asarray(self.predictions[position : position + 1]),
             mean_abs_shap=dict(self.mean_abs_shap),
         )
 

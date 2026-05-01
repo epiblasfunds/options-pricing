@@ -6,9 +6,9 @@ class UnderlyingConfig:
         with open(data_config_file_path, "r") as f:
             data_config = json.load(f)
         underlying_step_name = "underlying_step"
-        self.option_trades_underlying_db_columns = data_config[
-            underlying_step_name
-        ]["option_trades_underlying_db_columns"]
+        self.option_trades_underlying_db_columns = data_config[underlying_step_name][
+            "option_trades_underlying_db_columns"
+        ]
         self.output_filename = data_config[underlying_step_name]["output_filename"]
 
     def __init__(self, data_config_file_path: str):

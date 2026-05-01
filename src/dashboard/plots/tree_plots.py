@@ -31,9 +31,7 @@ def feature_importance_figure(result: SurrogateTreeModel, schema=None):
         title="Surrogate Feature Importances",
     )
     fig.update_traces(
-        hovertemplate=(
-            "Feature: %{y}<br>" "Relative importance: %{x:.4f}<extra></extra>"
-        )
+        hovertemplate=("Feature: %{y}<br>Relative importance: %{x:.4f}<extra></extra>")
     )
     fig.update_layout(
         template=STANDARD_TEMPLATE,

@@ -1,6 +1,5 @@
 """Callbacks for model diagnosis."""
 
-
 import plotly.graph_objects as go
 from dash import Input, Output, html
 

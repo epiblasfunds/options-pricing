@@ -22,13 +22,17 @@ class DashboardModelsConfig:
 
         self.error_metrics = tuple(features_config["error_metrics"])
         self.build_config = DashboardBuildConfig(
-            surrogate_depths=tuple(int(depth) for depth in build_config["surrogate_depths"]),
+            surrogate_depths=tuple(
+                int(depth) for depth in build_config["surrogate_depths"]
+            ),
             sample_option_size=int(build_config["sample_option_size"]),
             behaviour_anchor_size=int(build_config["behaviour_anchor_size"]),
             neighbors_k=int(build_config["neighbors_k"]),
         )
         self.random_state = int(settings_config["random_state"])
-        self.surrogate_min_samples_leaf = int(settings_config["surrogate_min_samples_leaf"])
+        self.surrogate_min_samples_leaf = int(
+            settings_config["surrogate_min_samples_leaf"]
+        )
         self.surrogate_sample_size = int(settings_config["surrogate_sample_size"])
         self.shap_background_size = int(settings_config["shap_background_size"])
         self.shap_explain_size = int(settings_config["shap_explain_size"])
@@ -42,9 +46,7 @@ class DashboardModelsConfig:
         self.symbolic_sample_size = int(settings_config["symbolic_sample_size"])
         self.symbolic_niterations = int(settings_config["symbolic_niterations"])
         self.symbolic_populations = int(settings_config["symbolic_populations"])
-        self.symbolic_population_size = int(
-            settings_config["symbolic_population_size"]
-        )
+        self.symbolic_population_size = int(settings_config["symbolic_population_size"])
         self.symbolic_topn = int(settings_config["symbolic_topn"])
         self.symbolic_ncycles_per_iteration = int(
             settings_config["symbolic_ncycles_per_iteration"]
@@ -54,6 +56,4 @@ class DashboardModelsConfig:
         )
         self.symbolic_maxsize = int(settings_config["symbolic_maxsize"])
         self.symbolic_maxdepth = int(settings_config["symbolic_maxdepth"])
-        self.symbolic_timeout_seconds = int(
-            settings_config["symbolic_timeout_seconds"]
-        )
+        self.symbolic_timeout_seconds = int(settings_config["symbolic_timeout_seconds"])

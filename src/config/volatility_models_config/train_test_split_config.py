@@ -6,7 +6,9 @@ class TrainTestSplitConfig:
         with open(data_config_file_path, "r") as f:
             data_config = json.load(f)
 
-        train_test_split_config = data_config["training_data_config"]["train_test_split_config"]
+        train_test_split_config = data_config["training_data_config"][
+            "train_test_split_config"
+        ]
 
         self.train_size = train_test_split_config["train_size"]
         self.lag = train_test_split_config["lag"]

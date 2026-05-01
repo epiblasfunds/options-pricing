@@ -9,5 +9,5 @@ __all__ = [
     "MergeRawStepLoader",
     "ProductSplitStepLoader",
     "UnderlyingStepLoader",
-    "VolatilityStepLoader"
+    "VolatilityStepLoader",
 ]
