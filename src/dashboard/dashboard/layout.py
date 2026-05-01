@@ -10,6 +10,7 @@ from src.dashboard.dashboard.styles import (
     HEADER_STYLE,
     HELP_TEXT_STYLE,
     IMAGE_STYLE,
+    INLINE_BUTTON_STYLE,
     INFO_ICON_STYLE,
     PAGE_STYLE,
     SECTION_CONTROL_CARD_STYLE,
@@ -462,7 +463,16 @@ def _sample_tab():
                                 ],
                             ),
                             html.Div(id=IDS.SAMPLE_MANUAL_FORM),
-                            html.Button("Analyze Sample", id=IDS.SAMPLE_RUN_BUTTON),
+                            html.Div(
+                                style={"marginTop": "16px", "display": "flex"},
+                                children=[
+                                    html.Button(
+                                        "Analyze Sample",
+                                        id=IDS.SAMPLE_RUN_BUTTON,
+                                        style=INLINE_BUTTON_STYLE,
+                                    )
+                                ],
+                            ),
                             html.Div(id=IDS.SAMPLE_OUTPUT, style={"marginTop": "12px"}),
                             html.Div(
                                 style=SUBCARD_STYLE,

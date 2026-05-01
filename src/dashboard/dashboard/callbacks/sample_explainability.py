@@ -8,6 +8,7 @@ from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
+from src.dashboard.dashboard.styles import PILL_BUTTON_STYLE
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
 from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
@@ -158,20 +159,11 @@ def _manual_field(feature, default_value):
                             style={"fontSize": "0.82rem", "color": "#5b6d85"},
                         ),
                         html.Button(
-                            "Use Current Time",
+                            "Now",
                             id={"type": "manual-now", "feature": feature.name},
                             n_clicks=0,
                             type="button",
-                            style={
-                                "height": "30px",
-                                "padding": "0 10px",
-                                "borderRadius": "999px",
-                                "border": "1px solid rgba(23,48,79,0.18)",
-                                "background": "#edf5ff",
-                                "color": "#17304f",
-                                "fontWeight": "700",
-                                "cursor": "pointer",
-                            },
+                            style=PILL_BUTTON_STYLE,
                         ),
                     ],
                 ),

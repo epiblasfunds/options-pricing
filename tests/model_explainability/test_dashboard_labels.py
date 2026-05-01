@@ -8,6 +8,7 @@ def test_build_sample_label_expands_abbreviations():
     row = pd.Series(
         {
             "OptionType": "C",
+            "StrikePrice": 9100.0,
             "TimeToExpiration": 15.3,
             "Moneyness": 0.9,
         },
@@ -18,7 +19,7 @@ def test_build_sample_label_expands_abbreviations():
 
     assert label == (
         "Sample ID: 42 | Option type: CALL | "
-        "Time to expiration: 15.3 days | Moneyness: 0.900"
+        "Strike: 9,100 | Time to expiration: 15.3 days | Moneyness: 0.900"
     )
 
 

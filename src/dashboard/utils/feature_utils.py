@@ -7,11 +7,13 @@ from src.dashboard.services.shared.feature_schema import FeatureSchema
 
 def build_sample_label(row: pd.Series) -> str:
     option_type = _display_option_type(row.get("OptionType", "?"))
+    strike = _display_number(row.get("StrikePrice"))
     maturity = float(row.get("TimeToExpiration", 0.0))
     moneyness = float(row.get("Moneyness", 0.0)) if "Moneyness" in row else float("nan")
     return (
         f"Sample ID: {row.name} | Option type: {option_type} | "
-        f"Time to expiration: {maturity:.1f} days | Moneyness: {moneyness:.3f}"
+        f"Strike: {strike} | Time to expiration: {maturity:.1f} days | "
+        f"Moneyness: {moneyness:.3f}"
     )
 
 
