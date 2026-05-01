@@ -3,7 +3,13 @@ import json
 from src.dashboard.services.shared.model_registry import ModelRegistry
 
 
-def _write_bundle(path, *, fmt="explainable_model", builder="src.model2dashboard.run_pipeline", with_dashboard_metadata=True):
+def _write_bundle(
+        path,
+        *,
+        fmt="explainable_model",
+        builder="src.model2dashboard.run_pipeline",
+        with_dashboard_metadata=True
+):
     path.mkdir(parents=True, exist_ok=True)
     (path / "metadata.json").write_text(
         json.dumps(

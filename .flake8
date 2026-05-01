@@ -1,2 +1,16 @@
 [flake8]
 max-line-length = 120
+exclude =
+    data/*
+    tfmenv/*
+    src/api/apienv/*
+    src/dashboard/dashenv/*
+    outputs/*
+    src/volatility_models/trained_models/*
+    src/volatility_models/trained_metadata/*
+    src/dashboard/saved_models/*
+    .coverage
+    .coveragerc
+    *.csv
+    __pycache__/
+    terraform/.terraform*
