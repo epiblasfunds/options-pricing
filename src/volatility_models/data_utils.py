@@ -156,7 +156,7 @@ class TrainingDataHandler:
         unique_dates_total = np.array(sorted(exec_dates.unique()))
         n_dates_total = len(unique_dates_total)
         if n_dates_total < 2:
-            logger.warning(
+            logger.info(
                 "Temporal split skipped because there are not enough dates (n_dates=%s).",
                 n_dates_total,
             )
@@ -171,7 +171,7 @@ class TrainingDataHandler:
         applied_lag = min(max(int(lag), 0), max_applicable_lag)
 
         if applied_lag < lag:
-            logger.warning(
+            logger.info(
                 "Requested lag (%s) is not applicable with n_dates=%s and train_size=%s. Applying lag=%s instead.",
                 lag,
                 n_dates_total,
