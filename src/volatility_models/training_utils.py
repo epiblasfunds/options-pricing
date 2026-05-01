@@ -18,7 +18,6 @@ from src.config.config import (
 from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 from src.python_models.volatility_models.volatility_model_family import (
-    ModelFitResult,
     VolatilityModelFamilyABC,
 )
 from src.volatility_models.data_utils import BASE_FEATURE_COLS, TrainingDataHandler

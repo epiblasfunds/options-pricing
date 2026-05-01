@@ -3,9 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from IPython.display import display
 
-from src.config.config import config
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 
 logger = logging.getLogger(__name__)

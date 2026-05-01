@@ -9,7 +9,7 @@ import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from keras import callbacks, layers, ops, regularizers
+from keras import layers, ops, regularizers
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression

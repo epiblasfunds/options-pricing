@@ -16,7 +16,6 @@ from src.model2dashboard.features import (
     CONTEXT_FEATURE_NAMES,
     EXPLAINABILITY_FEATURE_NAMES,
     MODEL_INPUT_FEATURE_NAMES,
-    RAW_INPUT_FEATURE_NAMES,
     TARGET_COLUMN,
     VISIBLE_RAW_INPUT_FEATURE_NAMES,
     load_test_trade_frame,
