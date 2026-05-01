@@ -1,12 +1,11 @@
 dash==4.1.0
 plotly==6.7.0
-pytest==8.4.2
 scikit-learn==1.8.0
 gunicorn
-pandas==3.0.0
-matplotlib==3.10.8
+pandas==3.0.2
+matplotlib==3.10.9
 sympy==1.14.0
-numpy==2.4.2
+numpy==2.4.4
 scipy==1.17.1
 shap==0.51.0
 google-cloud-storage

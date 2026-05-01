@@ -5,7 +5,7 @@ import logging
 
 from dash import Dash
 
-from src.config.config import VOLATILITY_MODEL_DATA_DIR_PATH, config
+from src.config.config import config
 from src.dashboard.dashboard.callbacks import register_callbacks
 from src.dashboard.dashboard.layout import build_layout
 from src.dashboard.domain import build_feature_schema, build_metrics_registry
@@ -59,9 +59,7 @@ def build_services() -> Services:
             model_dir,
         )
     model_loader = ModelLoader(cache_size=config.dashboard_models_config.cache_entries)
-    data_provider = VolatilityDataProvider(
-        dataset_path=VOLATILITY_MODEL_DATA_DIR_PATH / "test.csv",
-    )
+    data_provider = VolatilityDataProvider()
     data_provider.bind_model_runtime(
         model_registry=model_registry,
         model_loader=model_loader,
