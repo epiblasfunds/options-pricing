@@ -38,3 +38,4 @@ class LoggingConfig:
         cfg["root"]["level"] = final_level
 
         logging.config.dictConfig(cfg)
+        logging.getLogger("tensorflow").setLevel(logging.ERROR)
