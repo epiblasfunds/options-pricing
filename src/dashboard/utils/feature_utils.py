@@ -70,7 +70,7 @@ def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> s
     for feature in feature_schema.categorical_features(raw_only=True):
         prefix = f"{feature.name}_"
         if transformed_name.startswith(prefix):
-            category_value = transformed_name[len(prefix) :]
+            category_value = transformed_name[len(prefix):]
             return f"{feature.label} = {category_value}"
 
     for feature in feature_schema.numerical_features(raw_only=False):

@@ -88,7 +88,10 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         "Rate": "Rate",
     }
     descriptions = {
-        "ExecDatetime": "Execution timestamp used as contextual input. It is shown in the manual form but not explained as a driver.",
+        "ExecDatetime": (
+            "Execution timestamp used as contextual input. It is shown in the "
+            "manual form but not explained as a driver."
+        ),
         "OptionType": "Call or put option.",
         "StrikePrice": "Strike price associated with the traded option.",
         "UnderlyingPrice": "Underlying price paired with the option trade.",

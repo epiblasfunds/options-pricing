@@ -2,10 +2,10 @@ import base64
 import io
 from fractions import Fraction
 
-import matplotlib
 import plotly.express as px
 import plotly.graph_objects as go
 import sympy
+from matplotlib import pyplot as plt
 from sympy.printing.latex import LatexPrinter
 from sympy.printing.str import StrPrinter
 from sympy.parsing.sympy_parser import convert_xor
@@ -15,13 +15,10 @@ from sympy.parsing.sympy_parser import standard_transformations
 from src.dashboard.plots.plot_style import HOVERLABEL_STYLE
 from src.dashboard.plots.plot_style import STANDARD_MARGIN
 from src.dashboard.plots.plot_style import STANDARD_TEMPLATE
+from src.dashboard.utils.feature_utils import display_feature_label
 from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
 
-matplotlib.use("Agg")
-
-from matplotlib import pyplot as plt
-
-from src.dashboard.utils.feature_utils import display_feature_label
+plt.switch_backend("Agg")
 
 _SYMBOLIC_FORMULA_NAME_ALIASES = {
     "OptionType": "OptionType",

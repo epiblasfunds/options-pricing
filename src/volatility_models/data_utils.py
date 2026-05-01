@@ -267,7 +267,10 @@ class TrainingDataHandler:
 
         if verbose:
             logger.info(
-                "Contract-code leakage control applied between %s and %s | overlapping contracts: %s | removed rows -> %s: %s, %s: %s",
+                (
+                    "Contract-code leakage control applied between %s and %s | "
+                    "overlapping contracts: %s | removed rows -> %s: %s, %s: %s"
+                ),
                 left_split.value,
                 right_split.value,
                 int(overlap_contracts),

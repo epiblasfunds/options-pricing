@@ -3,16 +3,14 @@
 import base64
 import io
 
-import matplotlib
-
-matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 import shap
 
 from src.dashboard.services.global_explainability import ShapExplanationResult
 from src.dashboard.services.shared.feature_schema import FeatureSchema
 from src.dashboard.utils.feature_utils import display_feature_label
+
+plt.switch_backend("Agg")
 
 
 def beeswarm_image(result: ShapExplanationResult, schema: FeatureSchema) -> str:
