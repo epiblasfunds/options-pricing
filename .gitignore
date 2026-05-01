@@ -1,12 +1,20 @@
+# Data
 data/*
+
+# Python Environments
 tfmenv/*
+src/api/apienv/*
+src/dashboard/dashenv/*
 
 # Ignore symbolic regressor training output
 outputs/*
 
+# Models and training metadata
 src/volatility_models/trained_models/*
 src/volatility_models/trained_metadata/*
 src/dashboard/saved_models/*
+
+# IDE
 *.csv
 __pycache__/
 terraform/.terraform*
