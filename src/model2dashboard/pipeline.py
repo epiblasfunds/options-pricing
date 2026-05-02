@@ -13,7 +13,6 @@ from src.enums.volatility_model_enums import ModelFormatEnum
 from src.model2dashboard.artifact_builders import build_dashboard_artifacts
 from src.model2dashboard.features import (
     ANALYSIS_FEATURE_NAMES,
-    CONTEXT_FEATURE_NAMES,
     EXPLAINABILITY_FEATURE_NAMES,
     MODEL_INPUT_FEATURE_NAMES,
     TARGET_COLUMN,
@@ -158,7 +157,6 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         "model_input_features": list(MODEL_INPUT_FEATURE_NAMES),
         "transformed_feature_names": list(MODEL_INPUT_FEATURE_NAMES),
         "raw_feature_names": list(VISIBLE_RAW_INPUT_FEATURE_NAMES),
-        "context_feature_names": list(CONTEXT_FEATURE_NAMES),
         "explainability_feature_names": list(EXPLAINABILITY_FEATURE_NAMES),
         "analysis_feature_names": list(ANALYSIS_FEATURE_NAMES),
         "target_column": TARGET_COLUMN,

@@ -46,7 +46,7 @@ class DashboardBundleMetadata:
     @classmethod
     def load(cls, path: Path) -> "DashboardBundleMetadata":
         payload = json.loads(
-            cls.get_root_metadata_path(path).read_text(encoding="utf-8")
+            cls.get_root_metadata_path(path).read_text(encoding="utf-8-sig")
         )
         return cls(
             model_id=payload["model_id"],

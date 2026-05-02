@@ -22,7 +22,6 @@ def _model_info_panel(
     model_name: str,
     format_label: str,
     explained_features: list[str],
-    context_features: list[str],
     metric_names: list[str],
     feature_schema,
 ) -> html.Div:
@@ -96,63 +95,6 @@ def _model_info_panel(
                         children=[
                             _feature_chip(feature_name, feature_schema)
                             for feature_name in explained_features
-                        ],
-                    ),
-                ]
-            ),
-            html.Div(
-                children=[
-                    html.Div(
-                        "Context variable",
-                        style={
-                            "fontSize": "0.78rem",
-                            "fontWeight": "800",
-                            "textTransform": "uppercase",
-                            "color": "#5b6d85",
-                            "marginBottom": "8px",
-                        },
-                    ),
-                    html.Div(
-                        style={
-                            "display": "flex",
-                            "gap": "8px",
-                            "flexWrap": "wrap",
-                        },
-                        children=[
-                            html.Span(
-                                (
-                                    feature_schema.get(str(feature_name)).label
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                title=(
-                                    feature_schema.get(str(feature_name)).description
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                style={
-                                    "display": "inline-flex",
-                                    "alignItems": "center",
-                                    "whiteSpace": "nowrap",
-                                    "padding": "6px 10px",
-                                    "borderRadius": "999px",
-                                    "border": "1px solid rgba(33,75,122,0.14)",
-                                    "background": "#ffffff",
-                                    "color": "#243b5a",
-                                    "fontSize": "0.86rem",
-                                    "fontWeight": "600",
-                                },
-                            )
-                            for feature_name in context_features
-                        ]
-                        or [
-                            html.Span(
-                                "None",
-                                style={
-                                    "color": "#5b6d85",
-                                    "fontSize": "0.86rem",
-                                },
-                            )
                         ],
                     ),
                 ]
@@ -301,7 +243,6 @@ def register_model_loading_callbacks(app, services) -> None:
             if index in dataset.index
         ]
         explained_feature_names = list(shap_result.feature_names)
-        context_feature_names = metadata.get("context_feature_names", [])
         shap_feature_names = [
             str(feature_name)
             for feature_name in explained_feature_names
@@ -327,7 +268,6 @@ def register_model_loading_callbacks(app, services) -> None:
             model_name=model.name if model else str(model_id),
             format_label=format_label,
             explained_features=[str(feature) for feature in explained_feature_names],
-            context_features=[str(feature) for feature in context_feature_names],
             metric_names=[str(metric) for metric in metric_names],
             feature_schema=services.feature_schema,
         )

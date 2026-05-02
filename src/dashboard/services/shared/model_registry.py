@@ -41,7 +41,7 @@ class ModelRegistry:
         metadata_path = DashboardBundleMetadata.get_root_metadata_path(path)
         if not metadata_path.exists():
             return False
-        payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+        payload = json.loads(metadata_path.read_text(encoding="utf-8-sig"))
         if payload.get("format") != ModelFormatEnum.EXPLAINABLE_MODEL.value:
             return False
         if (

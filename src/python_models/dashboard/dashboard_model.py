@@ -114,7 +114,9 @@ class DashboardModel:
     @classmethod
     def load(cls, bundle_path: Path) -> "DashboardModel":
         root = cls.get_root_path(bundle_path)
-        payload = json.loads(cls.get_metadata_path(root).read_text(encoding="utf-8"))
+        payload = json.loads(
+            cls.get_metadata_path(root).read_text(encoding="utf-8-sig")
+        )
         return cls(
             model_id=payload["model_id"],
             model_name=payload["model_name"],
