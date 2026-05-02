@@ -69,6 +69,33 @@ def _section_title_with_info(title: str, info_text: str, level: int = 4):
     )
 
 
+def _compact_control_box(title: str, control, help_text: str):
+    return html.Div(
+        style={
+            "padding": "12px 14px",
+            "borderRadius": "12px",
+            "border": "1px solid rgba(33,75,122,0.12)",
+            "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            "boxShadow": "0 6px 16px rgba(22,40,68,0.04)",
+        },
+        children=[
+            html.Label(
+                title,
+                style={
+                    "display": "block",
+                    "marginBottom": "6px",
+                    "fontSize": "0.82rem",
+                    "fontWeight": "800",
+                    "textTransform": "uppercase",
+                    "color": "#17304f",
+                },
+            ),
+            control,
+            html.P(help_text, style=HELP_TEXT_STYLE),
+        ],
+    )
+
+
 def _behaviour_tab():
     return dcc.Tab(
         label="Behaviour And Surface",
@@ -466,6 +493,30 @@ def _global_tab():
                                 "Native SHAP plots over the selected model and dataset sample.",
                                 style={"margin": "0 0 14px 0", "opacity": "0.78"},
                             ),
+                            _compact_control_box(
+                                "SHAP Feature Scope",
+                                dcc.RadioItems(
+                                    id=IDS.GLOBAL_SHAP_FEATURE_SCOPE,
+                                    options=[
+                                        {
+                                            "label": "Main Features",
+                                            "value": "main",
+                                        },
+                                        {
+                                            "label": "Full Features",
+                                            "value": "full",
+                                        },
+                                    ],
+                                    value="main",
+                                    inline=True,
+                                ),
+                                (
+                                    "Main Features keeps the five visible "
+                                    "variables and aggregates hidden inputs into "
+                                    "'Auxiliar Features'. Full Features exposes "
+                                    "every model input directly."
+                                ),
+                            ),
                             html.Div(
                                 style={
                                     "display": "grid",
@@ -640,49 +691,81 @@ def _sample_tab():
                                 style=HELP_TEXT_STYLE,
                             ),
                             html.Div(
-                                style={"maxWidth": "520px"},
+                                style={
+                                    "display": "grid",
+                                    "gridTemplateColumns": (
+                                        "repeat(auto-fit, minmax(260px, 1fr))"
+                                    ),
+                                    "gap": "12px",
+                                    "alignItems": "start",
+                                    "marginBottom": "14px",
+                                },
                                 children=[
-                                    html.Div(
-                                        children=[
-                                            html.Label("Mode"),
-                                            dcc.RadioItems(
-                                                id=IDS.SAMPLE_MODE,
-                                                options=[
-                                                    {
-                                                        "label": "Dataset sample",
-                                                        "value": "dataset",
-                                                    },
-                                                    {
-                                                        "label": "Manual input",
-                                                        "value": "manual",
-                                                    },
-                                                ],
-                                                value="dataset",
-                                                inline=True,
-                                            ),
-                                            html.P(
-                                                (
-                                                    "Choose between an existing "
-                                                    "dataset row or a manually "
-                                                    "defined input sample."
-                                                ),
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            html.Div(
-                                                id=IDS.SAMPLE_INDEX_CONTAINER,
-                                                style={"marginTop": "14px"},
-                                                children=[
-                                                    html.Label("Dataset Sample"),
-                                                    dcc.Dropdown(id=IDS.SAMPLE_INDEX),
-                                                    html.P(
-                                                        "Observation index used when the dataset mode is selected.",
-                                                        style=HELP_TEXT_STYLE,
-                                                    ),
-                                                ],
-                                            ),
-                                        ]
+                                    _compact_control_box(
+                                        "SHAP Feature Scope",
+                                        dcc.RadioItems(
+                                            id=IDS.SAMPLE_SHAP_FEATURE_SCOPE,
+                                            options=[
+                                                {
+                                                    "label": "Main Features",
+                                                    "value": "main",
+                                                },
+                                                {
+                                                    "label": "Full Features",
+                                                    "value": "full",
+                                                },
+                                            ],
+                                            value="main",
+                                            inline=True,
+                                        ),
+                                        (
+                                            "Switch between the five visible Main "
+                                            "Features or the full model input space "
+                                            "before running the local SHAP waterfall."
+                                        ),
+                                    ),
+                                    _compact_control_box(
+                                        "Mode",
+                                        dcc.RadioItems(
+                                            id=IDS.SAMPLE_MODE,
+                                            options=[
+                                                {
+                                                    "label": "Dataset sample",
+                                                    "value": "dataset",
+                                                },
+                                                {
+                                                    "label": "Manual input",
+                                                    "value": "manual",
+                                                },
+                                            ],
+                                            value="dataset",
+                                            inline=True,
+                                        ),
+                                        (
+                                            "Choose between an existing dataset row "
+                                            "or a manually defined input sample."
+                                        ),
                                     ),
                                 ],
+                            ),
+                            html.Div(
+                                id=IDS.SAMPLE_INDEX_CONTAINER,
+                                style={"marginTop": "14px"},
+                                children=[
+                                    html.Label("Dataset Sample"),
+                                    dcc.Dropdown(
+                                        id=IDS.SAMPLE_INDEX,
+                                        className="single-line-dropdown",
+                                    ),
+                                    html.P(
+                                        "Observation index used when the dataset mode is selected.",
+                                        style=HELP_TEXT_STYLE,
+                                    ),
+                                ],
+                            ),
+                            html.Div(
+                                id=IDS.SAMPLE_FEATURE_PREVIEW,
+                                style={"marginTop": "14px"},
                             ),
                             html.Div(id=IDS.SAMPLE_MANUAL_FORM),
                             html.Div(

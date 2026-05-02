@@ -18,17 +18,21 @@ class _FakeExplainer:
         seed,
     ) -> None:
         self.model = model
+        self.masker = masker
         self.feature_names = feature_names
 
     def __call__(self, encoded_frame, max_evals, silent):
         predictions = np.asarray(self.model(encoded_frame), dtype="float64").reshape(-1)
+        base_value = float(
+            np.asarray(self.model(self.masker), dtype="float64").reshape(-1).mean()
+        )
         values = np.zeros(
             (len(encoded_frame), len(self.feature_names)), dtype="float64"
         )
-        values[:, 0] = predictions
+        values[:, 0] = predictions - base_value
         return shap.Explanation(
             values=values,
-            base_values=np.zeros(len(encoded_frame), dtype="float64"),
+            base_values=np.full(len(encoded_frame), base_value, dtype="float64"),
             data=encoded_frame.to_numpy(),
             feature_names=self.feature_names,
         )
@@ -45,18 +49,17 @@ class _FakeRegressor:
         ].iloc[0]
 
 
-def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
-    captured_raw_frames = []
-
+def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
     def fake_predict_raw_frame(_runtime, raw_frame):
-        captured_raw_frames.append(raw_frame.copy())
         exec_dt = pd.to_datetime(raw_frame["ExecDatetime"], errors="coerce")
         trade_is_h = (raw_frame["TradeType"].astype(str) == "H").astype(float)
+        option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
         return (
             exec_dt.dt.hour.astype(float) * 100.0
             + raw_frame["UnderlyingLagMinutes"].astype(float) * 10.0
             + raw_frame["Quantity"].astype(float)
             + trade_is_h
+            + option_is_put
         ).to_numpy(dtype="float64")
 
     monkeypatch.setattr(artifact_builders.shap, "Explainer", _FakeExplainer)
@@ -108,14 +111,11 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
         dataset_frame=dataset_frame,
         raw_frame=raw_frame,
         predictions=predictions,
-        sample_indices=[11],
+        sample_indices=[10, 11],
     )
 
-    local_prediction = float(local_shap.waterfall_predictions()[0])
-
-    assert captured_raw_frames
-    assert local_prediction == 1543.0
-    assert local_shap.index == [11]
+    assert local_shap.index == [10, 11]
+    assert local_shap.base_values.tolist() == [1303.5, 1303.5]
 
 
 def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():

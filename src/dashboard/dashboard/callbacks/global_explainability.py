@@ -40,9 +40,10 @@ def register_global_callbacks(app, services) -> None:
         Output(IDS.GLOBAL_INTERACTION_GRAPH, "src"),
         Output(IDS.GLOBAL_NOTE, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.GLOBAL_SHAP_FEATURE_SCOPE, "value"),
         Input(IDS.GLOBAL_DEPENDENCE_FEATURE, "value"),
     )
-    def render_global_explainability(model_id, selected_feature):
+    def render_global_explainability(model_id, feature_scope, selected_feature):
         if not model_id:
             return (
                 _empty_image(),
@@ -54,8 +55,11 @@ def register_global_callbacks(app, services) -> None:
         try:
             result = services.cache.get_or_compute(
                 "shap_global",
-                {"model_id": model_id},
-                lambda: services.shap_service.explain(model_id),
+                {"model_id": model_id, "feature_scope": feature_scope},
+                lambda: services.shap_service.explain(
+                    model_id,
+                    feature_scope=feature_scope,
+                ),
             )
         except Exception as exc:  # pragma: no cover - defensive UI path
             return (
@@ -72,7 +76,7 @@ def register_global_callbacks(app, services) -> None:
             for name in result.mean_abs_shap.head(5).index.tolist()
         ]
         note = (
-            f"Method: {result.method}. Dependence feature: "
+            f"Method: {result.method}. Feature scope: {result.feature_scope}. Dependence feature: "
             + f"{display_feature_label(feature_name, services.feature_schema)}. Top drivers: "
             + ", ".join(top_driver_labels)
         )

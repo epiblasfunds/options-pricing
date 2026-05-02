@@ -5,6 +5,7 @@ import pytest
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import apply_feature_override
 from src.model2dashboard.features import build_dashboard_dataset
@@ -61,7 +62,10 @@ def test_explainability_encoder_roundtrip_preserves_supported_feature_types():
     assert decoded.loc[10, "OptionType"] == "C"
     assert decoded.loc[11, "OptionType"] == "P"
     assert "TradeType" in reconstructed.columns
-    assert reconstructed.loc[10, "TradeType"] == "H"
+    assert reconstructed.loc[10, "TradeType"] == "M"
+    assert reconstructed.loc[11, "TradeType"] == "H"
+    assert reconstructed.loc[10, "Quantity"] == 1.0
+    assert reconstructed.loc[11, "UnderlyingLagMinutes"] == 3.5
 
 
 def test_feature_and_dashboard_dataset_builders_add_expected_columns():
@@ -79,6 +83,10 @@ def test_feature_and_dashboard_dataset_builders_add_expected_columns():
     assert "PredictedVolatility" in dataset.columns
     assert "Residual" in dataset.columns
     assert dataset.loc[0, "Residual"] == dataset.loc[0, TARGET_COLUMN] - 0.18
+
+
+def test_exec_datetime_is_hidden_from_visible_manual_inputs():
+    assert "ExecDatetime" not in VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
 def test_apply_feature_override_updates_supported_fields():

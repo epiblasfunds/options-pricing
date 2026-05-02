@@ -11,16 +11,23 @@ from src.dashboard.dashboard.ids import IDS
 from src.dashboard.dashboard.styles import PILL_BUTTON_STYLE
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
+from src.dashboard.services.global_explainability import AUXILIARY_FEATURE_LABEL
+from src.dashboard.utils.feature_utils import display_feature_label
+from src.dashboard.utils.feature_utils import format_feature_value
+from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
+from src.model2dashboard.features import MAIN_EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
 MANUAL_INPUT_DEFAULTS = {
-    "ExecDatetime": None,
     "OptionType": "CALL",
     "StrikePrice": 9100.0,
     "UnderlyingPrice": 9000.0,
     "TimeToExpiration": 20.0,
     "Rate": -0.6,
+    "Quantity": 1,
+    "TradeType": "M",
+    "UnderlyingLagMinutes": 0.0,
 }
 
 MANUAL_INPUT_LABEL_OVERRIDES = {
@@ -28,6 +35,12 @@ MANUAL_INPUT_LABEL_OVERRIDES = {
     "StrikePrice": "Strike",
     "UnderlyingPrice": "Underlying",
 }
+
+AUXILIARY_MANUAL_FEATURE_NAMES = [
+    feature_name
+    for feature_name in EXPLAINABILITY_FEATURE_NAMES
+    if feature_name not in MAIN_EXPLAINABILITY_FEATURE_NAMES
+]
 
 
 def _empty_figure():
@@ -120,17 +133,9 @@ def _manual_field(feature, default_value):
             value=_manual_option_type_value(default_value),
             clearable=False,
         )
-    elif feature.widget == "dropdown" and feature.allowed_values:
-        options = [
-            {"label": str(value), "value": value}
-            for value in feature.allowed_values or ()
-        ]
-        input_component = dcc.Dropdown(
-            id=component_id, options=options, value=default_value
-        )
-    elif feature.dtype == "datetime":
+    elif feature.name == "ExecDatetime":
         input_component = html.Div(
-            style={"display": "grid", "gap": "8px"},
+            style={"display": "grid", "gridTemplateColumns": "minmax(0, 1fr) auto", "gap": "8px"},
             children=[
                 dcc.Input(
                     id=component_id,
@@ -146,28 +151,30 @@ def _manual_field(feature, default_value):
                         "padding": "0 10px",
                     },
                 ),
-                html.Div(
+                html.Button(
+                    "now",
+                    id={"type": "manual-now", "feature": feature.name},
+                    n_clicks=0,
+                    type="button",
                     style={
-                        "display": "flex",
-                        "justifyContent": "space-between",
-                        "alignItems": "center",
-                        "gap": "10px",
+                        **PILL_BUTTON_STYLE,
+                        "height": "34px",
+                        "padding": "0 12px",
+                        "alignSelf": "center",
                     },
-                    children=[
-                        html.Span(
-                            "Filled with your current local time.",
-                            style={"fontSize": "0.82rem", "color": "#5b6d85"},
-                        ),
-                        html.Button(
-                            "Now",
-                            id={"type": "manual-now", "feature": feature.name},
-                            n_clicks=0,
-                            type="button",
-                            style=PILL_BUTTON_STYLE,
-                        ),
-                    ],
                 ),
             ],
+        )
+    elif feature.allowed_values:
+        options = [
+            {"label": str(value), "value": value}
+            for value in feature.allowed_values or ()
+        ]
+        input_component = dcc.Dropdown(
+            id=component_id,
+            options=options,
+            value=default_value,
+            clearable=False,
         )
     elif feature.is_numerical:
         input_component = _manual_number_control(feature, default_value)
@@ -302,10 +309,10 @@ def _manual_numeric_value(default_value):
 
 def _manual_datetime_value(default_value):
     if default_value in (None, ""):
-        return _current_local_timestamp()
+        return _current_local_hour_timestamp()
     timestamp = pd.to_datetime(default_value, errors="coerce")
     if pd.isna(timestamp):
-        return _current_local_timestamp()
+        return _current_local_hour_timestamp()
     if getattr(timestamp, "tzinfo", None) is None:
         return timestamp.isoformat(timespec="seconds")
     return timestamp.isoformat(timespec="seconds")
@@ -313,6 +320,98 @@ def _manual_datetime_value(default_value):
 
 def _current_local_timestamp():
     return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def _current_local_hour_timestamp():
+    return (
+        datetime.now()
+        .astimezone()
+        .replace(minute=0, second=0, microsecond=0)
+        .isoformat(timespec="milliseconds")
+    )
+
+
+def _current_local_midnight_timestamp():
+    return (
+        datetime.now()
+        .astimezone()
+        .replace(hour=0, minute=0, second=0, microsecond=0)
+        .isoformat(timespec="milliseconds")
+    )
+
+
+def _manual_hidden_defaults() -> dict[str, object]:
+    return {
+        "ExecDatetime": _current_local_midnight_timestamp(),
+        "Quantity": MANUAL_INPUT_DEFAULTS["Quantity"],
+        "TradeType": MANUAL_INPUT_DEFAULTS["TradeType"],
+        "UnderlyingLagMinutes": MANUAL_INPUT_DEFAULTS["UnderlyingLagMinutes"],
+    }
+
+
+def _manual_feature_names(feature_scope: str) -> list[str]:
+    if feature_scope == "full":
+        return list(EXPLAINABILITY_FEATURE_NAMES)
+    return list(VISIBLE_RAW_INPUT_FEATURE_NAMES)
+
+
+def _manual_section(title: str, feature_names: list[str], defaults: dict, services, *, subtle: bool = False):
+    border = "1px dashed rgba(33,75,122,0.16)" if subtle else "1px solid rgba(33,75,122,0.12)"
+    background = "#fbfcfe" if subtle else "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)"
+    title_color = "#54708f" if subtle else "#17304f"
+    description_color = "#6a7b92" if subtle else "#48617f"
+    return html.Div(
+        style={
+            "display": "grid",
+            "gap": "12px",
+            "padding": "14px 16px",
+            "borderRadius": "14px",
+            "border": border,
+            "background": background,
+            "boxShadow": "0 8px 18px rgba(22,40,68,0.04)" if not subtle else "none",
+        },
+        children=[
+            html.Div(
+                [
+                    html.Div(
+                        title,
+                        style={
+                            "fontSize": "0.82rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": title_color,
+                        },
+                    ),
+                    html.P(
+                        (
+                            "Primary visible drivers used in the dashboard."
+                            if not subtle
+                            else "Hidden model inputs available only in Full Features mode."
+                        ),
+                        style={
+                            "margin": "4px 0 0 0",
+                            "fontSize": "0.84rem",
+                            "color": description_color,
+                        },
+                    ),
+                ]
+            ),
+            html.Div(
+                style={
+                    "display": "grid",
+                    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
+                    "gap": "10px",
+                },
+                children=[
+                    _manual_field(
+                        services.feature_schema.get(feature_name),
+                        defaults.get(feature_name),
+                    )
+                    for feature_name in feature_names
+                ],
+            ),
+        ],
+    )
 
 
 def _stepped_manual_value(feature_schema, feature_name, current_value, direction):
@@ -392,6 +491,169 @@ def _neighbors_table(frame: pd.DataFrame):
     )
 
 
+def _feature_value_chip(
+    label: str,
+    value: str,
+    *,
+    subtle: bool = False,
+) -> html.Div:
+    return html.Div(
+        [
+            html.Span(
+                label,
+                style={
+                    "fontSize": "0.75rem",
+                    "fontWeight": "800",
+                    "textTransform": "uppercase",
+                    "color": "#6a7b92" if subtle else "#5b6d85",
+                },
+            ),
+            html.Strong(
+                value,
+                style={
+                    "fontSize": "0.9rem" if subtle else "0.96rem",
+                    "color": "#415775" if subtle else "#17304f",
+                    "fontWeight": "700" if subtle else "800",
+                },
+            ),
+        ],
+        style={
+            "display": "grid",
+            "gap": "4px",
+            "padding": "10px 12px",
+            "borderRadius": "12px",
+            "border": (
+                "1px dashed rgba(33,75,122,0.16)"
+                if subtle
+                else "1px solid rgba(33,75,122,0.12)"
+            ),
+            "background": "#fbfcfe" if subtle else "#ffffff",
+            "minWidth": "150px",
+            "opacity": "0.82" if subtle else "1",
+        },
+    )
+
+
+def _sample_feature_preview_card(services, sample_payload: dict) -> html.Div:
+    main_features = [
+        feature_name
+        for feature_name in MAIN_EXPLAINABILITY_FEATURE_NAMES
+        if feature_name in sample_payload
+    ]
+    auxiliary_features = [
+        feature_name
+        for feature_name in EXPLAINABILITY_FEATURE_NAMES
+        if feature_name not in main_features and feature_name in sample_payload
+    ]
+    return html.Div(
+        style={
+            "display": "grid",
+            "gap": "14px",
+            "padding": "16px 18px",
+            "borderRadius": "14px",
+            "border": "1px solid rgba(33,75,122,0.14)",
+            "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            "boxShadow": "0 8px 18px rgba(22,40,68,0.05)",
+        },
+        children=[
+            html.Div(
+                [
+                    html.Div(
+                        "Sample Feature Snapshot",
+                        style={
+                            "fontSize": "0.78rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#5b6d85",
+                        },
+                    ),
+                    html.P(
+                        (
+                            "Main Features are the five visible drivers. Auxiliar "
+                            "Features are the hidden inputs that still enter the model."
+                        ),
+                        style={"margin": "4px 0 0 0", "color": "#48617f"},
+                    ),
+                ]
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        "Main Features",
+                        style={
+                            "fontSize": "0.82rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#17304f",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.Div(
+                        style={
+                            "display": "flex",
+                            "flexWrap": "wrap",
+                            "gap": "10px",
+                        },
+                        children=[
+                            _feature_value_chip(
+                                display_feature_label(feature_name, services.feature_schema),
+                                format_feature_value(
+                                    feature_name,
+                                    sample_payload.get(feature_name),
+                                ),
+                            )
+                            for feature_name in main_features
+                        ],
+                    ),
+                ]
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        AUXILIARY_FEATURE_LABEL,
+                        style={
+                            "fontSize": "0.82rem",
+                            "fontWeight": "800",
+                            "textTransform": "uppercase",
+                            "color": "#54708f",
+                            "marginBottom": "8px",
+                        },
+                    ),
+                    html.P(
+                        (
+                            "Hidden model inputs grouped with a lighter visual "
+                            "weight so the main explanatory drivers remain primary."
+                        ),
+                        style={
+                            "margin": "0 0 8px 0",
+                            "fontSize": "0.84rem",
+                            "color": "#6a7b92",
+                        },
+                    ),
+                    html.Div(
+                        style={
+                            "display": "flex",
+                            "flexWrap": "wrap",
+                            "gap": "10px",
+                        },
+                        children=[
+                            _feature_value_chip(
+                                display_feature_label(feature_name, services.feature_schema),
+                                format_feature_value(
+                                    feature_name,
+                                    sample_payload.get(feature_name),
+                                ),
+                                subtle=True,
+                            )
+                            for feature_name in auxiliary_features
+                        ],
+                    ),
+                ]
+            ),
+        ],
+    )
+
+
 def _validate_manual_payload(services, sample_payload: dict) -> dict[str, str]:
     errors: dict[str, str] = {}
     mandatory_names = config.clientserver_config.dashboard_manual_input_features
@@ -451,31 +713,71 @@ def register_sample_callbacks(app, services) -> None:
         return _current_local_timestamp()
 
     @app.callback(
+        Output(IDS.SAMPLE_FEATURE_PREVIEW, "children"),
+        Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.SAMPLE_MODE, "value"),
+        Input(IDS.SAMPLE_INDEX, "value"),
+    )
+    def render_sample_feature_preview(
+        model_id,
+        mode,
+        sample_index,
+    ):
+        if not model_id:
+            return html.Div()
+        if mode == "manual":
+            return html.Div()
+        dataset = services.data_provider.load_dataset(model_id=model_id)
+        sample_frame = (
+            dataset.head(1).copy()
+            if sample_index is None
+            else dataset.loc[[sample_index]].copy()
+        )
+        sample_payload = {
+            feature_name: sample_frame.iloc[0].get(feature_name)
+            for feature_name in EXPLAINABILITY_FEATURE_NAMES
+        }
+        sample_payload = services.feature_schema.normalize_sample(sample_payload)
+        return _sample_feature_preview_card(services, sample_payload)
+
+    @app.callback(
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),
         Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
+        Input(IDS.SAMPLE_SHAP_FEATURE_SCOPE, "value"),
         Input(IDS.MODEL_SELECTOR, "value"),
     )
-    def render_manual_form(mode, _model_id):
+    def render_manual_form(mode, shap_feature_scope, _model_id):
         if mode != "manual":
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         defaults.update(MANUAL_INPUT_DEFAULTS)
-        defaults["ExecDatetime"] = _current_local_timestamp()
+        defaults.update(_manual_hidden_defaults())
+        defaults["ExecDatetime"] = _current_local_hour_timestamp()
+        main_feature_names = list(MAIN_EXPLAINABILITY_FEATURE_NAMES)
+        auxiliary_feature_names = list(AUXILIARY_MANUAL_FEATURE_NAMES)
+        form_sections = [
+            _manual_section("Main Features", main_feature_names, defaults, services)
+        ]
+        if shap_feature_scope == "full":
+            form_sections.append(
+                _manual_section(
+                    AUXILIARY_FEATURE_LABEL,
+                    auxiliary_feature_names,
+                    defaults,
+                    services,
+                    subtle=True,
+                )
+            )
         return (
             html.Div(
                 style={
                     "display": "grid",
-                    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
-                    "gap": "10px",
+                    "gap": "14px",
                     "margin": "16px 0",
                 },
-                children=[
-                    _manual_field(feature, defaults.get(feature.name))
-                    for feature in services.feature_schema.raw_input_features()
-                    if feature.name in VISIBLE_RAW_INPUT_FEATURE_NAMES
-                ],
+                children=form_sections,
             ),
             {"display": "none"},
         )
@@ -487,12 +789,21 @@ def register_sample_callbacks(app, services) -> None:
         Output(IDS.SAMPLE_COMPARISON, "figure"),
         Input(IDS.SAMPLE_RUN_BUTTON, "n_clicks"),
         State(IDS.MODEL_SELECTOR, "value"),
+        State(IDS.SAMPLE_SHAP_FEATURE_SCOPE, "value"),
         State(IDS.SAMPLE_MODE, "value"),
         State(IDS.SAMPLE_INDEX, "value"),
         State({"type": "manual-feature", "feature": ALL}, "id"),
         State({"type": "manual-feature", "feature": ALL}, "value"),
     )
-    def analyze_sample(_, model_id, mode, sample_index, manual_ids, manual_values):
+    def analyze_sample(
+        _,
+        model_id,
+        shap_feature_scope,
+        mode,
+        sample_index,
+        manual_ids,
+        manual_values,
+    ):
         if not model_id:
             return "Select a model.", None, html.Div(), _empty_figure()
         dataset = services.data_provider.load_dataset(model_id=model_id)
@@ -503,10 +814,13 @@ def register_sample_callbacks(app, services) -> None:
                 else:
                     sample_frame = dataset.loc[[sample_index]].copy()
             else:
-                sample_payload = {
-                    component_id["feature"]: value
-                    for component_id, value in zip(manual_ids, manual_values)
-                }
+                sample_payload = _manual_hidden_defaults()
+                sample_payload.update(
+                    {
+                        component_id["feature"]: value
+                        for component_id, value in zip(manual_ids, manual_values)
+                    }
+                )
                 sample_payload = services.feature_schema.normalize_sample(
                     sample_payload
                 )
@@ -535,18 +849,30 @@ def register_sample_callbacks(app, services) -> None:
                     if not neighbors.empty
                     else _empty_figure()
                 )
+                explanation = services.shap_service.from_payload(
+                    api_result["local_explanation"],
+                    feature_scope=shap_feature_scope,
+                )
                 sample_summary = _prediction_indicator(
                     title="Manual Input",
                     prediction=float(api_result["prediction"]),
                 )
                 return (
                     sample_summary,
-                    api_result.get("waterfall_image"),
+                    waterfall_image(
+                        explanation,
+                        explanation.explain_frame.index[0],
+                        services.feature_schema,
+                    ),
                     _neighbors_table(neighbors),
                     comparison,
                 )
 
-            explanation = services.shap_service.explain_sample(model_id, sample_frame)
+            explanation = services.shap_service.explain_sample(
+                model_id,
+                sample_frame,
+                feature_scope=shap_feature_scope,
+            )
             prediction = float(explanation.predictions.iloc[0])
             neighbors = services.neighbors_service.find_neighbors(
                 model_id, sample_frame, k=10

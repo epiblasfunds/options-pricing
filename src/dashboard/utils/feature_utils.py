@@ -18,15 +18,13 @@ def build_sample_label(row: pd.Series) -> str:
 
 
 def build_manual_input_sample_label(row: pd.Series) -> str:
-    exec_datetime = _display_datetime(row.get("ExecDatetime"))
     option_type = _display_option_type(row.get("OptionType", "?"))
     strike = _display_number(row.get("StrikePrice"))
     underlying = _display_number(row.get("UnderlyingPrice"))
     maturity = _display_number(row.get("TimeToExpiration"), decimals=1)
     rate = _display_number(row.get("Rate"), decimals=2)
     return (
-        f"ID: {row.name} | Exec datetime: {exec_datetime} | "
-        f"Type: {option_type} | Strike: {strike} | "
+        f"ID: {row.name} | Type: {option_type} | Strike: {strike} | "
         f"Underlying: {underlying} | Time to expiration: {maturity} | "
         f"Rate: {rate}"
     )
@@ -54,6 +52,24 @@ def _display_number(value, decimals: int = 0) -> str:
     except (TypeError, ValueError):
         return "?"
     return f"{numeric:,.{decimals}f}"
+
+
+def format_feature_value(feature_name: str, value) -> str:
+    if feature_name == "OptionType":
+        return _display_option_type(value)
+    if feature_name == "ExecDatetime":
+        return _display_datetime(value)
+    if feature_name in {"StrikePrice", "UnderlyingPrice"}:
+        return _display_number(value)
+    if feature_name == "Rate":
+        return _display_number(value, decimals=2)
+    if feature_name == "TimeToExpiration":
+        return _display_number(value, decimals=1)
+    if feature_name == "UnderlyingLagMinutes":
+        return _display_number(value, decimals=2)
+    if feature_name == "Quantity":
+        return _display_number(value)
+    return str(value) if value not in (None, "") else "?"
 
 
 def display_feature_label(feature_name: str, feature_schema: FeatureSchema) -> str:
@@ -94,5 +110,6 @@ __all__ = [
     "build_manual_input_sample_label",
     "build_sample_label",
     "display_feature_label",
+    "format_feature_value",
     "replace_feature_names_in_text",
 ]

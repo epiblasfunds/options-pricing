@@ -7,6 +7,7 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricsRegistry,
 )
 from src.enums.data_enums import OptionTypeEnum
+from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
 from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
@@ -23,8 +24,10 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
+    visible_raw_inputs = set(VISIBLE_RAW_INPUT_FEATURE_NAMES)
     features = [
-        _raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES
+        _raw_feature_definition(name, raw_input=name in visible_raw_inputs)
+        for name in RAW_INPUT_FEATURE_NAMES
     ]
     features.extend(
         [
@@ -78,22 +81,33 @@ def build_feature_schema() -> FeatureSchema:
     return FeatureSchema(features=features, target_column=TARGET_COLUMN)
 
 
-def _raw_feature_definition(name: str) -> FeatureDefinition:
+def _raw_feature_definition(
+    name: str,
+    raw_input: bool = True,
+) -> FeatureDefinition:
     labels = {
         "ExecDatetime": "Execution Datetime",
         "OptionType": "Option Type",
+        "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
+        "TradeType": "Trade Type",
+        "UnderlyingLagMinutes": "Underlying Lag (minutes)",
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
         "Rate": "Rate",
     }
     descriptions = {
         "ExecDatetime": (
-            "Execution timestamp used as contextual input. It is shown in the "
-            "manual form but not explained as a driver."
+            "Execution timestamp used by the model through derived trading-session "
+            "features."
         ),
         "OptionType": "Call or put option.",
+        "Quantity": "Trade size used by the model through a log-transformed input.",
         "StrikePrice": "Strike price associated with the traded option.",
+        "TradeType": "Market trade code used by the model as a categorical input.",
+        "UnderlyingLagMinutes": (
+            "Minutes between the underlying reference and the option execution."
+        ),
         "UnderlyingPrice": "Underlying price paired with the option trade.",
         "TimeToExpiration": "Remaining time to maturity, measured in days.",
         "Rate": "Risk-free rate used to back out implied volatility.",
@@ -104,8 +118,9 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             label=labels[name],
             dtype="datetime",
             category="categorical",
-            raw_input=True,
-            widget="text",
+            raw_input=raw_input,
+            derived_explainability_feature=not raw_input,
+            widget="text" if raw_input else None,
             description=descriptions[name],
         )
     if name == "OptionType":
@@ -114,10 +129,23 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
             label=labels[name],
             dtype="category",
             category="categorical",
-            raw_input=True,
+            raw_input=raw_input,
+            derived_explainability_feature=not raw_input,
             allowed_values=(OptionTypeEnum.CALL, OptionTypeEnum.PUT),
             default_value=OptionTypeEnum.CALL,
-            widget="dropdown",
+            widget="dropdown" if raw_input else None,
+            description=descriptions[name],
+        )
+    if name == "TradeType":
+        return FeatureDefinition(
+            name=name,
+            label=labels[name],
+            dtype="category",
+            category="categorical",
+            raw_input=raw_input,
+            derived_explainability_feature=not raw_input,
+            allowed_values=tuple(TRADE_TYPE_TO_FEATURE),
+            widget="dropdown" if raw_input else None,
             description=descriptions[name],
         )
     return FeatureDefinition(
@@ -125,9 +153,10 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         label=labels.get(name, name),
         dtype="float",
         category="numerical",
-        raw_input=True,
+        raw_input=raw_input,
+        derived_explainability_feature=not raw_input,
         min_value=0.0 if name != "Rate" else None,
-        widget="number",
+        widget="number" if raw_input else None,
         description=descriptions.get(name),
     )
 
