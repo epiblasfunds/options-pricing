@@ -57,7 +57,6 @@ _DATETIME_EXPLAINABILITY_FEATURE_NAMES = {
     column_name(VolatilityDBEnum.EXEC_DATETIME),
 }
 _NUMERIC_EXPLAINABILITY_FEATURE_NAMES = {
-    column_name(VolatilityDBEnum.QUANTITY),
     column_name(VolatilityDBEnum.STRIKE_PRICE),
     column_name(VolatilityDBEnum.UNDERLYING_PRICE),
     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
@@ -259,8 +258,6 @@ def apply_feature_override(
         adjusted[column_name(VolatilityDBEnum.STRIKE_PRICE)] = underlying / float(value)
     elif feature_name == column_name(VolatilityDBEnum.TIME_TO_EXPIRATION):
         adjusted[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)] = float(value)
-    elif feature_name == column_name(VolatilityDBEnum.QUANTITY):
-        adjusted[column_name(VolatilityDBEnum.QUANTITY)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.STRIKE_PRICE):
         adjusted[column_name(VolatilityDBEnum.STRIKE_PRICE)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.UNDERLYING_PRICE):
@@ -323,7 +320,6 @@ def _build_raw_defaults(
     defaults_override: dict[str, t.Any] | None = None,
 ) -> dict[str, t.Any]:
     defaults: dict[str, t.Any] = {
-        column_name(VolatilityDBEnum.QUANTITY): 1.0,
         column_name(VolatilityDBEnum.OPTION_CONTRACT_CODE): np.nan,
         column_name(VolatilityDBEnum.IMPLIED_VOLATILITY): np.nan,
     }
@@ -342,7 +338,6 @@ def _build_raw_defaults(
                     column_name(VolatilityDBEnum.UNDERLYING_PRICE),
                     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
                     column_name(VolatilityDBEnum.RATE),
-                    column_name(VolatilityDBEnum.QUANTITY),
                     column_name(VolatilityDBEnum.IMPLIED_VOLATILITY),
                 }:
                     defaults[feature_name] = float(
@@ -363,7 +358,6 @@ def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     underlying = frame[column_name(VolatilityDBEnum.UNDERLYING_PRICE)].astype(float)
     strike = frame[column_name(VolatilityDBEnum.STRIKE_PRICE)].astype(float)
     rate = frame[column_name(VolatilityDBEnum.RATE)].astype(float)
-    quantity = frame[column_name(VolatilityDBEnum.QUANTITY)].astype(float)
 
     with np.errstate(divide="ignore", invalid="ignore"):
         log_moneyness = np.log(underlying / strike)
@@ -377,7 +371,6 @@ def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     result["logMoneynessXSqrtTTE"] = log_moneyness * sqrt_tte_years
     result["logForwardMoneyness"] = log_forward_moneyness
     result["rate"] = rate
-    result["quantityLog1p"] = np.log1p(quantity)
 
     option_type = (
         frame[column_name(VolatilityDBEnum.OPTION_TYPE)].astype(str).str.upper()

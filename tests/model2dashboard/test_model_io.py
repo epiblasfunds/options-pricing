@@ -81,7 +81,6 @@ def test_predict_raw_frame_builds_features_before_scoring():
             "ExecDatetime": ["2026-04-22T10:00:00Z"],
             "OptionContractCode": ["CIBX 9000X26"],
             "OptionType": ["C"],
-            "Quantity": [1],
             "StrikePrice": [9000.0],
             "UnderlyingPrice": [9050.0],
             "TimeToExpiration": [15.0],

@@ -136,7 +136,6 @@ def build_dashboard_model(
         raw_feature_names=[
             str(VolatilityDBEnum.EXEC_DATETIME),
             str(VolatilityDBEnum.OPTION_TYPE),
-            str(VolatilityDBEnum.QUANTITY),
             str(VolatilityDBEnum.STRIKE_PRICE),
             str(VolatilityDBEnum.UNDERLYING_PRICE),
             str(VolatilityDBEnum.TIME_TO_EXPIRATION),

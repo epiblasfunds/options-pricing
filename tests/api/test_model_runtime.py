@@ -52,7 +52,6 @@ def _raw_frame():
             {
                 "ExecDatetime": "2026-04-22T10:00:00.000Z",
                 "OptionType": "C",
-                "Quantity": 1,
                 "StrikePrice": 10000.0,
                 "UnderlyingPrice": 10100.0,
                 "TimeToExpiration": 30.0,
@@ -61,7 +60,6 @@ def _raw_frame():
             {
                 "ExecDatetime": "2026-04-22T11:00:00.000Z",
                 "OptionType": "P",
-                "Quantity": 5,
                 "StrikePrice": 9900.0,
                 "UnderlyingPrice": 10000.0,
                 "TimeToExpiration": 45.0,
@@ -76,7 +74,6 @@ def _fake_predict_raw_frame(_runtime, raw_frame):
     option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
     return (
         exec_dt.dt.hour.astype(float) * 100.0
-        + raw_frame["Quantity"].astype(float)
         + option_is_put
     ).to_numpy(dtype="float64")
 

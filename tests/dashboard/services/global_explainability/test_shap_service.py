@@ -13,7 +13,6 @@ def _payload():
         "feature_names": [
             "ExecDatetime",
             "OptionType",
-            "Quantity",
             "StrikePrice",
             "UnderlyingPrice",
             "TimeToExpiration",
@@ -21,17 +20,16 @@ def _payload():
         ],
         "index": [7],
         "values": [
-            [0.04, 0.02, 0.03, 0.10, -0.07, 0.06, -0.02],
+            [0.04, 0.02, 0.10, -0.07, 0.06, -0.02],
         ],
         "base_values": [0.30],
         "data": [
-            [1.0, 0.0, 3.0, 9100.0, 9050.0, 20.0, -0.6],
+            [1.0, 0.0, 9100.0, 9050.0, 20.0, -0.6],
         ],
         "display_data": [
             [
                 "2026-04-22T10:00:00Z",
                 "C",
-                3.0,
                 9100.0,
                 9050.0,
                 20.0,
@@ -41,7 +39,6 @@ def _payload():
         "mean_abs_shap": {
             "ExecDatetime": 0.04,
             "OptionType": 0.02,
-            "Quantity": 0.03,
             "StrikePrice": 0.10,
             "UnderlyingPrice": 0.07,
             "TimeToExpiration": 0.06,
@@ -80,5 +77,5 @@ def test_full_scope_preserves_full_feature_set():
     result = service.from_payload(_payload(), feature_scope=FULL_FEATURE_SCOPE)
 
     assert result.feature_scope == FULL_FEATURE_SCOPE
-    assert len(result.feature_names) == 7
+    assert len(result.feature_names) == 6
     assert AUXILIARY_FEATURE_LABEL not in result.feature_names

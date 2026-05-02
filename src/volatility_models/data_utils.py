@@ -86,9 +86,6 @@ class TrainingDataHandler:
         is_call = float(tr[VolatilityDBEnum.OPTION_TYPE].upper() == OptionTypeEnum.CALL)
         is_put = float(tr[VolatilityDBEnum.OPTION_TYPE].upper() == OptionTypeEnum.PUT)
 
-        quantity_raw = tr[VolatilityDBEnum.QUANTITY]
-        quantity_log1p = np.log1p(quantity_raw)
-
         features = {
             TrainingDataEnum.TTE_YEARS: tte_years,
             TrainingDataEnum.SQRT_TTE_YEARS: sqrt_tte_years,
@@ -97,7 +94,6 @@ class TrainingDataHandler:
             TrainingDataEnum.LOG_MONEYNESS_X_SQRT_TTE: log_moneyness_x_sqrt_tte,
             TrainingDataEnum.LOG_FORWARD_MONEYNESS: log_forward_moneyness,
             TrainingDataEnum.RATE: rate,
-            TrainingDataEnum.QUANTITY_LOG1P: quantity_log1p,
             TrainingDataEnum.IS_CALL: is_call,
             TrainingDataEnum.IS_PUT: is_put,
         }

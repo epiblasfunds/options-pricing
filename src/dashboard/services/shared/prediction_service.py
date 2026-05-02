@@ -128,7 +128,6 @@ class PredictionService:
             "ExecDatetime": "execDatetime",
             "OptionContractCode": "optionContractCode",
             "OptionType": "optionType",
-            "Quantity": "quantity",
             "StrikePrice": "strikePrice",
             "UnderlyingPrice": "underlyingPrice",
             "TimeToExpiration": "timeToExpiration",

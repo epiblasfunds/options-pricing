@@ -4,7 +4,6 @@
             "ExecDatetime",
             "OptionContractCode",
             "OptionType",
-            "Quantity",
             "StrikePrice",
             "UnderlyingPrice",
             "TimeToExpiration",
@@ -18,7 +17,6 @@
         "raw_model_input": [
             "ExecDatetime",
             "OptionType",
-            "Quantity",
             "StrikePrice",
             "UnderlyingPrice",
             "TimeToExpiration",
@@ -31,8 +29,7 @@
             "logMoneynessSq",
             "logMoneynessXSqrtTTE",
             "logForwardMoneyness",
-            "rate",
-            "quantityLog1p"
+            "rate"
         ],
         "target_column": "ImpliedVolatility",
         "train_test_split_config": {

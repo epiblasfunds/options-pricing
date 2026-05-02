@@ -18,7 +18,6 @@ class PredictionFeatures(BaseModel):
     execDatetime: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     optionContractCode: str | None = None
     optionType: ApiOptionTypeEnum
-    quantity: int = 1
     strikePrice: float
     underlyingPrice: float
     timeToExpiration: float

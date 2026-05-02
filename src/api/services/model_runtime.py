@@ -126,7 +126,6 @@ class ApiModelService:
         row = {
             "ExecDatetime": self._format_exec_datetime(features.execDatetime),
             "OptionType": option_type,
-            "Quantity": int(features.quantity),
             "StrikePrice": float(features.strikePrice),
             "UnderlyingPrice": float(features.underlyingPrice),
             "TimeToExpiration": float(features.timeToExpiration),

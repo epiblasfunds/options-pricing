@@ -87,7 +87,6 @@ def _raw_feature_definition(
     labels = {
         "ExecDatetime": "Execution Datetime",
         "OptionType": "Option Type",
-        "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
@@ -99,7 +98,6 @@ def _raw_feature_definition(
             "features."
         ),
         "OptionType": "Call or put option.",
-        "Quantity": "Trade size used by the model through a log-transformed input.",
         "StrikePrice": "Strike price associated with the traded option.",
         "UnderlyingPrice": "Underlying price paired with the option trade.",
         "TimeToExpiration": "Remaining time to maturity, measured in days.",
@@ -151,7 +149,6 @@ def _model_feature_definition(name: str) -> FeatureDefinition:
         "logMoneynessXSqrtTTE": "Log-Moneyness x Sqrt TTE",
         "logForwardMoneyness": "Log Forward Moneyness",
         "rate": "Rate",
-        "quantityLog1p": "Log(1 + Quantity)",
         "isCall": "Is Call",
         "isPut": "Is Put",
     }

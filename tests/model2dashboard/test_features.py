@@ -21,7 +21,6 @@ def _raw_trade_frame():
                 "ExecDatetime": "2026-04-22T10:00:00Z",
                 "OptionContractCode": "CIBX 9000X26",
                 "OptionType": "C",
-                "Quantity": 1,
                 "StrikePrice": 9000.0,
                 "UnderlyingPrice": 9050.0,
                 "TimeToExpiration": 15.0,
@@ -32,7 +31,6 @@ def _raw_trade_frame():
                 "ExecDatetime": "2026-04-23T15:00:00Z",
                 "OptionContractCode": "PIBX 9100X26",
                 "OptionType": "P",
-                "Quantity": 7,
                 "StrikePrice": 9100.0,
                 "UnderlyingPrice": 9000.0,
                 "TimeToExpiration": 20.0,
@@ -57,7 +55,6 @@ def test_explainability_encoder_roundtrip_preserves_supported_feature_types():
     assert encoded.shape == (2, len(EXPLAINABILITY_FEATURE_NAMES))
     assert decoded.loc[10, "OptionType"] == "C"
     assert decoded.loc[11, "OptionType"] == "P"
-    assert reconstructed.loc[10, "Quantity"] == 1.0
 
 
 def test_feature_and_dashboard_dataset_builders_add_expected_columns():
