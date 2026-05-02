@@ -53,9 +53,7 @@ ANALYSIS_FEATURE_NAMES = [
     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
     column_name(VolatilityDBEnum.RATE),
 ]
-_DATETIME_EXPLAINABILITY_FEATURE_NAMES = {
-    column_name(VolatilityDBEnum.EXEC_DATETIME),
-}
+_DATETIME_EXPLAINABILITY_FEATURE_NAMES: set[str] = set()
 _NUMERIC_EXPLAINABILITY_FEATURE_NAMES = {
     column_name(VolatilityDBEnum.STRIKE_PRICE),
     column_name(VolatilityDBEnum.UNDERLYING_PRICE),
@@ -377,12 +375,4 @@ def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     )
     result["isCall"] = (option_type == OptionTypeEnum.CALL.value).astype(float)
     result["isPut"] = (option_type == OptionTypeEnum.PUT.value).astype(float)
-
-    exec_dt = pd.to_datetime(frame[column_name(VolatilityDBEnum.EXEC_DATETIME)])
-    exec_hour = exec_dt.dt.hour
-    exec_weekday = exec_dt.dt.weekday
-    for hour in range(9, 20):
-        result[f"execHour{hour}"] = (exec_hour == hour).astype(float)
-    for weekday in range(5):
-        result[f"execWeekday{weekday}"] = (exec_weekday == weekday).astype(float)
     return result.replace([np.inf, -np.inf], np.nan).fillna(0.0)

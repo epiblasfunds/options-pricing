@@ -1,10 +1,7 @@
-from datetime import datetime
-from datetime import timezone
 from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel
-from pydantic import Field
 
 from src.enums.volatility_model_enums import ModelNameEnum
 
@@ -15,7 +12,6 @@ class ApiOptionTypeEnum(StrEnum):
 
 
 class PredictionFeatures(BaseModel):
-    execDatetime: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     optionContractCode: str | None = None
     optionType: ApiOptionTypeEnum
     strikePrice: float

@@ -124,7 +124,6 @@ class ApiModelService:
         features = request.caracteristicas
         option_type = "C" if features.optionType == ApiOptionTypeEnum.CALL else "P"
         row = {
-            "ExecDatetime": self._format_exec_datetime(features.execDatetime),
             "OptionType": option_type,
             "StrikePrice": float(features.strikePrice),
             "UnderlyingPrice": float(features.underlyingPrice),
@@ -327,13 +326,6 @@ class ApiModelService:
             "predictions": np.asarray(stored.waterfall_predictions()).tolist(),
             "mean_abs_shap": dict(stored.mean_abs_shap),
         }
-
-    @staticmethod
-    def _format_exec_datetime(value: datetime) -> str:
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        value = value.astimezone(timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     @classmethod
     def _frame_records(cls, frame: pd.DataFrame) -> list[dict[str, Any]]:

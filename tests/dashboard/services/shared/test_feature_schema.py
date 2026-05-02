@@ -20,7 +20,6 @@ def test_feature_schema_defaults_normalization_and_validation():
     schema = build_feature_schema()
     frame = pd.DataFrame(
         {
-            "ExecDatetime": ["2026-04-22T10:00:00Z", "2026-04-23T11:00:00Z"],
             "OptionType": ["C", "P"],
             "StrikePrice": [9000.0, 9100.0],
             "UnderlyingPrice": [9050.0, 9150.0],
@@ -32,7 +31,6 @@ def test_feature_schema_defaults_normalization_and_validation():
     defaults = schema.defaults_from_frame(frame)
     normalized = schema.normalize_sample(
         {
-            "ExecDatetime": "2026-04-22T10:00:00Z",
             "OptionType": "call",
             "StrikePrice": "9000",
             "UnderlyingPrice": 9050,
@@ -53,7 +51,6 @@ def test_feature_schema_validation_reports_required_invalid_and_bound_errors():
 
     errors = schema.validate_sample(
         {
-            "ExecDatetime": "not-a-date",
             "OptionType": "invalid",
             "StrikePrice": -1,
             "UnderlyingPrice": "",
@@ -62,7 +59,6 @@ def test_feature_schema_validation_reports_required_invalid_and_bound_errors():
         }
     )
 
-    assert errors["ExecDatetime"] == "Value must be a valid datetime."
     assert errors["OptionType"] == "Value is outside the allowed set."
     assert errors["StrikePrice"] == "Value is below the minimum."
     assert errors["UnderlyingPrice"] == "Value is required."

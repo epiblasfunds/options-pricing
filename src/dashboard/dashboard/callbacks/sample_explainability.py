@@ -1,7 +1,5 @@
 """Callbacks for local sample explainability."""
 
-from datetime import datetime
-
 import pandas as pd
 import plotly.graph_objects as go
 from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
@@ -129,38 +127,6 @@ def _manual_field(feature, default_value):
             ],
             value=_manual_option_type_value(default_value),
             clearable=False,
-        )
-    elif feature.name == "ExecDatetime":
-        input_component = html.Div(
-            style={"display": "grid", "gridTemplateColumns": "minmax(0, 1fr) auto", "gap": "8px"},
-            children=[
-                dcc.Input(
-                    id=component_id,
-                    type="text",
-                    value=_manual_datetime_value(default_value),
-                    placeholder="YYYY-MM-DDTHH:MM:SS+02:00",
-                    style={
-                        "height": "34px",
-                        "width": "100%",
-                        "boxSizing": "border-box",
-                        "borderRadius": "8px",
-                        "border": "1px solid rgba(23,48,79,0.18)",
-                        "padding": "0 10px",
-                    },
-                ),
-                html.Button(
-                    "now",
-                    id={"type": "manual-now", "feature": feature.name},
-                    n_clicks=0,
-                    type="button",
-                    style={
-                        **PILL_BUTTON_STYLE,
-                        "height": "34px",
-                        "padding": "0 12px",
-                        "alignSelf": "center",
-                    },
-                ),
-            ],
         )
     elif feature.allowed_values:
         options = [
@@ -302,43 +268,8 @@ def _manual_numeric_value(default_value):
     return numeric_value
 
 
-def _manual_datetime_value(default_value):
-    if default_value in (None, ""):
-        return _current_local_hour_timestamp()
-    timestamp = pd.to_datetime(default_value, errors="coerce")
-    if pd.isna(timestamp):
-        return _current_local_hour_timestamp()
-    if getattr(timestamp, "tzinfo", None) is None:
-        return timestamp.isoformat(timespec="seconds")
-    return timestamp.isoformat(timespec="seconds")
-
-
-def _current_local_timestamp():
-    return datetime.now().astimezone().isoformat(timespec="seconds")
-
-
-def _current_local_hour_timestamp():
-    return (
-        datetime.now()
-        .astimezone()
-        .replace(minute=0, second=0, microsecond=0)
-        .isoformat(timespec="milliseconds")
-    )
-
-
-def _current_local_midnight_timestamp():
-    return (
-        datetime.now()
-        .astimezone()
-        .replace(hour=0, minute=0, second=0, microsecond=0)
-        .isoformat(timespec="milliseconds")
-    )
-
-
 def _manual_hidden_defaults() -> dict[str, object]:
-    return {
-        "ExecDatetime": _current_local_midnight_timestamp(),
-    }
+    return {}
 
 
 def _manual_feature_names(feature_scope: str) -> list[str]:
@@ -695,16 +626,6 @@ def register_sample_callbacks(app, services) -> None:
         )
 
     @app.callback(
-        Output(
-            {"type": "manual-feature", "feature": MATCH}, "value", allow_duplicate=True
-        ),
-        Input({"type": "manual-now", "feature": MATCH}, "n_clicks"),
-        prevent_initial_call=True,
-    )
-    def set_manual_datetime_now(_):
-        return _current_local_timestamp()
-
-    @app.callback(
         Output(IDS.SAMPLE_FEATURE_PREVIEW, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
         Input(IDS.SAMPLE_MODE, "value"),
@@ -746,7 +667,6 @@ def register_sample_callbacks(app, services) -> None:
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         defaults.update(MANUAL_INPUT_DEFAULTS)
         defaults.update(_manual_hidden_defaults())
-        defaults["ExecDatetime"] = _current_local_hour_timestamp()
         main_feature_names = list(MAIN_EXPLAINABILITY_FEATURE_NAMES)
         auxiliary_feature_names = list(AUXILIARY_MANUAL_FEATURE_NAMES)
         form_sections = [

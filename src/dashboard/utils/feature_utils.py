@@ -57,8 +57,6 @@ def _display_number(value, decimals: int = 0) -> str:
 def format_feature_value(feature_name: str, value) -> str:
     if feature_name == "OptionType":
         return _display_option_type(value)
-    if feature_name == "ExecDatetime":
-        return _display_datetime(value)
     if feature_name in {"StrikePrice", "UnderlyingPrice"}:
         return _display_number(value)
     if feature_name == "Rate":

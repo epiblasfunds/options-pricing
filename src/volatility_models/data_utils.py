@@ -98,33 +98,6 @@ class TrainingDataHandler:
             TrainingDataEnum.IS_PUT: is_put,
         }
 
-        exec_dt = tr[VolatilityDBEnum.EXEC_DATETIME]
-        exec_hour = int(exec_dt.hour)
-        exec_weekday = int(exec_dt.weekday())
-        for col in [
-            TrainingDataEnum.EXEC_HOUR_9,
-            TrainingDataEnum.EXEC_HOUR_10,
-            TrainingDataEnum.EXEC_HOUR_11,
-            TrainingDataEnum.EXEC_HOUR_12,
-            TrainingDataEnum.EXEC_HOUR_13,
-            TrainingDataEnum.EXEC_HOUR_14,
-            TrainingDataEnum.EXEC_HOUR_15,
-            TrainingDataEnum.EXEC_HOUR_16,
-            TrainingDataEnum.EXEC_HOUR_17,
-            TrainingDataEnum.EXEC_HOUR_18,
-            TrainingDataEnum.EXEC_HOUR_19,
-        ]:
-            features[col.value] = float(f"execHour{exec_hour}" == col.value)
-
-        for col in [
-            TrainingDataEnum.EXEC_WEEKDAY_0,
-            TrainingDataEnum.EXEC_WEEKDAY_1,
-            TrainingDataEnum.EXEC_WEEKDAY_2,
-            TrainingDataEnum.EXEC_WEEKDAY_3,
-            TrainingDataEnum.EXEC_WEEKDAY_4,
-        ]:
-            features[col.value] = float(f"execWeekday{exec_weekday}" == col.value)
-
         return features
 
     @staticmethod
@@ -495,16 +468,6 @@ class DataInfoDisplay:
 
         categorical_summary_groups = {
             "is_call": ["isCall"],
-            "exec_hour": [
-                enum_value.value
-                for enum_value in TrainingDataEnum
-                if enum_value.value.startswith("execHour")
-            ],
-            "exec_weekday": [
-                enum_value.value
-                for enum_value in TrainingDataEnum
-                if enum_value.value.startswith("execWeekday")
-            ],
         }
 
         for group_name, group_cols in categorical_summary_groups.items():

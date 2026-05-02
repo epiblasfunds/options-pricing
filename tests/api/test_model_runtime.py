@@ -50,7 +50,6 @@ def _raw_frame():
     return pd.DataFrame(
         [
             {
-                "ExecDatetime": "2026-04-22T10:00:00.000Z",
                 "OptionType": "C",
                 "StrikePrice": 10000.0,
                 "UnderlyingPrice": 10100.0,
@@ -58,7 +57,6 @@ def _raw_frame():
                 "Rate": 0.02,
             },
             {
-                "ExecDatetime": "2026-04-22T11:00:00.000Z",
                 "OptionType": "P",
                 "StrikePrice": 9900.0,
                 "UnderlyingPrice": 10000.0,
@@ -70,12 +68,9 @@ def _raw_frame():
 
 
 def _fake_predict_raw_frame(_runtime, raw_frame):
-    exec_dt = pd.to_datetime(raw_frame["ExecDatetime"], errors="coerce")
+    strike = pd.to_numeric(raw_frame["StrikePrice"], errors="coerce")
     option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
-    return (
-        exec_dt.dt.hour.astype(float) * 100.0
-        + option_is_put
-    ).to_numpy(dtype="float64")
+    return (strike * 0.1 + option_is_put).to_numpy(dtype="float64")
 
 
 def test_runtime_shap_explanation_uses_manual_row_not_stored_sample():

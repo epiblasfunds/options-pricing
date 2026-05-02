@@ -51,12 +51,9 @@ class _FakeRegressor:
 
 def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
     def fake_predict_raw_frame(_runtime, raw_frame):
-        exec_dt = pd.to_datetime(raw_frame["ExecDatetime"], errors="coerce")
+        strike = pd.to_numeric(raw_frame["StrikePrice"], errors="coerce")
         option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
-        return (
-            exec_dt.dt.hour.astype(float) * 100.0
-            + option_is_put
-        ).to_numpy(dtype="float64")
+        return (strike * 0.1 + option_is_put).to_numpy(dtype="float64")
 
     monkeypatch.setattr(artifact_builders.shap, "Explainer", _FakeExplainer)
     monkeypatch.setattr(artifact_builders, "predict_raw_frame", fake_predict_raw_frame)
@@ -105,7 +102,7 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
     )
 
     assert local_shap.index == [10, 11]
-    assert local_shap.base_values.tolist() == [1303.5, 1303.5]
+    assert local_shap.base_values.tolist() == [900.0, 900.0]
 
 
 def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():

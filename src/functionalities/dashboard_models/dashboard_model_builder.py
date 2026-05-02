@@ -134,7 +134,6 @@ def build_dashboard_model(
         metadata=dict(model.metadata.metadata),
         dataset_frame=dataset_frame,
         raw_feature_names=[
-            str(VolatilityDBEnum.EXEC_DATETIME),
             str(VolatilityDBEnum.OPTION_TYPE),
             str(VolatilityDBEnum.STRIKE_PRICE),
             str(VolatilityDBEnum.UNDERLYING_PRICE),

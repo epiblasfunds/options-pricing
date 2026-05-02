@@ -85,7 +85,6 @@ def _raw_feature_definition(
     raw_input: bool = True,
 ) -> FeatureDefinition:
     labels = {
-        "ExecDatetime": "Execution Datetime",
         "OptionType": "Option Type",
         "StrikePrice": "Strike Price",
         "UnderlyingPrice": "Underlying Price",
@@ -93,27 +92,12 @@ def _raw_feature_definition(
         "Rate": "Rate",
     }
     descriptions = {
-        "ExecDatetime": (
-            "Execution timestamp used by the model through derived trading-session "
-            "features."
-        ),
         "OptionType": "Call or put option.",
         "StrikePrice": "Strike price associated with the traded option.",
         "UnderlyingPrice": "Underlying price paired with the option trade.",
         "TimeToExpiration": "Remaining time to maturity, measured in days.",
         "Rate": "Risk-free rate used to back out implied volatility.",
     }
-    if name == "ExecDatetime":
-        return FeatureDefinition(
-            name=name,
-            label=labels[name],
-            dtype="datetime",
-            category="categorical",
-            raw_input=raw_input,
-            derived_explainability_feature=not raw_input,
-            widget="text" if raw_input else None,
-            description=descriptions[name],
-        )
     if name == "OptionType":
         return FeatureDefinition(
             name=name,
@@ -152,10 +136,6 @@ def _model_feature_definition(name: str) -> FeatureDefinition:
         "isCall": "Is Call",
         "isPut": "Is Put",
     }
-    if name.startswith("execHour"):
-        labels[name] = f"Execution Hour = {name.removeprefix('execHour')}"
-    if name.startswith("execWeekday"):
-        labels[name] = f"Execution Weekday = {name.removeprefix('execWeekday')}"
     return FeatureDefinition(
         name=name,
         label=labels.get(name, name),
