@@ -83,7 +83,6 @@ def test_predict_raw_frame_builds_features_before_scoring():
             "OptionType": ["C"],
             "Quantity": [1],
             "StrikePrice": [9000.0],
-            "TradeType": ["M"],
             "UnderlyingLagMinutes": [0.25],
             "UnderlyingPrice": [9050.0],
             "TimeToExpiration": [15.0],

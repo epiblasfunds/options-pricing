@@ -54,7 +54,6 @@ def _raw_frame():
                 "OptionType": "C",
                 "Quantity": 1,
                 "StrikePrice": 10000.0,
-                "TradeType": "M",
                 "UnderlyingLagMinutes": 0.0,
                 "UnderlyingPrice": 10100.0,
                 "TimeToExpiration": 30.0,
@@ -65,7 +64,6 @@ def _raw_frame():
                 "OptionType": "P",
                 "Quantity": 5,
                 "StrikePrice": 9900.0,
-                "TradeType": "M",
                 "UnderlyingLagMinutes": 2.0,
                 "UnderlyingPrice": 10000.0,
                 "TimeToExpiration": 45.0,
@@ -77,13 +75,11 @@ def _raw_frame():
 
 def _fake_predict_raw_frame(_runtime, raw_frame):
     exec_dt = pd.to_datetime(raw_frame["ExecDatetime"], errors="coerce")
-    trade_is_h = (raw_frame["TradeType"].astype(str) == "H").astype(float)
     option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
     return (
         exec_dt.dt.hour.astype(float) * 100.0
         + raw_frame["UnderlyingLagMinutes"].astype(float) * 10.0
         + raw_frame["Quantity"].astype(float)
-        + trade_is_h
         + option_is_put
     ).to_numpy(dtype="float64")
 

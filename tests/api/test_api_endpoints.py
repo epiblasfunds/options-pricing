@@ -23,7 +23,7 @@ class _FakeModelService:
         return {
             "modelo": request.modelo,
             "prediction": np.float64(0.31),
-            "input": {"TradeType": request.caracteristicas.tradeType},
+            "input": {"Quantity": request.caracteristicas.quantity},
             "reference_sample_index": None,
             "waterfall_image": "data:image/png;base64,abc",
             "local_explanation": {"feature_names": ["rate"], "value": np.float64(1.2)},
@@ -56,7 +56,6 @@ def test_predict_endpoint_accepts_defaults():
     assert response.status_code == 200
     assert response.json()["prediction"] == 0.24
     assert service.predict_request.caracteristicas.quantity == 1
-    assert service.predict_request.caracteristicas.tradeType == "M"
     assert service.predict_request.caracteristicas.underlyingLag == 0.0
 
 

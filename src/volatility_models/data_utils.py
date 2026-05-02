@@ -105,17 +105,6 @@ class TrainingDataHandler:
             TrainingDataEnum.IS_PUT: is_put,
         }
 
-        trade_value = str(tr[VolatilityDBEnum.TRADE_TYPE])
-        for col in [
-            TrainingDataEnum.TRADE_TYPE_3,
-            TrainingDataEnum.TRADE_TYPE_H,
-            TrainingDataEnum.TRADE_TYPE_M,
-            TrainingDataEnum.TRADE_TYPE_S,
-            TrainingDataEnum.TRADE_TYPE_W,
-            TrainingDataEnum.TRADE_TYPE_X,
-        ]:
-            features[col.value] = float(f"tradeType{trade_value}" == col.value)
-
         exec_dt = tr[VolatilityDBEnum.EXEC_DATETIME]
         exec_hour = int(exec_dt.hour)
         exec_weekday = int(exec_dt.weekday())
@@ -513,9 +502,6 @@ class DataInfoDisplay:
 
         categorical_summary_groups = {
             "is_call": ["isCall"],
-            "trade_type": list(
-                config.volatility_models_config.training_data_config.trade_type_to_feature.values()
-            ),
             "exec_hour": [
                 enum_value.value
                 for enum_value in TrainingDataEnum

@@ -18,12 +18,6 @@ class TrainingDataEnum(StrEnum):
     # Categorical features
     IS_CALL = "isCall"
     IS_PUT = "isPut"
-    TRADE_TYPE_3 = "tradeType3"
-    TRADE_TYPE_H = "tradeTypeH"
-    TRADE_TYPE_M = "tradeTypeM"
-    TRADE_TYPE_S = "tradeTypeS"
-    TRADE_TYPE_W = "tradeTypeW"
-    TRADE_TYPE_X = "tradeTypeX"
     EXEC_HOUR_9 = "execHour9"
     EXEC_HOUR_10 = "execHour10"
     EXEC_HOUR_11 = "execHour11"

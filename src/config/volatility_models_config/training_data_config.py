@@ -30,10 +30,6 @@ class TrainingDataConfig:
         self.target_column = TrainingDataEnum(
             training_data_config["target_column"]
         ).value
-        self.trade_type_to_feature = {
-            k: TrainingDataEnum(v).value
-            for k, v in training_data_config["trade_type_to_feature"].items()
-        }
         self.train_test_split_config = TrainTestSplitConfig(data_config_file_path)
         self.kfolds_config = KFoldsConfig(data_config_file_path)
         self.custom_error_1: t.Dict = training_data_config["custom_error_1"]

@@ -26,7 +26,6 @@ MANUAL_INPUT_DEFAULTS = {
     "TimeToExpiration": 20.0,
     "Rate": -0.6,
     "Quantity": 1,
-    "TradeType": "M",
     "UnderlyingLagMinutes": 0.0,
 }
 
@@ -344,7 +343,6 @@ def _manual_hidden_defaults() -> dict[str, object]:
     return {
         "ExecDatetime": _current_local_midnight_timestamp(),
         "Quantity": MANUAL_INPUT_DEFAULTS["Quantity"],
-        "TradeType": MANUAL_INPUT_DEFAULTS["TradeType"],
         "UnderlyingLagMinutes": MANUAL_INPUT_DEFAULTS["UnderlyingLagMinutes"],
     }
 

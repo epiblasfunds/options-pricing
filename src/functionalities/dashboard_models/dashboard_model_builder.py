@@ -138,7 +138,6 @@ def build_dashboard_model(
             str(VolatilityDBEnum.OPTION_TYPE),
             str(VolatilityDBEnum.QUANTITY),
             str(VolatilityDBEnum.STRIKE_PRICE),
-            str(VolatilityDBEnum.TRADE_TYPE),
             str(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
             str(VolatilityDBEnum.UNDERLYING_PRICE),
             str(VolatilityDBEnum.TIME_TO_EXPIRATION),

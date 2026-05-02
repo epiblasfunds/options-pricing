@@ -10,7 +10,6 @@ from src.enums.data_enums import OptionTypeEnum
 from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
-from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
 from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
@@ -90,7 +89,6 @@ def _raw_feature_definition(
         "OptionType": "Option Type",
         "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
-        "TradeType": "Trade Type",
         "UnderlyingLagMinutes": "Underlying Lag (minutes)",
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
@@ -104,7 +102,6 @@ def _raw_feature_definition(
         "OptionType": "Call or put option.",
         "Quantity": "Trade size used by the model through a log-transformed input.",
         "StrikePrice": "Strike price associated with the traded option.",
-        "TradeType": "Market trade code used by the model as a categorical input.",
         "UnderlyingLagMinutes": (
             "Minutes between the underlying reference and the option execution."
         ),
@@ -136,18 +133,6 @@ def _raw_feature_definition(
             widget="dropdown" if raw_input else None,
             description=descriptions[name],
         )
-    if name == "TradeType":
-        return FeatureDefinition(
-            name=name,
-            label=labels[name],
-            dtype="category",
-            category="categorical",
-            raw_input=raw_input,
-            derived_explainability_feature=not raw_input,
-            allowed_values=tuple(TRADE_TYPE_TO_FEATURE),
-            widget="dropdown" if raw_input else None,
-            description=descriptions[name],
-        )
     return FeatureDefinition(
         name=name,
         label=labels.get(name, name),
@@ -175,8 +160,6 @@ def _model_feature_definition(name: str) -> FeatureDefinition:
         "isCall": "Is Call",
         "isPut": "Is Put",
     }
-    for trade_type, feature_column in TRADE_TYPE_TO_FEATURE.items():
-        labels[feature_column] = f"Trade Type = {trade_type}"
     if name.startswith("execHour"):
         labels[name] = f"Execution Hour = {name.removeprefix('execHour')}"
     if name.startswith("execWeekday"):

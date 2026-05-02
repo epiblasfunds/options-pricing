@@ -130,7 +130,6 @@ class PredictionService:
             "OptionType": "optionType",
             "Quantity": "quantity",
             "StrikePrice": "strikePrice",
-            "TradeType": "tradeType",
             "UnderlyingLagMinutes": "underlyingLag",
             "UnderlyingPrice": "underlyingPrice",
             "TimeToExpiration": "timeToExpiration",

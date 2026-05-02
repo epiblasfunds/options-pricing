@@ -23,7 +23,6 @@ def _raw_trade_frame():
                 "OptionType": "C",
                 "Quantity": 1,
                 "StrikePrice": 9000.0,
-                "TradeType": "M",
                 "UnderlyingLagMinutes": 0.25,
                 "UnderlyingPrice": 9050.0,
                 "TimeToExpiration": 15.0,
@@ -36,7 +35,6 @@ def _raw_trade_frame():
                 "OptionType": "P",
                 "Quantity": 7,
                 "StrikePrice": 9100.0,
-                "TradeType": "H",
                 "UnderlyingLagMinutes": 3.5,
                 "UnderlyingPrice": 9000.0,
                 "TimeToExpiration": 20.0,
@@ -61,9 +59,6 @@ def test_explainability_encoder_roundtrip_preserves_supported_feature_types():
     assert encoded.shape == (2, len(EXPLAINABILITY_FEATURE_NAMES))
     assert decoded.loc[10, "OptionType"] == "C"
     assert decoded.loc[11, "OptionType"] == "P"
-    assert "TradeType" in reconstructed.columns
-    assert reconstructed.loc[10, "TradeType"] == "M"
-    assert reconstructed.loc[11, "TradeType"] == "H"
     assert reconstructed.loc[10, "Quantity"] == 1.0
     assert reconstructed.loc[11, "UnderlyingLagMinutes"] == 3.5
 
