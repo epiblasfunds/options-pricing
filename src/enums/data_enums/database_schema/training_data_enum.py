@@ -12,7 +12,6 @@ class TrainingDataEnum(StrEnum):
     LOG_MONEYNESS_X_SQRT_TTE = "logMoneynessXSqrtTTE"
     LOG_FORWARD_MONEYNESS = "logForwardMoneyness"
     RATE = "rate"
-    UNDERLYING_LAG_MINUTES = "underlyingLagMinutes"
     QUANTITY_LOG1P = "quantityLog1p"
 
     # Categorical features

@@ -128,7 +128,6 @@ class ApiModelService:
             "OptionType": option_type,
             "Quantity": int(features.quantity),
             "StrikePrice": float(features.strikePrice),
-            "UnderlyingLagMinutes": float(features.underlyingLag),
             "UnderlyingPrice": float(features.underlyingPrice),
             "TimeToExpiration": float(features.timeToExpiration),
             "Rate": float(features.rate),

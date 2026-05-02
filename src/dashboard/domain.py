@@ -89,7 +89,6 @@ def _raw_feature_definition(
         "OptionType": "Option Type",
         "Quantity": "Quantity",
         "StrikePrice": "Strike Price",
-        "UnderlyingLagMinutes": "Underlying Lag (minutes)",
         "UnderlyingPrice": "Underlying Price",
         "TimeToExpiration": "Time To Expiration (days)",
         "Rate": "Rate",
@@ -102,9 +101,6 @@ def _raw_feature_definition(
         "OptionType": "Call or put option.",
         "Quantity": "Trade size used by the model through a log-transformed input.",
         "StrikePrice": "Strike price associated with the traded option.",
-        "UnderlyingLagMinutes": (
-            "Minutes between the underlying reference and the option execution."
-        ),
         "UnderlyingPrice": "Underlying price paired with the option trade.",
         "TimeToExpiration": "Remaining time to maturity, measured in days.",
         "Rate": "Risk-free rate used to back out implied volatility.",
@@ -155,7 +151,6 @@ def _model_feature_definition(name: str) -> FeatureDefinition:
         "logMoneynessXSqrtTTE": "Log-Moneyness x Sqrt TTE",
         "logForwardMoneyness": "Log Forward Moneyness",
         "rate": "Rate",
-        "underlyingLagMinutes": "Underlying Lag (minutes)",
         "quantityLog1p": "Log(1 + Quantity)",
         "isCall": "Is Call",
         "isPut": "Is Put",

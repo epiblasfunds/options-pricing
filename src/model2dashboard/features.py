@@ -59,7 +59,6 @@ _DATETIME_EXPLAINABILITY_FEATURE_NAMES = {
 _NUMERIC_EXPLAINABILITY_FEATURE_NAMES = {
     column_name(VolatilityDBEnum.QUANTITY),
     column_name(VolatilityDBEnum.STRIKE_PRICE),
-    column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
     column_name(VolatilityDBEnum.UNDERLYING_PRICE),
     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
     column_name(VolatilityDBEnum.RATE),
@@ -260,8 +259,6 @@ def apply_feature_override(
         adjusted[column_name(VolatilityDBEnum.STRIKE_PRICE)] = underlying / float(value)
     elif feature_name == column_name(VolatilityDBEnum.TIME_TO_EXPIRATION):
         adjusted[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)] = float(value)
-    elif feature_name == column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES):
-        adjusted[column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.QUANTITY):
         adjusted[column_name(VolatilityDBEnum.QUANTITY)] = float(value)
     elif feature_name == column_name(VolatilityDBEnum.STRIKE_PRICE):
@@ -327,7 +324,6 @@ def _build_raw_defaults(
 ) -> dict[str, t.Any]:
     defaults: dict[str, t.Any] = {
         column_name(VolatilityDBEnum.QUANTITY): 1.0,
-        column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES): 0.0,
         column_name(VolatilityDBEnum.OPTION_CONTRACT_CODE): np.nan,
         column_name(VolatilityDBEnum.IMPLIED_VOLATILITY): np.nan,
     }
@@ -346,7 +342,6 @@ def _build_raw_defaults(
                     column_name(VolatilityDBEnum.UNDERLYING_PRICE),
                     column_name(VolatilityDBEnum.TIME_TO_EXPIRATION),
                     column_name(VolatilityDBEnum.RATE),
-                    column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES),
                     column_name(VolatilityDBEnum.QUANTITY),
                     column_name(VolatilityDBEnum.IMPLIED_VOLATILITY),
                 }:
@@ -382,9 +377,6 @@ def _build_features_vectorized(frame: pd.DataFrame) -> pd.DataFrame:
     result["logMoneynessXSqrtTTE"] = log_moneyness * sqrt_tte_years
     result["logForwardMoneyness"] = log_forward_moneyness
     result["rate"] = rate
-    result["underlyingLagMinutes"] = frame[
-        column_name(VolatilityDBEnum.UNDERLYING_LAG_MINUTES)
-    ].astype(float)
     result["quantityLog1p"] = np.log1p(quantity)
 
     option_type = (

@@ -56,7 +56,6 @@ def test_predict_endpoint_accepts_defaults():
     assert response.status_code == 200
     assert response.json()["prediction"] == 0.24
     assert service.predict_request.caracteristicas.quantity == 1
-    assert service.predict_request.caracteristicas.underlyingLag == 0.0
 
 
 def test_sample_explainability_endpoint_returns_dashboard_payload():

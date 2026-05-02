@@ -15,18 +15,17 @@ def _payload():
             "OptionType",
             "Quantity",
             "StrikePrice",
-            "UnderlyingLagMinutes",
             "UnderlyingPrice",
             "TimeToExpiration",
             "Rate",
         ],
         "index": [7],
         "values": [
-            [0.04, 0.02, 0.03, 0.10, 0.05, -0.07, 0.06, -0.02],
+            [0.04, 0.02, 0.03, 0.10, -0.07, 0.06, -0.02],
         ],
         "base_values": [0.30],
         "data": [
-            [1.0, 0.0, 3.0, 9100.0, 1.5, 9050.0, 20.0, -0.6],
+            [1.0, 0.0, 3.0, 9100.0, 9050.0, 20.0, -0.6],
         ],
         "display_data": [
             [
@@ -34,7 +33,6 @@ def _payload():
                 "C",
                 3.0,
                 9100.0,
-                1.5,
                 9050.0,
                 20.0,
                 -0.6,
@@ -45,7 +43,6 @@ def _payload():
             "OptionType": 0.02,
             "Quantity": 0.03,
             "StrikePrice": 0.10,
-            "UnderlyingLagMinutes": 0.05,
             "UnderlyingPrice": 0.07,
             "TimeToExpiration": 0.06,
             "Rate": 0.02,
@@ -74,7 +71,7 @@ def test_main_scope_aggregates_hidden_features_without_changing_base_value():
     assert float(result.explain_frame.iloc[0, -1]) == 0.0
     assert float(result.explanation.data[0, -1]) == 0.0
     assert result.predictions.loc[7] == 0.50
-    assert result.explanation.values[0, -1] == pytest.approx(0.12)
+    assert result.explanation.values[0, -1] == pytest.approx(0.07)
 
 
 def test_full_scope_preserves_full_feature_set():
@@ -83,5 +80,5 @@ def test_full_scope_preserves_full_feature_set():
     result = service.from_payload(_payload(), feature_scope=FULL_FEATURE_SCOPE)
 
     assert result.feature_scope == FULL_FEATURE_SCOPE
-    assert len(result.feature_names) == 8
+    assert len(result.feature_names) == 7
     assert AUXILIARY_FEATURE_LABEL not in result.feature_names

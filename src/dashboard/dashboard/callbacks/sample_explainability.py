@@ -26,7 +26,6 @@ MANUAL_INPUT_DEFAULTS = {
     "TimeToExpiration": 20.0,
     "Rate": -0.6,
     "Quantity": 1,
-    "UnderlyingLagMinutes": 0.0,
 }
 
 MANUAL_INPUT_LABEL_OVERRIDES = {
@@ -288,7 +287,6 @@ def _manual_numeric_step(feature):
         "StrikePrice": 1,
         "UnderlyingPrice": 1,
         "TimeToExpiration": 1,
-        "UnderlyingLagMinutes": 1,
         "Quantity": 1,
         "Rate": 0.01,
     }.get(feature.name, 0.01 if feature.is_numerical else None)
@@ -343,7 +341,6 @@ def _manual_hidden_defaults() -> dict[str, object]:
     return {
         "ExecDatetime": _current_local_midnight_timestamp(),
         "Quantity": MANUAL_INPUT_DEFAULTS["Quantity"],
-        "UnderlyingLagMinutes": MANUAL_INPUT_DEFAULTS["UnderlyingLagMinutes"],
     }
 
 

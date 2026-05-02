@@ -55,7 +55,6 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
         option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
         return (
             exec_dt.dt.hour.astype(float) * 100.0
-            + raw_frame["UnderlyingLagMinutes"].astype(float) * 10.0
             + raw_frame["Quantity"].astype(float)
             + option_is_put
         ).to_numpy(dtype="float64")
@@ -76,7 +75,6 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
                 "OptionType": "C",
                 "Quantity": 1,
                 "StrikePrice": 9000.0,
-                "UnderlyingLagMinutes": 0.25,
                 "UnderlyingPrice": 9050.0,
                 "TimeToExpiration": 15.0,
                 "Rate": -0.5,
@@ -88,7 +86,6 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
                 "OptionType": "P",
                 "Quantity": 7,
                 "StrikePrice": 9100.0,
-                "UnderlyingLagMinutes": 3.5,
                 "UnderlyingPrice": 9000.0,
                 "TimeToExpiration": 20.0,
                 "Rate": -0.6,

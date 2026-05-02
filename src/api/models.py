@@ -20,7 +20,6 @@ class PredictionFeatures(BaseModel):
     optionType: ApiOptionTypeEnum
     quantity: int = 1
     strikePrice: float
-    underlyingLag: float = 0.0
     underlyingPrice: float
     timeToExpiration: float
     rate: float

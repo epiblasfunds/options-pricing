@@ -89,8 +89,6 @@ class TrainingDataHandler:
         quantity_raw = tr[VolatilityDBEnum.QUANTITY]
         quantity_log1p = np.log1p(quantity_raw)
 
-        underlying_lag_minutes = tr[VolatilityDBEnum.UNDERLYING_LAG_MINUTES]
-
         features = {
             TrainingDataEnum.TTE_YEARS: tte_years,
             TrainingDataEnum.SQRT_TTE_YEARS: sqrt_tte_years,
@@ -99,7 +97,6 @@ class TrainingDataHandler:
             TrainingDataEnum.LOG_MONEYNESS_X_SQRT_TTE: log_moneyness_x_sqrt_tte,
             TrainingDataEnum.LOG_FORWARD_MONEYNESS: log_forward_moneyness,
             TrainingDataEnum.RATE: rate,
-            TrainingDataEnum.UNDERLYING_LAG_MINUTES: underlying_lag_minutes,
             TrainingDataEnum.QUANTITY_LOG1P: quantity_log1p,
             TrainingDataEnum.IS_CALL: is_call,
             TrainingDataEnum.IS_PUT: is_put,

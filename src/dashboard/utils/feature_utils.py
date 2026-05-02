@@ -65,8 +65,6 @@ def format_feature_value(feature_name: str, value) -> str:
         return _display_number(value, decimals=2)
     if feature_name == "TimeToExpiration":
         return _display_number(value, decimals=1)
-    if feature_name == "UnderlyingLagMinutes":
-        return _display_number(value, decimals=2)
     if feature_name == "Quantity":
         return _display_number(value)
     return str(value) if value not in (None, "") else "?"
