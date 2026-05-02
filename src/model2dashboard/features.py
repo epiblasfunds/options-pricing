@@ -15,16 +15,14 @@ def column_name(column: t.Any) -> str:
 TARGET_COLUMN = column_name(
     config.volatility_models_config.training_data_config.target_column
 )
-MAIN_EXPLAINABILITY_FEATURE_NAMES = list(
-    config.clientserver_config.dashboard_manual_input_features
-)
-CONTEXT_FEATURE_NAMES: list[str] = []
-VISIBLE_RAW_INPUT_FEATURE_NAMES = list(MAIN_EXPLAINABILITY_FEATURE_NAMES)
 RAW_INPUT_FEATURE_NAMES = [
     column_name(column)
     for column in config.volatility_models_config.training_data_config.raw_model_input
 ]
 EXPLAINABILITY_FEATURE_NAMES = list(RAW_INPUT_FEATURE_NAMES)
+MAIN_EXPLAINABILITY_FEATURE_NAMES = list(EXPLAINABILITY_FEATURE_NAMES)
+CONTEXT_FEATURE_NAMES: list[str] = []
+VISIBLE_RAW_INPUT_FEATURE_NAMES = list(EXPLAINABILITY_FEATURE_NAMES)
 LEGACY_MAIN_EXPLAINABILITY_FEATURE_NAMES = [
     column_name(VolatilityDBEnum.OPTION_TYPE),
     column_name(VolatilityDBEnum.STRIKE_PRICE),

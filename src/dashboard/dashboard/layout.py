@@ -493,30 +493,6 @@ def _global_tab():
                                 "Native SHAP plots over the selected model and dataset sample.",
                                 style={"margin": "0 0 14px 0", "opacity": "0.78"},
                             ),
-                            _compact_control_box(
-                                "SHAP Feature Scope",
-                                dcc.RadioItems(
-                                    id=IDS.GLOBAL_SHAP_FEATURE_SCOPE,
-                                    options=[
-                                        {
-                                            "label": "Main Features",
-                                            "value": "main",
-                                        },
-                                        {
-                                            "label": "Full Features",
-                                            "value": "full",
-                                        },
-                                    ],
-                                    value="main",
-                                    inline=True,
-                                ),
-                                (
-                                    "Main Features keeps the five visible "
-                                    "variables and aggregates hidden inputs into "
-                                    "'Auxiliar Features'. Full Features exposes "
-                                    "every model input directly."
-                                ),
-                            ),
                             html.Div(
                                 style={
                                     "display": "grid",
@@ -692,38 +668,10 @@ def _sample_tab():
                             ),
                             html.Div(
                                 style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": (
-                                        "repeat(auto-fit, minmax(260px, 1fr))"
-                                    ),
-                                    "gap": "12px",
-                                    "alignItems": "start",
+                                    "maxWidth": "320px",
                                     "marginBottom": "14px",
                                 },
                                 children=[
-                                    _compact_control_box(
-                                        "SHAP Feature Scope",
-                                        dcc.RadioItems(
-                                            id=IDS.SAMPLE_SHAP_FEATURE_SCOPE,
-                                            options=[
-                                                {
-                                                    "label": "Main Features",
-                                                    "value": "main",
-                                                },
-                                                {
-                                                    "label": "Full Features",
-                                                    "value": "full",
-                                                },
-                                            ],
-                                            value="main",
-                                            inline=True,
-                                        ),
-                                        (
-                                            "Switch between the five visible Main "
-                                            "Features or the full model input space "
-                                            "before running the local SHAP waterfall."
-                                        ),
-                                    ),
                                     _compact_control_box(
                                         "Mode",
                                         dcc.RadioItems(

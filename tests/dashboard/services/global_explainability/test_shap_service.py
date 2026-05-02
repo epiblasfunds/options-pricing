@@ -1,9 +1,5 @@
 import numpy as np
-import pytest
 
-from src.dashboard.services.global_explainability import AUXILIARY_FEATURE_LABEL
-from src.dashboard.services.global_explainability import FULL_FEATURE_SCOPE
-from src.dashboard.services.global_explainability import MAIN_FEATURE_SCOPE
 from src.dashboard.services.global_explainability import ShapService
 
 
@@ -48,34 +44,22 @@ def _payload():
     }
 
 
-def test_main_scope_aggregates_hidden_features_without_changing_base_value():
+def test_from_payload_preserves_full_feature_set():
     service = ShapService(prediction_service=None)
 
-    result = service.from_payload(_payload(), feature_scope=MAIN_FEATURE_SCOPE)
+    result = service.from_payload(_payload())
 
-    assert result.feature_scope == MAIN_FEATURE_SCOPE
-    assert result.feature_names == [
-        "OptionType",
-        "StrikePrice",
-        "UnderlyingPrice",
-        "TimeToExpiration",
-        "Rate",
-        AUXILIARY_FEATURE_LABEL,
-    ]
+    assert result.feature_names == _payload()["feature_names"]
+    assert result.explain_frame.columns.tolist() == _payload()["feature_names"]
     assert float(np.asarray(result.explanation.base_values).reshape(-1)[0]) == 0.30
-    assert result.explanation.display_data[0, -1] == "Aggregated hidden inputs"
-    assert result.explain_frame.columns.tolist() == result.feature_names
-    assert float(result.explain_frame.iloc[0, -1]) == 0.0
-    assert float(result.explanation.data[0, -1]) == 0.0
-    assert result.predictions.loc[7] == 0.50
-    assert result.explanation.values[0, -1] == pytest.approx(0.07)
+    assert result.predictions.loc[7] == 0.43
+    assert result.mean_abs_shap.index.tolist()[0] == "StrikePrice"
 
 
-def test_full_scope_preserves_full_feature_set():
+def test_from_payload_preserves_display_data_and_values():
     service = ShapService(prediction_service=None)
 
-    result = service.from_payload(_payload(), feature_scope=FULL_FEATURE_SCOPE)
+    result = service.from_payload(_payload())
 
-    assert result.feature_scope == FULL_FEATURE_SCOPE
-    assert len(result.feature_names) == 7
-    assert AUXILIARY_FEATURE_LABEL not in result.feature_names
+    assert result.explanation.display_data[0, -1] == "CIBX 9100X26"
+    assert float(result.explanation.values[0, -1]) == 0.04

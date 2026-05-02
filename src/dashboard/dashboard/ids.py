@@ -6,7 +6,6 @@ class IDS:
     MODEL_SELECTOR = "model-selector"
     MODEL_INFO = "model-info"
 
-    GLOBAL_SHAP_FEATURE_SCOPE = "global-shap-feature-scope"
     GLOBAL_DEPENDENCE_FEATURE = "global-dependence-feature"
     GLOBAL_SUMMARY_GRAPH = "global-summary-graph"
     GLOBAL_BAR_GRAPH = "global-bar-graph"
@@ -30,7 +29,6 @@ class IDS:
     BEHAVIOUR_WARNINGS = "behaviour-warnings"
 
     SAMPLE_MODE = "sample-mode"
-    SAMPLE_SHAP_FEATURE_SCOPE = "sample-shap-feature-scope"
     SAMPLE_INDEX = "sample-index"
     SAMPLE_INDEX_CONTAINER = "sample-index-container"
     SAMPLE_FEATURE_PREVIEW = "sample-feature-preview"

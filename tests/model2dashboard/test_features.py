@@ -49,12 +49,13 @@ def test_explainability_encoder_roundtrip_preserves_supported_feature_types():
     explain_frame = build_explainability_frame(raw_frame)
     encoded = encoder.encode_frame(raw_frame)
     decoded = encoder.decode_values(encoded)
-    reconstructed = encoder.reconstruct_raw_frame(encoded)
+    rebuilt = encoder.reconstruct_raw_frame(encoded)
 
     assert list(explain_frame.columns) == list(EXPLAINABILITY_FEATURE_NAMES)
     assert encoded.shape == (2, len(EXPLAINABILITY_FEATURE_NAMES))
     assert decoded.loc[10, "OptionType"] == "C"
     assert decoded.loc[11, "OptionType"] == "P"
+    assert rebuilt.loc[10, "OptionType"] == "C"
 
 
 def test_feature_and_dashboard_dataset_builders_add_expected_columns():
@@ -74,8 +75,8 @@ def test_feature_and_dashboard_dataset_builders_add_expected_columns():
     assert dataset.loc[0, "Residual"] == dataset.loc[0, TARGET_COLUMN] - 0.18
 
 
-def test_exec_datetime_is_hidden_from_visible_manual_inputs():
-    assert "ExecDatetime" not in VISIBLE_RAW_INPUT_FEATURE_NAMES
+def test_visible_manual_inputs_match_explainability_features():
+    assert list(VISIBLE_RAW_INPUT_FEATURE_NAMES) == list(EXPLAINABILITY_FEATURE_NAMES)
 
 
 def test_apply_feature_override_updates_supported_fields():

@@ -6,14 +6,11 @@ from dash import ALL, MATCH, Input, Output, State, ctx, dcc, html, no_update
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
-from src.dashboard.dashboard.styles import PILL_BUTTON_STYLE
 from src.dashboard.plots.local_plots import neighbors_distance_figure
 from src.dashboard.plots.shap_plots import waterfall_image
-from src.dashboard.services.global_explainability import AUXILIARY_FEATURE_LABEL
 from src.dashboard.utils.feature_utils import display_feature_label
 from src.dashboard.utils.feature_utils import format_feature_value
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
-from src.model2dashboard.features import MAIN_EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
@@ -30,12 +27,6 @@ MANUAL_INPUT_LABEL_OVERRIDES = {
     "StrikePrice": "Strike",
     "UnderlyingPrice": "Underlying",
 }
-
-AUXILIARY_MANUAL_FEATURE_NAMES = [
-    feature_name
-    for feature_name in EXPLAINABILITY_FEATURE_NAMES
-    if feature_name not in MAIN_EXPLAINABILITY_FEATURE_NAMES
-]
 
 
 def _empty_figure():
@@ -272,71 +263,6 @@ def _manual_hidden_defaults() -> dict[str, object]:
     return {}
 
 
-def _manual_feature_names(feature_scope: str) -> list[str]:
-    if feature_scope == "full":
-        return list(EXPLAINABILITY_FEATURE_NAMES)
-    return list(VISIBLE_RAW_INPUT_FEATURE_NAMES)
-
-
-def _manual_section(title: str, feature_names: list[str], defaults: dict, services, *, subtle: bool = False):
-    border = "1px dashed rgba(33,75,122,0.16)" if subtle else "1px solid rgba(33,75,122,0.12)"
-    background = "#fbfcfe" if subtle else "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)"
-    title_color = "#54708f" if subtle else "#17304f"
-    description_color = "#6a7b92" if subtle else "#48617f"
-    return html.Div(
-        style={
-            "display": "grid",
-            "gap": "12px",
-            "padding": "14px 16px",
-            "borderRadius": "14px",
-            "border": border,
-            "background": background,
-            "boxShadow": "0 8px 18px rgba(22,40,68,0.04)" if not subtle else "none",
-        },
-        children=[
-            html.Div(
-                [
-                    html.Div(
-                        title,
-                        style={
-                            "fontSize": "0.82rem",
-                            "fontWeight": "800",
-                            "textTransform": "uppercase",
-                            "color": title_color,
-                        },
-                    ),
-                    html.P(
-                        (
-                            "Primary visible drivers used in the dashboard."
-                            if not subtle
-                            else "Hidden model inputs available only in Full Features mode."
-                        ),
-                        style={
-                            "margin": "4px 0 0 0",
-                            "fontSize": "0.84rem",
-                            "color": description_color,
-                        },
-                    ),
-                ]
-            ),
-            html.Div(
-                style={
-                    "display": "grid",
-                    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
-                    "gap": "10px",
-                },
-                children=[
-                    _manual_field(
-                        services.feature_schema.get(feature_name),
-                        defaults.get(feature_name),
-                    )
-                    for feature_name in feature_names
-                ],
-            ),
-        ],
-    )
-
-
 def _stepped_manual_value(feature_schema, feature_name, current_value, direction):
     feature = feature_schema.get(feature_name)
     step = float(_manual_numeric_step(feature) or 1)
@@ -417,8 +343,6 @@ def _neighbors_table(frame: pd.DataFrame):
 def _feature_value_chip(
     label: str,
     value: str,
-    *,
-    subtle: bool = False,
 ) -> html.Div:
     return html.Div(
         [
@@ -428,15 +352,15 @@ def _feature_value_chip(
                     "fontSize": "0.75rem",
                     "fontWeight": "800",
                     "textTransform": "uppercase",
-                    "color": "#6a7b92" if subtle else "#5b6d85",
+                    "color": "#5b6d85",
                 },
             ),
             html.Strong(
                 value,
                 style={
-                    "fontSize": "0.9rem" if subtle else "0.96rem",
-                    "color": "#415775" if subtle else "#17304f",
-                    "fontWeight": "700" if subtle else "800",
+                    "fontSize": "0.96rem",
+                    "color": "#17304f",
+                    "fontWeight": "800",
                 },
             ),
         ],
@@ -445,28 +369,18 @@ def _feature_value_chip(
             "gap": "4px",
             "padding": "10px 12px",
             "borderRadius": "12px",
-            "border": (
-                "1px dashed rgba(33,75,122,0.16)"
-                if subtle
-                else "1px solid rgba(33,75,122,0.12)"
-            ),
-            "background": "#fbfcfe" if subtle else "#ffffff",
+            "border": "1px solid rgba(33,75,122,0.12)",
+            "background": "#ffffff",
             "minWidth": "150px",
-            "opacity": "0.82" if subtle else "1",
         },
     )
 
 
 def _sample_feature_preview_card(services, sample_payload: dict) -> html.Div:
-    main_features = [
-        feature_name
-        for feature_name in MAIN_EXPLAINABILITY_FEATURE_NAMES
-        if feature_name in sample_payload
-    ]
-    auxiliary_features = [
+    feature_names = [
         feature_name
         for feature_name in EXPLAINABILITY_FEATURE_NAMES
-        if feature_name not in main_features and feature_name in sample_payload
+        if feature_name in sample_payload
     ]
     return html.Div(
         style={
@@ -491,10 +405,7 @@ def _sample_feature_preview_card(services, sample_payload: dict) -> html.Div:
                         },
                     ),
                     html.P(
-                        (
-                            "Main Features are the five visible drivers. Auxiliar "
-                            "Features are the hidden inputs that still enter the model."
-                        ),
+                        "Original input variables used by the model for this sample.",
                         style={"margin": "4px 0 0 0", "color": "#48617f"},
                     ),
                 ]
@@ -502,7 +413,7 @@ def _sample_feature_preview_card(services, sample_payload: dict) -> html.Div:
             html.Div(
                 [
                     html.Div(
-                        "Main Features",
+                        "Sample Features",
                         style={
                             "fontSize": "0.82rem",
                             "fontWeight": "800",
@@ -525,50 +436,7 @@ def _sample_feature_preview_card(services, sample_payload: dict) -> html.Div:
                                     sample_payload.get(feature_name),
                                 ),
                             )
-                            for feature_name in main_features
-                        ],
-                    ),
-                ]
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        AUXILIARY_FEATURE_LABEL,
-                        style={
-                            "fontSize": "0.82rem",
-                            "fontWeight": "800",
-                            "textTransform": "uppercase",
-                            "color": "#54708f",
-                            "marginBottom": "8px",
-                        },
-                    ),
-                    html.P(
-                        (
-                            "Hidden model inputs grouped with a lighter visual "
-                            "weight so the main explanatory drivers remain primary."
-                        ),
-                        style={
-                            "margin": "0 0 8px 0",
-                            "fontSize": "0.84rem",
-                            "color": "#6a7b92",
-                        },
-                    ),
-                    html.Div(
-                        style={
-                            "display": "flex",
-                            "flexWrap": "wrap",
-                            "gap": "10px",
-                        },
-                        children=[
-                            _feature_value_chip(
-                                display_feature_label(feature_name, services.feature_schema),
-                                format_feature_value(
-                                    feature_name,
-                                    sample_payload.get(feature_name),
-                                ),
-                                subtle=True,
-                            )
-                            for feature_name in auxiliary_features
+                            for feature_name in feature_names
                         ],
                     ),
                 ]
@@ -657,39 +525,30 @@ def register_sample_callbacks(app, services) -> None:
         Output(IDS.SAMPLE_MANUAL_FORM, "children"),
         Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
-        Input(IDS.SAMPLE_SHAP_FEATURE_SCOPE, "value"),
         Input(IDS.MODEL_SELECTOR, "value"),
     )
-    def render_manual_form(mode, shap_feature_scope, _model_id):
+    def render_manual_form(mode, _model_id):
         if mode != "manual":
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)
         defaults = services.feature_schema.defaults_from_frame(dataset, raw_only=True)
         defaults.update(MANUAL_INPUT_DEFAULTS)
         defaults.update(_manual_hidden_defaults())
-        main_feature_names = list(MAIN_EXPLAINABILITY_FEATURE_NAMES)
-        auxiliary_feature_names = list(AUXILIARY_MANUAL_FEATURE_NAMES)
-        form_sections = [
-            _manual_section("Main Features", main_feature_names, defaults, services)
-        ]
-        if shap_feature_scope == "full":
-            form_sections.append(
-                _manual_section(
-                    AUXILIARY_FEATURE_LABEL,
-                    auxiliary_feature_names,
-                    defaults,
-                    services,
-                    subtle=True,
-                )
-            )
         return (
             html.Div(
                 style={
                     "display": "grid",
-                    "gap": "14px",
+                    "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
+                    "gap": "10px",
                     "margin": "16px 0",
                 },
-                children=form_sections,
+                children=[
+                    _manual_field(
+                        services.feature_schema.get(feature_name),
+                        defaults.get(feature_name),
+                    )
+                    for feature_name in VISIBLE_RAW_INPUT_FEATURE_NAMES
+                ],
             ),
             {"display": "none"},
         )
@@ -701,7 +560,6 @@ def register_sample_callbacks(app, services) -> None:
         Output(IDS.SAMPLE_COMPARISON, "figure"),
         Input(IDS.SAMPLE_RUN_BUTTON, "n_clicks"),
         State(IDS.MODEL_SELECTOR, "value"),
-        State(IDS.SAMPLE_SHAP_FEATURE_SCOPE, "value"),
         State(IDS.SAMPLE_MODE, "value"),
         State(IDS.SAMPLE_INDEX, "value"),
         State({"type": "manual-feature", "feature": ALL}, "id"),
@@ -710,7 +568,6 @@ def register_sample_callbacks(app, services) -> None:
     def analyze_sample(
         _,
         model_id,
-        shap_feature_scope,
         mode,
         sample_index,
         manual_ids,
@@ -763,7 +620,6 @@ def register_sample_callbacks(app, services) -> None:
                 )
                 explanation = services.shap_service.from_payload(
                     api_result["local_explanation"],
-                    feature_scope=shap_feature_scope,
                 )
                 sample_summary = _prediction_indicator(
                     title="Manual Input",
@@ -783,7 +639,6 @@ def register_sample_callbacks(app, services) -> None:
             explanation = services.shap_service.explain_sample(
                 model_id,
                 sample_frame,
-                feature_scope=shap_feature_scope,
             )
             prediction = float(explanation.predictions.iloc[0])
             neighbors = services.neighbors_service.find_neighbors(

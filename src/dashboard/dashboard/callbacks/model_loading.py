@@ -4,13 +4,10 @@ from dash import Input, Output, State, html
 
 from src.config.config import config
 from src.dashboard.dashboard.ids import IDS
-from src.dashboard.services.global_explainability import AUXILIARY_FEATURE_LABEL
 from src.dashboard.utils.feature_utils import build_manual_input_sample_label
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
-from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
-from src.model2dashboard.features import MAIN_EXPLAINABILITY_FEATURE_NAMES
 
 
 def _default_ice_feature(ice_options: list[dict]) -> str | None:
@@ -24,8 +21,7 @@ def _model_info_panel(
     *,
     model_name: str,
     format_label: str,
-    main_explained_features: list[str],
-    auxiliary_explained_features: list[str],
+    explained_features: list[str],
     context_features: list[str],
     metric_names: list[str],
     feature_schema,
@@ -89,19 +85,17 @@ def _model_info_panel(
                         },
                     ),
                     html.Div(
-                        style={"display": "grid", "gap": "10px"},
+                        style={
+                            "display": "flex",
+                            "gap": "8px",
+                            "overflowX": "auto",
+                            "padding": "2px 2px 8px 2px",
+                            "maxWidth": "100%",
+                            "scrollbarWidth": "thin",
+                        },
                         children=[
-                            _feature_group_block(
-                                title="Main Features",
-                                feature_names=main_explained_features,
-                                feature_schema=feature_schema,
-                            ),
-                            _feature_group_block(
-                                title=AUXILIARY_FEATURE_LABEL,
-                                feature_names=auxiliary_explained_features,
-                                feature_schema=feature_schema,
-                                subtle=True,
-                            ),
+                            _feature_chip(feature_name, feature_schema)
+                            for feature_name in explained_features
                         ],
                     ),
                 ]
@@ -167,57 +161,7 @@ def _model_info_panel(
     )
 
 
-def _feature_group_block(
-    *,
-    title: str,
-    feature_names: list[str],
-    feature_schema,
-    subtle: bool = False,
-) -> html.Div:
-    return html.Div(
-        [
-            html.Div(
-                title,
-                style={
-                    "fontSize": "0.76rem",
-                    "fontWeight": "800",
-                    "textTransform": "uppercase",
-                    "color": "#6a7b92" if subtle else "#17304f",
-                    "marginBottom": "6px",
-                },
-            ),
-            html.Div(
-                style={
-                    "display": "flex",
-                    "gap": "8px",
-                    "overflowX": "auto",
-                    "padding": "2px 2px 8px 2px",
-                    "maxWidth": "100%",
-                    "scrollbarWidth": "thin",
-                },
-                children=[
-                    _feature_chip(
-                        feature_name,
-                        feature_schema,
-                        subtle=subtle,
-                    )
-                    for feature_name in feature_names
-                ]
-                or [
-                    html.Span(
-                        "None",
-                        style={
-                            "color": "#6a7b92",
-                            "fontSize": "0.86rem",
-                        },
-                    )
-                ],
-            ),
-        ]
-    )
-
-
-def _feature_chip(feature_name: str, feature_schema, *, subtle: bool = False) -> html.Span:
+def _feature_chip(feature_name: str, feature_schema) -> html.Span:
     if str(feature_name) in feature_schema.names():
         label = feature_schema.get(str(feature_name)).label
         title = feature_schema.get(str(feature_name)).description
@@ -233,16 +177,11 @@ def _feature_chip(feature_name: str, feature_schema, *, subtle: bool = False) ->
             "whiteSpace": "nowrap",
             "padding": "6px 10px",
             "borderRadius": "999px",
-            "border": (
-                "1px dashed rgba(33,75,122,0.16)"
-                if subtle
-                else "1px solid rgba(33,75,122,0.14)"
-            ),
-            "background": "#fbfcfe" if subtle else "#ffffff",
-            "color": "#5d718b" if subtle else "#243b5a",
-            "fontSize": "0.84rem" if subtle else "0.86rem",
-            "fontWeight": "500" if subtle else "600",
-            "opacity": "0.9" if subtle else "1",
+            "border": "1px solid rgba(33,75,122,0.14)",
+            "background": "#ffffff",
+            "color": "#243b5a",
+            "fontSize": "0.86rem",
+            "fontWeight": "600",
         },
     )
 
@@ -304,9 +243,8 @@ def register_model_loading_callbacks(app, services) -> None:
         Output(IDS.BEHAVIOUR_ANCHOR_INDEX, "options"),
         Output(IDS.SAMPLE_INDEX, "options"),
         Input(IDS.MODEL_SELECTOR, "value"),
-        Input(IDS.GLOBAL_SHAP_FEATURE_SCOPE, "value"),
     )
-    def update_shared_context(model_id, shap_feature_scope):
+    def update_shared_context(model_id):
         dataset = services.data_provider.load_dataset(model_id=model_id)
         sampled = sample_frame(
             dataset,
@@ -348,10 +286,7 @@ def register_model_loading_callbacks(app, services) -> None:
         model = services.model_registry.get_model(model_id)
         metadata = model.metadata if model else {}
         bundle = services.prediction_service.load_bundle(model_id)
-        shap_result = services.shap_service.explain(
-            model_id,
-            feature_scope=shap_feature_scope,
-        )
+        shap_result = services.shap_service.explain(model_id)
         sample_options = [
             {
                 "label": build_manual_input_sample_label(dataset.loc[index]),
@@ -366,19 +301,6 @@ def register_model_loading_callbacks(app, services) -> None:
             if index in dataset.index
         ]
         explained_feature_names = list(shap_result.feature_names)
-        explainability_feature_names = list(
-            metadata.get("explainability_feature_names", EXPLAINABILITY_FEATURE_NAMES)
-        )
-        main_explained_features = [
-            str(feature_name)
-            for feature_name in explainability_feature_names
-            if str(feature_name) in MAIN_EXPLAINABILITY_FEATURE_NAMES
-        ]
-        auxiliary_explained_features = [
-            str(feature_name)
-            for feature_name in explainability_feature_names
-            if str(feature_name) not in main_explained_features
-        ]
         context_feature_names = metadata.get("context_feature_names", [])
         shap_feature_names = [
             str(feature_name)
@@ -404,13 +326,8 @@ def register_model_loading_callbacks(app, services) -> None:
         info_panel = _model_info_panel(
             model_name=model.name if model else str(model_id),
             format_label=format_label,
-            main_explained_features=main_explained_features,
-            auxiliary_explained_features=auxiliary_explained_features,
-            context_features=(
-                [str(feature) for feature in context_feature_names]
-                if shap_feature_scope != "main"
-                else []
-            ),
+            explained_features=[str(feature) for feature in explained_feature_names],
+            context_features=[str(feature) for feature in context_feature_names],
             metric_names=[str(metric) for metric in metric_names],
             feature_schema=services.feature_schema,
         )
