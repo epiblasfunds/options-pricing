@@ -557,8 +557,11 @@ class Trainer:
         model_params: dict,
         shuffle: bool = True,
     ) -> tuple:
+        inverse_indices = None
         if shuffle:
             indices = np.random.permutation(len(X_train))
+            inverse_indices = np.empty_like(indices)
+            inverse_indices[indices] = np.arange(len(indices))
             X_train = X_train.iloc[indices]
             y_train = y_train[indices]
 
@@ -576,6 +579,12 @@ class Trainer:
             phase=phase,
             shuffle=shuffle,
         )
+
+        if inverse_indices is not None:
+            fit_result.train_predictions = np.asarray(
+                fit_result.train_predictions,
+                dtype=float,
+            )[inverse_indices]
 
         return fit_result, model
 
