@@ -70,16 +70,13 @@ class Visualizer:
                 return
 
             phase_value = phase.value
-            validation_label = (
-                "test RMSE" if phase is TrainingPhase.FINAL_TEST else "val RMSE"
-            )
             fig, ax = plt.subplots(1, 1, figsize=(10, 4))
 
             if train_rmse:
                 ax.plot(
                     range(1, len(train_rmse) + 1),
                     train_rmse,
-                    label="train RMSE",
+                    label="Train_ES RMSE",
                     linewidth=1.4,
                     alpha=0.9,
                 )
@@ -87,7 +84,7 @@ class Visualizer:
                 ax.plot(
                     range(1, len(val_rmse) + 1),
                     val_rmse,
-                    label=validation_label,
+                    label="Val_ES (Early Stopping) RMSE",
                     linewidth=1.4,
                     alpha=0.9,
                 )
@@ -149,7 +146,7 @@ class Visualizer:
                 ax.plot(
                     train_epochs,
                     train_rmse,
-                    label="train RMSE",
+                    label="Train_ES RMSE",
                     linewidth=1.2,
                     alpha=0.85,
                 )
@@ -157,7 +154,7 @@ class Visualizer:
                 ax.plot(
                     val_epochs,
                     val_rmse,
-                    label="val RMSE",
+                    label="Val_ES (Early Stopping) RMSE",
                     linewidth=1.2,
                     alpha=0.85,
                 )

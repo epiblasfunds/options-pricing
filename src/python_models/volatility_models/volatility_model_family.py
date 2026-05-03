@@ -22,6 +22,7 @@ from src.volatility_models.data_utils import (
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
+from config.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -164,15 +165,56 @@ class VolatilityModelFamilyABC(ABC):
         raise NotImplementedError
 
     @classmethod
-    @abstractmethod
     def fit_model(
         cls,
         *,
         model: t.Any,
         model_params: t.Dict[str, t.Any],
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training: bool,
+        phase: TrainingPhase = TrainingPhase.CV,
+        shuffle: bool = True,
+    ) -> ModelFitResult:
+        inverse_indices = None
+        if shuffle:
+            indices = np.random.permutation(len(X_train))
+            inverse_indices = np.empty_like(indices)
+            inverse_indices[indices] = np.arange(len(indices))
+            X_train = X_train.iloc[indices]
+            y_train = y_train[indices]
+
+        fit_result = cls._fit_model_family(
+            model=model,
+            model_params=model_params,
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            progressive_training=progressive_training,
+            phase=phase,
+            shuffle=shuffle,
+        )
+
+        if inverse_indices is not None:
+            fit_result.train_predictions = np.asarray(
+                fit_result.train_predictions,
+                dtype=float,
+            )[inverse_indices]
+
+        return fit_result
+
+    @classmethod
+    @abstractmethod
+    def _fit_model_family(
+        cls,
+        *,
+        model: t.Any,
+        model_params: t.Dict[str, t.Any],
+        X_train: pd.DataFrame,
+        y_train: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training=progressive_training,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
@@ -314,14 +356,15 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         return 1
 
     @classmethod
-    def fit_model(
+    def _fit_model_family(
         cls,
         *,
         model: t.Any,
         model_params: t.Dict[str, t.Any],
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training: bool,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
@@ -373,11 +416,11 @@ class RandomForestFamily(VolatilityModelFamilyABC):
     @staticmethod
     def get_hyperparameter_search_space() -> t.Dict:
         return {
-            "n_estimators": [300, 500, 800, 1200],
-            "max_depth": [None, 8, 12, 16, 24, 32],
-            "min_samples_split": [2, 5, 10, 20],
+            "n_estimators": [300, 400, 500],
+            "max_depth": [None, 8, 12, 16],
+            "min_samples_split": [2, 5, 10],
             "min_samples_leaf": [1, 2, 5, 10],
-            "max_features": ["sqrt", "log2", 0.3, 0.5, 0.7, 0.9],
+            "max_features": ["sqrt", "log2", 0.3, 0.5, 0.8],
             "bootstrap": [True],
             "max_samples": [None, 0.6, 0.8, 0.9],
             "min_impurity_decrease": [0.0, 1e-6, 1e-5, 1e-4],
@@ -393,17 +436,18 @@ class RandomForestFamily(VolatilityModelFamilyABC):
 
     @staticmethod
     def get_n_iter():
-        return 80
+        return 120
 
     @classmethod
-    def fit_model(
+    def _fit_model_family(
         cls,
         *,
         model: t.Any,
         model_params: t.Dict[str, t.Any],
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training: bool,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
@@ -490,14 +534,15 @@ class XGBoostFamily(VolatilityModelFamilyABC):
         return 200
 
     @classmethod
-    def fit_model(
+    def _fit_model_family(
         cls,
         *,
         model: t.Any,
         model_params: t.Dict[str, t.Any],
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training: bool,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
@@ -674,14 +719,15 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         return 120
 
     @classmethod
-    def fit_model(
+    def _fit_model_family(
         cls,
         *,
         model: t.Any,
         model_params: t.Dict[str, t.Any],
-        X_train: np.ndarray,
+        X_train: pd.DataFrame,
         y_train: np.ndarray,
-        X_val: np.ndarray,
+        X_val: pd.DataFrame,
+        progressive_training: bool,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
@@ -730,20 +776,41 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
                 )
             )
 
-        history = model.fit(
-            X_fit_scaled,
-            y_fit,
-            epochs=model_params["epochs"],
-            batch_size=model_params["batch_size"],
-            validation_data=(X_es_scaled, y_es),
-            callbacks=callbacks,
-            verbose=model_params["verbose"],
-            shuffle=shuffle,
-        )
+        # We have to recalculate the original len_X_train
+        #   len(X_progressive) = len(X_train)/n*Sum(i)
+        #   len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
+        #   sum(i) = n(n+1)/2
+        if False ###########  Descomentar: progressive_training:
+            n_segments = config.volatility_models_config.training_data_config.n_segments
+            len_X_train = 2*len(X_fit_scaled)/(n_segments+1)
+        else:
+            # For compatibility for normal trainings
+            n_segments = 1
+            len_X_train = len(X_fit_scaled)
 
-        train_rmse_history = [float(value) for value in history.history.get("rmse", [])]
+        combined_history = {}
+        end_idx = 0
+        for idx in range(n_segments):
+            frac = (idx + 1) / n_segments
+            end_idx += frac * len_X_train if idx+1 != n_segments else None
+
+            history = model.fit(
+                X_fit_scaled[:end_idx],
+                y_fit[:end_idx],
+                epochs=model_params["epochs"]//n_segments,
+                batch_size=model_params["batch_size"],
+                validation_data=(X_es_scaled, y_es),
+                callbacks=callbacks,
+                verbose=model_params["verbose"],
+                shuffle=False,
+            )
+
+            for key, values in history.history.items():
+                combined_history.setdefault(key, []).extend(values)
+
+        train_rmse_history = [float(value) for value in combined_history.get("rmse", [])]
         val_rmse_history = [
-            float(value) for value in history.history.get("val_rmse", [])
+            float(value) for value in combined_history.get("val_rmse", [])
         ]
 
         metric_history = val_rmse_history if val_rmse_history else train_rmse_history

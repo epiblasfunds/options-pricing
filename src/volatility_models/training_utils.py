@@ -227,6 +227,7 @@ class Trainer:
                 X_train=X_train_fold,
                 y_train=y_train_fold,
                 X_val=X_val_fold,
+                progressive_training=False,
                 phase=phase,
                 shuffle=True,
             )
@@ -555,16 +556,9 @@ class Trainer:
         X_val: pd.DataFrame,
         phase: TrainingPhase,
         model_params: dict,
+        progressive_training: bool,
         shuffle: bool = True,
     ) -> tuple:
-        inverse_indices = None
-        if shuffle:
-            indices = np.random.permutation(len(X_train))
-            inverse_indices = np.empty_like(indices)
-            inverse_indices[indices] = np.arange(len(indices))
-            X_train = X_train.iloc[indices]
-            y_train = y_train[indices]
-
         model = self.model_family.instantiate_model(
             input_dim=X_train.shape[1],
             model_params=model_params,
@@ -576,15 +570,10 @@ class Trainer:
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
+            progressive_training=progressive_training,
             phase=phase,
             shuffle=shuffle,
         )
-
-        if inverse_indices is not None:
-            fit_result.train_predictions = np.asarray(
-                fit_result.train_predictions,
-                dtype=float,
-            )[inverse_indices]
 
         return fit_result, model
 
@@ -690,6 +679,7 @@ class Trainer:
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
+            progressive_training=False,
             phase=phase,
             shuffle=True,
         )
@@ -904,6 +894,7 @@ class Trainer:
             X_train=X_train,
             y_train=y_train,
             X_val=X_val,
+            progressive_training=True,
             phase=phase,
             shuffle=False,
         )
