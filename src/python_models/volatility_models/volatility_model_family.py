@@ -780,7 +780,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         #   len(X_progressive) = len(X_train)/n*Sum(i)
         #   len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
         #   sum(i) = n(n+1)/2
-        if False ###########  Descomentar: progressive_training:
+        if False:  ###########  Descomentar: progressive_training:
             n_segments = config.volatility_models_config.training_data_config.n_segments
             len_X_train = 2*len(X_fit_scaled)/(n_segments+1)
         else:
