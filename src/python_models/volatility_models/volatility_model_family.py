@@ -214,7 +214,7 @@ class VolatilityModelFamilyABC(ABC):
         X_train: pd.DataFrame,
         y_train: np.ndarray,
         X_val: pd.DataFrame,
-        progressive_training=progressive_training,
+        progressive_training: bool,
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
