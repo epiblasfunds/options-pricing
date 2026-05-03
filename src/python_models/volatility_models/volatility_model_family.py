@@ -792,7 +792,10 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         end_idx = 0
         for idx in range(n_segments):
             frac = (idx + 1) / n_segments
-            end_idx += frac * len_X_train if idx+1 != n_segments else None
+            if idx+1 == n_segments:
+                end_idx = None
+            else:
+                end_idx += frac * len_X_train
 
             history = model.fit(
                 X_fit_scaled[:end_idx],
