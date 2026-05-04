@@ -777,12 +777,22 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             )
 
         # We have to recalculate the original len_X_train
-        #   len(X_progressive) = len(X_train)/n*Sum(i)
-        #   len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
-        #   sum(i) = n(n+1)/2
-        if False:  ###########  Descomentar: progressive_training:
+        #   Given:
+        #       len(X_progressive) = len(X_train)/n*Sum(i)
+        #       sum(i) = n(n+1)/2
+        #   Then:
+        #       len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
+        #   But, len(X_train) could be not a perfect division. so we have to adjust it:
+        #       Adding the adjustment: (len(progress) & n)
+        #       len(X_train) = 2*( len(progress) - (len(progress) & n) ) /(n+1)
+
+        if progressive_training:
             n_segments = config.volatility_models_config.training_data_config.n_segments
-            len_X_train = 2*len(X_fit_scaled)/(n_segments+1)
+
+            l_aux = len(X_fit_scaled)
+            adj = (l_aux % n_segments)
+            len_X_train = 2*(l_aux - adj) / (n_segments+1)
+            del l_aux, adj
         else:
             # For compatibility for normal trainings
             n_segments = 1
