@@ -273,7 +273,7 @@ class VolatilityModelFamilyABC(ABC):
             progressive_training=progressive_training,
             phase=phase,
             # if it's progressive training, then don't shuffle
-            shuffle=not progressive_training,
+            shuffle=False,
         )
 
         if inverse_indices is not None:
