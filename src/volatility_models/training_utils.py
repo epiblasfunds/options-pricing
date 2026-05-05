@@ -755,11 +755,20 @@ class Trainer:
             self.model_family.save_model(
                 model=model,
                 scaler=fit_result.feature_scaler,
+                family_name_override=family_name,
             )
 
-            model_path = self.model_family.get_model_path()
+            model_path = self.model_family.get_model_path().with_name(
+                f"{family_name}{self.model_family.get_model_path().suffix}"
+            )
             get_scaler_path = getattr(self.model_family, "get_scaler_path", None)
-            scaler_path = get_scaler_path() if callable(get_scaler_path) else None
+            scaler_path = None
+            if callable(get_scaler_path):
+                scaler_path_base = get_scaler_path()
+                if scaler_path_base is not None:
+                    scaler_path = scaler_path_base.with_name(
+                        f"{family_name}_scaler{scaler_path_base.suffix}"
+                    )
 
             _run_model2dashboard_pipeline(family_name=family_name)
 
