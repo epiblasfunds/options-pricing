@@ -26,6 +26,9 @@ from config.config import config
 
 logger = logging.getLogger(__name__)
 
+MONEYNESS_COL = config.volatility_models_config.training_data_config.moneyness_column
+N_SEGMENTS = int(config.volatility_models_config.training_data_config.n_segments)
+
 
 @dataclass
 class ModelFitResult:
@@ -165,6 +168,38 @@ class VolatilityModelFamilyABC(ABC):
         raise NotImplementedError
 
     @classmethod
+    def get_segments(
+        cls,
+        X_train: pd.DataFrame,
+        y_train: np.ndarray,
+    ) -> t.Tuple[t.List[pd.DataFrame], t.List[np.ndarray]]:
+        """
+        # We have to recalculate the original len_X_train
+        #   Given:
+        #       len(X_progressive) = len(X_train)/n*Sum(i)
+        #       sum(i) = n(n+1)/2
+        #   Then:
+        #       len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
+        #   But, len(X_train) could be not a perfect division. so we have to adjust it:
+        #       Adding the adjustment: (len(progress) & n)
+        #       len(X_train) = 2*( len(progress) - (len(progress) & n) ) /(n+1)
+        """
+        n_segments = config.volatility_models_config.training_data_config.n_segments
+        l_aux = len(X_train)
+        adj = (l_aux % n_segments)
+        len_X_train = 2*(l_aux - adj) / (n_segments+1)
+
+        X_train_list = []
+        y_train_list = []
+        end_idx = 0
+        for idx in range(n_segments):
+            frac = (idx + 1) / n_segments
+            end_idx += frac * len_X_train if idx+1 < n_segments else None
+            X_train_list.append(X_train.iloc[:end_idx].to_numpy())
+            y_train_list.append(y_train[:end_idx].to_numpy())
+        return np.asarray(X_train_list), np.asarray(y_train_list)
+
+    @classmethod
     def fit_model(
         cls,
         *,
@@ -193,7 +228,8 @@ class VolatilityModelFamilyABC(ABC):
             X_val=X_val,
             progressive_training=progressive_training,
             phase=phase,
-            shuffle=shuffle,
+            # if it's progressive training, then don't shuffle
+            shuffle=not progressive_training,
         )
 
         if inverse_indices is not None:
@@ -368,7 +404,7 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _, _ = model_params, phase, shuffle
+        _, _, _, _ = model_params, progressive_training, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -451,7 +487,7 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _, _ = model_params, phase, shuffle
+        _, _, _, _ = model_params, progressive_training, phase, shuffle
         model.fit(X_train, y_train)
         return ModelFitResult(
             model=model,
@@ -733,23 +769,23 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
     ) -> ModelFitResult:
         numeric_col_indices = cls._resolve_numeric_col_indices(data=X_train)
 
-        X_train = np.asarray(X_train)
+        if progressive_training:
+            X_train, y_train = cls.get_segments(X_train, y_train)
+        else:
+            X_train, y_train = np.asarray(X_train)[None, :, :], np.asarray(y_train)[None, :]
         X_val = np.asarray(X_val)
 
         X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
-            X_train,
-            y_train,
+            X_train[-1],
+            y_train[-1],
         )
-        (
-            X_fit_scaled,
-            X_es_scaled,
-            X_train_scaled,
-            X_val_scaled,
-            feature_scaler,
-        ) = cls._scale_numeric_features(
+        X_train[-1] = X_fit_raw
+        y_train[-1] = y_fit
+
+        _, X_es_scaled, X_train_scaled, X_val_scaled, feature_scaler = cls._scale_numeric_features(
             X_fit_raw=X_fit_raw,
             X_valid_raw=X_es_raw,
-            X_train_full_raw=X_train,
+            X_train_full_raw=X_train[-1],
             X_eval_raw=X_val,
             numeric_col_indices=numeric_col_indices,
             phase=phase,
@@ -762,7 +798,6 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             restore_best_weights=True,
             verbose=0,
         )
-
         callbacks = [early_stop]
 
         if model_params.get("use_lr_scheduler", False):
@@ -776,46 +811,18 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
                 )
             )
 
-        # We have to recalculate the original len_X_train
-        #   Given:
-        #       len(X_progressive) = len(X_train)/n*Sum(i)
-        #       sum(i) = n(n+1)/2
-        #   Then:
-        #       len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
-        #   But, len(X_train) could be not a perfect division. so we have to adjust it:
-        #       Adding the adjustment: (len(progress) & n)
-        #       len(X_train) = 2*( len(progress) - (len(progress) & n) ) /(n+1)
-
-        if progressive_training:
-            n_segments = config.volatility_models_config.training_data_config.n_segments
-
-            l_aux = len(X_fit_scaled)
-            adj = (l_aux % n_segments)
-            len_X_train = 2*(l_aux - adj) / (n_segments+1)
-            del l_aux, adj
-        else:
-            # For compatibility for normal trainings
-            n_segments = 1
-            len_X_train = len(X_fit_scaled)
-
         combined_history = {}
-        end_idx = 0
-        for idx in range(n_segments):
-            frac = (idx + 1) / n_segments
-            if idx+1 == n_segments:
-                end_idx = None
-            else:
-                end_idx += frac * len_X_train
-
+        for x, y in zip(X_train, y_train):
+            x = feature_scaler.transform(x[list(numeric_col_indices)])
             history = model.fit(
-                X_fit_scaled[:end_idx],
-                y_fit[:end_idx],
-                epochs=model_params["epochs"]//n_segments,
+                x,
+                y,
+                epochs=model_params["epochs"]//N_SEGMENTS,
                 batch_size=model_params["batch_size"],
                 validation_data=(X_es_scaled, y_es),
                 callbacks=callbacks,
                 verbose=model_params["verbose"],
-                shuffle=False,
+                shuffle=shuffle,
             )
 
             for key, values in history.history.items():
