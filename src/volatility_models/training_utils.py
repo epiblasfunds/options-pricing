@@ -576,12 +576,16 @@ class Trainer:
         X_val: pd.DataFrame,
         phase: TrainingPhase,
         model_params: dict,
-        progressive_training: bool,
+        progressive_training: bool = False,
+        shuffle: bool | None = None,
     ) -> tuple:
         model = self.model_family.instantiate_model(
             input_dim=X_train.shape[1],
             model_params=model_params,
         )
+
+        if shuffle is None:
+            shuffle = not progressive_training
 
         fit_result = self.model_family.fit_model(
             model=model,
@@ -591,6 +595,7 @@ class Trainer:
             X_val=X_val,
             progressive_training=progressive_training,
             phase=phase,
+            shuffle=shuffle,
         )
 
         return fit_result, model
@@ -602,13 +607,14 @@ class Trainer:
         progressive_training=False,
     ):
         suffix = "_retrained_progressive" if progressive_training else ""
-        family_name = self.model_family.get_family_name() + suffix
+        base_family_name = self.model_family.get_family_name()
+        family_name = base_family_name + suffix
         model_name = f"{family_name}_best"
         phase_suffix = str(getattr(phase, "value", phase)).lower()
         is_train_val = phase_suffix == TrainingPhase.TRAIN_VAL.value
         is_final_test = phase_suffix == TrainingPhase.FINAL_TEST.value
         metadata_path = (
-            VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{family_name}_metadata.json"
+            VOLATILITY_FAMILY_METADATA_DIR_PATH / f"{base_family_name}_metadata.json"
         )
         retrained_metadata_path = (
             VOLATILITY_RETRAINED_METADATA_DIR_PATH
@@ -645,7 +651,7 @@ class Trainer:
         if not metadata_path.exists():
             logger.info(
                 "Family metadata not found for '%s'. Running k-fold training...",
-                family_name,
+                base_family_name,
             )
             Trainer(self.model_family).run_kfolds_training()
 
@@ -671,9 +677,6 @@ class Trainer:
             )
             train_label = TrainingDataSplitEnum.TRAIN_VAL
             evaluation_label = TrainingDataSplitEnum.TEST
-
-        if progressive_training:
-            train_data = self._build_progressive_training_data(train_data=train_data)
 
         X_train = train_data[BASE_FEATURE_COLS]
         y_train = train_data[TARGET_COLUMN].to_numpy()

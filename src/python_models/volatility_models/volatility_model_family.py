@@ -168,36 +168,80 @@ class VolatilityModelFamilyABC(ABC):
         raise NotImplementedError
 
     @classmethod
-    def get_segments(
+    def _segment_sorted_indices(
+        cls,
+        X_train: pd.DataFrame,
+    ) -> list[np.ndarray]:
+        sorted_positions = np.argsort(np.abs(X_train[MONEYNESS_COL].to_numpy()))
+        segment_size = len(X_train) // N_SEGMENTS
+        segments: list[np.ndarray] = []
+        for idx in range(N_SEGMENTS - 1):
+            start = idx * segment_size
+            end = (idx + 1) * segment_size
+            segments.append(sorted_positions[start:end])
+        segments.append(sorted_positions[(N_SEGMENTS - 1) * segment_size:])
+        return segments
+
+    @classmethod
+    def build_progressive_phase_datasets(
         cls,
         X_train: pd.DataFrame,
         y_train: np.ndarray,
-    ) -> t.Tuple[t.List[pd.DataFrame], t.List[np.ndarray]]:
-        """
-        # We have to recalculate the original len_X_train
-        #   Given:
-        #       len(X_progressive) = len(X_train)/n*Sum(i)
-        #       sum(i) = n(n+1)/2
-        #   Then:
-        #       len(X_train) = (n*len(progress))/Sum(i) = 2*len(progress)/(n+1)
-        #   But, len(X_train) could be not a perfect division. so we have to adjust it:
-        #       Adding the adjustment: (len(progress) & n)
-        #       len(X_train) = 2*( len(progress) - (len(progress) & n) ) /(n+1)
-        """
-        n_segments = config.volatility_models_config.training_data_config.n_segments
-        l_aux = len(X_train)
-        adj = (l_aux % n_segments)
-        len_X_train = 2*(l_aux - adj) / (n_segments+1)
+    ) -> tuple[
+        list[tuple[np.ndarray, np.ndarray]],
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+    ]:
+        segment_indices = cls._segment_sorted_indices(X_train)
+        sorted_indices = np.concatenate(segment_indices)
+        segment_ids = np.empty(len(sorted_indices), dtype=int)
+        start = 0
+        for segment_id, segment in enumerate(segment_indices):
+            end = start + len(segment)
+            segment_ids[start:end] = segment_id
+            start = end
 
-        X_train_list = []
-        y_train_list = []
-        end_idx = 0
-        for idx in range(n_segments):
-            frac = (idx + 1) / n_segments
-            end_idx += frac * len_X_train if idx+1 < n_segments else None
-            X_train_list.append(X_train.iloc[:end_idx].to_numpy())
-            y_train_list.append(y_train[:end_idx].to_numpy())
-        return np.asarray(X_train_list), np.asarray(y_train_list)
+        X_sorted = X_train.iloc[sorted_indices].to_numpy()
+        y_train = np.asarray(y_train)
+        y_sorted = y_train[sorted_indices]
+
+        rng = np.random.default_rng(cls.RANDOM_SEED)
+        permutation = rng.permutation(len(X_sorted))
+        X_shuffled = X_sorted[permutation]
+        y_shuffled = y_sorted[permutation]
+        segment_ids = segment_ids[permutation]
+
+        n_samples = len(X_shuffled)
+        n_valid = max(int(np.ceil(n_samples * 0.20)), 256)
+        if n_samples > 1:
+            n_valid = min(n_valid, n_samples - 1)
+        split_idx = n_samples - n_valid
+
+        X_fit = X_shuffled[:split_idx]
+        y_fit = y_shuffled[:split_idx]
+        segment_ids_fit = segment_ids[:split_idx]
+        X_es = X_shuffled[split_idx:]
+        y_es = y_shuffled[split_idx:]
+
+        phase_datasets: list[tuple[np.ndarray, np.ndarray]] = []
+        for segment_id in range(N_SEGMENTS):
+            mask = segment_ids_fit <= segment_id
+            phase_datasets.append((X_fit[mask], y_fit[mask]))
+
+        return phase_datasets, X_train.to_numpy(), y_train, X_es, y_es
+
+    @classmethod
+    def build_progressive_sample_weights(
+        cls,
+        X_train: pd.DataFrame,
+    ) -> np.ndarray:
+        sample_weights = np.empty(len(X_train), dtype=float)
+        for segment_id, segment_indices in enumerate(cls._segment_sorted_indices(X_train)):
+            sample_weights[segment_indices] = float(N_SEGMENTS - segment_id)
+        sample_weights /= sample_weights.mean()
+        return sample_weights
 
     @classmethod
     def fit_model(
@@ -359,6 +403,18 @@ class VolatilityModelFamilyABC(ABC):
             y_train[split_idx:],
         )
 
+    @staticmethod
+    def transform_numeric_features(
+        *,
+        X_raw: np.ndarray,
+        numeric_col_indices: tuple[int, ...],
+        scaler: StandardScaler,
+    ) -> np.ndarray:
+        X_scaled = X_raw.copy()
+        indices = list(numeric_col_indices)
+        X_scaled[:, indices] = scaler.transform(X_raw[:, indices])
+        return X_scaled
+
 
 class LinearRegressionFamily(VolatilityModelFamilyABC):
     MODEL_EXTENSION = ".joblib"
@@ -404,8 +460,11 @@ class LinearRegressionFamily(VolatilityModelFamilyABC):
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _, _, _ = model_params, progressive_training, phase, shuffle
-        model.fit(X_train, y_train)
+        _, _, _ = model_params, phase, shuffle
+        fit_kwargs = {}
+        if progressive_training:
+            fit_kwargs["sample_weight"] = cls.build_progressive_sample_weights(X_train)
+        model.fit(X_train, y_train, **fit_kwargs)
         return ModelFitResult(
             model=model,
             train_predictions=np.asarray(model.predict(X_train), dtype=float),
@@ -487,8 +546,11 @@ class RandomForestFamily(VolatilityModelFamilyABC):
         phase: TrainingPhase = TrainingPhase.CV,
         shuffle: bool = True,
     ) -> ModelFitResult:
-        _, _, _, _ = model_params, progressive_training, phase, shuffle
-        model.fit(X_train, y_train)
+        _, _, _ = model_params, phase, shuffle
+        fit_kwargs = {}
+        if progressive_training:
+            fit_kwargs["sample_weight"] = cls.build_progressive_sample_weights(X_train)
+        model.fit(X_train, y_train, **fit_kwargs)
         return ModelFitResult(
             model=model,
             train_predictions=np.asarray(model.predict(X_train), dtype=float),
@@ -584,23 +646,65 @@ class XGBoostFamily(VolatilityModelFamilyABC):
     ) -> ModelFitResult:
         _, _, _ = model_params, phase, shuffle
 
-        X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
-            X_train,
-            y_train,
-        )
-        model.fit(
-            X_fit,
-            y_fit,
-            eval_set=[(X_es, y_es)],
-            verbose=False,
-        )
+        if progressive_training:
+            phase_datasets, X_train_full_raw, _, X_es, y_es = (
+                cls.build_progressive_phase_datasets(X_train, y_train)
+            )
+
+            total_estimators = int(model_params["n_estimators"])
+            base_estimators = total_estimators // len(phase_datasets)
+            remainder = total_estimators % len(phase_datasets)
+            phase_estimators = [
+                base_estimators + (1 if idx < remainder else 0)
+                for idx in range(len(phase_datasets))
+            ]
+
+            current_model = model
+            previous_booster = None
+            for idx, ((X_phase, y_phase), n_estimators) in enumerate(
+                zip(phase_datasets, phase_estimators)
+            ):
+                phase_params = dict(model_params)
+                phase_params["n_estimators"] = n_estimators
+                current_model = cls.instantiate_model(
+                    input_dim=X_train.shape[1],
+                    model_params=phase_params,
+                )
+                fit_kwargs = {
+                    "X": X_phase,
+                    "y": y_phase,
+                    "eval_set": [(X_es, y_es)],
+                    "verbose": False,
+                }
+                if previous_booster is not None:
+                    fit_kwargs["xgb_model"] = previous_booster
+                current_model.fit(**fit_kwargs)
+                previous_booster = current_model.get_booster()
+
+            model = current_model
+            X_train_for_predictions = X_train_full_raw
+        else:
+            X_fit, y_fit, X_es, y_es = cls.temporal_inner_split_for_early_stopping(
+                X_train,
+                y_train,
+            )
+            model.fit(
+                X_fit,
+                y_fit,
+                eval_set=[(X_es, y_es)],
+                verbose=False,
+            )
+            X_train_for_predictions = X_train
 
         best_iteration = getattr(model, "best_iteration", None)
         best_score = getattr(model, "best_score", None)
 
         return ModelFitResult(
             model=model,
-            train_predictions=np.asarray(model.predict(X_train), dtype=float),
+            train_predictions=np.asarray(
+                model.predict(X_train_for_predictions),
+                dtype=float,
+            ),
             validation_predictions=np.asarray(model.predict(X_val), dtype=float),
             best_iteration=(
                 int(best_iteration)
@@ -768,27 +872,33 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
         shuffle: bool = True,
     ) -> ModelFitResult:
         numeric_col_indices = cls._resolve_numeric_col_indices(data=X_train)
-
-        if progressive_training:
-            X_train, y_train = cls.get_segments(X_train, y_train)
-        else:
-            X_train, y_train = np.asarray(X_train)[None, :, :], np.asarray(y_train)[None, :]
+        X_train_full_raw = np.asarray(X_train)
+        y_train_full = np.asarray(y_train)
         X_val = np.asarray(X_val)
 
-        X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
-            X_train[-1],
-            y_train[-1],
-        )
-        X_train[-1] = X_fit_raw
-        y_train[-1] = y_fit
+        if progressive_training:
+            phase_datasets, _, _, X_es_raw, y_es = cls.build_progressive_phase_datasets(
+                X_train,
+                y_train,
+            )
+            X_fit_raw = phase_datasets[-1][0]
+        else:
+            phase_datasets = [(X_train_full_raw, y_train_full)]
+            X_fit_raw, y_fit, X_es_raw, y_es = cls.temporal_inner_split_for_early_stopping(
+                phase_datasets[-1][0],
+                phase_datasets[-1][1],
+            )
+            phase_datasets[-1] = (X_fit_raw, y_fit)
 
-        _, X_es_scaled, X_train_scaled, X_val_scaled, feature_scaler = cls._scale_numeric_features(
-            X_fit_raw=X_fit_raw,
-            X_valid_raw=X_es_raw,
-            X_train_full_raw=X_train[-1],
-            X_eval_raw=X_val,
-            numeric_col_indices=numeric_col_indices,
-            phase=phase,
+        _, X_es_scaled, X_train_scaled, X_val_scaled, feature_scaler = (
+            cls._scale_numeric_features(
+                X_fit_raw=X_fit_raw,
+                X_valid_raw=X_es_raw,
+                X_train_full_raw=X_train_full_raw,
+                X_eval_raw=X_val,
+                numeric_col_indices=numeric_col_indices,
+                phase=phase,
+            )
         )
 
         early_stop = EarlyStopping(
@@ -812,12 +922,17 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             )
 
         combined_history = {}
-        for x, y in zip(X_train, y_train):
-            x = feature_scaler.transform(x[list(numeric_col_indices)])
+        epochs_per_phase = max(1, model_params["epochs"] // len(phase_datasets))
+        for x_raw, y_phase in phase_datasets:
+            x = cls.transform_numeric_features(
+                X_raw=x_raw,
+                numeric_col_indices=numeric_col_indices,
+                scaler=feature_scaler,
+            )
             history = model.fit(
                 x,
-                y,
-                epochs=model_params["epochs"]//N_SEGMENTS,
+                y_phase,
+                epochs=epochs_per_phase,
                 batch_size=model_params["batch_size"],
                 validation_data=(X_es_scaled, y_es),
                 callbacks=callbacks,
