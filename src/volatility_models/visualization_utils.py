@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from src.enums.volatility_model_enums.training_data_split import TrainingDataSplitEnum
 from src.enums.volatility_model_enums.training_phase import TrainingPhase
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,42 @@ class Visualizer:
             title = "Best family model results after retraining on train + val:"
         else:
             title = "Best family model results:"
-        result_df = pd.DataFrame([result_series], index=["retrained_best"])
+
+        # Keep std metrics out of the main table and show them in a dedicated summary line
+        table_series = result_series[
+            [key for key in result_series.index if not key.endswith("_std")]
+        ]
+        result_df = pd.DataFrame([table_series], index=["retrained_best"])
         logger.info("%s\n%s", title, result_df.to_string())
+
+        std_summary_parts = []
+        split_order = (
+            TrainingDataSplitEnum.TRAIN,
+            TrainingDataSplitEnum.VAL,
+            TrainingDataSplitEnum.TRAIN_VAL,
+            TrainingDataSplitEnum.TEST,
+        )
+        for split in split_order:
+            split_value = str(split)
+            real_key = f"{split_value}_real_std"
+            pred_key = f"{split_value}_pred_std"
+            residual_key = f"{split_value}_residual_std"
+            if (
+                real_key in result_series
+                and pred_key in result_series
+                and residual_key in result_series
+            ):
+                std_summary_parts.append(
+                    f"{split_value}: real={result_series[real_key]:.6f}, "
+                    f"pred={result_series[pred_key]:.6f}, "
+                    f"residual={result_series[residual_key]:.6f}"
+                )
+
+        if std_summary_parts:
+            logger.info(
+                "Volatility Dispersion Summary: %s",
+                " | ".join(std_summary_parts),
+            )
 
     @staticmethod
     def top_n_family_models_table(
