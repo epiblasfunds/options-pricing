@@ -24,8 +24,6 @@ from src.volatility_models.data_utils import BASE_FEATURE_COLS, TrainingDataHand
 from src.volatility_models.visualization_utils import Visualizer
 
 TARGET_COLUMN = config.volatility_models_config.training_data_config.target_column
-MONEYNESS_COL = config.volatility_models_config.training_data_config.moneyness_column
-N_SEGMENTS = int(config.volatility_models_config.training_data_config.n_segments)
 
 logger = logging.getLogger(__name__)
 
