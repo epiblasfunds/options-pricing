@@ -414,26 +414,6 @@ class Trainer:
 
         Visualizer.info_confirmation(file_path, label="Retraining metadata saved")
 
-    @staticmethod
-    def segment_by_atm(train_data: pd.DataFrame):
-        # Segment by distance to ATM: increasing |log(S/K)| (ATM -> further from ATM)
-        train_data_sorted = train_data.assign(
-            _atm_distance=train_data[MONEYNESS_COL].abs()
-        )
-        train_data_sorted = (
-            train_data_sorted.sort_values("_atm_distance")
-            .drop(columns=["_atm_distance"])
-            .reset_index(drop=True)
-        )
-        segment_size = len(train_data_sorted) // N_SEGMENTS
-        segments = [
-            train_data_sorted.iloc[i*segment_size: (i + 1) * segment_size]
-            for i in range(N_SEGMENTS - 1)
-        ]
-        segments.append(train_data_sorted.iloc[(N_SEGMENTS - 1)*segment_size:])
-
-        return segments
-
     @classmethod
     def create_empty_metrics_table(cls, selection_config) -> pd.DataFrame:
         model_metrics = cls._metrics_for_splits(

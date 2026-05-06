@@ -43,7 +43,7 @@ class TrainingDataHandler:
 
     @staticmethod
     def _get_splitted_data_filename(split: TrainingDataSplitEnum):
-        filename = f"{split.value}_splitted_data{TrainingDataHandler}.csv"
+        filename = f"{split.value}_splitted_data_{TrainingDataHandler.__name__}.csv"
         return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod

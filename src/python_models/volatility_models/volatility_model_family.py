@@ -258,7 +258,8 @@ class VolatilityModelFamilyABC(ABC):
     ) -> ModelFitResult:
         inverse_indices = None
         if shuffle:
-            indices = np.random.permutation(len(X_train))
+            rng = np.random.default_rng(cls.RANDOM_SEED)
+            indices = rng.permutation(len(X_train))
             inverse_indices = np.empty_like(indices)
             inverse_indices[indices] = np.arange(len(indices))
             X_train = X_train.iloc[indices]
@@ -387,9 +388,13 @@ class VolatilityModelFamilyABC(ABC):
         min_valid_samples: int = 256,
     ):
         """
-        Creates an internal temporal split within X_train for early stopping.
-        The outer validation fold is reserved exclusively for final metric evaluation,
-        avoiding any overfitting bias toward that set.
+        Creates an internal split within X_train for early stopping, taking the
+        last `valid_fraction` rows by position as the inner validation set.
+
+        When called after a global shuffle (shuffle=True in fit_model), the split
+        is effectively random, not temporal. When called on ordered data (e.g.
+        progressive training where order is meaningful), the split is temporal.
+        The outer val/test folds are never touched here.
         """
         n_samples = len(X_train)
 
