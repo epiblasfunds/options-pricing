@@ -417,6 +417,13 @@ class TrainingDataHandler:
             fold_name = f"fold-{n_folds - i}"
             kfold_full_df = train_df.iloc[: -block_size * i] if i > 0 else train_df
             fold_train_df, fold_val_df = cls.split_train_test(kfold_full_df)
+            fold_train_df, fold_val_df = cls.enforce_unique_option_contract_pair(
+                left_df=fold_train_df,
+                right_df=fold_val_df,
+                left_split=TrainingDataSplitEnum.TRAIN,
+                right_split=TrainingDataSplitEnum.VAL,
+                verbose=False,
+            )
             folds[fold_name] = {"train": fold_train_df, "val": fold_val_df}
 
         folds = dict(
