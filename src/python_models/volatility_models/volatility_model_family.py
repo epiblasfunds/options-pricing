@@ -22,7 +22,7 @@ from src.volatility_models.data_utils import (
     BASE_NUMERIC_FEATURE_COLS,
 )
 from src.volatility_models.visualization_utils import Visualizer
-from config.config import config
+from src.config.config import config
 
 logger = logging.getLogger(__name__)
 

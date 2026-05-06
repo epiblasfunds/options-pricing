@@ -598,7 +598,7 @@ class Trainer:
             shuffle=shuffle,
         )
 
-        return fit_result, model
+        return fit_result, fit_result.model
 
     def retrain_best_params_family(
         self,

@@ -107,10 +107,13 @@ def predict_feature_frame(
     feature_frame: pd.DataFrame,
 ) -> np.ndarray:
     transformed = transform_feature_frame(runtime, feature_frame)
-    matrix = transformed.to_numpy(dtype="float32", copy=False)
     if runtime.is_keras:
+        matrix = transformed.to_numpy(dtype="float32", copy=False)
         predictions = runtime.model.predict(matrix, verbose=0)
+    elif hasattr(runtime.model, "feature_names_in_"):
+        predictions = runtime.model.predict(transformed)
     else:
+        matrix = transformed.to_numpy(dtype="float32", copy=False)
         predictions = runtime.model.predict(matrix)
     return np.asarray(predictions, dtype="float64").reshape(-1)
 
