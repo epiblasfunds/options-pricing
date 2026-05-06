@@ -42,21 +42,9 @@ class TrainingDataHandler:
     }
 
     @staticmethod
-    def _get_splitted_data_filename(split: TrainingDataSplitEnum):
-        filename = f"{split.value}_splitted_data_{TrainingDataHandler.__name__}.csv"
-        return TRAINING_DATA_SPLITTED_DIR / filename
-
-    @staticmethod
     def _get_splitted_features_data_filename(split: TrainingDataSplitEnum):
         filename = f"{split.value}_splitted_features_data.csv"
         return TRAINING_DATA_SPLITTED_FEATURES_DIR / filename
-
-    @staticmethod
-    def _get_kfolds_filename(split: TrainingDataSplitEnum, kfold_name: str):
-        if split == TrainingDataSplitEnum.TEST:
-            raise ValueError
-        filename = f"{split.value}_kfolds_{kfold_name}.csv"
-        return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod
     def get_df_dates(data_df: pd.DataFrame):
