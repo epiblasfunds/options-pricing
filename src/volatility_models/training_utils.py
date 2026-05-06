@@ -435,28 +435,6 @@ class Trainer:
         return segments
 
     @classmethod
-    def _build_progressive_training_data(
-        cls,
-        train_data: pd.DataFrame
-    ) -> tuple[pd.DataFrame, np.ndarray]:
-        """
-        Builds cumulative ATM-to-less-ATM blocks.
-        In each iteration, data is concatenated up to the current segment, shuffled
-        within that cumulative set, and all cumulative sets are concatenated at the end.
-        """
-        segments = cls.segment_by_atm(train_data)
-        progressive_blocks = []
-        for idx in range(len(segments)):
-            accumulated_segment = pd.concat(segments[: idx + 1], ignore_index=True)
-            accumulated_segment = accumulated_segment.sample(frac=1.0).reset_index(
-                drop=True
-            )
-            progressive_blocks.append(accumulated_segment)
-
-        accumulated_data = pd.concat(progressive_blocks, ignore_index=True)
-        return accumulated_data
-
-    @classmethod
     def create_empty_metrics_table(cls, selection_config) -> pd.DataFrame:
         model_metrics = cls._metrics_for_splits(
             [TrainingDataSplitEnum.TRAIN, TrainingDataSplitEnum.VAL]
