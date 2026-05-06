@@ -171,6 +171,7 @@ class Trainer:
         y_valid_pred,
         evaluation_label: TrainingDataSplitEnum,
         train_label: TrainingDataSplitEnum = TrainingDataSplitEnum.TRAIN,
+        include_dispersion_metrics: bool = False,
         round_digits: int = 6,
     ) -> dict[str, float]:
         y_train_true = np.asarray(y_train_true)
@@ -192,25 +193,28 @@ class Trainer:
                 metric_name, y_valid_true, y_valid_pred
             )
 
-        # Dispersion metrics to compare inferred volatility against real values
-        train_real_std_col = Trainer._metric_column(train_label, "real_std")
-        train_pred_std_col = Trainer._metric_column(train_label, "pred_std")
-        train_residual_std_col = Trainer._metric_column(train_label, "residual_std")
-        eval_real_std_col = Trainer._metric_column(evaluation_label, "real_std")
-        eval_pred_std_col = Trainer._metric_column(evaluation_label, "pred_std")
-        eval_residual_std_col = Trainer._metric_column(
-            evaluation_label, "residual_std"
-        )
+        if include_dispersion_metrics:
+            # Dispersion metrics to compare inferred volatility against real values.
+            train_real_std_col = Trainer._metric_column(train_label, "real_std")
+            train_pred_std_col = Trainer._metric_column(train_label, "pred_std")
+            train_residual_std_col = Trainer._metric_column(
+                train_label, "residual_std"
+            )
+            eval_real_std_col = Trainer._metric_column(evaluation_label, "real_std")
+            eval_pred_std_col = Trainer._metric_column(evaluation_label, "pred_std")
+            eval_residual_std_col = Trainer._metric_column(
+                evaluation_label, "residual_std"
+            )
 
-        train_residuals = y_train_pred - y_train_true
-        eval_residuals = y_valid_pred - y_valid_true
+            train_residuals = y_train_pred - y_train_true
+            eval_residuals = y_valid_pred - y_valid_true
 
-        metrics[train_real_std_col] = float(np.std(y_train_true))
-        metrics[train_pred_std_col] = float(np.std(y_train_pred))
-        metrics[train_residual_std_col] = float(np.std(train_residuals))
-        metrics[eval_real_std_col] = float(np.std(y_valid_true))
-        metrics[eval_pred_std_col] = float(np.std(y_valid_pred))
-        metrics[eval_residual_std_col] = float(np.std(eval_residuals))
+            metrics[train_real_std_col] = float(np.std(y_train_true))
+            metrics[train_pred_std_col] = float(np.std(y_train_pred))
+            metrics[train_residual_std_col] = float(np.std(train_residuals))
+            metrics[eval_real_std_col] = float(np.std(y_valid_true))
+            metrics[eval_pred_std_col] = float(np.std(y_valid_pred))
+            metrics[eval_residual_std_col] = float(np.std(eval_residuals))
 
         return {
             name: float(np.round(value, round_digits))
@@ -261,6 +265,7 @@ class Trainer:
                 y_val_fold,
                 fit_result.validation_predictions,
                 evaluation_label=evaluation_label,
+                include_dispersion_metrics=False,
             )
             model_folds_metrics.append(metrics)
 
@@ -730,6 +735,7 @@ class Trainer:
             fit_result.validation_predictions,
             evaluation_label=evaluation_label,
             train_label=train_label,
+            include_dispersion_metrics=True,
         )
 
         if is_train_val:
