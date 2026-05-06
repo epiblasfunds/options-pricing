@@ -570,8 +570,10 @@ class DataInfoDisplay:
 
             train_rows = len(fold_train_df)
             val_rows = len(fold_val_df)
+            fold_total_rows = train_rows + val_rows
             train_n_dates = len(fold_train_dates)
             val_n_dates = len(fold_val_dates)
+            fold_total_dates = train_n_dates + val_n_dates
 
             train_start = min(fold_train_dates)
             train_end_date = max(fold_train_dates)
@@ -580,12 +582,15 @@ class DataInfoDisplay:
 
             logger.info(f"{fold_name.upper()}")
             logger.info(
-                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / len(full_df):>7.2%} of train) "
-                f"| dates: {train_n_dates:>5,} ({train_n_dates / len(full_df_dates):>7.2%} of train) "
+                f"  Fold effective total: {fold_total_rows:,} rows | {fold_total_dates:,} dates"
+            )
+            logger.info(
+                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / fold_total_rows:>7.2%} of fold) "
+                f"| dates: {train_n_dates:>5,} ({train_n_dates / fold_total_dates:>7.2%} of fold) "
                 f"| range: {train_start} -> {train_end_date}"
             )
             logger.info(
-                f"  VALID | rows: {val_rows:>8,} ({val_rows / len(full_df):>7.2%} of train) "
-                f"| dates: {val_n_dates:>5,} ({val_n_dates / len(full_df_dates):>7.2%} of train) "
+                f"  VALID | rows: {val_rows:>8,} ({val_rows / fold_total_rows:>7.2%} of fold) "
+                f"| dates: {val_n_dates:>5,} ({val_n_dates / fold_total_dates:>7.2%} of fold) "
                 f"| range: {val_start} -> {val_end_date}"
             )
