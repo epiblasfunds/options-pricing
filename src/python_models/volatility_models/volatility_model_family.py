@@ -927,7 +927,6 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             )
 
         combined_history = {}
-        epochs_per_phase = max(1, model_params["epochs"] // len(phase_datasets))
         for x_raw, y_phase in phase_datasets:
             x = cls.transform_numeric_features(
                 X_raw=x_raw,
@@ -937,7 +936,7 @@ class SequentialNNFamily(VolatilityModelFamilyABC):
             history = model.fit(
                 x,
                 y_phase,
-                epochs=epochs_per_phase,
+                epochs=model_params["epochs"],
                 batch_size=model_params["batch_size"],
                 validation_data=(X_es_scaled, y_es),
                 callbacks=callbacks,
