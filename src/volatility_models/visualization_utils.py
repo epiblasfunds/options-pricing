@@ -8,6 +8,13 @@ from src.enums.volatility_model_enums.training_phase import TrainingPhase
 
 logger = logging.getLogger(__name__)
 
+VALIDATION_CURVE_STYLE = {
+    "color": "fuchsia",
+    "linestyle": "--",
+    "linewidth": 0.8,
+    "alpha": 0.85,
+}
+
 
 class Visualizer:
     @staticmethod
@@ -85,8 +92,7 @@ class Visualizer:
                     range(1, len(val_rmse) + 1),
                     val_rmse,
                     label="Val_ES (Early Stopping) RMSE",
-                    linewidth=1.4,
-                    alpha=0.9,
+                    **VALIDATION_CURVE_STYLE,
                 )
 
             max_epochs = max(len(train_rmse), len(val_rmse))
@@ -155,8 +161,7 @@ class Visualizer:
                     val_epochs,
                     val_rmse,
                     label="Val_ES (Early Stopping) RMSE",
-                    linewidth=1.2,
-                    alpha=0.85,
+                    **VALIDATION_CURVE_STYLE,
                 )
 
             if best_epoch and best_epoch <= max_epochs:
