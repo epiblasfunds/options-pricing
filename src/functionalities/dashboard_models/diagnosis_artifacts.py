@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.config.config import config
 from src.dashboard.domain import build_metrics_registry
+from src.dashboard.utils.diagnosis import build_error_heatmap_frame
 from src.enums.data_enums import VolatilityDBEnum
 from src.model2dashboard.features import TARGET_COLUMN
 from src.python_models.dashboard.artifacts import DiagnosisArtifact
@@ -26,17 +27,7 @@ def build_diagnosis_artifact(
         max_rows=min(2500, len(evaluation_frame)),
         random_state=config.dashboard_models_config.random_state + 7,
     )
-    error_heatmap = (
-        evaluation_frame.assign(
-            moneyness_bin=pd.cut(evaluation_frame["Moneyness"], bins=12),
-            maturity_bin=pd.cut(
-                evaluation_frame[str(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12
-            ),
-        )
-        .groupby(["moneyness_bin", "maturity_bin"], observed=False)["AbsoluteError"]
-        .mean()
-        .reset_index()
-    )
+    error_heatmap = build_error_heatmap_frame(evaluation_frame)
     return DiagnosisArtifact(
         metrics={str(name): float(value) for name, value in metrics.items()},
         plot_frame=plot_frame,

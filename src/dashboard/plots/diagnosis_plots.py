@@ -119,5 +119,11 @@ def error_heatmap_figure(error_heatmap):
 
 def _bin_label(value) -> str:
     if isinstance(value, pd.Interval):
+        if float(value.left) < 0.0 <= float(value.right):
+            return f"[0, {_format_bin_bound(float(value.right))}]"
         return str(value)
     return str(value)
+
+
+def _format_bin_bound(value: float) -> str:
+    return f"{value:.3f}".rstrip("0").rstrip(".")

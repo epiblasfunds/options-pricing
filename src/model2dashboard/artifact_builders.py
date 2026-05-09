@@ -14,6 +14,7 @@ from pysr import PySRRegressor
 
 from src.config.config import config
 from src.dashboard.domain import build_metrics_registry
+from src.dashboard.utils.diagnosis import build_error_heatmap_frame
 from src.dashboard.utils.sampling import quantile_grid
 from src.dashboard.utils.sampling import sample_frame
 from src.enums.data_enums import VolatilityDBEnum
@@ -699,17 +700,7 @@ def build_diagnosis_artifact(
         max_rows=min(2500, len(sampled)),
         random_state=config.dashboard_models_config.random_state + 7,
     )
-    error_heatmap = (
-        sampled.assign(
-            moneyness_bin=pd.cut(sampled["Moneyness"], bins=12),
-            maturity_bin=pd.cut(
-                sampled[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12
-            ),
-        )
-        .groupby(["moneyness_bin", "maturity_bin"], observed=False)["AbsoluteError"]
-        .mean()
-        .reset_index()
-    )
+    error_heatmap = build_error_heatmap_frame(sampled)
     return DiagnosisArtifact(
         metrics={str(name): float(value) for name, value in metrics.items()},
         plot_frame=plot_frame,

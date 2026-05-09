@@ -30,6 +30,20 @@ def test_error_heatmap_figure_serializes_interval_bins():
     assert figure.layout.coloraxis.cmax == 0.4
 
 
+def test_error_heatmap_figure_clamps_negative_zero_like_maturity_bin_labels():
+    error_heatmap = pd.DataFrame(
+        {
+            "moneyness_bin": [pd.Interval(0.9, 1.0, closed="right")],
+            "maturity_bin": [pd.Interval(-0.423, 37.948, closed="right")],
+            "AbsoluteError": [0.1],
+        }
+    )
+
+    figure = error_heatmap_figure(error_heatmap)
+
+    assert figure.data[0]["y"][0] == "[0, 37.948]"
+
+
 def test_diagnosis_figures_render_core_series():
     frame = pd.DataFrame(
         {
