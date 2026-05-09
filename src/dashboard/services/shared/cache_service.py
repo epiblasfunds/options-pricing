@@ -40,3 +40,7 @@ class CacheService:
             while len(self._entries) > self.max_entries:
                 self._entries.popitem(last=False)
         return value
+
+    def clear(self) -> None:
+        with self._lock:
+            self._entries.clear()

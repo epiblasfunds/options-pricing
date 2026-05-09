@@ -3,6 +3,7 @@
 
 class IDS:
     MODEL_REFRESH_BUTTON = "model-refresh-button"
+    MODEL_REFRESH_TOKEN = "model-refresh-token"
     MODEL_SELECTOR = "model-selector"
     MODEL_INFO = "model-info"
 

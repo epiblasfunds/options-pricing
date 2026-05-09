@@ -31,6 +31,9 @@ class ModelLoader:
             discovered_model.format.value,
         )
 
+    def clear(self) -> None:
+        self._load_cached.cache_clear()
+
     def _load_uncached(
         self,
         model_path_str: str,

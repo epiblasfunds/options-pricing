@@ -83,72 +83,78 @@ def build_symbolic_panel(symbolic_model, services):
                 style=_grid_style(),
                 children=[
                     html.Div(
-                        style=_subcard_style(),
+                        style=_left_column_style(),
                         children=[
-                            html.H4("Equation Source", style={"margin": "0 0 8px 0"}),
-                            html.Pre(
-                                format_symbolic_equation_text(
-                                    symbolic_model.equation,
-                                    schema=services.feature_schema,
-                                ),
-                                style=_dark_pre_style(),
-                            ),
-                            html.H4("Interpretation", style={"margin": "14px 0 8px 0"}),
-                            html.P(
-                                replace_feature_names_in_text(
-                                    symbolic_model.interpretation,
-                                    services.feature_schema,
-                                ),
-                                style={"margin": "0 0 12px 0"},
-                            ),
-                            html.H4("Active Inputs", style={"margin": "14px 0 8px 0"}),
                             html.Div(
-                                style={
-                                    "display": "flex",
-                                    "gap": "8px",
-                                    "flexWrap": "wrap",
-                                },
+                                style=_subcard_style(),
                                 children=[
-                                    html.Span(
-                                        display_feature_label(
-                                            feature_name,
+                                    html.H4(
+                                        "Equation Source",
+                                        style={"margin": "0 0 8px 0"},
+                                    ),
+                                    html.Pre(
+                                        format_symbolic_equation_text(
+                                            symbolic_model.equation,
+                                            schema=services.feature_schema,
+                                        ),
+                                        style=_dark_pre_style(),
+                                    ),
+                                    html.H4(
+                                        "Interpretation",
+                                        style={"margin": "14px 0 8px 0"},
+                                    ),
+                                    html.P(
+                                        replace_feature_names_in_text(
+                                            symbolic_model.interpretation,
                                             services.feature_schema,
                                         ),
-                                        style=_chip_style(),
-                                    )
-                                    for feature_name in symbolic_model.used_feature_names
+                                        style={"margin": "0 0 12px 0"},
+                                    ),
+                                    html.H4(
+                                        "Active Inputs",
+                                        style={"margin": "14px 0 8px 0"},
+                                    ),
+                                    html.Div(
+                                        style={
+                                            "display": "flex",
+                                            "gap": "8px",
+                                            "flexWrap": "wrap",
+                                        },
+                                        children=[
+                                            html.Span(
+                                                display_feature_label(
+                                                    feature_name,
+                                                    services.feature_schema,
+                                                ),
+                                                style=_chip_style(),
+                                            )
+                                            for feature_name in symbolic_model.used_feature_names
+                                        ],
+                                    ),
                                 ],
                             ),
-                        ],
-                    ),
-                    html.Div(
-                        style={"display": "grid", "gap": "16px"},
-                        children=[
                             html.Div(
                                 style=_subcard_style(),
                                 children=[
-                                    dcc.Graph(
-                                        figure=symbolic_expression_tree_figure(
-                                            symbolic_model,
-                                            schema=services.feature_schema,
-                                        )
-                                    )
-                                ],
-                            ),
-                            html.Div(
-                                style=_subcard_style(),
-                                children=[
+                                    html.H4(
+                                        "Equation Frontier",
+                                        style={"margin": "0 0 10px 0"},
+                                    ),
                                     dcc.Graph(
                                         figure=symbolic_frontier_figure(
                                             symbolic_model,
                                             schema=services.feature_schema,
                                         )
-                                    )
+                                    ),
                                 ],
                             ),
                             html.Div(
                                 style=_subcard_style(),
                                 children=[
+                                    html.H4(
+                                        "Symbolic Fidelity",
+                                        style={"margin": "0 0 10px 0"},
+                                    ),
                                     dcc.Graph(
                                         figure=symbolic_fidelity_figure(symbolic_model)
                                     )
@@ -166,6 +172,21 @@ def build_symbolic_panel(symbolic_model, services):
                                         children=equation_rows,
                                     ),
                                 ],
+                            ),
+                        ],
+                    ),
+                    html.Div(
+                        style=_subcard_style(),
+                        children=[
+                            html.H4(
+                                "Expression Operation Tree",
+                                style={"margin": "0 0 10px 0"},
+                            ),
+                            dcc.Graph(
+                                figure=symbolic_expression_tree_figure(
+                                    symbolic_model,
+                                    schema=services.feature_schema,
+                                )
                             ),
                         ],
                     ),
@@ -252,8 +273,9 @@ def _panel_style():
 def _grid_style():
     return {
         "display": "grid",
-        "gridTemplateColumns": "minmax(340px, 1.1fr) minmax(340px, 1fr)",
+        "gridTemplateColumns": "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
         "gap": "18px",
+        "alignItems": "start",
     }
 
 
@@ -264,6 +286,10 @@ def _metric_row_style():
         "flexWrap": "wrap",
         "marginBottom": "12px",
     }
+
+
+def _left_column_style():
+    return {"display": "grid", "gap": "16px", "minWidth": "0"}
 
 
 def _formula_style():
@@ -284,6 +310,7 @@ def _subcard_style():
         "border": "1px solid rgba(23,48,79,0.10)",
         "borderRadius": "14px",
         "background": "#ffffff",
+        "minWidth": "0",
     }
 
 

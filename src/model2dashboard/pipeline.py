@@ -10,6 +10,7 @@ from src.config.config import (
     config,
 )
 from src.enums.volatility_model_enums import ModelFormatEnum
+from src.enums.volatility_model_enums.model_name import display_model_name
 from src.model2dashboard.artifact_builders import build_dashboard_artifacts
 from src.model2dashboard.features import (
     ANALYSIS_FEATURE_NAMES,
@@ -209,7 +210,7 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
 
 
 def _display_model_name(model_id: str) -> str:
-    return model_id.replace("_", " ").title()
+    return display_model_name(model_id)
 
 
 def main() -> None:

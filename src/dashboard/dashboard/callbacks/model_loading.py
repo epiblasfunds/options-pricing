@@ -7,6 +7,7 @@ from src.dashboard.dashboard.ids import IDS
 from src.dashboard.utils.feature_utils import build_manual_input_sample_label
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
+from src.enums.volatility_model_enums.model_name import display_model_name
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
 
 
@@ -15,6 +16,12 @@ def _default_ice_feature(ice_options: list[dict]) -> str | None:
     if "StrikePrice" in option_values:
         return "StrikePrice"
     return option_values[0] if option_values else None
+
+
+def _format_chip_label(format_value: str) -> str:
+    if format_value == "explainable_model":
+        return "Dashboard Bundle"
+    return format_value
 
 
 def _model_info_panel(
@@ -156,14 +163,19 @@ def register_model_loading_callbacks(app, services) -> None:
     @app.callback(
         Output(IDS.MODEL_SELECTOR, "options"),
         Output(IDS.MODEL_SELECTOR, "value"),
+        Output(IDS.MODEL_REFRESH_TOKEN, "data"),
         Input(IDS.MODEL_REFRESH_BUTTON, "n_clicks"),
         State(IDS.MODEL_SELECTOR, "value"),
     )
-    def refresh_models(_, current_value):
+    def refresh_models(n_clicks, current_value):
+        services.cache.clear()
+        services.model_loader.clear()
+        services.data_provider.clear()
+        services.model_registry.model_dir = services.storage_runtime.prepare_model_dir()
         models = services.model_registry.discover_models()
         options = [
             {
-                "label": f"{model.name} ({model.format.value})",
+                "label": display_model_name(model.name),
                 "value": model.model_id,
             }
             for model in models
@@ -174,7 +186,7 @@ def register_model_loading_callbacks(app, services) -> None:
             if current_value in valid_values
             else (options[0]["value"] if options else None)
         )
-        return options, value
+        return options, value, int(n_clicks or 0)
 
     @app.callback(
         Output(IDS.MODEL_INFO, "children"),
@@ -185,8 +197,9 @@ def register_model_loading_callbacks(app, services) -> None:
         Output(IDS.BEHAVIOUR_ANCHOR_INDEX, "options"),
         Output(IDS.SAMPLE_INDEX, "options"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def update_shared_context(model_id):
+    def update_shared_context(model_id, _refresh_token):
         dataset = services.data_provider.load_dataset(model_id=model_id)
         sampled = sample_frame(
             dataset,
@@ -260,12 +273,12 @@ def register_model_loading_callbacks(app, services) -> None:
             }
             for feature_name in shap_feature_names
         ]
-        format_label = model.format.value if model else "unknown"
+        format_label = _format_chip_label(model.format.value) if model else "unknown"
         metric_names = list(
             metadata.get("error_metrics", config.dashboard_models_config.error_metrics)
         )
         info_panel = _model_info_panel(
-            model_name=model.name if model else str(model_id),
+            model_name=display_model_name(model.name if model else str(model_id)),
             format_label=format_label,
             explained_features=[str(feature) for feature in explained_feature_names],
             metric_names=[str(metric) for metric in metric_names],

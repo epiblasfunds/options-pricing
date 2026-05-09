@@ -16,13 +16,13 @@ def test_format_symbolic_equation_text_uses_readable_names_and_compact_coefficie
     assert "x_" not in formatted
     assert "StrikePrice" not in formatted
     assert "UnderlyingPrice" not in formatted
-    assert "OptionType" in formatted
-    assert "Strike" in formatted
-    assert "Underlying" in formatted
-    assert "Rate/3" in formatted
-    assert "Strike/8" in formatted
-    assert "1.78e-4*TimeToExpiration" in formatted
-    assert "3.3e-5*Underlying" in formatted
+    assert "optionType" in formatted
+    assert "strike" in formatted
+    assert "underlying" in formatted
+    assert "rate/3" in formatted
+    assert "strike/8" in formatted
+    assert "1.78e-4*timeToExpiration" in formatted
+    assert "3.3e-5*underlying" in formatted
 
 
 def test_format_symbolic_equation_latex_supports_fractions_and_scientific_notation():
@@ -30,8 +30,8 @@ def test_format_symbolic_equation_latex_supports_fractions_and_scientific_notati
 
     formatted = format_symbolic_equation_latex(expression)
 
-    assert r"\frac{Rate}{3}" in formatted
-    assert r"3.3 \cdot 10^{-5} Underlying" in formatted
+    assert r"\frac{rate}{3}" in formatted
+    assert r"3.3 \cdot 10^{-5} underlying" in formatted
 
 
 def test_symbolic_formula_aliases_use_feature_names_instead_of_positional_aliases():
@@ -49,9 +49,9 @@ def test_symbolic_formula_aliases_use_feature_names_instead_of_positional_aliase
     aliases = symbolic_formula_aliases(model)
 
     assert [alias for alias, _ in aliases] == [
-        "OptionType",
-        "Rate",
-        "Strike",
-        "TimeToExpiration",
-        "Underlying",
+        "optionType",
+        "rate",
+        "strike",
+        "timeToExpiration",
+        "underlying",
     ]

@@ -41,8 +41,9 @@ def register_global_callbacks(app, services) -> None:
         Output(IDS.GLOBAL_NOTE, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
         Input(IDS.GLOBAL_DEPENDENCE_FEATURE, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_global_explainability(model_id, selected_feature):
+    def render_global_explainability(model_id, selected_feature, _refresh_token):
         if not model_id:
             return (
                 _empty_image(),

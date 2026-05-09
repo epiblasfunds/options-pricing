@@ -26,6 +26,8 @@ def test_error_heatmap_figure_serializes_interval_bins():
 
     assert "(0.9, 1.0]" in payload
     assert "(10.0, 20.0]" in payload
+    assert figure.layout.coloraxis.cmin == 0.0
+    assert figure.layout.coloraxis.cmax == 0.4
 
 
 def test_diagnosis_figures_render_core_series():

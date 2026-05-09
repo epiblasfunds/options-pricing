@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 class Services:
     """Runtime service container."""
 
+    storage_runtime: DashboardModelStorageRuntime
     feature_schema: object
     metrics_registry: object
     cache: CacheService
@@ -74,6 +75,7 @@ def build_services() -> Services:
         feature_schema=feature_schema,
     )
     return Services(
+        storage_runtime=storage_runtime,
         feature_schema=feature_schema,
         metrics_registry=metrics_registry,
         cache=cache,

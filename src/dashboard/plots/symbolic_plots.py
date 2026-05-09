@@ -21,11 +21,11 @@ from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
 plt.switch_backend("Agg")
 
 _SYMBOLIC_FORMULA_NAME_ALIASES = {
-    "OptionType": "OptionType",
-    "Rate": "Rate",
-    "StrikePrice": "Strike",
-    "TimeToExpiration": "TimeToExpiration",
-    "UnderlyingPrice": "Underlying",
+    "OptionType": "optionType",
+    "Rate": "rate",
+    "StrikePrice": "strike",
+    "TimeToExpiration": "timeToExpiration",
+    "UnderlyingPrice": "underlying",
 }
 _SYMBOLIC_FORMULA_SYMBOL_ORDER = {
     "OptionType": 0,
@@ -378,7 +378,24 @@ def _sorted_symbols(symbols) -> list[sympy.Symbol]:
 
 
 def _symbolic_formula_alias(feature_name: str) -> str:
-    return _SYMBOLIC_FORMULA_NAME_ALIASES.get(feature_name, feature_name)
+    alias = _SYMBOLIC_FORMULA_NAME_ALIASES.get(feature_name)
+    if alias is not None:
+        return alias
+    return _to_camel_case(str(feature_name))
+
+
+def _to_camel_case(text: str) -> str:
+    raw = str(text).strip()
+    if not raw:
+        return raw
+    if "_" in raw:
+        parts = [part for part in raw.split("_") if part]
+        if not parts:
+            return ""
+        head = parts[0][:1].lower() + parts[0][1:]
+        tail = "".join(part[:1].upper() + part[1:] for part in parts[1:])
+        return head + tail
+    return raw[:1].lower() + raw[1:]
 
 
 def _node_label(node, schema=None) -> str:

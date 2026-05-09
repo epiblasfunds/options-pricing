@@ -498,11 +498,13 @@ def register_sample_callbacks(app, services) -> None:
         Input(IDS.MODEL_SELECTOR, "value"),
         Input(IDS.SAMPLE_MODE, "value"),
         Input(IDS.SAMPLE_INDEX, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
     def render_sample_feature_preview(
         model_id,
         mode,
         sample_index,
+        _refresh_token,
     ):
         if not model_id:
             return html.Div()
@@ -526,8 +528,9 @@ def register_sample_callbacks(app, services) -> None:
         Output(IDS.SAMPLE_INDEX_CONTAINER, "style"),
         Input(IDS.SAMPLE_MODE, "value"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_manual_form(mode, _model_id):
+    def render_manual_form(mode, _model_id, _refresh_token):
         if mode != "manual":
             return html.Div(), {"marginTop": "14px"}
         dataset = services.data_provider.load_dataset(model_id=_model_id)

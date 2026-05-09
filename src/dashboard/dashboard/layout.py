@@ -481,10 +481,11 @@ def _global_tab():
                         children=[
                             html.P(
                                 (
-                                    "Understand which inputs drive "
-                                    "the volatility model globally and inspect "
-                                    "the precomputed surrogate trees that "
-                                    "summarize its logic."
+                                    "Inspect the model globally through SHAP "
+                                    "summaries, feature-importance rankings, "
+                                    "dependence and attribution heatmaps, and "
+                                    "the precomputed symbolic and tree "
+                                    "surrogates that approximate its logic."
                                 ),
                                 style=HELP_TEXT_STYLE,
                             ),
@@ -801,12 +802,12 @@ def _diagnosis_tab():
                                         "Performance Summary",
                                         (
                                             "Headline diagnostic metrics for "
-                                            "the selected model over the "
-                                            "sampled evaluation set. This panel "
-                                            "provides a compact overview of "
-                                            "average predictive accuracy before "
-                                            "drilling down into residual "
-                                            "structure and localized error "
+                                            "the selected model over the full "
+                                            "test set. This panel provides a "
+                                            "compact overview of aggregate "
+                                            "predictive accuracy before "
+                                            "drilling down into sampled scatter "
+                                            "diagnostics and full-surface error "
                                             "concentration."
                                         ),
                                     ),
@@ -856,9 +857,11 @@ def _diagnosis_tab():
                                                             "absolute error "
                                                             "across the joint "
                                                             "moneyness and "
-                                                            "maturity grid. It is "
-                                                            "designed to reveal "
-                                                            "where model accuracy "
+                                                            "maturity grid over "
+                                                            "the full test set. "
+                                                            "It is designed to "
+                                                            "reveal where model "
+                                                            "accuracy "
                                                             "deteriorates "
                                                             "systematically on "
                                                             "the surface and "
@@ -986,6 +989,7 @@ def build_layout():
             html.Div(
                 style=CARD_STYLE,
                 children=[
+                    dcc.Store(id=IDS.MODEL_REFRESH_TOKEN, data=0),
                     html.Div(
                         style=CONTROL_ROW_STYLE,
                         children=[
@@ -1000,7 +1004,7 @@ def build_layout():
                             html.Div(
                                 children=[
                                     html.Button(
-                                        "Refresh Model Catalog",
+                                        "Refresh",
                                         id=IDS.MODEL_REFRESH_BUTTON,
                                         style=BUTTON_STYLE,
                                     )
