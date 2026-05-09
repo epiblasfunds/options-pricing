@@ -67,9 +67,11 @@ Este fichero configura los datos de entrenamiento y las métricas de selección:
 
 Las métricas compuestas penalizan no solo error, sino también inestabilidad y sobreajuste. Conceptualmente:
 
+<div class="doc-math">
 \[
 CE_1 = RMSE_{val} + \alpha \cdot std(RMSE_{val}) + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
 \]
+</div>
 
 donde:
 
@@ -79,9 +81,11 @@ donde:
 - $std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.
 - $\alpha$ y $\beta$ son penalizaciones configuradas.
 
+<div class="doc-math">
 \[
 CE_2 = RMSE_{val} + \gamma \cdot CE_1 + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
 \]
+</div>
 
 donde:
 

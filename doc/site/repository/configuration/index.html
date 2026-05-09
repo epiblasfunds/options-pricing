@@ -352,9 +352,12 @@
 </tbody>
 </table>
 <p>Las métricas compuestas penalizan no solo error, sino también inestabilidad y sobreajuste. Conceptualmente:</p>
-<p>[
+<div class="doc-math">
+\[
 CE_1 = RMSE_{val} + \alpha \cdot std(RMSE_{val}) + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$CE_1$ es la métrica compuesta de selección.</li>
@@ -363,9 +366,12 @@ CE_1 = RMSE_{val} + \alpha \cdot std(RMSE_{val}) + \beta \cdot \max(0, RMSE_{val
 <li>$std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.</li>
 <li>$\alpha$ y $\beta$ son penalizaciones configuradas.</li>
 </ul>
-<p>[
+<div class="doc-math">
+\[
 CE_2 = RMSE_{val} + \gamma \cdot CE_1 + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$CE_1$ es la métrica compuesta de selección.</li>

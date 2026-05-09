@@ -16,9 +16,11 @@ flowchart TD
 
 La caja `Performance Summary` muestra métricas agregadas sobre el conjunto de test:
 
+<div class="doc-math">
 \[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
 \]
+</div>
 
 donde:
 
@@ -27,9 +29,11 @@ donde:
 - $y_i$ es el valor real observado.
 - $\hat{y}_i$ es la predicción del modelo para la observación $i$.
 
+<div class="doc-math">
 \[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
 \]
+</div>
 
 donde:
 
@@ -38,9 +42,11 @@ donde:
 - $y_i$ es el valor real observado.
 - $\hat{y}_i$ es la predicción del modelo para la observación $i$.
 
+<div class="doc-math">
 \[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
 \]
+</div>
 
 donde:
 
@@ -55,9 +61,11 @@ Es el resumen más compacto de calidad final. RMSE es especialmente sensible a e
 
 El scatter compara volatilidad real contra volatilidad predicha. La diagonal representa predicción perfecta:
 
+<div class="doc-math">
 \[
 \hat{y}=y
 \]
+</div>
 
 donde:
 
@@ -76,9 +84,11 @@ Lecturas importantes:
 
 El heatmap de residuos agrega error absoluto por regiones de moneyness y vencimiento:
 
+<div class="doc-math">
 \[
 AE_i = |y_i-\hat{y}_i|
 \]
+</div>
 
 donde:
 
@@ -103,9 +113,11 @@ Esta caja muestra patrones de residual frente a moneyness. Ayuda a ver si el mod
 
 La moneyness considerada en dashboard es:
 
+<div class="doc-math">
 \[
 m=\frac{F}{K}
 \]
+</div>
 
 donde:
 

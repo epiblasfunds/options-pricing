@@ -4,9 +4,11 @@ Las curvas ICE, del inglés *Individual Conditional Expectation*, muestran cómo
 
 Formalmente, para una feature $j$, una observación $x_i$ y un valor contrafactual $z$:
 
+<div class="doc-math">
 \[
 ICE_i^{(j)}(z)=f(z, x_{i,-j})
 \]
+</div>
 
 donde:
 
@@ -69,9 +71,11 @@ Si las curvas ICE de `StrikePrice` divergen mucho, el modelo no está usando str
 
 Un Partial Dependence Plot promedia las curvas ICE:
 
+<div class="doc-math">
 \[
 PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n}f(z,x_{i,-j})
 \]
+</div>
 
 donde:
 

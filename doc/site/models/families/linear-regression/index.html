@@ -191,9 +191,12 @@
                 <h1 id="regresion-lineal">Regresión lineal<a class="headerlink" href="#regresion-lineal" title="Permanent link">&para;</a></h1>
 <p>La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mínima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.</p>
 <p>La forma del modelo es:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}=\beta_0+\sum_{j=1}^{p}\beta_j x_j
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.</li>
@@ -233,9 +236,12 @@
 </tbody>
 </table>
 <p>En modo progresivo, el modelo recibe <code>sample_weight</code> para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mínimos cuadrados ponderados:</p>
-<p>[
+<div class="doc-math">
+\[
 \min_{\beta}\sum_i w_i(y_i-\beta_0-x_i^\top\beta)^2
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>El operador $\min$ representa el problema de optimización.</li>

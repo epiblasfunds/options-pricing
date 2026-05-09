@@ -23,9 +23,11 @@ flowchart TD
 
 La variable objetivo es `ImpliedVolatility`, calculada durante el ETL mediante inversión Black-76. El modelo aprende una aproximación:
 
+<div class="doc-math">
 \[
 \hat{\sigma}=f(X)
 \]
+</div>
 
 donde:
 

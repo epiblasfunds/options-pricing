@@ -44,9 +44,11 @@ Antes de valorar se exige:
 
 El tipo usado por Black-76 se calcula como un tipo compuesto desde la fecha de ejecución hasta vencimiento. Para períodos de al menos un día, se recorren días hábiles y se acumula:
 
+<div class="doc-math">
 \[
 \prod_i \left(1 + r_i \frac{n_i}{N}\right)
 \]
+</div>
 
 donde:
 
@@ -58,9 +60,11 @@ donde $N=360$, $r_i$ es el tipo diario en decimal y $n_i$ es el número de días
 
 El tipo anualizado equivalente es:
 
+<div class="doc-math">
 \[
 r_{comp} = \left(\prod_i \left(1 + r_i \frac{n_i}{N}\right)-1\right)\frac{N}{d_c}
 \]
+</div>
 
 donde:
 
@@ -74,9 +78,11 @@ donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimiento
 
 El modelo Black-76 valora opciones sobre forwards/futuros. Para una call:
 
+<div class="doc-math">
 \[
 C=e^{-rT}\left(FN(d_1)-KN(d_2)\right)
 \]
+</div>
 
 donde:
 
@@ -91,9 +97,11 @@ donde:
 
 Para una put:
 
+<div class="doc-math">
 \[
 P=e^{-rT}\left(KN(-d_2)-FN(-d_1)\right)
 \]
+</div>
 
 donde:
 
@@ -108,11 +116,13 @@ donde:
 
 con:
 
+<div class="doc-math">
 \[
 d_1=\frac{\ln(F/K)+\frac{1}{2}\sigma^2T}{\sigma\sqrt{T}},
 \qquad
 d_2=d_1-\sigma\sqrt{T}
 \]
+</div>
 
 donde:
 
@@ -137,9 +147,11 @@ En el proyecto:
 
 La volatilidad se obtiene buscando la raíz:
 
+<div class="doc-math">
 \[
 g(\sigma)=P_{Black76}(F,K,T,r,\sigma)-P_{mercado}=0
 \]
+</div>
 
 donde:
 

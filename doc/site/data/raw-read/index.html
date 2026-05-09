@@ -255,17 +255,23 @@
 </ul>
 <h2 id="filtrado-de-universo-ibex">Filtrado de universo IBEX<a class="headerlink" href="#filtrado-de-universo-ibex" title="Permanent link">&para;</a></h2>
 <p>El filtrado inicial aplica dos condiciones:</p>
-<p>[
-\text{es_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
-]</p>
+<div class="doc-math">
+\[
+\text{es\_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$c$ es el código de contrato.</li>
 <li>$\text{es_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.</li>
 </ul>
-<p>[
-\text{es_mensual}(c)=\text{longitud}(c)\in{\text{longitud opción},\text{longitud futuro}}
-]</p>
+<div class="doc-math">
+\[
+\text{es\_mensual}(c)=\text{longitud}(c)\in\{\text{longitud opción},\text{longitud futuro}\}
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$c$ es el código de contrato.</li>
@@ -289,13 +295,16 @@
     class B,D decisión;
 </code></pre>
 <p>La lógica financiera es construir una serie continua de referencia monetaria. Para fechas antiguas, el ajuste aproxima la transición entre EONIA y €STR:</p>
-<p>[
+<div class="doc-math">
+\[
 r_t =
 \begin{cases}
-\text{EONIA}<em _mathrm_corte="\mathrm{corte">t - s, &amp; t &lt; t</em> \
-\text{€STR}}<em _mathrm_corte="\mathrm{corte">t, &amp; t \ge t</em>
+\text{EONIA}_t - s, & t < t_{\mathrm{corte}} \\
+\text{€STR}_t, & t \ge t_{\mathrm{corte}}
 \end{cases}
-]}</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$r_t$ es el tipo usado en la fecha $t$.</li>

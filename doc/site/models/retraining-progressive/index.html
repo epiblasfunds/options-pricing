@@ -191,22 +191,25 @@
                 <h1 id="reentrenamiento-y-progressive-training">Reentrenamiento y progressive training<a class="headerlink" href="#reentrenamiento-y-progressive-training" title="Permanent link">&para;</a></h1>
 <p>Después de seleccionar hiperparámetros por <a href="../splits-kfolds/">k-folds temporales</a>, el proyecto reentrena la mejor configuración. Hay dos fases principales: una fase train/validation para confirmar rendimiento y una fase final test para producir el modelo que se guarda y se convierte a <a href="../../dashboard/model-to-dashboard/">bundle de dashboard</a>.</p>
 <pre><code class="language-mermaid">flowchart TD
-    A[Metadata de mejor familia] --&gt; B[Recuperar mejores parámetros]
+    A[&quot;Metadata de mejor familia&quot;] --&gt; B[&quot;Recuperar mejores parámetros&quot;]
     B --&gt; C{Fase}
-    C --&gt;|train_val| D[Train vs Validation]
-    C --&gt;|final_test| E[TrainVal vs Test]
-    D --&gt; F[Métricas + custom_error_2]
-    E --&gt; G[Métricas finales + dispersión]
-    G --&gt; H[Guardar modelo final]
-    H --&gt; I[Construir bundle dashboard]
-    I --&gt; J[Subida opcional a GCP]
+    C --&gt;|train_val| D[&quot;Train vs Validation&quot;]
+    C --&gt;|final_test| E[&quot;TrainVal vs Test&quot;]
+    D --&gt; F[&quot;Métricas + custom_error_2&quot;]
+    E --&gt; G[&quot;Métricas finales + dispersión&quot;]
+    G --&gt; H[&quot;Guardar modelo final&quot;]
+    H --&gt; I[&quot;Construir bundle dashboard&quot;]
+    I --&gt; J[&quot;Subida opcional a GCP&quot;]
 </code></pre>
 <h2 id="reentrenamiento-no-progresivo">Reentrenamiento no progresivo<a class="headerlink" href="#reentrenamiento-no-progresivo" title="Permanent link">&para;</a></h2>
 <p>En entrenamiento no progresivo, el modelo recibe todo el bloque de entrenamiento de la fase de una vez. Si la familia es iterativa, se crea una partición interna para early stopping; si no lo es, ajusta directamente sobre todo el bloque permitido.</p>
 <p>Este modo representa el entrenamiento estándar:</p>
-<p>[
+<div class="doc-math">
+\[
 \min_{\theta} \sum_{i \in Train} L(y_i, f_{\theta}(x_i))
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>El operador $\min$ representa el problema de optimización.</li>
@@ -223,9 +226,12 @@
 </ul>
 <h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
 <p>El entrenamiento progresivo ordena observaciones por cercanía a ATM usando la magnitud de la log-moneyness:</p>
-<p>[
+<div class="doc-math">
+\[
 |\ell| = |\log(F/K)|
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\ell$ es la log-moneyness.</li>
@@ -235,10 +241,10 @@
 </ul>
 <p>Luego divide el entrenamiento en segmentos. El primer segmento contiene observaciones más cercanas a ATM; los siguientes incorporan progresivamente regiones más alejadas.</p>
 <pre><code class="language-mermaid">flowchart LR
-    A[Ordenar por |logMoneyness|] --&gt; B[Segmento 1: más ATM]
-    B --&gt; C[Segmento 2: ATM + intermedio]
-    C --&gt; D[Segmento 3: ATM + intermedio + alas]
-    D --&gt; E[Modelo final]
+    A[&quot;Ordenar por abs(logMoneyness)&quot;] --&gt; B[&quot;Segmento 1: más ATM&quot;]
+    B --&gt; C[&quot;Segmento 2: ATM + intermedio&quot;]
+    C --&gt; D[&quot;Segmento 3: ATM + intermedio + alas&quot;]
+    D --&gt; E[&quot;Modelo final&quot;]
 </code></pre>
 <p>La intención financiera es estabilizar primero la zona más líquida y central de la superficie. Las regiones muy OTM o ITM pueden ser más ruidosas, menos líquidas o más sensibles a microestructura. Empezar por ATM fuerza al modelo a aprender primero el nivel central de volatilidad y luego extenderse a las alas.</p>
 <h2 id="diferencias-por-familia">Diferencias por familia<a class="headerlink" href="#diferencias-por-familia" title="Permanent link">&para;</a></h2>
@@ -275,9 +281,12 @@
 <p>La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos, mientras que modelos iterativos pueden aprender por fases.</p>
 <h2 id="pesos-por-segmento">Pesos por segmento<a class="headerlink" href="#pesos-por-segmento" title="Permanent link">&para;</a></h2>
 <p>Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:</p>
-<p>[
+<div class="doc-math">
+\[
 w_s \propto S-s
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$w_s$ es el peso asignado al segmento $s$.</li>
@@ -285,9 +294,12 @@ w_s \propto S-s
 <li>$s$ es el índice del segmento ordenado por cercanía a ATM.</li>
 </ul>
 <p>y se normalizan para mantener escala media estable:</p>
-<p>[
+<div class="doc-math">
+\[
 \tilde{w}_i=\frac{w_i}{\bar{w}}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\tilde{w}_i$ es el peso normalizado de la observación $i$.</li>

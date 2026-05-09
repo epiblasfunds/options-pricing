@@ -248,9 +248,12 @@
 </ul>
 <h2 id="union-temporal-as-of">Unión temporal as-of<a class="headerlink" href="#union-temporal-as-of" title="Permanent link">&para;</a></h2>
 <p>Primero se une cada trade de opción con su contrato de futuro candidato. Luego se ordenan las operaciones de opción y futuro por fecha-hora de ejecución. Para cada opción se selecciona el último trade del futuro con:</p>
-<p>[
+<div class="doc-math">
+\[
 t_{futuro} \le t_{opción}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$t_{futuro}$ es la hora de la operación de futuro usada como subyacente.</li>
@@ -275,9 +278,12 @@ t_{futuro} \le t_{opción}
 </code></pre>
 <h2 id="lag-del-subyacente">Lag del subyacente<a class="headerlink" href="#lag-del-subyacente" title="Permanent link">&para;</a></h2>
 <p>La base calcula el lag entre opción y subyacente en minutos:</p>
-<p>[
+<div class="doc-math">
+\[
 Lag_{min}=\frac{\lvert t_{opción}-t_{subyacente}\rvert}{60}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$Lag_{min}$ es el desfase temporal en minutos.</li>

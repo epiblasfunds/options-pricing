@@ -2,9 +2,11 @@
 
 XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:
 
+<div class="doc-math">
 \[
 \hat{\sigma}^{(m)}(x)=\hat{\sigma}^{(m-1)}(x)+\eta T_m(x)
 \]
+</div>
 
 donde:
 

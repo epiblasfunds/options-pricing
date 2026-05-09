@@ -255,9 +255,12 @@
 <li>El día se calcula como tercer viernes del mes.</li>
 </ul>
 <p>La regla de tercer viernes es:</p>
-<p>[
+<div class="doc-math">
+\[
 d_{3F} = 1 + ((4 - weekday(\text{primer día del mes})) \bmod 7) + 14
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$d_{3F}$ es el día del mes correspondiente al tercer viernes.</li>
@@ -267,9 +270,12 @@ d_{3F} = 1 + ((4 - weekday(\text{primer día del mes})) \bmod 7) + 14
 <p>Después se agrega la hora de expiración configurada, de forma que el vencimiento sea un datetime y no solo una fecha.</p>
 <h2 id="imputacion-de-strikes">Imputación de strikes<a class="headerlink" href="#imputacion-de-strikes" title="Permanent link">&para;</a></h2>
 <p>Para opciones con strike missing, el strike se extrae del código. La configuración declara el tramo de caracteres que codifica el strike. Para futuros, el strike no tiene significado económico y no se usa como strike de opción.</p>
-<p>[
-K = \text{float}(c[\text{strike_start}:\text{strike_end}])
-]</p>
+<div class="doc-math">
+\[
+K = \text{float}(c[\text{strike\_start}:\text{strike\_end}])
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$K$ es el strike extraído del código de contrato.</li>
@@ -278,9 +284,12 @@ K = \text{float}(c[\text{strike_start}:\text{strike_end}])
 </ul>
 <h2 id="tiempo-hasta-vencimiento">Tiempo hasta vencimiento<a class="headerlink" href="#tiempo-hasta-vencimiento" title="Permanent link">&para;</a></h2>
 <p>Se construye una fecha-hora de ejecución combinando fecha de sesión y hora de ejecución. Si la fuente no trae microsegundos, se normaliza con microsegundos cero. El tiempo hasta vencimiento se calcula en días con decimales:</p>
-<p>[
+<div class="doc-math">
+\[
 T_{días}=\frac{\text{MaturityDatetime}-\text{ExecDatetime}}{24\cdot 3600}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$T_{días}$ es el tiempo hasta vencimiento expresado en días.</li>

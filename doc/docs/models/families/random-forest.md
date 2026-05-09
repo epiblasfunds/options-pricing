@@ -2,9 +2,11 @@
 
 Random Forest es un ensamble de Árboles de decisión entrenados sobre muestras bootstrap y subconjuntos de variables. La predicción final es el promedio:
 
+<div class="doc-math">
 \[
 \hat{\sigma}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
 \]
+</div>
 
 donde:
 

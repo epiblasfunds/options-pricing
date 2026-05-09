@@ -28,9 +28,11 @@ flowchart TD
 
 La sección de superficies toma una observación real como ancla y genera una grilla contrafactual de moneyness y vencimiento. El strike se reconstruye como:
 
+<div class="doc-math">
 \[
 K = \frac{F}{m}
 \]
+</div>
 
 donde:
 

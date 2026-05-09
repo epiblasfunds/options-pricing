@@ -56,9 +56,11 @@ El vector final incluye:
 
 La moneyness se mide como:
 
+<div class="doc-math">
 \[
 m=\frac{F}{K}
 \]
+</div>
 
 donde:
 
@@ -68,9 +70,11 @@ donde:
 
 y su versión logaritmica:
 
+<div class="doc-math">
 \[
 \ell=\log(m)=\log(F/K)
 \]
+</div>
 
 donde:
 
@@ -85,9 +89,11 @@ La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores
 
 El proyecto usa:
 
+<div class="doc-math">
 \[
 F^{adj}=F e^{rT}
 \]
+</div>
 
 donde:
 
@@ -96,9 +102,11 @@ donde:
 - $r$ es el tipo de interés.
 - $T$ es el vencimiento en años.
 
+<div class="doc-math">
 \[
 \ell_F=\log(F^{adj}/K)
 \]
+</div>
 
 donde:
 

@@ -191,9 +191,12 @@
                 <h1 id="superficies-de-volatilidad">Superficies de volatilidad<a class="headerlink" href="#superficies-de-volatilidad" title="Permanent link">&para;</a></h1>
 <p>La pestaña <a href="../../behaviour-surface/">Behaviour And Surface</a> trata el modelo como una función de superficie. En lugar de limitarse a predicciones punto a punto, se pregunta cómo se mueve la volatilidad estimada cuando se modifican moneyness y vencimiento alrededor de una operación real.</p>
 <p>En opciones, la volatilidad implícita se analiza habitualmente como una superficie:</p>
-<p>[
+<div class="doc-math">
+\[
 \sigma = \sigma(K,T)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\sigma$ es la volatilidad implícita.</li>
@@ -201,9 +204,12 @@
 <li>$T$ es el tiempo hasta vencimiento.</li>
 </ul>
 <p>o, de forma más comparable entre niveles de mercado:</p>
-<p>[
+<div class="doc-math">
+\[
 \sigma = \sigma(m,T), \quad m=\frac{F}{K}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\sigma$ es la volatilidad implícita.</li>
@@ -237,9 +243,12 @@
 <li>Construye <code>surface_grid_size</code> valores de vencimiento entre 1 día y el máximo entre $1.5$ veces el vencimiento del ancla y 30 días.</li>
 <li>Reconstruye el strike como:</li>
 </ol>
-<p>[
+<div class="doc-math">
+\[
 K = \frac{F}{m}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$K$ es el strike reconstruido.</li>
@@ -287,9 +296,12 @@ K = \frac{F}{m}
 <p>Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.</p>
 <h2 id="smile-curve">Smile curve<a class="headerlink" href="#smile-curve" title="Permanent link">&para;</a></h2>
 <p>Un smile es un corte de la superficie a vencimiento fijo:</p>
-<p>[
+<div class="doc-math">
+\[
 m \longmapsto \hat{\sigma}(m \mid T=T_k)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$m$ es la moneyness del corte.</li>
@@ -306,9 +318,12 @@ m \longmapsto \hat{\sigma}(m \mid T=T_k)
 </ul>
 <h2 id="term-structure">Term structure<a class="headerlink" href="#term-structure" title="Permanent link">&para;</a></h2>
 <p>La term structure es el corte opuesto:</p>
-<p>[
+<div class="doc-math">
+\[
 T \longmapsto \hat{\sigma}(T \mid m=m_k)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$T$ es el tiempo hasta vencimiento del corte.</li>

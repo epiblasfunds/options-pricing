@@ -39,9 +39,11 @@ Se validan de nuevo opciones, futuros y candidatos de subyacente:
 
 Primero se une cada trade de opción con su contrato de futuro candidato. Luego se ordenan las operaciones de opción y futuro por fecha-hora de ejecución. Para cada opción se selecciona el último trade del futuro con:
 
+<div class="doc-math">
 \[
 t_{futuro} \le t_{opción}
 \]
+</div>
 
 donde:
 
@@ -72,9 +74,11 @@ flowchart TD
 
 La base calcula el lag entre opción y subyacente en minutos:
 
+<div class="doc-math">
 \[
 Lag_{min}=\frac{\lvert t_{opción}-t_{subyacente}\rvert}{60}
 \]
+</div>
 
 donde:
 

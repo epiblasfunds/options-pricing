@@ -205,9 +205,12 @@
 <p>La búsqueda no agota necesariamente todo el espacio. Para familias grandes, el número de iteraciones está acotado. El sistema registra cuántas configuraciones se han explorado frente a la cardinalidad máxima.</p>
 <h2 id="metricas-base">Métricas base<a class="headerlink" href="#metricas-base" title="Permanent link">&para;</a></h2>
 <p>Las métricas base son:</p>
-<p>[
+<div class="doc-math">
+\[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$MAE$ es el error absoluto medio.</li>
@@ -215,9 +218,12 @@ MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
 <li>$y_i$ es el valor real observado.</li>
 <li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
 </ul>
-<p>[
+<div class="doc-math">
+\[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$RMSE$ es la raíz del error cuadrático medio.</li>
@@ -225,9 +231,12 @@ RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
 <li>$y_i$ es el valor real observado.</li>
 <li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
 </ul>
-<p>[
+<div class="doc-math">
+\[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$R^2$ es el coeficiente de determinación.</li>
@@ -243,9 +252,12 @@ R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
 <li>Variabilidad entre folds.</li>
 <li>Gap de sobreajuste cuando validation es peor que train.</li>
 </ul>
-<p>[
+<div class="doc-math">
+\[
 CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$CE_1$ es la métrica compuesta de selección.</li>

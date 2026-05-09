@@ -191,9 +191,12 @@
                 <h1 id="curvas-ice">Curvas ICE<a class="headerlink" href="#curvas-ice" title="Permanent link">&para;</a></h1>
 <p>Las curvas ICE, del inglés <em>Individual Conditional Expectation</em>, muestran cómo cambia la predicción de un modelo para observaciones individuales cuando se modifica una feature y se mantienen las demás variables fijas. En este proyecto se usan para analizar respuestas del modelo de volatilidad ante cambios de strike, subyacente, vencimiento o tipo de interés.</p>
 <p>Formalmente, para una feature $j$, una observación $x_i$ y un valor contrafactual $z$:</p>
-<p>[
+<div class="doc-math">
+\[
 ICE_i^{(j)}(z)=f(z, x_{i,-j})
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$ICE_i^{(j)}(z)$ es la respuesta individual de la observación $i$ para la feature $j$.</li>
@@ -283,9 +286,12 @@ ICE_i^{(j)}(z)=f(z, x_{i,-j})
 <p>Si las curvas ICE de <code>StrikePrice</code> divergen mucho, el modelo no está usando strike de forma aislada; probablemente la relación con <code>UnderlyingPrice</code> y moneyness domina. Si las curvas ICE de <code>TimeToExpiration</code> cambian mucho en corto plazo, conviene cruzar la lectura con el diagnóstico por maturity.</p>
 <h2 id="diferencia-con-pdp">Diferencia con PDP<a class="headerlink" href="#diferencia-con-pdp" title="Permanent link">&para;</a></h2>
 <p>Un Partial Dependence Plot promedia las curvas ICE:</p>
-<p>[
+<div class="doc-math">
+\[
 PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n}f(z,x_{i,-j})
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$PDP_j(z)$ es la dependencia parcial de la feature $j$.</li>

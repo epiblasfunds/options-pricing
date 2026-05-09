@@ -16,10 +16,23 @@
       if (normalizeUrl(navLinks[i].getAttribute("href")) !== target) {
         continue;
       }
-      var group = navLinks[i].closest("ul");
-      var caption = group ? group.previousElementSibling : null;
-      if (caption && caption.classList.contains("caption")) {
-        return caption.textContent.replace(/\s+/g, " ").trim();
+      var item = navLinks[i].closest("li");
+      var parentItem = item ? item.parentElement.closest("li") : null;
+      while (parentItem) {
+        for (var child = parentItem.firstElementChild; child; child = child.nextElementSibling) {
+          if (child.tagName === "A" && !child.hasAttribute("href")) {
+            return child.textContent.replace(/\s+/g, " ").trim();
+          }
+        }
+        parentItem = parentItem.parentElement ? parentItem.parentElement.closest("li") : null;
+      }
+      var group = item ? item.parentElement : navLinks[i].closest("ul");
+      while (group) {
+        var caption = group.previousElementSibling;
+        if (caption && caption.classList && caption.classList.contains("caption")) {
+          return caption.textContent.replace(/\s+/g, " ").trim();
+        }
+        group = group.parentElement ? group.parentElement.closest("ul") : null;
       }
       return "Inicio";
     }

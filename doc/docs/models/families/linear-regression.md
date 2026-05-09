@@ -4,9 +4,11 @@ La regresión lineal se usa como baseline interpretable. Su función principal n
 
 La forma del modelo es:
 
+<div class="doc-math">
 \[
 \hat{\sigma}=\beta_0+\sum_{j=1}^{p}\beta_j x_j
 \]
+</div>
 
 donde:
 
@@ -27,9 +29,11 @@ La familia `LinearRegressionFamily` no define espacio de búsqueda. Se entrena u
 
 En modo progresivo, el modelo recibe `sample_weight` para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mínimos cuadrados ponderados:
 
+<div class="doc-math">
 \[
 \min_{\beta}\sum_i w_i(y_i-\beta_0-x_i^\top\beta)^2
 \]
+</div>
 
 donde:
 

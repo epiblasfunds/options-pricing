@@ -63,9 +63,11 @@ Cuando falta el vencimiento, se reconstruye desde el código de contrato:
 
 La regla de tercer viernes es:
 
+<div class="doc-math">
 \[
 d_{3F} = 1 + ((4 - weekday(\text{primer día del mes})) \bmod 7) + 14
 \]
+</div>
 
 donde:
 
@@ -79,9 +81,11 @@ Después se agrega la hora de expiración configurada, de forma que el vencimien
 
 Para opciones con strike missing, el strike se extrae del código. La configuración declara el tramo de caracteres que codifica el strike. Para futuros, el strike no tiene significado económico y no se usa como strike de opción.
 
+<div class="doc-math">
 \[
 K = \text{float}(c[\text{strike\_start}:\text{strike\_end}])
 \]
+</div>
 
 donde:
 
@@ -93,9 +97,11 @@ donde:
 
 Se construye una fecha-hora de ejecución combinando fecha de sesión y hora de ejecución. Si la fuente no trae microsegundos, se normaliza con microsegundos cero. El tiempo hasta vencimiento se calcula en días con decimales:
 
+<div class="doc-math">
 \[
 T_{días}=\frac{\text{MaturityDatetime}-\text{ExecDatetime}}{24\cdot 3600}
 \]
+</div>
 
 donde:
 

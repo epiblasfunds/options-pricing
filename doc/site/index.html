@@ -220,9 +220,12 @@
 </code></pre>
 <h2 id="problema-que-se-quiere-resolver">Problema que se quiere resolver<a class="headerlink" href="#problema-que-se-quiere-resolver" title="Permanent link">&para;</a></h2>
 <p>El objetivo es aproximar la función de volatilidad implícita:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}=f(\text{tipo de opción}, K, F, \tau, r)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}$ es la volatilidad implícita predicha.</li>
@@ -230,9 +233,12 @@
 <li>$X$ o las variables entre paréntesis son las entradas financieras del modelo.</li>
 </ul>
 <p>donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ es el tiempo hasta vencimiento y $r$ es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:</p>
-<p>[
+<div class="doc-math">
+\[
 P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$P_{mercado}$ es el precio observado.</li>
@@ -382,5 +388,5 @@ P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-05-09 22:22:52.511148+00:00
+Build Date UTC : 2026-05-09 22:44:11.257928+00:00
 -->

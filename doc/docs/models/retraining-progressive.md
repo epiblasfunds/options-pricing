@@ -4,15 +4,15 @@ Después de seleccionar hiperparámetros por [k-folds temporales](splits-kfolds.
 
 ```mermaid
 flowchart TD
-    A[Metadata de mejor familia] --> B[Recuperar mejores parámetros]
+    A["Metadata de mejor familia"] --> B["Recuperar mejores parámetros"]
     B --> C{Fase}
-    C -->|train_val| D[Train vs Validation]
-    C -->|final_test| E[TrainVal vs Test]
-    D --> F[Métricas + custom_error_2]
-    E --> G[Métricas finales + dispersión]
-    G --> H[Guardar modelo final]
-    H --> I[Construir bundle dashboard]
-    I --> J[Subida opcional a GCP]
+    C -->|train_val| D["Train vs Validation"]
+    C -->|final_test| E["TrainVal vs Test"]
+    D --> F["Métricas + custom_error_2"]
+    E --> G["Métricas finales + dispersión"]
+    G --> H["Guardar modelo final"]
+    H --> I["Construir bundle dashboard"]
+    I --> J["Subida opcional a GCP"]
 ```
 
 ## Reentrenamiento no progresivo
@@ -21,9 +21,11 @@ En entrenamiento no progresivo, el modelo recibe todo el bloque de entrenamiento
 
 Este modo representa el entrenamiento estándar:
 
+<div class="doc-math">
 \[
 \min_{\theta} \sum_{i \in Train} L(y_i, f_{\theta}(x_i))
 \]
+</div>
 
 donde:
 
@@ -43,9 +45,11 @@ Ventajas:
 
 El entrenamiento progresivo ordena observaciones por cercanía a ATM usando la magnitud de la log-moneyness:
 
+<div class="doc-math">
 \[
 |\ell| = |\log(F/K)|
 \]
+</div>
 
 donde:
 
@@ -58,10 +62,10 @@ Luego divide el entrenamiento en segmentos. El primer segmento contiene observac
 
 ```mermaid
 flowchart LR
-    A[Ordenar por |logMoneyness|] --> B[Segmento 1: más ATM]
-    B --> C[Segmento 2: ATM + intermedio]
-    C --> D[Segmento 3: ATM + intermedio + alas]
-    D --> E[Modelo final]
+    A["Ordenar por abs(logMoneyness)"] --> B["Segmento 1: más ATM"]
+    B --> C["Segmento 2: ATM + intermedio"]
+    C --> D["Segmento 3: ATM + intermedio + alas"]
+    D --> E["Modelo final"]
 ```
 
 La intención financiera es estabilizar primero la zona más líquida y central de la superficie. Las regiones muy OTM o ITM pueden ser más ruidosas, menos líquidas o más sensibles a microestructura. Empezar por ATM fuerza al modelo a aprender primero el nivel central de volatilidad y luego extenderse a las alas.
@@ -82,9 +86,11 @@ La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos
 
 Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:
 
+<div class="doc-math">
 \[
 w_s \propto S-s
 \]
+</div>
 
 donde:
 
@@ -94,9 +100,11 @@ donde:
 
 y se normalizan para mantener escala media estable:
 
+<div class="doc-math">
 \[
 \tilde{w}_i=\frac{w_i}{\bar{w}}
 \]
+</div>
 
 donde:
 
@@ -135,7 +143,6 @@ Progressive training no es solo una variante de optimización. Afecta a la forma
 - Menos error central.
 - Cambios en smiles y term structures.
 - Diferente importancia relativa de moneyness y vencimiento.
-
 
 
 
