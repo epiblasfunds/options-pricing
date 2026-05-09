@@ -16,7 +16,7 @@
       ],
       "sample_option_size": 250,
       "behaviour_anchor_size": 96,
-      "neighbors_k": 10
+      "neighbors_k": 200
     },
     "random_state": 42,
     "surrogate_min_samples_leaf": 80,

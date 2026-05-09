@@ -5,7 +5,7 @@ import pandas as pd
 import shap
 
 from src.api.services.model_runtime import ApiModelService
-from src.dashboard.plots.local_plots import neighbors_distance_figure
+from src.dashboard.plots.local_plots import neighbors_projection_figure
 from src.model2dashboard import artifact_builders
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.python_models.dashboard.artifacts import StoredShapExplanation
@@ -148,12 +148,58 @@ def test_runtime_shap_explanation_matches_persisted_background_base_value(monkey
     assert float(local_shap.base_values[0]) == float(runtime_stored.base_values[0])
 
 
-def test_neighbors_distance_figure_uses_api_neighbor_index_column():
-    figure = neighbors_distance_figure(
-        pd.DataFrame({"index": [101, 205], "distance": [0.1, 0.3]})
+def test_neighbors_projection_figure_uses_api_neighbor_index_column():
+    sample = pd.DataFrame(
+        {"StrikePrice": [100.0], "UnderlyingPrice": [101.0], "distance": [0.0]}
+    )
+    figure = neighbors_projection_figure(
+        sample,
+        pd.DataFrame(
+            {
+                "index": [101, 205],
+                "distance": [0.1, 0.3],
+                "StrikePrice": [99.0, 103.0],
+                "UnderlyingPrice": [100.0, 104.0],
+            }
+        ),
+        feature_names=["StrikePrice", "UnderlyingPrice"],
     )
 
-    assert list(figure.data[0].x) == ["101", "205"]
+    assert figure.data[1].customdata[0][0] == "101"
+    assert figure.data[1].customdata[1][0] == "205"
+
+
+def test_runtime_neighbors_use_training_reference_frame():
+    service = ApiModelService.__new__(ApiModelService)
+    dashboard_model = SimpleNamespace(
+        transformed_feature_names=["StrikePrice", "UnderlyingPrice"],
+        metadata={"model_input_features": ["StrikePrice", "UnderlyingPrice"]},
+        training_reference_frame=pd.DataFrame(
+            {
+                "StrikePrice": [100.0, 220.0],
+                "UnderlyingPrice": [101.0, 221.0],
+                "ImpliedVolatility": [0.2, 0.5],
+            },
+            index=[50, 60],
+        ),
+        dataset_frame=pd.DataFrame(
+            {
+                "StrikePrice": [1000.0, 2000.0],
+                "UnderlyingPrice": [1001.0, 2001.0],
+                "ImpliedVolatility": [1.0, 2.0],
+            },
+            index=[5, 6],
+        ),
+    )
+    sample = pd.DataFrame({"StrikePrice": [102.0], "UnderlyingPrice": [103.0]})
+
+    neighbors = service._find_runtime_neighbors(
+        dashboard_model=dashboard_model,
+        sample_frame=sample,
+        k=1,
+    )
+
+    assert neighbors.index.tolist() == [50]
 
 
 def test_stored_shap_to_result_uses_waterfall_final_prediction():

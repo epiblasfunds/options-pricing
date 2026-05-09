@@ -126,3 +126,31 @@ def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():
     assert normalized["equation"].is_unique
     assert normalized["selected"].sum() == 1
     assert "best_eq" in set(normalized["equation"])
+
+
+def test_build_neighbors_projection_pca_returns_reusable_transform():
+    artifact = artifact_builders.build_neighbors_projection_pca(
+        training_reference_frame=pd.DataFrame(
+            {
+                "TTEYears": [0.05, 0.10, 0.20],
+                "sqrtTTEYears": [0.22, 0.31, 0.45],
+                "isCall": [1.0, 0.0, 1.0],
+            }
+        ),
+        feature_names=["TTEYears", "sqrtTTEYears", "isCall"],
+    )
+
+    coords = artifact.transform_frame(
+        pd.DataFrame(
+            {
+                "TTEYears": [0.15],
+                "sqrtTTEYears": [0.39],
+                "isCall": [0.0],
+            }
+        ),
+        dimensions=3,
+    )
+
+    assert artifact.feature_names == ["TTEYears", "sqrtTTEYears", "isCall"]
+    assert artifact.components.shape[1] == 3
+    assert coords.shape == (1, 3)

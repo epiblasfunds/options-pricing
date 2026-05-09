@@ -19,9 +19,11 @@ from src.model2dashboard import run_pipeline
 run_pipeline()
 ```
 
-The bundle builder loads chart data from `TrainingDataHandler.load_splitted_data()[-1]`,
-so non-training dashboard views are generated on the Test split. Each generated bundle
-contains:
+The bundle builder loads dashboard samples and diagnosis data from
+`TrainingDataHandler.load_splitted_data()[-1]`, so those views are generated on the
+Test split. Nearest-neighbour search uses
+`TrainingDataHandler.load_splitted_data()[0]`, so neighbour tables and maps are
+anchored on the Train split. Each generated bundle contains:
 - final-test predictions and diagnosis artifacts;
 - global and local SHAP values;
 - behaviour surfaces, ICE and ALE frames;

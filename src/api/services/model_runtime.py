@@ -43,7 +43,7 @@ class ApiModelService:
         storage: ModelStorage,
         cache: ApiModelCache[LoadedApiModel],
         feature_schema: FeatureSchema | None = None,
-        neighbors_k: int = 10,
+        neighbors_k: int = 200,
     ) -> None:
         self.storage = storage
         self.cache = cache
@@ -159,7 +159,7 @@ class ApiModelService:
         sample_frame: pd.DataFrame,
         k: int,
     ) -> pd.DataFrame:
-        dataset = dashboard_model.dataset_frame
+        dataset = dashboard_model.training_reference_frame
         feature_names = self._neighbor_feature_names(dashboard_model, sample_frame)
         if not feature_names:
             return pd.DataFrame()
@@ -199,7 +199,7 @@ class ApiModelService:
         return [
             name
             for name in candidates
-            if name in dashboard_model.dataset_frame.columns
+            if name in dashboard_model.training_reference_frame.columns
             and name in sample_frame.columns
         ]
 

@@ -38,7 +38,7 @@ class IDS:
     SAMPLE_OUTPUT = "sample-output"
     SAMPLE_WATERFALL = "sample-waterfall"
     SAMPLE_NEIGHBORS = "sample-neighbors"
-    SAMPLE_COMPARISON = "sample-comparison"
+    SAMPLE_COMPARISON_3D = "sample-comparison-3d"
 
     DIAGNOSIS_METRICS = "diagnosis-metrics"
     DIAGNOSIS_SCATTER = "diagnosis-scatter"

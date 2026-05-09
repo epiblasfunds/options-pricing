@@ -729,7 +729,7 @@ def _sample_tab():
                             ),
                             html.Div(id=IDS.SAMPLE_OUTPUT, style={"marginTop": "12px"}),
                             html.Div(
-                                style=SUBCARD_STYLE,
+                                style={**SUBCARD_STYLE, "marginBottom": "28px"},
                                 children=[
                                     _section_title_with_info(
                                         "Local SHAP Waterfall",
@@ -746,30 +746,54 @@ def _sample_tab():
                                     _bounded_image(IDS.SAMPLE_WATERFALL),
                                 ],
                             ),
-                            _section_title_with_info(
-                                "Nearest Neighbours",
-                                (
-                                    "Closest historical observations to the "
-                                    "selected sample in the explainability "
-                                    "feature space. These rows provide local "
-                                    "context and help assess whether the "
-                                    "explanation is supported by genuinely "
-                                    "similar cases from the dataset."
-                                ),
+                            html.Div(
+                                style={"marginTop": "8px"},
+                                children=[
+                                    _section_title_with_info(
+                                        "Nearest Neighbours",
+                                        (
+                                            "Closest historical observations to the "
+                                            "selected sample in the explainability "
+                                            "feature space. These rows provide local "
+                                            "context and help assess whether the "
+                                            "explanation is supported by genuinely "
+                                            "similar cases from the dataset."
+                                        ),
+                                    ),
+                                    html.Div(id=IDS.SAMPLE_NEIGHBORS),
+                                ],
                             ),
-                            html.Div(id=IDS.SAMPLE_NEIGHBORS),
-                            _section_title_with_info(
-                                "Neighbour Distance Comparison",
-                                (
-                                    "Distance profile of the retrieved "
-                                    "neighbours relative to the selected "
-                                    "sample. Lower values indicate stronger "
-                                    "local support, while larger gaps may "
-                                    "suggest the sample lies in a sparse or less "
-                                    "represented region of the feature space."
-                                ),
+                            html.Div(
+                                style={"marginTop": "32px"},
+                                children=[
+                                    _section_title_with_info(
+                                        "Neighbourhood Distance Map",
+                                        (
+                                            "Three-dimensional projection of the local "
+                                            "feature space built from the analyzed sample "
+                                            "and its retrieved neighbours. Closer points "
+                                            "indicate stronger local support, while more "
+                                            "distant points suggest the sample lies in a "
+                                            "sparser region."
+                                        ),
+                                    ),
+                                    html.P(
+                                        (
+                                            "Disclaimer: the principal components are "
+                                            "estimated locally from the analyzed sample "
+                                            "and the neighbours shown in this map, not "
+                                            "from the full training set. Axis directions "
+                                            "and component meanings may therefore change "
+                                            "across samples."
+                                        ),
+                                        style=HELP_TEXT_STYLE,
+                                    ),
+                                ],
                             ),
-                            dcc.Graph(id=IDS.SAMPLE_COMPARISON),
+                            dcc.Graph(
+                                id=IDS.SAMPLE_COMPARISON_3D,
+                                style={"height": "820px"},
+                            ),
                         ],
                     )
                 ]

@@ -134,6 +134,15 @@ def load_test_trade_frame(*, verbose: bool = False) -> pd.DataFrame:
     return _normalize_trade_frame(test_frame).reset_index(drop=True)
 
 
+def load_train_trade_frame(*, verbose: bool = False) -> pd.DataFrame:
+    from src.volatility_models.data_utils import TrainingDataHandler
+
+    train_frame, _, _ = TrainingDataHandler.load_splitted_data(
+        verbose=verbose,
+    )
+    return _normalize_trade_frame(train_frame).reset_index(drop=True)
+
+
 def _normalize_trade_frame(frame: pd.DataFrame) -> pd.DataFrame:
     normalized = frame.copy()
     normalized.columns = [column_name(column) for column in normalized.columns]
