@@ -61,7 +61,7 @@ Este fichero configura los datos de entrenamiento y las métricas de selección:
 | `kfolds_config` | Número de folds temporales y bloques extra usados para construir ventanas. |
 | `custom_error_1` | Métrica compuesta para elegir hiperparámetros en validación cruzada. |
 | `custom_error_2` | Métrica compuesta para comparar reentrenamientos train/validation. |
-| `models_metrics` | Métricas base: MAE, RMSE y \(R^2\). |
+| `models_metrics` | Métricas base: MAE, RMSE y $R^2$. |
 | `required_scaler_models` | Familias que guardan scaler junto al estimador. |
 | `progressive_training_config` | Número de segmentos y columna de moneyness usada para entrenamiento progresivo. |
 

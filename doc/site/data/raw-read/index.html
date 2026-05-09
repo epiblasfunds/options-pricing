@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Lectura raw - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Lectura raw";
+        var mkdocs_page_input_path = "data\\raw-read.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Lectura raw</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#entradas">Entradas</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#normalizacion-de-cabeceras-y-tipos">Normalización de cabeceras y tipos</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filtrado-de-universo-ibex">Filtrado de universo IBEX</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#construccion-de-la-base-de-tipos">Construcción de la base de tipos</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#validaciones-y-salidas">Validaciones y salidas</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/tensor-train/">Red tensor-train</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Datos</li>
+      <li class="breadcrumb-item active">Lectura raw</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="read-raw-step">Read Raw Step<a class="headerlink" href="#read-raw-step" title="Permanent link">&para;</a></h1>
+<p>El primer paso convierte ficheros fuente heterogéneos en tres bases limpias: contratos, operaciones y tipos. Su objetivo es reducir volumen, normalizar tipos y dejar solo el universo de instrumentos que el proyecto modela.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[(Market data por año)] --&gt; B[Leer CCONTRACTS_C2]
+    A --&gt; C[Leer TGENTRADES]
+    D[(ECB_EONIA.csv)] --&gt; E[Construir tipos]
+    F[(ECB_STR.csv)] --&gt; E
+    B --&gt; G[Filtrar IBEX y vencimientos mensuales]
+    C --&gt; H[Filtrar IBEX y vencimientos mensuales]
+    G --&gt; I[(CCONTRACTS_C2.csv)]
+    H --&gt; J[(TGENTRADES.csv)]
+    E --&gt; K[(RATES_DATABASE.csv)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,D,F,I,J,K dataset;
+    class B,C,E,G,H process;
+</code></pre>
+<h2 id="entradas">Entradas<a class="headerlink" href="#entradas" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Entrada</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ficheros <code>CCONTRACTS_C2</code></td>
+<td>Descripción diaria de contratos: código, strike, vencimiento y metadatos.</td>
+</tr>
+<tr>
+<td>Ficheros <code>TGENTRADES</code></td>
+<td>Operaciones ejecutadas: contrato, hora, precio, cantidad y tipo de operación.</td>
+</tr>
+<tr>
+<td><code>ECB_EONIA.csv</code></td>
+<td>Tipo EONIA histórico.</td>
+</tr>
+<tr>
+<td><code>ECB_STR.csv</code></td>
+<td>Tipo €STR histórico.</td>
+</tr>
+</tbody>
+</table>
+<p>El rango de años se toma de configuración. Para cada año se buscan ficheros con los prefijos esperados y extensiones de mercado. Cuando hay variantes repetidas para una misma fecha, se conserva un fichero único por fecha.</p>
+<h2 id="normalizacion-de-cabeceras-y-tipos">Normalización de cabeceras y tipos<a class="headerlink" href="#normalizacion-de-cabeceras-y-tipos" title="Permanent link">&para;</a></h2>
+<p>Los ficheros fuente pueden llegar con o sin cabecera. El loader detecta si la primera fila parece una cabecera textual y la descarta cuando corresponde. En el caso de operaciones puede aparecer una columna auxiliar de secuencia que no pertenece al esquema final; esa columna se elimina.</p>
+<p>Después se asignan nombres de columnas según el schema declarado y se seleccionan solo columnas relevantes. Las conversiones de tipos cubren:</p>
+<ul>
+<li>Fechas de sesión.</li>
+<li>Horas de ejecución.</li>
+<li>Numéricos de precio, cantidad, strike y tipos.</li>
+<li>Texto para códigos y categorías.</li>
+</ul>
+<h2 id="filtrado-de-universo-ibex">Filtrado de universo IBEX<a class="headerlink" href="#filtrado-de-universo-ibex" title="Permanent link">&para;</a></h2>
+<p>El filtrado inicial aplica dos condiciones:</p>
+<p>$$
+\text{es_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
+$$</p>
+<p>$$
+\text{es_mensual}(c)=\text{longitud}(c)\in{\text{longitud opción},\text{longitud futuro}}
+$$</p>
+<p>Solo se conservan filas que cumplen ambas. Esto mantiene el universo consistente entre contratos y operaciones.</p>
+<h2 id="construccion-de-la-base-de-tipos">Construcción de la base de tipos<a class="headerlink" href="#construccion-de-la-base-de-tipos" title="Permanent link">&para;</a></h2>
+<p>La base de tipos combina EONIA y €STR. Antes de la fecha de corte se utiliza EONIA ajustado por el spread configurado; desde la fecha de corte se utiliza €STR directamente.</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[(EONIA)] --&gt; B{Fecha &lt; corte}
+    C[(€STR)] --&gt; D{Fecha &gt;= corte}
+    B --&gt; E[EONIA - spread]
+    D --&gt; F[€STR]
+    E --&gt; G[(RATES_DATABASE)]
+    F --&gt; G
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef decisión fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#4a2a00;
+    class A,C,G dataset;
+    class E,F process;
+    class B,D decisión;
+</code></pre>
+<p>La lógica financiera es construir una serie continua de referencia monetaria. Para fechas antiguas, el ajuste aproxima la transición entre EONIA y €STR:</p>
+<p>$$
+r_t =
+\begin{cases}
+\text{EONIA}<em _mathrm_corte="\mathrm{corte">t - s, &amp; t &lt; t</em> \
+\text{€STR}}<em _mathrm_corte="\mathrm{corte">t, &amp; t \ge t</em>
+\end{cases}
+$$}</p>
+<h2 id="validaciones-y-salidas">Validaciones y salidas<a class="headerlink" href="#validaciones-y-salidas" title="Permanent link">&para;</a></h2>
+<p>Este paso no realiza todavía las validaciones financieras profundas; su cometido principal es lectura, selección y tipado. Las salidas son:</p>
+<table>
+<thead>
+<tr>
+<th>Salida</th>
+<th>Contenido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CCONTRACTS_C2.csv</code></td>
+<td>Contratos IBEX mensuales seleccionados y tipados.</td>
+</tr>
+<tr>
+<td><code>TGENTRADES.csv</code></td>
+<td>Operaciones IBEX mensuales seleccionadas y tipadas.</td>
+</tr>
+<tr>
+<td><code>RATES_DATABASE.csv</code></td>
+<td>Serie diaria de tipos de referencia homogénea.</td>
+</tr>
+</tbody>
+</table>
+<p>Estas tres bases alimentan el paso de <a href="../merge-raw/">unión de operaciones y contratos</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../" class="btn btn-neutral float-left" title="Visión general del ETL"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../merge-raw/" class="btn btn-neutral float-right" title="Unión de mercado y contratos">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../merge-raw/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

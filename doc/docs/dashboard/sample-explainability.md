@@ -1,99 +1,66 @@
-﻿# Pestaña Sample Explainability
+# Pestaña Sample Explainability
 
-Esta pestaña analiza una observación concreta. Puede partir de una fila del dataset o de una entrada manual. Su objetivo es responder: ¿por qué esta muestra recibe esta volatilidad predicha y qué observaciones históricas se le parecen?
+Esta página resume la pestaña de explicabilidad local. El detalle está dividido en [SHAP local y waterfall](sample/local-shap-waterfall.md) y [vecinos y soporte local](sample/neighbours.md).
+
+La pestaña responde a dos preguntas:
+
+- Por qué una muestra concreta recibe una volatilidad predicha.
+- Si esa muestra está respaldada por observaciones históricas similares.
 
 ```mermaid
 flowchart TD
-    A[Modo dataset o manual] --> B[Construir muestra]
+    A[Dataset sample o manual input] --> B[Construir muestra]
     B --> C[Predicción]
-    C --> D[Local SHAP Waterfall]
-    C --> E[Nearest Neighbours]
-    E --> F[Neighbourhood Distance Map]
+    C --> D[SHAP local waterfall]
+    B --> E[Vecinos en train]
+    E --> F[Tabla de vecinos]
+    E --> G[Mapa PCA 3D]
+    D --> H[Explicación local]
+    F --> H
+    G --> H
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,E data;
+    class D method;
+    class F,G,H plot;
 ```
 
 ## Mode
 
-La caja `Mode` permite elegir entre:
+El modo `Dataset sample` selecciona una observación del bundle con artefactos precomputados. El modo `Manual input` permite introducir un escenario financiero. En ambos casos se usan las mismas variables raw visibles: `OptionType`, `StrikePrice`, `UnderlyingPrice`, `TimeToExpiration` y `Rate`.
 
-- Dataset sample: una observación ya presente en el bundle.
-- Manual input: una muestra definida por el usuario con las features raw visibles.
+## Feature Preview y Manual Form
 
-La entrada manual usa las mismas variables financieras que el modelo espera conceptualmente: tipo de opción, strike, subyacente, tiempo a vencimiento y tipo.
-
-## Dataset Sample
-
-Cuando el modo es dataset, el usuario selecciona el índice de una observación precomputada. Esto permite usar SHAP local y vecinos ya guardados en el bundle, con respuesta rápida.
-
-## Feature Preview
-
-La vista previa muestra los valores relevantes de la muestra seleccionada o manual. Sirve para comprobar que la explicación que se va a lanzar corresponde al escenario financiero deseado.
-
-## Manual Form
-
-En modo manual, el formulario recoge los inputs raw. El dashboard normaliza y valida esos valores según el esquema de features:
-
-- Numéricos con rango válido cuando aplica.
-- Tipo de opción dentro de categorías permitidas.
-- Defaults razonables para columnas auxiliares no visibles.
-
-## Analyze Sample
-
-El botón ejecuta el análisis. En muestra de dataset, recupera artefactos del bundle. En muestra manual, puede usar el runtime/API para calcular predicción, SHAP local y vecinos.
+La vista previa sirve para comprobar que la muestra explicada corresponde al contrato deseado. En modo manual, el formulario valida rangos y categorías mediante el esquema de features del dashboard.
 
 ## Sample Output
 
-La caja de salida resume la predicción:
+La salida resume:
 
 $$
 \hat{\sigma}=f(x)
 $$
 
-Si existe volatilidad real asociada, también puede interpretarse junto al residual:
+Si la observación pertenece al dataset y existe volatilidad real, también puede leerse el residual:
 
 $$
-e = \sigma - \hat{\sigma}
+e=\sigma-\hat{\sigma}
 $$
+
+El residual evalúa acierto frente a mercado. El [waterfall SHAP](sample/local-shap-waterfall.md) explica la predicción del modelo.
 
 ## Local SHAP Waterfall
 
-El waterfall local descompone una predicción:
+El waterfall local usa [SHAP](global/shap-fundamentals.md) para construir:
 
 $$
 \hat{\sigma}(x)=\phi_0+\phi_1(x)+\cdots+\phi_p(x)
 $$
 
-La visualización ordena contribuciones por magnitud. Permite ver qué variables empujan la volatilidad hacia arriba o hacia abajo para esa muestra específica.
-
-Interpretación:
-
-- Barras positivas: aumentan la volatilidad frente al baseline.
-- Barras negativas: reducen la volatilidad frente al baseline.
-- La suma de baseline y contribuciones llega a la predicción.
+La lectura completa está en [SHAP local y waterfall](sample/local-shap-waterfall.md).
 
 ## Nearest Neighbours
 
-La tabla de vecinos muestra observaciones históricas cercanas en el espacio de features del modelo. La distancia se calcula tras estandarizar variables, para que ninguna feature domine solo por escala.
-
-La utilidad es doble:
-
-- Validar soporte local: una muestra rodeada de vecinos parecidos es más fiable.
-- Comparar predicción frente a casos históricos: ayuda a detectar muestras manuales fuera de distribución.
-
-## Neighbourhood Distance Map
-
-El mapa 3D proyecta la muestra y sus vecinos a componentes principales. No pretende que cada eje tenga una interpretación fija; es una visualización local de proximidad.
-
-```mermaid
-flowchart LR
-    A[Features transformadas] --> B[Estandarización]
-    B --> C[PCA local/global guardada]
-    C --> D[Coordenadas 3D]
-    D --> E[Mapa de vecinos]
-```
-
-Si la muestra aparece aislada, la explicación local debe leerse con más cautela. Si aparece dentro de una nube densa de vecinos, la predicción tiene más soporte empírico.
-
-
-
-
+Los vecinos muestran observaciones históricas cercanas en el espacio transformado del modelo. La utilidad es evaluar soporte local y detectar extrapolación. El cálculo y sus cautelas se documentan en [vecinos y soporte local](sample/neighbours.md).
 

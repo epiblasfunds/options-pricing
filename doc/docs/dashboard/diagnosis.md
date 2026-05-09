@@ -73,7 +73,7 @@ $$
 m=\frac{F}{K}
 $$
 
-y también se usan transformaciones logarítmicas en artefactos relacionados. Errores concentrados lejos de \(m=1\) suelen indicar dificultad en las alas.
+y también se usan transformaciones logarítmicas en artefactos relacionados. Errores concentrados lejos de $m=1$ suelen indicar dificultad en las alas.
 
 ## Error by Maturity
 

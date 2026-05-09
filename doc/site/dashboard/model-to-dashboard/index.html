@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>De modelo entrenado a bundle visualizable - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "De modelo entrenado a bundle visualizable";
+        var mkdocs_page_input_path = "dashboard\\model-to-dashboard.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/tensor-train/">Red tensor-train</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Generación de artefactos</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">De modelo entrenado a bundle visualizable</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#descubrimiento-y-carga-del-runtime">Descubrimiento y carga del runtime</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dataset-de-dashboard">Dataset de dashboard</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#shap">SHAP</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#arboles-surrogate">Árboles surrogate</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#regresion-simbolica">Regresión simbólica</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#superficies-ice-y-ale">Superficies, ICE y ALE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#vecinos">Vecinos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#estructura-del-bundle">Estructura del bundle</a>
+    </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Generación de artefactos</li>
+      <li class="breadcrumb-item active">De modelo entrenado a bundle visualizable</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="de-modelo-entrenado-a-bundle-visualizable">De modelo entrenado a bundle visualizable<a class="headerlink" href="#de-modelo-entrenado-a-bundle-visualizable" title="Permanent link">&para;</a></h1>
+<p>El paquete de conversión toma modelos guardados tras el reentrenamiento final y genera un bundle autocontenido. Ese bundle es lo que consume el <a href="../">dashboard</a>. La conversión no cambia el modelo principal; calcula artefactos auxiliares que permiten explicarlo sin repetir procesos costosos en cada interacción.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[trained_models] --&gt; B[Cargar runtime del modelo]
+    C[retrained_metadata] --&gt; B
+    D[Train split raw] --&gt; E[Predicciones train]
+    F[Test split raw] --&gt; G[Predicciones test]
+    B --&gt; E
+    B --&gt; G
+    G --&gt; H[Dataset dashboard]
+    E --&gt; I[Referencia de vecinos]
+    H --&gt; J[SHAP]
+    H --&gt; K[Surrogates]
+    H --&gt; L[Superficies/ICE/ALE]
+    H --&gt; M[Diagnóstico]
+    I --&gt; N[Vecinos y PCA]
+    J --&gt; O[Bundle saved_models/model_id]
+    K --&gt; O
+    L --&gt; O
+    M --&gt; O
+    N --&gt; O
+</code></pre>
+<h2 id="descubrimiento-y-carga-del-runtime">Descubrimiento y carga del runtime<a class="headerlink" href="#descubrimiento-y-carga-del-runtime" title="Permanent link">&para;</a></h2>
+<p>La conversión descubre familias entrenadas en la carpeta de modelos finales. Para cada familia:</p>
+<ul>
+<li>Localiza el fichero del estimador.</li>
+<li>Localiza metadatos de final test.</li>
+<li>Localiza metadatos train/val si existen.</li>
+<li>Carga scaler cuando el modelo lo necesita.</li>
+<li>Fuerza predicción en proceso único cuando el estimador permite paralelismo, para evitar conflictos en runtime.</li>
+</ul>
+<h2 id="dataset-de-dashboard">Dataset de dashboard<a class="headerlink" href="#dataset-de-dashboard" title="Permanent link">&para;</a></h2>
+<p>El dataset de dashboard se construye sobre el split de test. Contiene columnas raw, features transformadas, predicción, residual y error absoluto:</p>
+<p>$$
+Residual_i = y_i-\hat{y}_i
+$$</p>
+<p>$$
+AbsoluteError_i = |Residual_i|
+$$</p>
+<p>El split de train se conserva como referencia para vecinos. Esta separación es deliberada:</p>
+<ul>
+<li>Diagnóstico y visualizaciones de rendimiento se hacen sobre test.</li>
+<li>Vecinos se buscan contra train, para dar contexto histórico sin usar el mismo conjunto evaluado como referencia principal.</li>
+</ul>
+<h2 id="shap">SHAP<a class="headerlink" href="#shap" title="Permanent link">&para;</a></h2>
+<p>Se calculan explicaciones <a href="../global/shap-fundamentals/">SHAP</a> mediante un explainer de permutación:</p>
+<ul>
+<li>Un fondo pequeño muestreado del dataset.</li>
+<li>Una muestra global para beeswarm, barras y heatmap.</li>
+<li>Una muestra local para waterfalls.</li>
+</ul>
+<p>La explicación aproxima la descomposición:</p>
+<p>$$
+\hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
+$$</p>
+<p>donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.</p>
+<h2 id="arboles-surrogate">Árboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h2>
+<p>Para varias profundidades configuradas se entrena un <a href="../global/surrogate-trees/">árbol surrogate</a> que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:</p>
+<p>$$
+\hat{\sigma}<em árbol="árbol">{modelo} \quad \text{vs} \quad \hat{\sigma}</em>
+$$</p>
+<p>Se guardan métricas, importancias, reglas textuales, número de hojas y profundidad efectiva.</p>
+<h2 id="regresion-simbolica">Regresión simbólica<a class="headerlink" href="#regresion-simbolica" title="Permanent link">&para;</a></h2>
+<p>La <a href="../global/symbolic-regression/">regresión simbólica</a> busca una expresión cerrada que aproxime el modelo principal. En el proyecto se implementa con PySR, una búsqueda evolutiva de expresiones, no con reinforcement learning ni con un método de enjambre.</p>
+<p>El bundle guarda:</p>
+<ul>
+<li>Ecuación seleccionada.</li>
+<li>Expresión en LaTeX.</li>
+<li>Features usadas.</li>
+<li>Complejidad.</li>
+<li>Tabla de ecuaciones candidatas.</li>
+<li>Fidelidad frente al modelo principal.</li>
+</ul>
+<h2 id="superficies-ice-y-ale">Superficies, ICE y ALE<a class="headerlink" href="#superficies-ice-y-ale" title="Permanent link">&para;</a></h2>
+<p>Las <a href="../behaviour/volatility-surfaces/">superficies de volatilidad</a> se generan alrededor de anclas representativas del test. Para cada ancla se construye una grilla de moneyness y vencimiento, manteniendo el resto de variables fijas.</p>
+<p><a href="../behaviour/ice/">ICE</a> y <a href="../behaviour/ale/">ALE</a> se calculan para features de análisis:</p>
+<ul>
+<li>Strike.</li>
+<li>Subyacente.</li>
+<li>Tiempo a vencimiento.</li>
+<li>Tipo de interés.</li>
+</ul>
+<p><a href="../behaviour/ice/">ICE</a> muestra respuestas individuales. <a href="../behaviour/ale/">ALE</a> muestra efecto acumulado centrado por bins, más robusto cuando hay correlaciones entre variables.</p>
+<h2 id="vecinos">Vecinos<a class="headerlink" href="#vecinos" title="Permanent link">&para;</a></h2>
+<p>Los <a href="../sample/neighbours/">vecinos</a> se calculan contra el split de train transformado. Se estandarizan features y se recuperan observaciones más cercanas. También se guarda una proyección PCA para representar distancias en 3D.</p>
+<h2 id="estructura-del-bundle">Estructura del bundle<a class="headerlink" href="#estructura-del-bundle" title="Permanent link">&para;</a></h2>
+<p>Cada carpeta de modelo contiene:</p>
+<ul>
+<li><code>metadata.json</code> raíz.</li>
+<li>Carpeta <code>dashboard_model/</code>.</li>
+<li>Dataset de test con predicciones.</li>
+<li>Referencia de train para vecinos.</li>
+<li>SHAP global/local.</li>
+<li>Frames de vecinos, superficies, ICE y ALE.</li>
+<li>Diagnóstico.</li>
+<li>Árboles surrogate.</li>
+<li>Modelo simbólico.</li>
+<li>Stub de respuesta manual.</li>
+</ul>
+<p>El dashboard puede arrancar sin recalcular estos artefactos, lo que reduce tiempo de respuesta.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../" class="btn btn-neutral float-left" title="Cometido del dashboard"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../global-explainability/" class="btn btn-neutral float-right" title="Mapa de la pestaña">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../global-explainability/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

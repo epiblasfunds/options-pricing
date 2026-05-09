@@ -70,7 +70,7 @@ $$
 Lag_{min}=\frac{\lvert t_{opción}-t_{subyacente}\rvert}{60}
 $$
 
-Aunque la unión as-of ya impone \(t_{subyacente}\le t_{opción}\), se guarda el valor absoluto como magnitud de distancia temporal. Este campo permite filtrar operaciones cuyo precio de futuro sea demasiado antiguo en el paso de [volatilidad implícita](volatility.md).
+Aunque la unión as-of ya impone $t_{subyacente}\le t_{opción}$, se guarda el valor absoluto como magnitud de distancia temporal. Este campo permite filtrar operaciones cuyo precio de futuro sea demasiado antiguo en el paso de [volatilidad implícita](volatility.md).
 
 ## Salida
 

@@ -27,7 +27,7 @@ $$
 \hat{\sigma}=f(X)
 $$
 
-donde \(X\) no son directamente todas las columnas raw, sino una representación financiera compacta basada en vencimiento, moneyness, tipo y tipo de opción.
+donde $X$ no son directamente todas las columnas raw, sino una representación financiera compacta basada en vencimiento, moneyness, tipo y tipo de opción.
 
 ## Datos usados para entrenamiento
 

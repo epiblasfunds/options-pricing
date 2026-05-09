@@ -1,103 +1,69 @@
-﻿# Pestaña Global Explainability
+# Pestaña Global Explainability
 
-Esta pestaña explica el modelo en conjunto. Combina SHAP global con modelos equivalentes más simples. Su objetivo es responder: ¿qué variables usa el modelo y con qué patrones generales?
+Esta página es el mapa de lectura de la pestaña de explicabilidad global. La explicación detallada de cada concepto está separada en páginas específicas para que la documentación pueda leerse de forma rigurosa: [fundamentos de SHAP](global/shap-fundamentals.md), [visualizaciones SHAP](global/shap-visualizations.md), [árboles surrogate](global/surrogate-trees.md) y [regresión simbólica](global/symbolic-regression.md).
+
+La pestaña combina dos enfoques. El primero es atributivo: [SHAP](global/shap-fundamentals.md) descompone predicciones en contribuciones por variable. El segundo es aproximativo: los [árboles surrogate](global/surrogate-trees.md) y la [regresión simbólica](global/symbolic-regression.md) construyen modelos interpretables que imitan al modelo principal.
 
 ```mermaid
 flowchart TD
-    A[Predicciones test] --> B[SHAP Explainability]
-    B --> C[Summary]
-    B --> D[Feature Importance]
+    A[Predicciones final-test] --> B[SHAP global]
+    B --> C[Summary beeswarm]
+    B --> D[Feature importance]
     B --> E[Dependence]
     B --> F[Heatmap]
-    A --> G[Equivalent Explainable Models]
+    A --> G[Modelos equivalentes]
     G --> H[Árboles surrogate]
     G --> I[Regresión simbólica]
+    H --> J[Fidelidad y reglas]
+    I --> K[Fórmula, complejidad y candidatos]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef artifact fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A data;
+    class B,G,H,I method;
+    class C,D,E,F,J,K artifact;
 ```
 
 ## SHAP Explainability
 
-La sección SHAP agrupa las visualizaciones basadas en valores de Shapley aproximados por permutación. La idea es descomponer cada predicción en contribuciones por feature:
+[SHAP](global/shap-fundamentals.md) se usa porque permite comparar modelos heterogéneos bajo una misma semántica de atribución. El proyecto emplea `shap.Explainer` con algoritmo de permutación, adecuado para tratar el estimador como caja negra y explicar familias tan distintas como XGBoost, Random Forest o redes neuronales.
+
+Las contribuciones cumplen:
 
 $$
 \hat{\sigma}_i = \phi_0 + \sum_j \phi_{ij}
 $$
 
-Valores positivos elevan la volatilidad predicha frente al baseline; valores negativos la reducen.
+En esta pestaña se agregan varias filas explicadas para estudiar comportamiento global. La interpretación local de una fila concreta se desarrolla en [SHAP local y waterfall](sample/local-shap-waterfall.md).
 
-## Summary
+## Visualizaciones disponibles
 
-La caja `Summary` muestra un beeswarm SHAP. Cada punto es una observación y cada fila una feature. La posición horizontal es la contribución SHAP, y el color suele representar el valor de la feature.
+| Caja | Página de detalle | Función |
+| --- | --- | --- |
+| `Summary` | [Visualizaciones SHAP](global/shap-visualizations.md) | Beeswarm de contribuciones individuales. |
+| `Feature Importance` | [Visualizaciones SHAP](global/shap-visualizations.md) | Ranking por $\frac{1}{n}\sum_i|\phi_{ij}|$. |
+| `Dependence` | [Visualizaciones SHAP](global/shap-visualizations.md) | Relación entre valor de feature y contribución. |
+| `Heatmap` | [Visualizaciones SHAP](global/shap-visualizations.md) | Matriz de perfiles explicativos por observación. |
+| `Surrogate trees` | [Árboles surrogate](global/surrogate-trees.md) | Reglas aproximadas del modelo principal. |
+| `Symbolic model` | [Regresión simbólica](global/symbolic-regression.md) | Fórmula cerrada que aproxima al predictor. |
 
-Se usa para leer:
+## Modelos equivalentes
 
-- Ranking visual de importancia.
-- Dirección del efecto.
-- Dispersión de contribuciones.
-- No linealidades y asimetrías.
-
-## Feature Importance
-
-La caja `Feature Importance` resume:
-
-$$
-I_j = \frac{1}{n}\sum_i |\phi_{ij}|
-$$
-
-Es una importancia global por magnitud media absoluta. A diferencia de coeficientes lineales, no indica signo; indica cuanto mueve cada feature la predicción en promedio.
-
-## Dependence
-
-La caja `Dependence` permite seleccionar una feature transformada y ver su valor frente a su contribución SHAP. Es útil para detectar:
-
-- Umbrales.
-- Saturaciones.
-- Cambios de pendiente.
-- Interacciones visibles por color o dispersión.
-
-La lectura es local-global: cada punto es local, pero el patrón agregado revela la forma funcional aprendida.
-
-## Heatmap
-
-La caja `Heatmap` muestra contribuciones SHAP por observación y feature. Permite detectar grupos de observaciones con estructura explicativa parecida.
-
-Por ejemplo, dos regiones de moneyness pueden tener volatilidades similares pero apoyarse en drivers distintos. El heatmap ayuda a distinguir esos regímenes.
-
-## Equivalent Explainable Models
-
-Esta sección contiene modelos sustitutos que aproximan al modelo principal. No explican la verdad de mercado directamente; explican el comportamiento del modelo entrenado.
-
-```mermaid
-flowchart LR
-    A[Modelo principal] --> B[Predicciones sobre muestra]
-    B --> C[árbol surrogate]
-    B --> D[Modelo simbólico]
-    C --> E[Reglas y fidelidad]
-    D --> F[Fórmula y fidelidad]
-```
-
-### Árboles surrogate
-
-Los árboles se entrenan a varias profundidades. Profundidades bajas dan reglas fáciles de leer pero menor fidelidad. Profundidades altas capturan más detalle, pero pueden dejar de ser interpretables.
-
-El dashboard muestra:
-
-- Profundidades disponibles.
-- Reglas del árbol.
-- Importancias del surrogate.
-- Métricas de fidelidad contra el modelo principal.
-- Imagen o representación del árbol.
-
-### Regresión simbólica
-
-La regresión simbólica produce una ecuación cerrada. Su valor es resumir una aproximación del modelo en una fórmula:
+Los modelos equivalentes no sustituyen al modelo principal. Su target es la predicción del modelo principal:
 
 $$
-\hat{\sigma}_{simbólica}=g(x_1,\ldots,x_p)
+\hat{\sigma}_{principal}(x) \approx h(x)
 $$
 
-El dashboard muestra la ecuación, complejidad, features usadas, métricas de fidelidad y candidatos alternativos. Una fórmula sencilla con fidelidad razonable es valiosa porque convierte un modelo complejo en una explicación comunicable.
+donde $h$ puede ser un árbol o una expresión simbólica. La calidad de esa aproximación se llama fidelidad. Una fidelidad alta indica que la explicación equivalente reproduce al modelo; no indica por sí­ sola que el modelo sea correcto frente al mercado.
 
+## Lectura recomendada
 
+Para defender un resultado ante revisión técnica:
 
-
+1. Leer el ranking [SHAP](global/shap-fundamentals.md) para identificar drivers principales.
+2. Usar dependence plots para comprobar dirección y no linealidad.
+3. Revisar [árboles surrogate](global/surrogate-trees.md) de baja profundidad para reglas globales.
+4. Revisar [regresión simbólica](global/symbolic-regression.md) para una fórmula compacta y sus métricas.
+5. Contrastar con [ICE](behaviour/ice.md), [ALE](behaviour/ale.md) y diagnóstico si aparecen patrones dudosos.
 

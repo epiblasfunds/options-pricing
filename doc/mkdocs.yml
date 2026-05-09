@@ -6,8 +6,8 @@ site_dir: site
 theme:
   name: readthedocs
   locale: es
-  navigation_depth: 1
-  collapse_navigation: false
+  navigation_depth: 4
+  collapse_navigation: true
   sticky_navigation: true
   include_homepage_in_sidebar: true
   prev_next_buttons_location: bottom
@@ -26,18 +26,40 @@ nav:
       - Volatilidad implícita: data/volatility.md
   - Modelos de volatilidad:
       - Visión general: models/index.md
-      - Características: models/features.md
-      - Splits temporales y k-folds: models/splits-kfolds.md
-      - Familias de modelos: models/families.md
-      - Entrenamiento y selección: models/training.md
-      - Reentrenamiento y progressive training: models/retraining-progressive.md
+      - Diseño de variables:
+          - Características financieras: models/features.md
+      - Validación y selección:
+          - Splits temporales y k-folds: models/splits-kfolds.md
+          - Entrenamiento y selección: models/training.md
+          - Reentrenamiento y progressive training: models/retraining-progressive.md
+      - Familias de modelos:
+          - Comparativa de familias: models/families.md
+          - Regresión lineal: models/families/linear-regression.md
+          - Random Forest: models/families/random-forest.md
+          - XGBoost: models/families/xgboost.md
+          - Redes neuronales: models/families/neural-networks.md
+          - Red tensor-train: models/families/tensor-train.md
   - Dashboard:
       - Cometido del dashboard: dashboard/index.md
-      - De modelo entrenado a bundle visualizable: dashboard/model-to-dashboard.md
-      - Behaviour And Surface: dashboard/behaviour-surface.md
-      - Global Explainability: dashboard/global-explainability.md
-      - Sample Explainability: dashboard/sample-explainability.md
-      - Diagnosis: dashboard/diagnosis.md
+      - Generación de artefactos:
+          - De modelo entrenado a bundle visualizable: dashboard/model-to-dashboard.md
+      - Explicabilidad global:
+          - Mapa de la pestaña: dashboard/global-explainability.md
+          - Fundamentos de SHAP: dashboard/global/shap-fundamentals.md
+          - Visualizaciones SHAP: dashboard/global/shap-visualizations.md
+          - Árboles surrogate: dashboard/global/surrogate-trees.md
+          - Regresión simbólica: dashboard/global/symbolic-regression.md
+      - Superficies y respuesta:
+          - Mapa de la pestaña: dashboard/behaviour-surface.md
+          - Superficies de volatilidad: dashboard/behaviour/volatility-surfaces.md
+          - Curvas ICE: dashboard/behaviour/ice.md
+          - Curvas ALE: dashboard/behaviour/ale.md
+      - Explicabilidad local:
+          - Mapa de la pestaña: dashboard/sample-explainability.md
+          - SHAP local y waterfall: dashboard/sample/local-shap-waterfall.md
+          - Vecinos y soporte local: dashboard/sample/neighbours.md
+      - Diagnóstico:
+          - Diagnóstico de rendimiento: dashboard/diagnosis.md
   - Operación:
       - API, almacenamiento y despliegue: operations/api-deployment.md
 markdown_extensions:
