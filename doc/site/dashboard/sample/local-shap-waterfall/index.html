@@ -191,9 +191,12 @@
                 <h1 id="shap-local-y-waterfall">SHAP local y waterfall<a class="headerlink" href="#shap-local-y-waterfall" title="Permanent link">&para;</a></h1>
 <p>La explicación local responde a una pregunta distinta de la explicabilidad global: por qué una muestra concreta recibe una volatilidad predicha concreta. El dashboard usa <a href="../../global/shap-fundamentals/">SHAP</a> local y una visualización waterfall para descomponer una predicción individual.</p>
 <p>La identidad de lectura es:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}(x_i)=\phi_0+\sum_{j=1}^{p}\phi_j(x_i)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}$ o $f(x)$ es la predicción del modelo.</li>
@@ -259,9 +262,12 @@
 <p>La segunda frase confunde atribución predictiva con causalidad y omite que strike y subyacente interactúan a través de moneyness.</p>
 <h2 id="relacion-con-prediccion-y-residual">Relación con predicción y residual<a class="headerlink" href="#relacion-con-prediccion-y-residual" title="Permanent link">&para;</a></h2>
 <p>Cuando la muestra procede del dataset y tiene volatilidad real, puede compararse:</p>
-<p>[
+<div class="doc-math">
+\[
 e_i = \sigma_i - \hat{\sigma}(x_i)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.</li>

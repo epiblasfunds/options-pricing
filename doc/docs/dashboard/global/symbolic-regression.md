@@ -4,9 +4,11 @@ La regresión simbólica busca una expresión matemática cerrada que aproxime u
 
 La forma objetivo es:
 
+<div class="doc-math">
 \[
 \hat{\sigma}_{principal}(x) \approx g(x_1,\ldots,x_p)
 \]
+</div>
 
 donde:
 
@@ -102,9 +104,11 @@ La complejidad es una medida estructural de la expresión. Aumenta con variables
 
 Una fórmula con complejidad baja puede ser:
 
+<div class="doc-math">
 \[
 g(x)=a+b\cdot TimeToExpiration
 \]
+</div>
 
 donde:
 
@@ -124,6 +128,7 @@ Una fórmula de complejidad alta puede incluir múltiples productos, cocientes y
 
 La fidelidad se calcula sobre el 20% reservado:
 
+<div class="doc-math">
 \[
 RMSE_{sym} =
 \sqrt{
@@ -133,6 +138,7 @@ RMSE_{sym} =
 \right)^2
 }
 \]
+</div>
 
 donde:
 

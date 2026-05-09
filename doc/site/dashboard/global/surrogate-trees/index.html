@@ -190,9 +190,12 @@
               
                 <h1 id="arboles-surrogate">Árboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h1>
 <p>Un árbol surrogate es un modelo interpretable entrenado para imitar al modelo principal. En el proyecto no se entrena contra la volatilidad real, sino contra las predicciones finales del estimador seleccionado:</p>
-<p>[
-\hat{\sigma}<em surrogate="surrogate">{principal}(x) \longrightarrow \hat{\sigma}</em>(x)
-]</p>
+<div class="doc-math">
+\[
+\hat{\sigma}_{principal}(x) \longrightarrow \hat{\sigma}_{surrogate}(x)
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal para la muestra $x$.</li>
@@ -295,17 +298,20 @@
 <p>En la documentación del resultado conviene justificar qué profundidad se usa para discusión. Si la profundidad 2 tiene RMSE de fidelidad bajo, las reglas globales son especialmente valiosas. Si solo profundidades altas consiguen fidelidad aceptable, el modelo principal probablemente utiliza interacciones complejas y no debe resumirse con pocas reglas.</p>
 <h2 id="metricas-de-fidelidad">Métricas de fidelidad<a class="headerlink" href="#metricas-de-fidelidad" title="Permanent link">&para;</a></h2>
 <p>La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:</p>
-<p>[
+<div class="doc-math">
+\[
 RMSE_{fid} =
 \sqrt{
 \frac{1}{n}\sum_{i=1}^{n}
 \left(
-\hat{\sigma}<em surrogate="surrogate">{principal}(x_i)
+\hat{\sigma}_{principal}(x_i)
 -
-\hat{\sigma}</em>(x_i)
+\hat{\sigma}_{surrogate}(x_i)
 \right)^2
 }
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$RMSE$ es el error cuadrático medio de fidelidad.</li>
@@ -316,9 +322,12 @@ RMSE_{fid} =
 <p>También se guardan MAE y $R^2$ cuando están configurados. Estas métricas no son métricas de mercado. Un surrogate puede tener excelente fidelidad a un modelo malo, y un surrogate con peor fidelidad puede seguir ser útil como resumen parcial. Por eso se debe presentar junto con las métricas de diagnóstico del modelo principal.</p>
 <h2 id="reglas-textuales">Reglas textuales<a class="headerlink" href="#reglas-textuales" title="Permanent link">&para;</a></h2>
 <p>El árbol se exporta con <code>export_text</code>, usando los nombres de features de explicabilidad. Una regla tiene forma:</p>
-<p>[
+<div class="doc-math">
+\[
 si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$x_j$ es el valor de la feature usada en el nodo del árbol.</li>

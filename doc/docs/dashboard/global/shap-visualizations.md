@@ -39,9 +39,11 @@ En volatilidad implícita, una feature puede ser importante aunque no tenga un s
 
 La importancia global que se muestra en barras se calcula como:
 
+<div class="doc-math">
 \[
 I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
 \]
+</div>
 
 donde:
 
@@ -58,9 +60,11 @@ La diferencia con la importancia de árboles es relevante. La importancia de imp
 
 El dependence plot dibuja el valor de una feature frente a su contribución [SHAP](shap-fundamentals.md):
 
+<div class="doc-math">
 \[
 x_{ij} \longmapsto \phi_j(x_i)
 \]
+</div>
 
 donde:
 

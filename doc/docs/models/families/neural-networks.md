@@ -4,11 +4,13 @@ La familia `SequentialNNFamily` usa una red feed-forward con capas densas. Su ob
 
 La forma conceptual es:
 
+<div class="doc-math">
 \[
 h_1=\phi(W_1x+b_1), \quad
 h_l=\phi(W_lh_{l-1}+b_l), \quad
 \hat{\sigma}=W_oh_L+b_o
 \]
+</div>
 
 donde:
 

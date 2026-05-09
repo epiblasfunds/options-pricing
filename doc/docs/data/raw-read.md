@@ -45,18 +45,22 @@ Después se asignan nombres de columnas según el schema declarado y se seleccio
 
 El filtrado inicial aplica dos condiciones:
 
+<div class="doc-math">
 \[
 \text{es\_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
 \]
+</div>
 
 donde:
 
 - $c$ es el código de contrato.
 - $\text{es\_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.
 
+<div class="doc-math">
 \[
 \text{es\_mensual}(c)=\text{longitud}(c)\in\{\text{longitud opción},\text{longitud futuro}\}
 \]
+</div>
 
 donde:
 
@@ -87,6 +91,7 @@ flowchart LR
 
 La lógica financiera es construir una serie continua de referencia monetaria. Para fechas antiguas, el ajuste aproxima la transición entre EONIA y €STR:
 
+<div class="doc-math">
 \[
 r_t =
 \begin{cases}
@@ -94,6 +99,7 @@ r_t =
 \text{€STR}_t, & t \ge t_{\mathrm{corte}}
 \end{cases}
 \]
+</div>
 
 donde:
 

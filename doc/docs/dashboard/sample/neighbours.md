@@ -61,9 +61,11 @@ La lectura recomendada es:
 
 El mapa 3D usa PCA para proyectar el entorno a tres componentes. PCA es una transformación lineal que busca direcciones de máxima varianza:
 
+<div class="doc-math">
 \[
 Z = XW
 \]
+</div>
 
 donde:
 

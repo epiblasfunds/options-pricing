@@ -319,6 +319,15 @@ code {
   color: #14243a;
 }
 
+.doc-math {
+  margin: 1rem 0 0.75rem;
+  overflow-x: auto;
+}
+
+.doc-math mjx-container[jax="CHTML"][display="true"] {
+  margin: 0.25rem 0;
+}
+
 @media screen and (max-width: 900px) {
   .wy-nav-side,
   .wy-side-scroll {

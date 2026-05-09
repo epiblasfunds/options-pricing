@@ -4,9 +4,11 @@ La explicación local responde a una pregunta distinta de la explicabilidad glob
 
 La identidad de lectura es:
 
+<div class="doc-math">
 \[
 \hat{\sigma}(x_i)=\phi_0+\sum_{j=1}^{p}\phi_j(x_i)
 \]
+</div>
 
 donde:
 
@@ -70,9 +72,11 @@ La segunda frase confunde atribución predictiva con causalidad y omite que stri
 
 Cuando la muestra procede del dataset y tiene volatilidad real, puede compararse:
 
+<div class="doc-math">
 \[
 e_i = \sigma_i - \hat{\sigma}(x_i)
 \]
+</div>
 
 donde:
 

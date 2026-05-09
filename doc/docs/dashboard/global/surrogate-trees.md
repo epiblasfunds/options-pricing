@@ -2,9 +2,11 @@
 
 Un árbol surrogate es un modelo interpretable entrenado para imitar al modelo principal. En el proyecto no se entrena contra la volatilidad real, sino contra las predicciones finales del estimador seleccionado:
 
+<div class="doc-math">
 \[
 \hat{\sigma}_{principal}(x) \longrightarrow \hat{\sigma}_{surrogate}(x)
 \]
+</div>
 
 donde:
 
@@ -71,6 +73,7 @@ En la documentación del resultado conviene justificar qué profundidad se usa p
 
 La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:
 
+<div class="doc-math">
 \[
 RMSE_{fid} =
 \sqrt{
@@ -82,6 +85,7 @@ RMSE_{fid} =
 \right)^2
 }
 \]
+</div>
 
 donde:
 
@@ -96,9 +100,11 @@ También se guardan MAE y $R^2$ cuando están configurados. Estas métricas no s
 
 El árbol se exporta con `export_text`, usando los nombres de features de explicabilidad. Una regla tiene forma:
 
+<div class="doc-math">
 \[
 si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
 \]
+</div>
 
 donde:
 

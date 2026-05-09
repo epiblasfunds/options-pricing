@@ -38,9 +38,11 @@ La conversión descubre familias entrenadas en la carpeta de modelos finales. Pa
 
 El dataset de dashboard se construye sobre el split de test. Contiene columnas raw, features transformadas, predicción, residual y error absoluto:
 
+<div class="doc-math">
 \[
 Residual_i = y_i-\hat{y}_i
 \]
+</div>
 
 donde:
 
@@ -48,9 +50,11 @@ donde:
 - $y_i$ es la volatilidad real observada.
 - $\hat{y}_i$ es la volatilidad predicha.
 
+<div class="doc-math">
 \[
 AbsoluteError_i = |Residual_i|
 \]
+</div>
 
 donde:
 
@@ -74,9 +78,11 @@ Se calculan explicaciones [SHAP](global/shap-fundamentals.md) mediante un explai
 
 La explicación aproxima la descomposición:
 
+<div class="doc-math">
 \[
 \hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
 \]
+</div>
 
 donde:
 
@@ -91,9 +97,11 @@ donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.
 
 Para varias profundidades configuradas se entrena un [árbol surrogate](global/surrogate-trees.md) que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:
 
+<div class="doc-math">
 \[
 \hat{\sigma}_{modelo} \quad \text{vs} \quad \hat{\sigma}_{árbol}
 \]
+</div>
 
 donde:
 

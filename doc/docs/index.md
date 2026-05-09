@@ -27,21 +27,28 @@ flowchart LR
 
 El objetivo es aproximar la función de volatilidad implícita:
 
+<div class="doc-math">
 \[
 \hat{\sigma}=f(\text{tipo de opción}, K, F, \tau, r)
 \]
+</div>
 
 donde:
 
 - $\hat{\sigma}$ es la volatilidad implícita predicha.
 - $f$ es el modelo entrenado.
-- $X$ o las variables entre paréntesis son las entradas financieras del modelo.
+- $K$ es el strike.
+- $F$ es el precio del futuro subyacente.
+- $\tau$ es el tiempo hasta vencimiento.
+- $r$ es el tipo de interés anualizado utilizado en la valoración.
 
-donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ es el tiempo hasta vencimiento y $r$ es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:
+La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:
 
+<div class="doc-math">
 \[
 P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
 \]
+</div>
 
 donde:
 

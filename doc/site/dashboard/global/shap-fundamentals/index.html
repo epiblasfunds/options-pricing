@@ -205,9 +205,12 @@
 </code></pre>
 <h2 id="descomposicion-aditiva">Descomposición aditiva<a class="headerlink" href="#descomposicion-aditiva" title="Permanent link">&para;</a></h2>
 <p>La explicación SHAP tiene forma aditiva:</p>
-<p>[
+<div class="doc-math">
+\[
 f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$f(x)$ es la predicción del modelo principal para la muestra $x$.</li>
@@ -218,14 +221,17 @@ f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
 <p>Una contribución positiva aumenta la volatilidad predicha respecto al valor base; una contribución negativa la reduce. Esta atribución no implica causalidad: explica el comportamiento del modelo entrenado bajo una referencia concreta.</p>
 <h2 id="valores-de-shapley">Valores de Shapley<a class="headerlink" href="#valores-de-shapley" title="Permanent link">&para;</a></h2>
 <p>SHAP se basa en los valores de Shapley de teoría de juegos cooperativos. En ese marco, las features son jugadores y la predicción es el pago a repartir. La atribución de una feature es su contribución marginal media al incorporarse a todos los posibles subconjuntos de features.</p>
-<p>[
+<div class="doc-math">
+\[
 \phi_j =
-\sum_{S \subseteq N \setminus {j}}
+\sum_{S \subseteq N \setminus \{j\}}
 \frac{|S|!(p-|S|-1)!}{p!}
 \left[
-v(S \cup {j})-v(S)
+v(S \cup \{j\})-v(S)
 \right]
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$N$ es el conjunto completo de features.</li>
@@ -238,9 +244,12 @@ v(S \cup {j})-v(S)
 <h2 id="aproximacion-por-permutacion">Aproximación por permutación<a class="headerlink" href="#aproximacion-por-permutacion" title="Permanent link">&para;</a></h2>
 <p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta variante trata el modelo como caja negra, por lo que sirve para regresión lineal, Random Forest, XGBoost y redes neuronales con una interfaz común.</p>
 <p>El presupuesto de evaluación por fila es:</p>
-<p>[
-max_evals = 2p+1
-]</p>
+<div class="doc-math">
+\[
+max\_evals = 2p+1
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$max_evals$ es el número máximo de evaluaciones del modelo por explicación.</li>

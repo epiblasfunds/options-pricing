@@ -38,9 +38,11 @@ La vista previa sirve para comprobar que la muestra explicada corresponde al con
 
 La salida resume:
 
+<div class="doc-math">
 \[
 \hat{\sigma}=f(x)
 \]
+</div>
 
 donde:
 
@@ -50,9 +52,11 @@ donde:
 
 Si la observación pertenece al dataset y existe volatilidad real, también puede leerse el residual:
 
+<div class="doc-math">
 \[
 e=\sigma-\hat{\sigma}
 \]
+</div>
 
 donde:
 
@@ -64,9 +68,11 @@ El residual evalúa acierto frente a mercado. El [waterfall SHAP](sample/local-s
 
 El waterfall local usa [SHAP](global/shap-fundamentals.md) para construir:
 
+<div class="doc-math">
 \[
 \hat{\sigma}(x)=\phi_0+\phi_1(x)+\cdots+\phi_p(x)
 \]
+</div>
 
 donde:
 

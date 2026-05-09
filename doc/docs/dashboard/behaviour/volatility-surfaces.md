@@ -4,9 +4,11 @@ La pestaña [Behaviour And Surface](../behaviour-surface.md) trata el modelo com
 
 En opciones, la volatilidad implícita se analiza habitualmente como una superficie:
 
+<div class="doc-math">
 \[
 \sigma = \sigma(K,T)
 \]
+</div>
 
 donde:
 
@@ -16,9 +18,11 @@ donde:
 
 o, de forma más comparable entre niveles de mercado:
 
+<div class="doc-math">
 \[
 \sigma = \sigma(m,T), \quad m=\frac{F}{K}
 \]
+</div>
 
 donde:
 
@@ -57,9 +61,11 @@ La función `build_surfaces_frame` genera las superficies. Para cada ancla selec
 4. Construye `surface_grid_size` valores de vencimiento entre 1 día y el máximo entre $1.5$ veces el vencimiento del ancla y 30 días.
 5. Reconstruye el strike como:
 
+<div class="doc-math">
 \[
 K = \frac{F}{m}
 \]
+</div>
 
 donde:
 
@@ -96,9 +102,11 @@ Una superficie aceptable para un modelo de volatilidad debería evitar comportam
 
 Un smile es un corte de la superficie a vencimiento fijo:
 
+<div class="doc-math">
 \[
 m \longmapsto \hat{\sigma}(m \mid T=T_k)
 \]
+</div>
 
 donde:
 
@@ -119,9 +127,11 @@ Una lectura rigurosa distingue:
 
 La term structure es el corte opuesto:
 
+<div class="doc-math">
 \[
 T \longmapsto \hat{\sigma}(T \mid m=m_k)
 \]
+</div>
 
 donde:
 

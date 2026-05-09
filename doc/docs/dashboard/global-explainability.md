@@ -30,9 +30,11 @@ flowchart TD
 
 Las contribuciones cumplen:
 
+<div class="doc-math">
 \[
 \hat{\sigma}_i = \phi_0 + \sum_j \phi_{ij}
 \]
+</div>
 
 donde:
 
@@ -58,9 +60,11 @@ En esta pestaña se agregan varias filas explicadas para estudiar comportamiento
 
 Los modelos equivalentes no sustituyen al modelo principal. Su target es la predicción del modelo principal:
 
+<div class="doc-math">
 \[
 \hat{\sigma}_{principal}(x) \approx h(x)
 \]
+</div>
 
 donde:
 

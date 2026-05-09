@@ -212,9 +212,12 @@
 <h2 id="shap-explainability">SHAP Explainability<a class="headerlink" href="#shap-explainability" title="Permanent link">&para;</a></h2>
 <p><a href="../global/shap-fundamentals/">SHAP</a> se usa porque permite comparar modelos heterogéneos bajo una misma semántica de atribución. El proyecto emplea <code>shap.Explainer</code> con algoritmo de permutación, adecuado para tratar el estimador como caja negra y explicar familias tan distintas como XGBoost, Random Forest o redes neuronales.</p>
 <p>Las contribuciones cumplen:</p>
-<p>[
-\hat{\sigma}<em ij="ij">i = \phi_0 + \sum_j \phi</em>
-]</p>
+<div class="doc-math">
+\[
+\hat{\sigma}_i = \phi_0 + \sum_j \phi_{ij}
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}$ o $f(x)$ es la predicción del modelo.</li>
@@ -267,9 +270,12 @@
 </table>
 <h2 id="modelos-equivalentes">Modelos equivalentes<a class="headerlink" href="#modelos-equivalentes" title="Permanent link">&para;</a></h2>
 <p>Los modelos equivalentes no sustituyen al modelo principal. Su target es la predicción del modelo principal:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}_{principal}(x) \approx h(x)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.</li>

@@ -190,9 +190,12 @@
               
                 <h1 id="xgboost">XGBoost<a class="headerlink" href="#xgboost" title="Permanent link">&para;</a></h1>
 <p>XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}^{(m)}(x)=\hat{\sigma}^{(m-1)}(x)+\eta T_m(x)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}^{(m)}(x)$ es la predicción tras la iteración $m$.</li>

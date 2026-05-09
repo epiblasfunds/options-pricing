@@ -24,9 +24,11 @@ La búsqueda no agota necesariamente todo el espacio. Para familias grandes, el 
 
 Las métricas base son:
 
+<div class="doc-math">
 \[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
 \]
+</div>
 
 donde:
 
@@ -35,9 +37,11 @@ donde:
 - $y_i$ es el valor real observado.
 - $\hat{y}_i$ es la predicción del modelo para la observación $i$.
 
+<div class="doc-math">
 \[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
 \]
+</div>
 
 donde:
 
@@ -46,9 +50,11 @@ donde:
 - $y_i$ es el valor real observado.
 - $\hat{y}_i$ es la predicción del modelo para la observación $i$.
 
+<div class="doc-math">
 \[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
 \]
+</div>
 
 donde:
 
@@ -67,9 +73,11 @@ La selección no usa solo RMSE medio. Usa una métrica compuesta que penaliza:
 - Variabilidad entre folds.
 - Gap de sobreajuste cuando validation es peor que train.
 
+<div class="doc-math">
 \[
 CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
 \]
+</div>
 
 donde:
 

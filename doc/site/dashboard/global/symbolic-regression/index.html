@@ -191,9 +191,12 @@
                 <h1 id="regresion-simbolica">Regresión simbólica<a class="headerlink" href="#regresion-simbolica" title="Permanent link">&para;</a></h1>
 <p>La regresión simbólica busca una expresión matemática cerrada que aproxime una relación observada. En este proyecto se usa como modelo surrogate: la expresión no se ajusta directamente a la volatilidad implícita real, sino a las predicciones del modelo principal sobre una muestra del dataset de test.</p>
 <p>La forma objetivo es:</p>
-<p>[
+<div class="doc-math">
+\[
 \hat{\sigma}_{principal}(x) \approx g(x_1,\ldots,x_p)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.</li>
@@ -349,9 +352,12 @@
 <h2 id="complejidad">Complejidad<a class="headerlink" href="#complejidad" title="Permanent link">&para;</a></h2>
 <p>La complejidad es una medida estructural de la expresión. Aumenta con variables, constantes y operadores. No equivale a número de parámetros en sentido estadístico clásico, pero funciona como proxy de legibilidad.</p>
 <p>Una fórmula con complejidad baja puede ser:</p>
-<p>[
+<div class="doc-math">
+\[
 g(x)=a+b\cdot TimeToExpiration
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$g(x)$ es la expresión simbólica candidata.</li>
@@ -368,7 +374,8 @@ g(x)=a+b\cdot TimeToExpiration
 </ul>
 <h2 id="fidelidad-y-uso-correcto">Fidelidad y uso correcto<a class="headerlink" href="#fidelidad-y-uso-correcto" title="Permanent link">&para;</a></h2>
 <p>La fidelidad se calcula sobre el 20% reservado:</p>
-<p>[
+<div class="doc-math">
+\[
 RMSE_{sym} =
 \sqrt{
 \frac{1}{n}\sum_i
@@ -376,7 +383,9 @@ RMSE_{sym} =
 \hat{\sigma}_{principal}(x_i)-g(x_i)
 \right)^2
 }
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$RMSE_{sym}$ es el error cuadrático medio de fidelidad de la expresión simbólica.</li>

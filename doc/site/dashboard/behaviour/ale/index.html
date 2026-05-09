@@ -191,7 +191,8 @@
                 <h1 id="curvas-ale">Curvas ALE<a class="headerlink" href="#curvas-ale" title="Permanent link">&para;</a></h1>
 <p>ALE, del inglés <em>Accumulated Local Effects</em>, estima el efecto medio acumulado de una feature sobre la predicción del modelo usando variaciones locales dentro de regiones observadas. En este proyecto complementa a las <a href="../ice/">curvas ICE</a>: ICE enseña trayectorias individuales; ALE resume un efecto agregado menos vulnerable a combinaciones contrafactuales irreales cuando las variables están correlacionadas.</p>
 <p>La definición continua para una feature $j$ es:</p>
-<p>[
+<div class="doc-math">
+\[
 ALE_j(z)=
 \int_{z_0}^{z}
 E\left[
@@ -200,7 +201,9 @@ E\left[
 \right]ds
 -
 C
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$ALE_j(z)$ es el efecto local acumulado de la feature $j$.</li>
@@ -235,14 +238,17 @@ C
 <li>Predice dos escenarios locales: feature igual a $l_k$ y feature igual a $u_k$.</li>
 <li>Calcula la diferencia media:</li>
 </ol>
-<p>[
+<div class="doc-math">
+\[
 \Delta_k =
 \frac{1}{|I_k|}
 \sum_{i \in I_k}
 \left[
 f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
 \right]
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\Delta_k$ es el incremento local medio del bin $k$.</li>
@@ -255,9 +261,12 @@ f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
 <p>Acumula incrementos:</p>
 </li>
 </ul>
-<p>[
-\tilde{ALE}<em _leq="\leq" k="k" r="r">k=\sum</em>\Delta_r
-]</p>
+<div class="doc-math">
+\[
+\tilde{ALE}_k=\sum_{r \leq k}\Delta_r
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.</li>
@@ -268,9 +277,12 @@ f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
 <p>Centra la curva restando la media:</p>
 </li>
 </ul>
-<p>[
-ALE_k = \tilde{ALE}<em r="1">k - \frac{1}{K}\sum</em>_r
-]}^{K}\tilde{ALE</p>
+<div class="doc-math">
+\[
+ALE_k = \tilde{ALE}_k - \frac{1}{K}\sum_{r=1}^{K}\tilde{ALE}_r
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.</li>

@@ -237,9 +237,12 @@
 <p>En volatilidad implícita, una feature puede ser importante aunque no tenga un signo único. Por ejemplo, <code>StrikePrice</code> puede elevar o reducir la predicción dependiendo del nivel del subyacente y del vencimiento. En ese caso, lo relevante no es buscar un coeficiente global, sino identificar regímenes.</p>
 <h2 id="importancia-media-absoluta">Importancia media absoluta<a class="headerlink" href="#importancia-media-absoluta" title="Permanent link">&para;</a></h2>
 <p>La importancia global que se muestra en barras se calcula como:</p>
-<p>[
+<div class="doc-math">
+\[
 I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$I_j$ es la importancia global de la feature $j$.</li>
@@ -251,9 +254,12 @@ I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
 <p>La diferencia con la importancia de árboles es relevante. La importancia de impureza de un Random Forest depende de splits internos del propio estimador; la importancia <a href="../shap-fundamentals/">SHAP</a> se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar XGBoost, redes y lineal bajo la misma medida visual.</p>
 <h2 id="dependence-plot">Dependence plot<a class="headerlink" href="#dependence-plot" title="Permanent link">&para;</a></h2>
 <p>El dependence plot dibuja el valor de una feature frente a su contribución <a href="../shap-fundamentals/">SHAP</a>:</p>
-<p>[
+<div class="doc-math">
+\[
 x_{ij} \longmapsto \phi_j(x_i)
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$x_{ij}$ es el valor de la feature $j$ en la observación $i$.</li>

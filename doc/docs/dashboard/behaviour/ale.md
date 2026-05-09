@@ -4,6 +4,7 @@ ALE, del inglés *Accumulated Local Effects*, estima el efecto medio acumulado d
 
 La definición continua para una feature $j$ es:
 
+<div class="doc-math">
 \[
 ALE_j(z)=
 \int_{z_0}^{z}
@@ -14,6 +15,7 @@ E\left[
 -
 C
 \]
+</div>
 
 donde:
 
@@ -53,6 +55,7 @@ La función `build_ale_frame` implementa una aproximación por bins:
 4. Predice dos escenarios locales: feature igual a $l_k$ y feature igual a $u_k$.
 5. Calcula la diferencia media:
 
+<div class="doc-math">
 \[
 \Delta_k =
 \frac{1}{|I_k|}
@@ -61,6 +64,7 @@ La función `build_ale_frame` implementa una aproximación por bins:
 f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
 \right]
 \]
+</div>
 
 donde:
 
@@ -71,9 +75,11 @@ donde:
 
 6. Acumula incrementos:
 
+<div class="doc-math">
 \[
 \tilde{ALE}_k=\sum_{r \leq k}\Delta_r
 \]
+</div>
 
 donde:
 
@@ -82,9 +88,11 @@ donde:
 
 7. Centra la curva restando la media:
 
+<div class="doc-math">
 \[
 ALE_k = \tilde{ALE}_k - \frac{1}{K}\sum_{r=1}^{K}\tilde{ALE}_r
 \]
+</div>
 
 donde:
 

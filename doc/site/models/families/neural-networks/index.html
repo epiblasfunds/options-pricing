@@ -191,11 +191,14 @@
                 <h1 id="redes-neuronales-secuenciales">Redes neuronales secuenciales<a class="headerlink" href="#redes-neuronales-secuenciales" title="Permanent link">&para;</a></h1>
 <p>La familia <code>SequentialNNFamily</code> usa una red feed-forward con capas densas. Su objetivo es capturar relaciones no lineales suaves entre las features financieras.</p>
 <p>La forma conceptual es:</p>
-<p>[
+<div class="doc-math">
+\[
 h_1=\phi(W_1x+b_1), \quad
 h_l=\phi(W_lh_{l-1}+b_l), \quad
 \hat{\sigma}=W_oh_L+b_o
-]</p>
+\]
+</div>
+
 <p>donde:</p>
 <ul>
 <li>$h_l$ es la activación de la capa oculta $l$.</li>
