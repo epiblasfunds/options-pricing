@@ -18,16 +18,9 @@ def _default_ice_feature(ice_options: list[dict]) -> str | None:
     return option_values[0] if option_values else None
 
 
-def _format_chip_label(format_value: str) -> str:
-    if format_value == "explainable_model":
-        return "Dashboard Bundle"
-    return format_value
-
-
 def _model_info_panel(
     *,
     model_name: str,
-    format_label: str,
     explained_features: list[str],
     metric_names: list[str],
     feature_schema,
@@ -69,7 +62,6 @@ def _model_info_panel(
                     html.Div(
                         style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
                         children=[
-                            _metadata_chip("Format", format_label),
                             *[
                                 _metadata_chip("Metric", metric)
                                 for metric in metric_names
@@ -273,13 +265,11 @@ def register_model_loading_callbacks(app, services) -> None:
             }
             for feature_name in shap_feature_names
         ]
-        format_label = _format_chip_label(model.format.value) if model else "unknown"
         metric_names = list(
             metadata.get("error_metrics", config.dashboard_models_config.error_metrics)
         )
         info_panel = _model_info_panel(
             model_name=display_model_name(model.name if model else str(model_id)),
-            format_label=format_label,
             explained_features=[str(feature) for feature in explained_feature_names],
             metric_names=[str(metric) for metric in metric_names],
             feature_schema=services.feature_schema,

@@ -790,9 +790,20 @@ def _sample_tab():
                                     ),
                                 ],
                             ),
-                            dcc.Graph(
-                                id=IDS.SAMPLE_COMPARISON_3D,
-                                style={"height": "820px"},
+                            html.Div(
+                                style={
+                                    "width": "50vw",
+                                    "maxWidth": "50vw",
+                                    "margin": "0 auto",
+                                    "aspectRatio": "3 / 2",
+                                    "minHeight": "420px",
+                                },
+                                children=[
+                                    dcc.Graph(
+                                        id=IDS.SAMPLE_COMPARISON_3D,
+                                        style={"height": "100%", "width": "100%"},
+                                    )
+                                ],
                             ),
                         ],
                     )

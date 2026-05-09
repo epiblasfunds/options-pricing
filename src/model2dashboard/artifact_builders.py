@@ -751,14 +751,15 @@ def build_diagnosis_artifact(
     dataset_frame: pd.DataFrame,
     financial_warnings: list[str],
 ) -> DiagnosisArtifact:
+    full_test = dataset_frame.dropna(subset=[TARGET_COLUMN]).copy()
     sampled = sample_frame(
-        dataset_frame.dropna(subset=[TARGET_COLUMN]),
+        full_test,
         max_rows=config.dashboard_models_config.diagnosis_sample_size,
         random_state=config.dashboard_models_config.random_state,
     )
     metrics = METRICS_REGISTRY.compute_metrics(
-        sampled[TARGET_COLUMN].astype(float).reset_index(drop=True),
-        sampled["PredictedVolatility"].astype(float).reset_index(drop=True),
+        full_test[TARGET_COLUMN].astype(float).reset_index(drop=True),
+        full_test["PredictedVolatility"].astype(float).reset_index(drop=True),
         config.dashboard_models_config.error_metrics,
     )
     plot_frame = sample_frame(
@@ -766,7 +767,7 @@ def build_diagnosis_artifact(
         max_rows=min(2500, len(sampled)),
         random_state=config.dashboard_models_config.random_state + 7,
     )
-    error_heatmap = build_error_heatmap_frame(sampled)
+    error_heatmap = build_error_heatmap_frame(full_test)
     return DiagnosisArtifact(
         metrics={str(name): float(value) for name, value in metrics.items()},
         plot_frame=plot_frame,
