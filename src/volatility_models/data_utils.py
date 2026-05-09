@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 from src.config.config import (
-    TRAINING_DATA_SPLITTED_DIR,
     TRAINING_DATA_SPLITTED_FEATURES_DIR,
     config,
 )
