@@ -69,6 +69,33 @@ def _section_title_with_info(title: str, info_text: str, level: int = 4):
     )
 
 
+def _compact_control_box(title: str, control, help_text: str):
+    return html.Div(
+        style={
+            "padding": "12px 14px",
+            "borderRadius": "12px",
+            "border": "1px solid rgba(33,75,122,0.12)",
+            "background": "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+            "boxShadow": "0 6px 16px rgba(22,40,68,0.04)",
+        },
+        children=[
+            html.Label(
+                title,
+                style={
+                    "display": "block",
+                    "marginBottom": "6px",
+                    "fontSize": "0.82rem",
+                    "fontWeight": "800",
+                    "textTransform": "uppercase",
+                    "color": "#17304f",
+                },
+            ),
+            control,
+            html.P(help_text, style=HELP_TEXT_STYLE),
+        ],
+    )
+
+
 def _behaviour_tab():
     return dcc.Tab(
         label="Behaviour And Surface",
@@ -454,10 +481,11 @@ def _global_tab():
                         children=[
                             html.P(
                                 (
-                                    "Understand which inputs drive "
-                                    "the volatility model globally and inspect "
-                                    "the precomputed surrogate trees that "
-                                    "summarize its logic."
+                                    "Inspect the model globally through SHAP "
+                                    "summaries, feature-importance rankings, "
+                                    "dependence and attribution heatmaps, and "
+                                    "the precomputed symbolic and tree "
+                                    "surrogates that approximate its logic."
                                 ),
                                 style=HELP_TEXT_STYLE,
                             ),
@@ -640,49 +668,53 @@ def _sample_tab():
                                 style=HELP_TEXT_STYLE,
                             ),
                             html.Div(
-                                style={"maxWidth": "520px"},
+                                style={
+                                    "maxWidth": "320px",
+                                    "marginBottom": "14px",
+                                },
                                 children=[
-                                    html.Div(
-                                        children=[
-                                            html.Label("Mode"),
-                                            dcc.RadioItems(
-                                                id=IDS.SAMPLE_MODE,
-                                                options=[
-                                                    {
-                                                        "label": "Dataset sample",
-                                                        "value": "dataset",
-                                                    },
-                                                    {
-                                                        "label": "Manual input",
-                                                        "value": "manual",
-                                                    },
-                                                ],
-                                                value="dataset",
-                                                inline=True,
-                                            ),
-                                            html.P(
-                                                (
-                                                    "Choose between an existing "
-                                                    "dataset row or a manually "
-                                                    "defined input sample."
-                                                ),
-                                                style=HELP_TEXT_STYLE,
-                                            ),
-                                            html.Div(
-                                                id=IDS.SAMPLE_INDEX_CONTAINER,
-                                                style={"marginTop": "14px"},
-                                                children=[
-                                                    html.Label("Dataset Sample"),
-                                                    dcc.Dropdown(id=IDS.SAMPLE_INDEX),
-                                                    html.P(
-                                                        "Observation index used when the dataset mode is selected.",
-                                                        style=HELP_TEXT_STYLE,
-                                                    ),
-                                                ],
-                                            ),
-                                        ]
+                                    _compact_control_box(
+                                        "Mode",
+                                        dcc.RadioItems(
+                                            id=IDS.SAMPLE_MODE,
+                                            options=[
+                                                {
+                                                    "label": "Dataset sample",
+                                                    "value": "dataset",
+                                                },
+                                                {
+                                                    "label": "Manual input",
+                                                    "value": "manual",
+                                                },
+                                            ],
+                                            value="dataset",
+                                            inline=True,
+                                        ),
+                                        (
+                                            "Choose between an existing dataset row "
+                                            "or a manually defined input sample."
+                                        ),
                                     ),
                                 ],
+                            ),
+                            html.Div(
+                                id=IDS.SAMPLE_INDEX_CONTAINER,
+                                style={"marginTop": "14px"},
+                                children=[
+                                    html.Label("Dataset Sample"),
+                                    dcc.Dropdown(
+                                        id=IDS.SAMPLE_INDEX,
+                                        className="single-line-dropdown",
+                                    ),
+                                    html.P(
+                                        "Observation index used when the dataset mode is selected.",
+                                        style=HELP_TEXT_STYLE,
+                                    ),
+                                ],
+                            ),
+                            html.Div(
+                                id=IDS.SAMPLE_FEATURE_PREVIEW,
+                                style={"marginTop": "14px"},
                             ),
                             html.Div(id=IDS.SAMPLE_MANUAL_FORM),
                             html.Div(
@@ -697,7 +729,7 @@ def _sample_tab():
                             ),
                             html.Div(id=IDS.SAMPLE_OUTPUT, style={"marginTop": "12px"}),
                             html.Div(
-                                style=SUBCARD_STYLE,
+                                style={**SUBCARD_STYLE, "marginBottom": "28px"},
                                 children=[
                                     _section_title_with_info(
                                         "Local SHAP Waterfall",
@@ -714,30 +746,65 @@ def _sample_tab():
                                     _bounded_image(IDS.SAMPLE_WATERFALL),
                                 ],
                             ),
-                            _section_title_with_info(
-                                "Nearest Neighbours",
-                                (
-                                    "Closest historical observations to the "
-                                    "selected sample in the explainability "
-                                    "feature space. These rows provide local "
-                                    "context and help assess whether the "
-                                    "explanation is supported by genuinely "
-                                    "similar cases from the dataset."
-                                ),
+                            html.Div(
+                                style={"marginTop": "8px"},
+                                children=[
+                                    _section_title_with_info(
+                                        "Nearest Neighbours",
+                                        (
+                                            "Closest historical observations to the "
+                                            "selected sample in the explainability "
+                                            "feature space. These rows provide local "
+                                            "context and help assess whether the "
+                                            "explanation is supported by genuinely "
+                                            "similar cases from the dataset."
+                                        ),
+                                    ),
+                                    html.Div(id=IDS.SAMPLE_NEIGHBORS),
+                                ],
                             ),
-                            html.Div(id=IDS.SAMPLE_NEIGHBORS),
-                            _section_title_with_info(
-                                "Neighbour Distance Comparison",
-                                (
-                                    "Distance profile of the retrieved "
-                                    "neighbours relative to the selected "
-                                    "sample. Lower values indicate stronger "
-                                    "local support, while larger gaps may "
-                                    "suggest the sample lies in a sparse or less "
-                                    "represented region of the feature space."
-                                ),
+                            html.Div(
+                                style={"marginTop": "32px"},
+                                children=[
+                                    _section_title_with_info(
+                                        "Neighbourhood Distance Map",
+                                        (
+                                            "Three-dimensional projection of the local "
+                                            "feature space built from the analyzed sample "
+                                            "and its retrieved neighbours. Closer points "
+                                            "indicate stronger local support, while more "
+                                            "distant points suggest the sample lies in a "
+                                            "sparser region."
+                                        ),
+                                    ),
+                                    html.P(
+                                        (
+                                            "Disclaimer: the principal components are "
+                                            "estimated locally from the analyzed sample "
+                                            "and the neighbours shown in this map, not "
+                                            "from the full training set. Axis directions "
+                                            "and component meanings may therefore change "
+                                            "across samples."
+                                        ),
+                                        style=HELP_TEXT_STYLE,
+                                    ),
+                                ],
                             ),
-                            dcc.Graph(id=IDS.SAMPLE_COMPARISON),
+                            html.Div(
+                                style={
+                                    "width": "50vw",
+                                    "maxWidth": "50vw",
+                                    "margin": "0 auto",
+                                    "aspectRatio": "3 / 2",
+                                    "minHeight": "420px",
+                                },
+                                children=[
+                                    dcc.Graph(
+                                        id=IDS.SAMPLE_COMPARISON_3D,
+                                        style={"height": "100%", "width": "100%"},
+                                    )
+                                ],
+                            ),
                         ],
                     )
                 ]
@@ -770,12 +837,12 @@ def _diagnosis_tab():
                                         "Performance Summary",
                                         (
                                             "Headline diagnostic metrics for "
-                                            "the selected model over the "
-                                            "sampled evaluation set. This panel "
-                                            "provides a compact overview of "
-                                            "average predictive accuracy before "
-                                            "drilling down into residual "
-                                            "structure and localized error "
+                                            "the selected model over the full "
+                                            "test set. This panel provides a "
+                                            "compact overview of aggregate "
+                                            "predictive accuracy before "
+                                            "drilling down into sampled scatter "
+                                            "diagnostics and full-surface error "
                                             "concentration."
                                         ),
                                     ),
@@ -825,9 +892,11 @@ def _diagnosis_tab():
                                                             "absolute error "
                                                             "across the joint "
                                                             "moneyness and "
-                                                            "maturity grid. It is "
-                                                            "designed to reveal "
-                                                            "where model accuracy "
+                                                            "maturity grid over "
+                                                            "the full test set. "
+                                                            "It is designed to "
+                                                            "reveal where model "
+                                                            "accuracy "
                                                             "deteriorates "
                                                             "systematically on "
                                                             "the surface and "
@@ -955,6 +1024,7 @@ def build_layout():
             html.Div(
                 style=CARD_STYLE,
                 children=[
+                    dcc.Store(id=IDS.MODEL_REFRESH_TOKEN, data=0),
                     html.Div(
                         style=CONTROL_ROW_STYLE,
                         children=[
@@ -969,7 +1039,7 @@ def build_layout():
                             html.Div(
                                 children=[
                                     html.Button(
-                                        "Refresh Model Catalog",
+                                        "Refresh",
                                         id=IDS.MODEL_REFRESH_BUTTON,
                                         style=BUTTON_STYLE,
                                     )

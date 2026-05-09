@@ -7,6 +7,7 @@ from src.dashboard.dashboard.ids import IDS
 from src.dashboard.utils.feature_utils import build_manual_input_sample_label
 from src.dashboard.utils.feature_utils import build_sample_label, display_feature_label
 from src.dashboard.utils.sampling import sample_frame
+from src.enums.volatility_model_enums.model_name import display_model_name
 from src.model2dashboard.features import ANALYSIS_FEATURE_NAMES
 
 
@@ -20,9 +21,7 @@ def _default_ice_feature(ice_options: list[dict]) -> str | None:
 def _model_info_panel(
     *,
     model_name: str,
-    format_label: str,
     explained_features: list[str],
-    context_features: list[str],
     metric_names: list[str],
     feature_schema,
 ) -> html.Div:
@@ -63,7 +62,6 @@ def _model_info_panel(
                     html.Div(
                         style={"display": "flex", "gap": "8px", "flexWrap": "wrap"},
                         children=[
-                            _metadata_chip("Format", format_label),
                             *[
                                 _metadata_chip("Metric", metric)
                                 for metric in metric_names
@@ -94,93 +92,38 @@ def _model_info_panel(
                             "scrollbarWidth": "thin",
                         },
                         children=[
-                            html.Span(
-                                (
-                                    feature_schema.get(str(feature_name)).label
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                title=(
-                                    feature_schema.get(str(feature_name)).description
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                style={
-                                    "display": "inline-flex",
-                                    "alignItems": "center",
-                                    "whiteSpace": "nowrap",
-                                    "padding": "6px 10px",
-                                    "borderRadius": "999px",
-                                    "border": "1px solid rgba(33,75,122,0.14)",
-                                    "background": "#ffffff",
-                                    "color": "#243b5a",
-                                    "fontSize": "0.86rem",
-                                    "fontWeight": "600",
-                                },
-                            )
+                            _feature_chip(feature_name, feature_schema)
                             for feature_name in explained_features
                         ],
                     ),
                 ]
             ),
-            html.Div(
-                children=[
-                    html.Div(
-                        "Context variable",
-                        style={
-                            "fontSize": "0.78rem",
-                            "fontWeight": "800",
-                            "textTransform": "uppercase",
-                            "color": "#5b6d85",
-                            "marginBottom": "8px",
-                        },
-                    ),
-                    html.Div(
-                        style={
-                            "display": "flex",
-                            "gap": "8px",
-                            "flexWrap": "wrap",
-                        },
-                        children=[
-                            html.Span(
-                                (
-                                    feature_schema.get(str(feature_name)).label
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                title=(
-                                    feature_schema.get(str(feature_name)).description
-                                    if str(feature_name) in feature_schema.names()
-                                    else str(feature_name)
-                                ),
-                                style={
-                                    "display": "inline-flex",
-                                    "alignItems": "center",
-                                    "whiteSpace": "nowrap",
-                                    "padding": "6px 10px",
-                                    "borderRadius": "999px",
-                                    "border": "1px solid rgba(33,75,122,0.14)",
-                                    "background": "#ffffff",
-                                    "color": "#243b5a",
-                                    "fontSize": "0.86rem",
-                                    "fontWeight": "600",
-                                },
-                            )
-                            for feature_name in context_features
-                        ]
-                        or [
-                            html.Span(
-                                "None",
-                                style={
-                                    "color": "#5b6d85",
-                                    "fontSize": "0.86rem",
-                                },
-                            )
-                        ],
-                    ),
-                ]
-            ),
         ],
+    )
+
+
+def _feature_chip(feature_name: str, feature_schema) -> html.Span:
+    if str(feature_name) in feature_schema.names():
+        label = feature_schema.get(str(feature_name)).label
+        title = feature_schema.get(str(feature_name)).description
+    else:
+        label = str(feature_name)
+        title = str(feature_name)
+    return html.Span(
+        label,
+        title=title,
+        style={
+            "display": "inline-flex",
+            "alignItems": "center",
+            "whiteSpace": "nowrap",
+            "padding": "6px 10px",
+            "borderRadius": "999px",
+            "border": "1px solid rgba(33,75,122,0.14)",
+            "background": "#ffffff",
+            "color": "#243b5a",
+            "fontSize": "0.86rem",
+            "fontWeight": "600",
+        },
     )
 
 
@@ -212,14 +155,19 @@ def register_model_loading_callbacks(app, services) -> None:
     @app.callback(
         Output(IDS.MODEL_SELECTOR, "options"),
         Output(IDS.MODEL_SELECTOR, "value"),
+        Output(IDS.MODEL_REFRESH_TOKEN, "data"),
         Input(IDS.MODEL_REFRESH_BUTTON, "n_clicks"),
         State(IDS.MODEL_SELECTOR, "value"),
     )
-    def refresh_models(_, current_value):
+    def refresh_models(n_clicks, current_value):
+        services.cache.clear()
+        services.model_loader.clear()
+        services.data_provider.clear()
+        services.model_registry.model_dir = services.storage_runtime.prepare_model_dir()
         models = services.model_registry.discover_models()
         options = [
             {
-                "label": f"{model.name} ({model.format.value})",
+                "label": display_model_name(model.name),
                 "value": model.model_id,
             }
             for model in models
@@ -230,7 +178,7 @@ def register_model_loading_callbacks(app, services) -> None:
             if current_value in valid_values
             else (options[0]["value"] if options else None)
         )
-        return options, value
+        return options, value, int(n_clicks or 0)
 
     @app.callback(
         Output(IDS.MODEL_INFO, "children"),
@@ -241,8 +189,9 @@ def register_model_loading_callbacks(app, services) -> None:
         Output(IDS.BEHAVIOUR_ANCHOR_INDEX, "options"),
         Output(IDS.SAMPLE_INDEX, "options"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def update_shared_context(model_id):
+    def update_shared_context(model_id, _refresh_token):
         dataset = services.data_provider.load_dataset(model_id=model_id)
         sampled = sample_frame(
             dataset,
@@ -284,6 +233,7 @@ def register_model_loading_callbacks(app, services) -> None:
         model = services.model_registry.get_model(model_id)
         metadata = model.metadata if model else {}
         bundle = services.prediction_service.load_bundle(model_id)
+        shap_result = services.shap_service.explain(model_id)
         sample_options = [
             {
                 "label": build_manual_input_sample_label(dataset.loc[index]),
@@ -297,13 +247,7 @@ def register_model_loading_callbacks(app, services) -> None:
             for index in bundle.dashboard_model.behaviour_anchor_indices
             if index in dataset.index
         ]
-        explained_feature_names = metadata.get(
-            "explainability_feature_names"
-        ) or metadata.get(
-            "raw_feature_names",
-            [],
-        )
-        context_feature_names = metadata.get("context_feature_names", [])
+        explained_feature_names = list(shap_result.feature_names)
         shap_feature_names = [
             str(feature_name)
             for feature_name in explained_feature_names
@@ -321,15 +265,12 @@ def register_model_loading_callbacks(app, services) -> None:
             }
             for feature_name in shap_feature_names
         ]
-        format_label = model.format.value if model else "unknown"
         metric_names = list(
             metadata.get("error_metrics", config.dashboard_models_config.error_metrics)
         )
         info_panel = _model_info_panel(
-            model_name=model.name if model else str(model_id),
-            format_label=format_label,
+            model_name=display_model_name(model.name if model else str(model_id)),
             explained_features=[str(feature) for feature in explained_feature_names],
-            context_features=[str(feature) for feature in context_feature_names],
             metric_names=[str(metric) for metric in metric_names],
             feature_schema=services.feature_schema,
         )

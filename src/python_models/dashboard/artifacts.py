@@ -46,7 +46,7 @@ class DashboardBundleMetadata:
     @classmethod
     def load(cls, path: Path) -> "DashboardBundleMetadata":
         payload = json.loads(
-            cls.get_root_metadata_path(path).read_text(encoding="utf-8")
+            cls.get_root_metadata_path(path).read_text(encoding="utf-8-sig")
         )
         return cls(
             model_id=payload["model_id"],
@@ -202,3 +202,50 @@ class ManualApiStubResponse:
     prediction: float
     summary: str
     reference_sample_index: t.Any | None = None
+
+
+@dataclass
+class StoredNeighborsProjectionPca:
+    feature_names: list[str]
+    fill_values: dict[str, float]
+    scale_values: dict[str, float]
+    components: np.ndarray
+    explained_variance_ratio: np.ndarray
+
+    def transform_frame(
+        self,
+        frame: pd.DataFrame,
+        *,
+        dimensions: int = 3,
+    ) -> np.ndarray:
+        dimensions = max(1, int(dimensions))
+        if frame.empty:
+            return np.zeros((0, dimensions), dtype="float64")
+        if not self.feature_names:
+            return np.zeros((len(frame), dimensions), dtype="float64")
+
+        matrix = frame.reindex(columns=self.feature_names).apply(
+            pd.to_numeric,
+            errors="coerce",
+        )
+        components = np.asarray(self.components, dtype="float64")
+        fill = pd.Series(self.fill_values, index=self.feature_names, dtype="float64")
+        scale = pd.Series(self.scale_values, index=self.feature_names, dtype="float64")
+        scale = scale.replace(0.0, 1.0).fillna(1.0)
+        standardized = (matrix.fillna(fill) - fill) / scale
+
+        component_count = min(dimensions, int(components.shape[0]))
+        if component_count == 0:
+            return np.zeros((len(frame), dimensions), dtype="float64")
+        coords = standardized.to_numpy(dtype="float64") @ components[:component_count].T
+        if coords.shape[1] < dimensions:
+            coords = np.column_stack(
+                [
+                    coords,
+                    np.zeros(
+                        (len(frame), dimensions - coords.shape[1]),
+                        dtype="float64",
+                    ),
+                ]
+            )
+        return coords

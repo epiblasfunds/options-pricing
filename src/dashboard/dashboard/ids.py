@@ -3,6 +3,7 @@
 
 class IDS:
     MODEL_REFRESH_BUTTON = "model-refresh-button"
+    MODEL_REFRESH_TOKEN = "model-refresh-token"
     MODEL_SELECTOR = "model-selector"
     MODEL_INFO = "model-info"
 
@@ -31,12 +32,13 @@ class IDS:
     SAMPLE_MODE = "sample-mode"
     SAMPLE_INDEX = "sample-index"
     SAMPLE_INDEX_CONTAINER = "sample-index-container"
+    SAMPLE_FEATURE_PREVIEW = "sample-feature-preview"
     SAMPLE_MANUAL_FORM = "sample-manual-form"
     SAMPLE_RUN_BUTTON = "sample-run-button"
     SAMPLE_OUTPUT = "sample-output"
     SAMPLE_WATERFALL = "sample-waterfall"
     SAMPLE_NEIGHBORS = "sample-neighbors"
-    SAMPLE_COMPARISON = "sample-comparison"
+    SAMPLE_COMPARISON_3D = "sample-comparison-3d"
 
     DIAGNOSIS_METRICS = "diagnosis-metrics"
     DIAGNOSIS_SCATTER = "diagnosis-scatter"

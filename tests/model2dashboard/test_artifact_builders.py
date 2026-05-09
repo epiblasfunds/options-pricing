@@ -3,9 +3,11 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 import shap
+import pytest
 
 from src.model2dashboard import artifact_builders
 from src.model2dashboard.artifact_builders import _normalize_symbolic_equation_table
+from src.model2dashboard.features import TARGET_COLUMN
 
 
 class _FakeExplainer:
@@ -18,17 +20,21 @@ class _FakeExplainer:
         seed,
     ) -> None:
         self.model = model
+        self.masker = masker
         self.feature_names = feature_names
 
     def __call__(self, encoded_frame, max_evals, silent):
         predictions = np.asarray(self.model(encoded_frame), dtype="float64").reshape(-1)
+        base_value = float(
+            np.asarray(self.model(self.masker), dtype="float64").reshape(-1).mean()
+        )
         values = np.zeros(
             (len(encoded_frame), len(self.feature_names)), dtype="float64"
         )
-        values[:, 0] = predictions
+        values[:, 0] = predictions - base_value
         return shap.Explanation(
             values=values,
-            base_values=np.zeros(len(encoded_frame), dtype="float64"),
+            base_values=np.full(len(encoded_frame), base_value, dtype="float64"),
             data=encoded_frame.to_numpy(),
             feature_names=self.feature_names,
         )
@@ -45,19 +51,11 @@ class _FakeRegressor:
         ].iloc[0]
 
 
-def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
-    captured_raw_frames = []
-
+def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
     def fake_predict_raw_frame(_runtime, raw_frame):
-        captured_raw_frames.append(raw_frame.copy())
-        exec_dt = pd.to_datetime(raw_frame["ExecDatetime"], errors="coerce")
-        trade_is_h = (raw_frame["TradeType"].astype(str) == "H").astype(float)
-        return (
-            exec_dt.dt.hour.astype(float) * 100.0
-            + raw_frame["UnderlyingLagMinutes"].astype(float) * 10.0
-            + raw_frame["Quantity"].astype(float)
-            + trade_is_h
-        ).to_numpy(dtype="float64")
+        strike = pd.to_numeric(raw_frame["StrikePrice"], errors="coerce")
+        option_is_put = (raw_frame["OptionType"].astype(str) == "P").astype(float)
+        return (strike * 0.1 + option_is_put).to_numpy(dtype="float64")
 
     monkeypatch.setattr(artifact_builders.shap, "Explainer", _FakeExplainer)
     monkeypatch.setattr(artifact_builders, "predict_raw_frame", fake_predict_raw_frame)
@@ -73,10 +71,7 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
                 "ExecDatetime": "2026-04-22T10:00:00+00:00",
                 "OptionContractCode": "CIBX 9000X26",
                 "OptionType": "C",
-                "Quantity": 1,
                 "StrikePrice": 9000.0,
-                "TradeType": "M",
-                "UnderlyingLagMinutes": 0.25,
                 "UnderlyingPrice": 9050.0,
                 "TimeToExpiration": 15.0,
                 "Rate": -0.5,
@@ -86,10 +81,7 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
                 "ExecDatetime": "2026-04-23T15:00:00+00:00",
                 "OptionContractCode": "PIBX 9100X26",
                 "OptionType": "P",
-                "Quantity": 7,
                 "StrikePrice": 9100.0,
-                "TradeType": "H",
-                "UnderlyingLagMinutes": 3.5,
                 "UnderlyingPrice": 9000.0,
                 "TimeToExpiration": 20.0,
                 "Rate": -0.6,
@@ -108,14 +100,11 @@ def test_build_shap_artifacts_preserves_row_specific_hidden_inputs(monkeypatch):
         dataset_frame=dataset_frame,
         raw_frame=raw_frame,
         predictions=predictions,
-        sample_indices=[11],
+        sample_indices=[10, 11],
     )
 
-    local_prediction = float(local_shap.waterfall_predictions()[0])
-
-    assert captured_raw_frames
-    assert local_prediction == 1543.0
-    assert local_shap.index == [11]
+    assert local_shap.index == [10, 11]
+    assert local_shap.base_values.tolist() == [900.0, 900.0]
 
 
 def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():
@@ -139,3 +128,60 @@ def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():
     assert normalized["equation"].is_unique
     assert normalized["selected"].sum() == 1
     assert "best_eq" in set(normalized["equation"])
+
+
+def test_build_neighbors_projection_pca_returns_reusable_transform():
+    artifact = artifact_builders.build_neighbors_projection_pca(
+        training_reference_frame=pd.DataFrame(
+            {
+                "TTEYears": [0.05, 0.10, 0.20],
+                "sqrtTTEYears": [0.22, 0.31, 0.45],
+                "isCall": [1.0, 0.0, 1.0],
+            }
+        ),
+        feature_names=["TTEYears", "sqrtTTEYears", "isCall"],
+    )
+
+    coords = artifact.transform_frame(
+        pd.DataFrame(
+            {
+                "TTEYears": [0.15],
+                "sqrtTTEYears": [0.39],
+                "isCall": [0.0],
+            }
+        ),
+        dimensions=3,
+    )
+
+    assert artifact.feature_names == ["TTEYears", "sqrtTTEYears", "isCall"]
+    assert artifact.components.shape[1] == 3
+    assert coords.shape == (1, 3)
+
+
+def test_build_diagnosis_artifact_uses_full_test_for_metrics_and_heatmap(monkeypatch):
+    dataset = pd.DataFrame(
+        {
+            TARGET_COLUMN: [0.10, 0.20, 0.40],
+            "PredictedVolatility": [0.10, 0.25, 0.30],
+            "Moneyness": [0.90, 1.00, 1.10],
+            "TimeToExpiration": [10.0, 20.0, 30.0],
+            "AbsoluteError": [0.00, 0.05, 0.10],
+        }
+    )
+
+    monkeypatch.setattr(
+        artifact_builders,
+        "sample_frame",
+        lambda frame, max_rows, random_state: frame.head(1).copy(),
+    )
+
+    artifact = artifact_builders.build_diagnosis_artifact(
+        dataset_frame=dataset,
+        financial_warnings=[],
+    )
+
+    assert artifact.metrics["rmse"] == pytest.approx(
+        np.sqrt(((0.0**2) + (0.05**2) + (0.10**2)) / 3.0)
+    )
+    assert len(artifact.plot_frame) == 1
+    assert int(artifact.error_heatmap["AbsoluteError"].notna().sum()) == 3

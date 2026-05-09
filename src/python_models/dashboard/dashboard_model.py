@@ -8,6 +8,7 @@ import pandas as pd
 from src.python_models.dashboard.artifacts import (
     DiagnosisArtifact,
     ManualApiStubResponse,
+    StoredNeighborsProjectionPca,
     StoredShapExplanation,
     SurrogateTreeModel,
 )
@@ -22,6 +23,8 @@ class DashboardModel:
         dataset_frame: pd.DataFrame,
         raw_feature_names: list[str],
         transformed_feature_names: list[str],
+        training_reference_frame: pd.DataFrame | None = None,
+        neighbors_projection_pca: StoredNeighborsProjectionPca | None = None,
         tree_models: dict[int, SurrogateTreeModel] | None = None,
         symbolic_model: t.Any | None = None,
         sample_indices: list[t.Any] | None = None,
@@ -39,6 +42,13 @@ class DashboardModel:
         self.model_name = model_name
         self.metadata = metadata
         self.dataset_frame = dataset_frame
+        self.training_reference_frame = (
+            training_reference_frame.copy()
+            if training_reference_frame is not None
+            and not training_reference_frame.empty
+            else dataset_frame.copy()
+        )
+        self.neighbors_projection_pca = neighbors_projection_pca
         self.raw_feature_names = raw_feature_names
         self.transformed_feature_names = transformed_feature_names
         self.tree_models = {
@@ -96,6 +106,14 @@ class DashboardModel:
             encoding="utf-8",
         )
         joblib.dump(self.dataset_frame, root / "dataset_frame.joblib")
+        joblib.dump(
+            self.training_reference_frame,
+            root / "training_reference_frame.joblib",
+        )
+        self._dump_optional(
+            root / "neighbors_projection_pca.joblib",
+            self.neighbors_projection_pca,
+        )
         self._dump_optional(root / "global_shap.joblib", self.global_shap)
         self._dump_optional(root / "local_shap.joblib", self.local_shap)
         joblib.dump(self.neighbors_frame, root / "neighbors_frame.joblib")
@@ -114,12 +132,20 @@ class DashboardModel:
     @classmethod
     def load(cls, bundle_path: Path) -> "DashboardModel":
         root = cls.get_root_path(bundle_path)
-        payload = json.loads(cls.get_metadata_path(root).read_text(encoding="utf-8"))
+        payload = json.loads(
+            cls.get_metadata_path(root).read_text(encoding="utf-8-sig")
+        )
         return cls(
             model_id=payload["model_id"],
             model_name=payload["model_name"],
             metadata=payload.get("metadata", {}),
             dataset_frame=joblib.load(root / "dataset_frame.joblib"),
+            training_reference_frame=cls._load_optional_frame(
+                root / "training_reference_frame.joblib"
+            ),
+            neighbors_projection_pca=cls._load_optional(
+                root / "neighbors_projection_pca.joblib"
+            ),
             raw_feature_names=list(payload.get("raw_feature_names", [])),
             transformed_feature_names=list(
                 payload.get("transformed_feature_names", [])
@@ -156,7 +182,7 @@ class DashboardModel:
         )
         if rows.empty:
             return pd.DataFrame()
-        neighbors = self.dataset_frame.loc[rows["neighbor_index"]].copy()
+        neighbors = self.training_reference_frame.loc[rows["neighbor_index"]].copy()
         neighbors["distance"] = rows["distance"].to_numpy()
         return neighbors
 

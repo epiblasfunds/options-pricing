@@ -69,3 +69,6 @@ class VolatilityDataProvider:
         raise FileNotFoundError(
             "No dashboard model bundles are available for dataset loading."
         )
+
+    def clear(self) -> None:
+        self._cache = None

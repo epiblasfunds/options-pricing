@@ -9,8 +9,10 @@ from src.dashboard.plots.plot_style import (
     HOVERLABEL_STYLE,
     STANDARD_MARGIN,
     STANDARD_TEMPLATE,
-    safe_color_range,
 )
+
+DIAGNOSIS_SCATTER_OPACITY = 0.45
+HEATMAP_MAX_ABSOLUTE_ERROR = 0.4
 
 
 def real_vs_predicted_figure(frame):
@@ -20,7 +22,7 @@ def real_vs_predicted_figure(frame):
         y="PredictedVolatility",
         color="OptionType" if "OptionType" in frame.columns else None,
         title="Actual vs Predicted Implied Volatility",
-        opacity=0.6,
+        opacity=DIAGNOSIS_SCATTER_OPACITY,
         render_mode="webgl",
     )
     minimum = min(frame["ImpliedVolatility"].min(), frame["PredictedVolatility"].min())
@@ -57,7 +59,7 @@ def residual_by_feature_figure(frame, feature_name: str, title: str):
         y="Residual",
         color="OptionType" if "OptionType" in frame.columns else None,
         title=title,
-        opacity=0.6,
+        opacity=DIAGNOSIS_SCATTER_OPACITY,
         render_mode="webgl",
     )
     fig.add_hline(y=0.0, line_dash="dash", line_color="#4f5d75")
@@ -95,7 +97,7 @@ def error_heatmap_figure(error_heatmap):
         aspect="auto",
         origin="lower",
         color_continuous_scale=ERROR_COLORSCALE,
-        range_color=safe_color_range(error_heatmap["AbsoluteError"].tolist()),
+        range_color=(0.0, HEATMAP_MAX_ABSOLUTE_ERROR),
         title="Average Absolute Error Heatmap",
     )
     fig.update_traces(
@@ -117,5 +119,11 @@ def error_heatmap_figure(error_heatmap):
 
 def _bin_label(value) -> str:
     if isinstance(value, pd.Interval):
+        if float(value.left) < 0.0 <= float(value.right):
+            return f"[0, {_format_bin_bound(float(value.right))}]"
         return str(value)
     return str(value)
+
+
+def _format_bin_bound(value: float) -> str:
+    return f"{value:.3f}".rstrip("0").rstrip(".")

@@ -5,4 +5,7 @@ from src.dashboard.services.global_explainability.shap_service import (
     ShapService,
 )
 
-__all__ = ["ShapExplanationResult", "ShapService"]
+__all__ = [
+    "ShapExplanationResult",
+    "ShapService",
+]

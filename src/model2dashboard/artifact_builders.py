@@ -5,6 +5,7 @@ import pandas as pd
 import shap
 import sympy
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
@@ -14,6 +15,7 @@ from pysr import PySRRegressor
 
 from src.config.config import config
 from src.dashboard.domain import build_metrics_registry
+from src.dashboard.utils.diagnosis import build_error_heatmap_frame
 from src.dashboard.utils.sampling import quantile_grid
 from src.dashboard.utils.sampling import sample_frame
 from src.enums.data_enums import VolatilityDBEnum
@@ -34,6 +36,7 @@ from src.model2dashboard.model_io import transform_feature_frame
 from src.model2dashboard.surface_checks import financial_checks_from_surface
 from src.python_models.dashboard.artifacts import DiagnosisArtifact
 from src.python_models.dashboard.artifacts import ManualApiStubResponse
+from src.python_models.dashboard.artifacts import StoredNeighborsProjectionPca
 from src.python_models.dashboard.artifacts import StoredShapExplanation
 from src.python_models.dashboard.artifacts import SurrogateTreeModel
 from src.python_models.symbolic_regressor_model import SymbolicRegressorModel
@@ -45,8 +48,16 @@ METRICS_REGISTRY = build_metrics_registry()
 def build_dashboard_artifacts(
     *,
     runtime: TrainingModelRuntime,
+    raw_train_frame: pd.DataFrame,
     raw_test_frame: pd.DataFrame,
 ) -> dict[str, t.Any]:
+    train_feature_frame = build_feature_frame_from_trades(raw_train_frame)
+    train_predictions = pd.Series(
+        predict_feature_frame(runtime, train_feature_frame),
+        index=raw_train_frame.index,
+        name="PredictedVolatility",
+    )
+    training_reference_frame = build_dashboard_dataset(raw_train_frame, train_predictions)
     feature_frame = build_feature_frame_from_trades(raw_test_frame)
     predictions = pd.Series(
         predict_feature_frame(runtime, feature_frame),
@@ -88,6 +99,11 @@ def build_dashboard_artifacts(
     )
     return {
         "dataset_frame": dataset_frame,
+        "training_reference_frame": training_reference_frame,
+        "neighbors_projection_pca": build_neighbors_projection_pca(
+            training_reference_frame=training_reference_frame,
+            feature_names=list(runtime.model_input_features),
+        ),
         "feature_frame": feature_frame,
         "predictions": predictions,
         "sample_indices": sample_indices,
@@ -108,9 +124,10 @@ def build_dashboard_artifacts(
         "local_shap": local_shap,
         "neighbors_frame": build_neighbors_frame(
             runtime=runtime,
-            dataset_frame=dataset_frame,
-            feature_frame=feature_frame,
+            training_reference_frame=training_reference_frame,
+            training_feature_frame=train_feature_frame,
             sample_indices=sample_indices,
+            sample_feature_frame=feature_frame,
         ),
         "surfaces_frame": surfaces_frame,
         "ice_frame": build_ice_frame(
@@ -135,6 +152,55 @@ def build_dashboard_artifacts(
             reference_sample_index=sample_indices[0] if sample_indices else None,
         ),
     }
+
+
+def build_neighbors_projection_pca(
+    *,
+    training_reference_frame: pd.DataFrame,
+    feature_names: list[str],
+) -> StoredNeighborsProjectionPca:
+    selected = [
+        name for name in feature_names if name in training_reference_frame.columns
+    ]
+    if not selected:
+        return StoredNeighborsProjectionPca(
+            feature_names=[],
+            fill_values={},
+            scale_values={},
+            components=np.zeros((0, 0), dtype="float64"),
+            explained_variance_ratio=np.zeros(0, dtype="float64"),
+        )
+
+    matrix = training_reference_frame.loc[:, selected].apply(
+        pd.to_numeric,
+        errors="coerce",
+    )
+    fill_values = matrix.mean().fillna(0.0)
+    standardized = matrix.fillna(fill_values)
+    scale = standardized.std(ddof=0).replace(0.0, 1.0).fillna(1.0)
+    standardized = (standardized - fill_values) / scale
+
+    component_count = min(3, standardized.shape[0], standardized.shape[1])
+    if component_count <= 0:
+        components = np.zeros((0, len(selected)), dtype="float64")
+        explained_variance_ratio = np.zeros(0, dtype="float64")
+    else:
+        fitted = PCA(n_components=component_count, svd_solver="full").fit(
+            standardized.to_numpy(dtype="float64")
+        )
+        components = np.asarray(fitted.components_, dtype="float64")
+        explained_variance_ratio = np.asarray(
+            fitted.explained_variance_ratio_,
+            dtype="float64",
+        )
+
+    return StoredNeighborsProjectionPca(
+        feature_names=list(selected),
+        fill_values={name: float(value) for name, value in fill_values.items()},
+        scale_values={name: float(value) for name, value in scale.items()},
+        components=components,
+        explained_variance_ratio=explained_variance_ratio,
+    )
 
 
 def build_shap_artifacts(
@@ -508,22 +574,23 @@ def build_symbolic_regressor_model(
 def build_neighbors_frame(
     *,
     runtime: TrainingModelRuntime,
-    dataset_frame: pd.DataFrame,
-    feature_frame: pd.DataFrame,
+    training_reference_frame: pd.DataFrame,
+    training_feature_frame: pd.DataFrame,
     sample_indices: list[t.Any],
+    sample_feature_frame: pd.DataFrame,
 ) -> pd.DataFrame:
     sampled_dataset = sample_frame(
-        dataset_frame,
+        training_reference_frame,
         max_rows=config.dashboard_models_config.neighbors_sample_size,
         random_state=config.dashboard_models_config.random_state,
     )
     transformed_dataset = transform_feature_frame(
         runtime,
-        feature_frame.loc[sampled_dataset.index],
+        training_feature_frame.loc[sampled_dataset.index],
     )
     transformed_samples = transform_feature_frame(
         runtime,
-        feature_frame.loc[sample_indices],
+        sample_feature_frame.loc[sample_indices],
     )
     scaler = StandardScaler()
     dataset_values = scaler.fit_transform(transformed_dataset.to_numpy())
@@ -684,14 +751,15 @@ def build_diagnosis_artifact(
     dataset_frame: pd.DataFrame,
     financial_warnings: list[str],
 ) -> DiagnosisArtifact:
+    full_test = dataset_frame.dropna(subset=[TARGET_COLUMN]).copy()
     sampled = sample_frame(
-        dataset_frame.dropna(subset=[TARGET_COLUMN]),
+        full_test,
         max_rows=config.dashboard_models_config.diagnosis_sample_size,
         random_state=config.dashboard_models_config.random_state,
     )
     metrics = METRICS_REGISTRY.compute_metrics(
-        sampled[TARGET_COLUMN].astype(float).reset_index(drop=True),
-        sampled["PredictedVolatility"].astype(float).reset_index(drop=True),
+        full_test[TARGET_COLUMN].astype(float).reset_index(drop=True),
+        full_test["PredictedVolatility"].astype(float).reset_index(drop=True),
         config.dashboard_models_config.error_metrics,
     )
     plot_frame = sample_frame(
@@ -699,17 +767,7 @@ def build_diagnosis_artifact(
         max_rows=min(2500, len(sampled)),
         random_state=config.dashboard_models_config.random_state + 7,
     )
-    error_heatmap = (
-        sampled.assign(
-            moneyness_bin=pd.cut(sampled["Moneyness"], bins=12),
-            maturity_bin=pd.cut(
-                sampled[column_name(VolatilityDBEnum.TIME_TO_EXPIRATION)], bins=12
-            ),
-        )
-        .groupby(["moneyness_bin", "maturity_bin"], observed=False)["AbsoluteError"]
-        .mean()
-        .reset_index()
-    )
+    error_heatmap = build_error_heatmap_frame(full_test)
     return DiagnosisArtifact(
         metrics={str(name): float(value) for name, value in metrics.items()},
         plot_frame=plot_frame,

@@ -20,8 +20,9 @@ def register_equivalent_callbacks(app, services) -> None:
     @app.callback(
         Output(IDS.GLOBAL_EQUIVALENT_CONTENT, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_equivalent_models(model_id):
+    def render_equivalent_models(model_id, _refresh_token):
         if not model_id:
             return html.Div("Select an explainable-model bundle.")
         try:
@@ -48,8 +49,9 @@ def register_equivalent_callbacks(app, services) -> None:
         Output(IDS.GLOBAL_EQUIVALENT_TREE_PANEL, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
         Input(IDS.GLOBAL_EQUIVALENT_DEPTH_TABS, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_tree_panel(model_id, selected_depth):
+    def render_tree_panel(model_id, selected_depth, _refresh_token):
         if not model_id:
             return html.Div()
         try:

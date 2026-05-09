@@ -15,7 +15,7 @@ class _FakeModelService:
         return {
             "modelo": request.modelo,
             "prediction": 0.24,
-            "input": {"Quantity": request.caracteristicas.quantity},
+            "input": {"StrikePrice": request.caracteristicas.strikePrice},
         }
 
     def sample_explainability(self, request):
@@ -23,7 +23,7 @@ class _FakeModelService:
         return {
             "modelo": request.modelo,
             "prediction": np.float64(0.31),
-            "input": {"TradeType": request.caracteristicas.tradeType},
+            "input": {"StrikePrice": request.caracteristicas.strikePrice},
             "reference_sample_index": None,
             "waterfall_image": "data:image/png;base64,abc",
             "local_explanation": {"feature_names": ["rate"], "value": np.float64(1.2)},
@@ -55,9 +55,7 @@ def test_predict_endpoint_accepts_defaults():
 
     assert response.status_code == 200
     assert response.json()["prediction"] == 0.24
-    assert service.predict_request.caracteristicas.quantity == 1
-    assert service.predict_request.caracteristicas.tradeType == "M"
-    assert service.predict_request.caracteristicas.underlyingLag == 0.0
+    assert service.predict_request.caracteristicas.strikePrice == 10000.0
 
 
 def test_sample_explainability_endpoint_returns_dashboard_payload():
@@ -77,3 +75,57 @@ def test_sample_explainability_endpoint_returns_dashboard_payload():
     assert body["reference_sample_index"] is None
     assert body["waterfall_image"].startswith("data:image/png;base64,")
     assert body["neighbors"][0]["distance"] == 0.0
+
+
+def test_health_endpoints_return_ok():
+    client = TestClient(app)
+
+    assert client.get("/").json() == {"status": "ok"}
+    assert client.get("/health").json() == {"status": "ok"}
+
+
+def test_predict_endpoint_maps_expected_errors_to_http_status_codes():
+    class _ErroringService:
+        def __init__(self, exc):
+            self.exc = exc
+
+        def predict(self, request):
+            raise self.exc
+
+    for exc, expected_status in [
+        (FileNotFoundError("missing"), 404),
+        (ValueError("bad"), 400),
+        (RuntimeError("upstream"), 502),
+    ]:
+        app.dependency_overrides[get_model_service] = lambda exc=exc: _ErroringService(exc)
+        try:
+            response = TestClient(app).post("/run_model/predict/", json=_payload())
+        finally:
+            app.dependency_overrides.clear()
+
+        assert response.status_code == expected_status
+
+
+def test_sample_explainability_endpoint_maps_expected_errors_to_http_status_codes():
+    class _ErroringService:
+        def __init__(self, exc):
+            self.exc = exc
+
+        def sample_explainability(self, request):
+            raise self.exc
+
+    for exc, expected_status in [
+        (FileNotFoundError("missing"), 404),
+        (ValueError("bad"), 400),
+        (RuntimeError("upstream"), 502),
+    ]:
+        app.dependency_overrides[get_model_service] = lambda exc=exc: _ErroringService(exc)
+        try:
+            response = TestClient(app).post(
+                "/run_model/sample_explainability/",
+                json=_payload(),
+            )
+        finally:
+            app.dependency_overrides.clear()
+
+        assert response.status_code == expected_status

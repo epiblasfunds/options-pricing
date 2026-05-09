@@ -10,14 +10,15 @@ from src.config.config import (
     config,
 )
 from src.enums.volatility_model_enums import ModelFormatEnum
+from src.enums.volatility_model_enums.model_name import display_model_name
 from src.model2dashboard.artifact_builders import build_dashboard_artifacts
 from src.model2dashboard.features import (
     ANALYSIS_FEATURE_NAMES,
-    CONTEXT_FEATURE_NAMES,
     EXPLAINABILITY_FEATURE_NAMES,
     MODEL_INPUT_FEATURE_NAMES,
     TARGET_COLUMN,
     VISIBLE_RAW_INPUT_FEATURE_NAMES,
+    load_train_trade_frame,
     load_test_trade_frame,
 )
 from src.model2dashboard.model_io import (
@@ -59,12 +60,14 @@ def build_all_explainable_models(
     bundle_dir: Path = DASHBOARD_SAVED_MODELS_DIR_PATH,
     overwrite: bool = True,
 ) -> list[ExportedDashboardBundle]:
+    raw_train_frame = load_train_trade_frame(verbose=False)
     raw_test_frame = load_test_trade_frame(verbose=False)
     exported: list[ExportedDashboardBundle] = []
     for family_name in discover_model_families(trained_models_dir):
         exported.append(
             build_explainable_model(
                 family_name=family_name,
+                raw_train_frame=raw_train_frame,
                 raw_test_frame=raw_test_frame,
                 trained_models_dir=trained_models_dir,
                 retrained_metadata_dir=retrained_metadata_dir,
@@ -78,6 +81,7 @@ def build_all_explainable_models(
 def build_explainable_model(
     *,
     family_name: str,
+    raw_train_frame=None,
     raw_test_frame=None,
     trained_models_dir: Path = VOLATILITY_TRAINED_MODELS_DIR_PATH,
     retrained_metadata_dir: Path = VOLATILITY_RETRAINED_METADATA_DIR_PATH,
@@ -94,7 +98,16 @@ def build_explainable_model(
         if raw_test_frame is not None
         else load_test_trade_frame(verbose=False)
     ).reset_index(drop=True)
-    artifacts = build_dashboard_artifacts(runtime=runtime, raw_test_frame=test_frame)
+    train_frame = (
+        raw_train_frame.copy()
+        if raw_train_frame is not None
+        else load_train_trade_frame(verbose=False)
+    ).reset_index(drop=True)
+    artifacts = build_dashboard_artifacts(
+        runtime=runtime,
+        raw_train_frame=train_frame,
+        raw_test_frame=test_frame,
+    )
 
     bundle_path = bundle_dir / family_name
     if overwrite and bundle_path.exists():
@@ -114,6 +127,8 @@ def build_explainable_model(
         model_name=_display_model_name(family_name),
         metadata=metadata_payload,
         dataset_frame=artifacts["dataset_frame"],
+        training_reference_frame=artifacts["training_reference_frame"],
+        neighbors_projection_pca=artifacts["neighbors_projection_pca"],
         raw_feature_names=list(VISIBLE_RAW_INPUT_FEATURE_NAMES),
         transformed_feature_names=list(runtime.model_input_features),
         tree_models=artifacts["tree_models"],
@@ -158,7 +173,6 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         "model_input_features": list(MODEL_INPUT_FEATURE_NAMES),
         "transformed_feature_names": list(MODEL_INPUT_FEATURE_NAMES),
         "raw_feature_names": list(VISIBLE_RAW_INPUT_FEATURE_NAMES),
-        "context_feature_names": list(CONTEXT_FEATURE_NAMES),
         "explainability_feature_names": list(EXPLAINABILITY_FEATURE_NAMES),
         "analysis_feature_names": list(ANALYSIS_FEATURE_NAMES),
         "target_column": TARGET_COLUMN,
@@ -206,12 +220,14 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         ),
         "data_split": "test",
         "data_source": "TrainingDataHandler.load_splitted_data()[-1]",
+        "neighbor_reference_split": "train",
+        "neighbor_reference_source": "TrainingDataHandler.load_splitted_data()[0]",
         "builder": "src.model2dashboard.run_pipeline",
     }
 
 
 def _display_model_name(model_id: str) -> str:
-    return model_id.replace("_", " ").title()
+    return display_model_name(model_id)
 
 
 def main() -> None:

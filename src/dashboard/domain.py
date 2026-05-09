@@ -7,9 +7,9 @@ from src.dashboard.services.shared.metrics_registry import (
     MetricsRegistry,
 )
 from src.enums.data_enums import OptionTypeEnum
+from src.model2dashboard.features import RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
-from src.model2dashboard.features import TRADE_TYPE_TO_FEATURE
 from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
@@ -23,8 +23,10 @@ def _r2_score(y_true, y_pred) -> float:
 
 
 def build_feature_schema() -> FeatureSchema:
+    visible_raw_inputs = set(VISIBLE_RAW_INPUT_FEATURE_NAMES)
     features = [
-        _raw_feature_definition(name) for name in VISIBLE_RAW_INPUT_FEATURE_NAMES
+        _raw_feature_definition(name, raw_input=name in visible_raw_inputs)
+        for name in RAW_INPUT_FEATURE_NAMES
     ]
     features.extend(
         [
@@ -78,9 +80,11 @@ def build_feature_schema() -> FeatureSchema:
     return FeatureSchema(features=features, target_column=TARGET_COLUMN)
 
 
-def _raw_feature_definition(name: str) -> FeatureDefinition:
+def _raw_feature_definition(
+    name: str,
+    raw_input: bool = True,
+) -> FeatureDefinition:
     labels = {
-        "ExecDatetime": "Execution Datetime",
         "OptionType": "Option Type",
         "StrikePrice": "Strike Price",
         "UnderlyingPrice": "Underlying Price",
@@ -88,36 +92,23 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         "Rate": "Rate",
     }
     descriptions = {
-        "ExecDatetime": (
-            "Execution timestamp used as contextual input. It is shown in the "
-            "manual form but not explained as a driver."
-        ),
         "OptionType": "Call or put option.",
         "StrikePrice": "Strike price associated with the traded option.",
         "UnderlyingPrice": "Underlying price paired with the option trade.",
         "TimeToExpiration": "Remaining time to maturity, measured in days.",
         "Rate": "Risk-free rate used to back out implied volatility.",
     }
-    if name == "ExecDatetime":
-        return FeatureDefinition(
-            name=name,
-            label=labels[name],
-            dtype="datetime",
-            category="categorical",
-            raw_input=True,
-            widget="text",
-            description=descriptions[name],
-        )
     if name == "OptionType":
         return FeatureDefinition(
             name=name,
             label=labels[name],
             dtype="category",
             category="categorical",
-            raw_input=True,
+            raw_input=raw_input,
+            derived_explainability_feature=not raw_input,
             allowed_values=(OptionTypeEnum.CALL, OptionTypeEnum.PUT),
             default_value=OptionTypeEnum.CALL,
-            widget="dropdown",
+            widget="dropdown" if raw_input else None,
             description=descriptions[name],
         )
     return FeatureDefinition(
@@ -125,9 +116,10 @@ def _raw_feature_definition(name: str) -> FeatureDefinition:
         label=labels.get(name, name),
         dtype="float",
         category="numerical",
-        raw_input=True,
+        raw_input=raw_input,
+        derived_explainability_feature=not raw_input,
         min_value=0.0 if name != "Rate" else None,
-        widget="number",
+        widget="number" if raw_input else None,
         description=descriptions.get(name),
     )
 
@@ -141,17 +133,9 @@ def _model_feature_definition(name: str) -> FeatureDefinition:
         "logMoneynessXSqrtTTE": "Log-Moneyness x Sqrt TTE",
         "logForwardMoneyness": "Log Forward Moneyness",
         "rate": "Rate",
-        "underlyingLagMinutes": "Underlying Lag (minutes)",
-        "quantityLog1p": "Log(1 + Quantity)",
         "isCall": "Is Call",
         "isPut": "Is Put",
     }
-    for trade_type, feature_column in TRADE_TYPE_TO_FEATURE.items():
-        labels[feature_column] = f"Trade Type = {trade_type}"
-    if name.startswith("execHour"):
-        labels[name] = f"Execution Hour = {name.removeprefix('execHour')}"
-    if name.startswith("execWeekday"):
-        labels[name] = f"Execution Weekday = {name.removeprefix('execWeekday')}"
     return FeatureDefinition(
         name=name,
         label=labels.get(name, name),

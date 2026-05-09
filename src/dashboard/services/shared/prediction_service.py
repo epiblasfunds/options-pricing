@@ -125,13 +125,9 @@ class PredictionService:
             option_type_text = "PUT"
 
         mapping = {
-            "ExecDatetime": "execDatetime",
             "OptionContractCode": "optionContractCode",
             "OptionType": "optionType",
-            "Quantity": "quantity",
             "StrikePrice": "strikePrice",
-            "TradeType": "tradeType",
-            "UnderlyingLagMinutes": "underlyingLag",
             "UnderlyingPrice": "underlyingPrice",
             "TimeToExpiration": "timeToExpiration",
             "Rate": "rate",

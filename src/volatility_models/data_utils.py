@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 from src.config.config import (
-    TRAINING_DATA_SPLITTED_DIR,
     TRAINING_DATA_SPLITTED_FEATURES_DIR,
     config,
 )
@@ -42,21 +41,9 @@ class TrainingDataHandler:
     }
 
     @staticmethod
-    def _get_splitted_data_filename(split: TrainingDataSplitEnum):
-        filename = f"{split.value}_splitted_data{TrainingDataHandler}.csv"
-        return TRAINING_DATA_SPLITTED_DIR / filename
-
-    @staticmethod
     def _get_splitted_features_data_filename(split: TrainingDataSplitEnum):
         filename = f"{split.value}_splitted_features_data.csv"
         return TRAINING_DATA_SPLITTED_FEATURES_DIR / filename
-
-    @staticmethod
-    def _get_kfolds_filename(split: TrainingDataSplitEnum, kfold_name: str):
-        if split == TrainingDataSplitEnum.TEST:
-            raise ValueError
-        filename = f"{split.value}_kfolds_{kfold_name}.csv"
-        return TRAINING_DATA_SPLITTED_DIR / filename
 
     @staticmethod
     def get_df_dates(data_df: pd.DataFrame):
@@ -86,11 +73,6 @@ class TrainingDataHandler:
         is_call = float(tr[VolatilityDBEnum.OPTION_TYPE].upper() == OptionTypeEnum.CALL)
         is_put = float(tr[VolatilityDBEnum.OPTION_TYPE].upper() == OptionTypeEnum.PUT)
 
-        quantity_raw = tr[VolatilityDBEnum.QUANTITY]
-        quantity_log1p = np.log1p(quantity_raw)
-
-        underlying_lag_minutes = tr[VolatilityDBEnum.UNDERLYING_LAG_MINUTES]
-
         features = {
             TrainingDataEnum.TTE_YEARS: tte_years,
             TrainingDataEnum.SQRT_TTE_YEARS: sqrt_tte_years,
@@ -99,49 +81,9 @@ class TrainingDataHandler:
             TrainingDataEnum.LOG_MONEYNESS_X_SQRT_TTE: log_moneyness_x_sqrt_tte,
             TrainingDataEnum.LOG_FORWARD_MONEYNESS: log_forward_moneyness,
             TrainingDataEnum.RATE: rate,
-            TrainingDataEnum.UNDERLYING_LAG_MINUTES: underlying_lag_minutes,
-            TrainingDataEnum.QUANTITY_LOG1P: quantity_log1p,
             TrainingDataEnum.IS_CALL: is_call,
             TrainingDataEnum.IS_PUT: is_put,
         }
-
-        trade_value = str(tr[VolatilityDBEnum.TRADE_TYPE])
-        for col in [
-            TrainingDataEnum.TRADE_TYPE_3,
-            TrainingDataEnum.TRADE_TYPE_H,
-            TrainingDataEnum.TRADE_TYPE_M,
-            TrainingDataEnum.TRADE_TYPE_S,
-            TrainingDataEnum.TRADE_TYPE_W,
-            TrainingDataEnum.TRADE_TYPE_X,
-        ]:
-            features[col.value] = float(f"tradeType{trade_value}" == col.value)
-
-        exec_dt = tr[VolatilityDBEnum.EXEC_DATETIME]
-        exec_hour = int(exec_dt.hour)
-        exec_weekday = int(exec_dt.weekday())
-        for col in [
-            TrainingDataEnum.EXEC_HOUR_9,
-            TrainingDataEnum.EXEC_HOUR_10,
-            TrainingDataEnum.EXEC_HOUR_11,
-            TrainingDataEnum.EXEC_HOUR_12,
-            TrainingDataEnum.EXEC_HOUR_13,
-            TrainingDataEnum.EXEC_HOUR_14,
-            TrainingDataEnum.EXEC_HOUR_15,
-            TrainingDataEnum.EXEC_HOUR_16,
-            TrainingDataEnum.EXEC_HOUR_17,
-            TrainingDataEnum.EXEC_HOUR_18,
-            TrainingDataEnum.EXEC_HOUR_19,
-        ]:
-            features[col.value] = float(f"execHour{exec_hour}" == col.value)
-
-        for col in [
-            TrainingDataEnum.EXEC_WEEKDAY_0,
-            TrainingDataEnum.EXEC_WEEKDAY_1,
-            TrainingDataEnum.EXEC_WEEKDAY_2,
-            TrainingDataEnum.EXEC_WEEKDAY_3,
-            TrainingDataEnum.EXEC_WEEKDAY_4,
-        ]:
-            features[col.value] = float(f"execWeekday{exec_weekday}" == col.value)
 
         return features
 
@@ -462,6 +404,13 @@ class TrainingDataHandler:
             fold_name = f"fold-{n_folds - i}"
             kfold_full_df = train_df.iloc[: -block_size * i] if i > 0 else train_df
             fold_train_df, fold_val_df = cls.split_train_test(kfold_full_df)
+            fold_train_df, fold_val_df = cls.enforce_unique_option_contract_pair(
+                left_df=fold_train_df,
+                right_df=fold_val_df,
+                left_split=TrainingDataSplitEnum.TRAIN,
+                right_split=TrainingDataSplitEnum.VAL,
+                verbose=False,
+            )
             folds[fold_name] = {"train": fold_train_df, "val": fold_val_df}
 
         folds = dict(
@@ -513,19 +462,6 @@ class DataInfoDisplay:
 
         categorical_summary_groups = {
             "is_call": ["isCall"],
-            "trade_type": list(
-                config.volatility_models_config.training_data_config.trade_type_to_feature.values()
-            ),
-            "exec_hour": [
-                enum_value.value
-                for enum_value in TrainingDataEnum
-                if enum_value.value.startswith("execHour")
-            ],
-            "exec_weekday": [
-                enum_value.value
-                for enum_value in TrainingDataEnum
-                if enum_value.value.startswith("execWeekday")
-            ],
         }
 
         for group_name, group_cols in categorical_summary_groups.items():
@@ -621,8 +557,10 @@ class DataInfoDisplay:
 
             train_rows = len(fold_train_df)
             val_rows = len(fold_val_df)
+            fold_total_rows = train_rows + val_rows
             train_n_dates = len(fold_train_dates)
             val_n_dates = len(fold_val_dates)
+            fold_total_dates = train_n_dates + val_n_dates
 
             train_start = min(fold_train_dates)
             train_end_date = max(fold_train_dates)
@@ -631,12 +569,15 @@ class DataInfoDisplay:
 
             logger.info(f"{fold_name.upper()}")
             logger.info(
-                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / len(full_df):>7.2%} of train) "
-                f"| dates: {train_n_dates:>5,} ({train_n_dates / len(full_df_dates):>7.2%} of train) "
+                f"  Fold effective total: {fold_total_rows:,} rows | {fold_total_dates:,} dates"
+            )
+            logger.info(
+                f"  TRAIN | rows: {train_rows:>8,} ({train_rows / fold_total_rows:>7.2%} of fold) "
+                f"| dates: {train_n_dates:>5,} ({train_n_dates / fold_total_dates:>7.2%} of fold) "
                 f"| range: {train_start} -> {train_end_date}"
             )
             logger.info(
-                f"  VALID | rows: {val_rows:>8,} ({val_rows / len(full_df):>7.2%} of train) "
-                f"| dates: {val_n_dates:>5,} ({val_n_dates / len(full_df_dates):>7.2%} of train) "
+                f"  VALID | rows: {val_rows:>8,} ({val_rows / fold_total_rows:>7.2%} of fold) "
+                f"| dates: {val_n_dates:>5,} ({val_n_dates / fold_total_dates:>7.2%} of fold) "
                 f"| range: {val_start} -> {val_end_date}"
             )

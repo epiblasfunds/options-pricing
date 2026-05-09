@@ -4,6 +4,7 @@ from sklearn.tree import DecisionTreeRegressor
 
 from src.python_models.dashboard.artifacts import DiagnosisArtifact
 from src.python_models.dashboard.artifacts import ManualApiStubResponse
+from src.python_models.dashboard.artifacts import StoredNeighborsProjectionPca
 from src.python_models.dashboard.artifacts import StoredShapExplanation
 from src.python_models.dashboard.artifacts import SurrogateTreeModel
 from src.python_models.dashboard.dashboard_model import DashboardModel
@@ -51,6 +52,21 @@ def _dashboard_model():
         ),
         raw_feature_names=["OptionType"],
         transformed_feature_names=["isCall"],
+        training_reference_frame=pd.DataFrame(
+            {
+                "PredictedVolatility": [0.11],
+                "ImpliedVolatility": [0.12],
+                "OptionType": ["P"],
+            },
+            index=[17],
+        ),
+        neighbors_projection_pca=StoredNeighborsProjectionPca(
+            feature_names=["isCall"],
+            fill_values={"isCall": 0.5},
+            scale_values={"isCall": 0.5},
+            components=[[1.0]],
+            explained_variance_ratio=[1.0],
+        ),
         tree_models={2: _tree_model()},
         symbolic_model=SymbolicRegressorModel(
             equation="Rate",
@@ -67,7 +83,7 @@ def _dashboard_model():
         global_shap=shap_values,
         local_shap=shap_values,
         neighbors_frame=pd.DataFrame(
-            {"sample_index": [5], "neighbor_index": [5], "distance": [0.0]}
+            {"sample_index": [5], "neighbor_index": [17], "distance": [0.0]}
         ),
         surfaces_frame=pd.DataFrame(
             {"anchor_index": [5], "Moneyness": [1.0], "PredictedVolatility": [0.3]}
@@ -97,7 +113,11 @@ def test_dashboard_model_save_load_and_accessors(tmp_path):
     assert loaded.model_id == "rf"
     assert loaded.predictions_for_indices([5]).to_dict() == {5: 0.3}
     assert loaded.local_shap_for_index(5).index == [5]
+    assert loaded.training_reference_frame.index.tolist() == [17]
+    assert loaded.neighbors_projection_pca is not None
+    assert loaded.neighbors_projection_pca.feature_names == ["isCall"]
     assert loaded.neighbors_for_index(5)["distance"].tolist() == [0.0]
+    assert loaded.neighbors_for_index(5).index.tolist() == [17]
     assert not loaded.surface_for_anchor(5).empty
     assert not loaded.ice_for_feature("Rate").empty
     assert not loaded.ale_for_feature("Rate").empty

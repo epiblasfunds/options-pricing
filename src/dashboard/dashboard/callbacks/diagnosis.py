@@ -26,8 +26,9 @@ def register_diagnosis_callbacks(app, services) -> None:
         Output(IDS.DIAGNOSIS_HEATMAP, "figure"),
         Output(IDS.DIAGNOSIS_WARNINGS, "children"),
         Input(IDS.MODEL_SELECTOR, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_diagnosis(model_id):
+    def render_diagnosis(model_id, _refresh_token):
         if not model_id:
             return (
                 "Select a model.",

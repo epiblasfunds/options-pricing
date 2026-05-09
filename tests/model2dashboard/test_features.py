@@ -5,6 +5,7 @@ import pytest
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import MODEL_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import TARGET_COLUMN
+from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import apply_feature_override
 from src.model2dashboard.features import build_dashboard_dataset
@@ -20,10 +21,7 @@ def _raw_trade_frame():
                 "ExecDatetime": "2026-04-22T10:00:00Z",
                 "OptionContractCode": "CIBX 9000X26",
                 "OptionType": "C",
-                "Quantity": 1,
                 "StrikePrice": 9000.0,
-                "TradeType": "M",
-                "UnderlyingLagMinutes": 0.25,
                 "UnderlyingPrice": 9050.0,
                 "TimeToExpiration": 15.0,
                 "Rate": -0.5,
@@ -33,10 +31,7 @@ def _raw_trade_frame():
                 "ExecDatetime": "2026-04-23T15:00:00Z",
                 "OptionContractCode": "PIBX 9100X26",
                 "OptionType": "P",
-                "Quantity": 7,
                 "StrikePrice": 9100.0,
-                "TradeType": "H",
-                "UnderlyingLagMinutes": 3.5,
                 "UnderlyingPrice": 9000.0,
                 "TimeToExpiration": 20.0,
                 "Rate": -0.6,
@@ -54,14 +49,13 @@ def test_explainability_encoder_roundtrip_preserves_supported_feature_types():
     explain_frame = build_explainability_frame(raw_frame)
     encoded = encoder.encode_frame(raw_frame)
     decoded = encoder.decode_values(encoded)
-    reconstructed = encoder.reconstruct_raw_frame(encoded)
+    rebuilt = encoder.reconstruct_raw_frame(encoded)
 
     assert list(explain_frame.columns) == list(EXPLAINABILITY_FEATURE_NAMES)
     assert encoded.shape == (2, len(EXPLAINABILITY_FEATURE_NAMES))
     assert decoded.loc[10, "OptionType"] == "C"
     assert decoded.loc[11, "OptionType"] == "P"
-    assert "TradeType" in reconstructed.columns
-    assert reconstructed.loc[10, "TradeType"] == "H"
+    assert rebuilt.loc[10, "OptionType"] == "C"
 
 
 def test_feature_and_dashboard_dataset_builders_add_expected_columns():
@@ -79,6 +73,10 @@ def test_feature_and_dashboard_dataset_builders_add_expected_columns():
     assert "PredictedVolatility" in dataset.columns
     assert "Residual" in dataset.columns
     assert dataset.loc[0, "Residual"] == dataset.loc[0, TARGET_COLUMN] - 0.18
+
+
+def test_visible_manual_inputs_match_explainability_features():
+    assert list(VISIBLE_RAW_INPUT_FEATURE_NAMES) == list(EXPLAINABILITY_FEATURE_NAMES)
 
 
 def test_apply_feature_override_updates_supported_fields():

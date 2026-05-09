@@ -18,6 +18,7 @@ from src.dashboard.domain import build_feature_schema
 from src.dashboard.plots.shap_plots import waterfall_image
 from src.dashboard.services.global_explainability import ShapExplanationResult
 from src.dashboard.services.shared.feature_schema import FeatureSchema
+from src.dashboard.utils.sampling import sample_frame
 from src.model2dashboard.features import EXPLAINABILITY_FEATURE_NAMES
 from src.model2dashboard.features import add_dashboard_derived_features
 from src.model2dashboard.features import build_explainability_encoder
@@ -42,7 +43,7 @@ class ApiModelService:
         storage: ModelStorage,
         cache: ApiModelCache[LoadedApiModel],
         feature_schema: FeatureSchema | None = None,
-        neighbors_k: int = 10,
+        neighbors_k: int = 200,
     ) -> None:
         self.storage = storage
         self.cache = cache
@@ -123,12 +124,8 @@ class ApiModelService:
         features = request.caracteristicas
         option_type = "C" if features.optionType == ApiOptionTypeEnum.CALL else "P"
         row = {
-            "ExecDatetime": self._format_exec_datetime(features.execDatetime),
             "OptionType": option_type,
-            "Quantity": int(features.quantity),
             "StrikePrice": float(features.strikePrice),
-            "TradeType": str(features.tradeType),
-            "UnderlyingLagMinutes": float(features.underlyingLag),
             "UnderlyingPrice": float(features.underlyingPrice),
             "TimeToExpiration": float(features.timeToExpiration),
             "Rate": float(features.rate),
@@ -162,7 +159,7 @@ class ApiModelService:
         sample_frame: pd.DataFrame,
         k: int,
     ) -> pd.DataFrame:
-        dataset = dashboard_model.dataset_frame
+        dataset = dashboard_model.training_reference_frame
         feature_names = self._neighbor_feature_names(dashboard_model, sample_frame)
         if not feature_names:
             return pd.DataFrame()
@@ -202,7 +199,7 @@ class ApiModelService:
         return [
             name
             for name in candidates
-            if name in dashboard_model.dataset_frame.columns
+            if name in dashboard_model.training_reference_frame.columns
             and name in sample_frame.columns
         ]
 
@@ -223,15 +220,15 @@ class ApiModelService:
             raise RuntimeError(
                 "Cannot build runtime SHAP explanation without features."
             )
-        background_source = build_explainability_frame(
+        background_rows = sample_frame(
             dashboard_model.dataset_frame,
+            max_rows=config.dashboard_models_config.shap_background_size,
+            random_state=config.dashboard_models_config.random_state + 1,
+        )
+        background_source = build_explainability_frame(
+            background_rows,
             feature_names=feature_names,
         )
-        if len(background_source) > config.dashboard_models_config.shap_background_size:
-            background_source = background_source.sample(
-                n=config.dashboard_models_config.shap_background_size,
-                random_state=config.dashboard_models_config.random_state,
-            ).sort_index()
 
         sample_explain_frame = build_explainability_frame(
             raw_frame,
@@ -321,16 +318,14 @@ class ApiModelService:
             "values": np.asarray(stored.values).tolist(),
             "base_values": np.asarray(stored.base_values).tolist(),
             "data": np.asarray(stored.data).tolist(),
+            "display_data": (
+                None
+                if stored.display_data is None
+                else np.asarray(stored.display_data, dtype=object).tolist()
+            ),
             "predictions": np.asarray(stored.waterfall_predictions()).tolist(),
             "mean_abs_shap": dict(stored.mean_abs_shap),
         }
-
-    @staticmethod
-    def _format_exec_datetime(value: datetime) -> str:
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        value = value.astimezone(timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     @classmethod
     def _frame_records(cls, frame: pd.DataFrame) -> list[dict[str, Any]]:

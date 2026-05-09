@@ -34,8 +34,9 @@ def register_behaviour_callbacks(app, services) -> None:
         Input(IDS.MODEL_SELECTOR, "value"),
         Input(IDS.BEHAVIOUR_ANCHOR_INDEX, "value"),
         Input(IDS.BEHAVIOUR_ICE_FEATURE, "value"),
+        Input(IDS.MODEL_REFRESH_TOKEN, "data"),
     )
-    def render_behaviour(model_id, anchor_index, feature_name):
+    def render_behaviour(model_id, anchor_index, feature_name, _refresh_token):
         if not model_id:
             return (_empty_figure(),) * 6 + ("Select a model.",)
 
