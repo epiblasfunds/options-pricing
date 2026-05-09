@@ -1,0 +1,61 @@
+﻿site_name: Volatilidad explicable en opciones del IBEX
+site_description: Documentación técnica del proyecto de modelado de volatilidad implícita y explicabilidad.
+site_author: Proyecto TFM
+docs_dir: docs
+site_dir: site
+theme:
+  name: readthedocs
+  locale: es
+  navigation_depth: 1
+  collapse_navigation: false
+  sticky_navigation: true
+  include_homepage_in_sidebar: true
+  prev_next_buttons_location: bottom
+nav:
+  - Inicio: index.md
+  - Estructura del repositorio:
+      - Visión general: repository/index.md
+      - Configuración y resources: repository/configuration.md
+      - Paquetes de src: repository/src-packages.md
+  - Datos:
+      - Visión general del ETL: data/index.md
+      - Lectura raw: data/raw-read.md
+      - Unión de mercado y contratos: data/merge-raw.md
+      - Separación por producto: data/product-split.md
+      - Subyacente de cada opción: data/underlying.md
+      - Volatilidad implícita: data/volatility.md
+  - Modelos de volatilidad:
+      - Visión general: models/index.md
+      - Características: models/features.md
+      - Splits temporales y k-folds: models/splits-kfolds.md
+      - Familias de modelos: models/families.md
+      - Entrenamiento y selección: models/training.md
+      - Reentrenamiento y progressive training: models/retraining-progressive.md
+  - Dashboard:
+      - Cometido del dashboard: dashboard/index.md
+      - De modelo entrenado a bundle visualizable: dashboard/model-to-dashboard.md
+      - Behaviour And Surface: dashboard/behaviour-surface.md
+      - Global Explainability: dashboard/global-explainability.md
+      - Sample Explainability: dashboard/sample-explainability.md
+      - Diagnosis: dashboard/diagnosis.md
+  - Operación:
+      - API, almacenamiento y despliegue: operations/api-deployment.md
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - javascripts/mathjax-config.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
+  - javascripts/nav-labels.js
+
+
+
