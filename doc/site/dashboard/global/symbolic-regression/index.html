@@ -126,22 +126,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../surrogate-trees/">Árboles surrogate</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Regresión simbólica</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#qua-problema-resuelve">Qué problema resuelve</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#matodo-usado-pysr-y-baosqueda-evolutiva">Método usado: PySR y búsqueda evolutiva</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#configuracia3n-concreta">Configuración concreta</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#complejidad">Complejidad</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#fidelidad-y-uso-correcto">Fidelidad y uso correcto</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#por-qua-es-aotil-en-este-tfm">Por qué es útil en este TFM</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -204,13 +188,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="regresia3n-simba3lica">Regresión simbólica<a class="headerlink" href="#regresia3n-simba3lica" title="Permanent link">&para;</a></h1>
-<p>La regresión simbólica busca una expresión matemática cerrada que aproxime una relación observada. En este proyecto se usa como modelo surrogate: la expresión no se ajusta directamente a la volatilidad implí­cita real, sino a las predicciones del modelo principal sobre una muestra del dataset de test.</p>
+                <h1 id="regresion-simbolica">Regresión simbólica<a class="headerlink" href="#regresion-simbolica" title="Permanent link">&para;</a></h1>
+<p>La regresión simbólica busca una expresión matemática cerrada que aproxime una relación observada. En este proyecto se usa como modelo surrogate: la expresión no se ajusta directamente a la volatilidad implícita real, sino a las predicciones del modelo principal sobre una muestra del dataset de test.</p>
 <p>La forma objetivo es:</p>
-<p>$$
+<p>[
 \hat{\sigma}_{principal}(x) \approx g(x_1,\ldots,x_p)
-$$</p>
-<p>donde $g$ es una fórmula formada por variables, constantes y operadores permitidos. Su valor en la documentación es claro: proporciona una aproximación algebraica del comportamiento del modelo, con una complejidad explí­cita y métricas de fidelidad. Es especialmente útil cuando el tribunal quiere entender si una red o un boosting está aprendiendo una relación interpretable o si depende de interacciones demasiado complejas para resumirse.</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.</li>
+<li>$g$ o $h$ es el modelo interpretable aproximador.</li>
+<li>$x$ es el vector de entrada explicado.</li>
+</ul>
+<p>donde $g$ es una fórmula formada por variables, constantes y operadores permitidos. Su valor en la documentación es claro: proporciona una aproximación algebraica del comportamiento del modelo, con una complejidad explícita y métricas de fidelidad. Es especialmente útil cuando el tribunal quiere entender si una red o un boosting está aprendiendo una relación interpretable o si depende de interacciones demasiado complejas para resumirse.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Modelo principal] --&gt; B[Predicciones final-test]
     C[Features de explicabilidad] --&gt; D[Muestra simbólica]
@@ -226,17 +216,17 @@ $$</p>
     class E,F,G method;
     class H artifact;
 </code></pre>
-<h2 id="qua-problema-resuelve">Qué problema resuelve<a class="headerlink" href="#qua-problema-resuelve" title="Permanent link">&para;</a></h2>
-<p>La regresión lineal ofrece una fórmula, pero puede ser demasiado rí­gida. Un Random Forest, XGBoost o una red neuronal pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implí­cita o explí­citamente la complejidad.</p>
-<p>En el contexto de volatilidad implí­cita, una ecuación simbólica puede revelar estructuras como:</p>
+<h2 id="que-problema-resuelve">Qué problema resuelve<a class="headerlink" href="#que-problema-resuelve" title="Permanent link">&para;</a></h2>
+<p>La regresión lineal ofrece una fórmula, pero puede ser demasiado rígida. Un Random Forest, XGBoost o una red neuronal pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.</p>
+<p>En el contexto de volatilidad implícita, una ecuación simbólica puede revelar estructuras como:</p>
 <ul>
 <li>Dependencia con vencimiento.</li>
 <li>Curvatura respecto a strike o subyacente.</li>
 <li>Interacción entre precio relativo y tipo.</li>
 <li>Correcciones no lineales que el modelo principal usa de forma recurrente.</li>
 </ul>
-<p>La ecuación no debe presentarse como fórmula de valoración de opciones. Es una aproximación del predictor entrenado. Esa diferencia evita confundir una explicación empí­rica con un modelo financiero cerrado.</p>
-<h2 id="matodo-usado-pysr-y-baosqueda-evolutiva">Método usado: PySR y búsqueda evolutiva<a class="headerlink" href="#matodo-usado-pysr-y-baosqueda-evolutiva" title="Permanent link">&para;</a></h2>
+<p>La ecuación no debe presentarse como fórmula de valoración de opciones. Es una aproximación del predictor entrenado. Esa diferencia evita confundir una explicación empírica con un modelo financiero cerrado.</p>
+<h2 id="metodo-usado-pysr-y-busqueda-evolutiva">Método usado: PySR y búsqueda evolutiva<a class="headerlink" href="#metodo-usado-pysr-y-busqueda-evolutiva" title="Permanent link">&para;</a></h2>
 <p>El repositorio usa <code>PySRRegressor</code>, una interfaz Python para SymbolicRegression.jl. El método no es reinforcement learning ni un algoritmo de enjambre. Es una búsqueda evolutiva de expresiones: se mantienen poblaciones de fórmulas candidatas que se modifican mediante operaciones inspiradas en algoritmos genéticos, se evalúan por error y complejidad, y se seleccionan candidatas prometedoras.</p>
 <p>Conceptualmente:</p>
 <pre><code class="language-mermaid">flowchart LR
@@ -249,8 +239,8 @@ $$</p>
     classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
     class A,B,C,D,E,F method;
 </code></pre>
-<p>Las expresiones se comparan por su pérdida sobre datos de entrenamiento y por su complejidad estructural. PySR conserva una tabla de ecuaciones candidatas, no solo la mejor fórmula final. Esto es importante para auditorí­a: una ecuación ligeramente peor pero mucho más simple puede ser más defendible como explicación.</p>
-<h2 id="configuracia3n-concreta">Configuración concreta<a class="headerlink" href="#configuracia3n-concreta" title="Permanent link">&para;</a></h2>
+<p>Las expresiones se comparan por su pérdida sobre datos de entrenamiento y por su complejidad estructural. PySR conserva una tabla de ecuaciones candidatas, no solo la mejor fórmula final. Esto es importante para auditoría: una ecuación ligeramente peor pero mucho más simple puede ser más defendible como explicación.</p>
+<h2 id="configuracion-concreta">Configuración concreta<a class="headerlink" href="#configuracion-concreta" title="Permanent link">&para;</a></h2>
 <p>La función <code>build_symbolic_regressor_model</code> configura PySR con:</p>
 <table>
 <thead>
@@ -274,7 +264,7 @@ $$</p>
 <tr>
 <td><code>niterations</code></td>
 <td style="text-align: right;">120000</td>
-<td>Número de iteraciones evolutivas. Aumentarlo amplí­a la búsqueda.</td>
+<td>Número de iteraciones evolutivas. Aumentarlo amplía la búsqueda.</td>
 </tr>
 <tr>
 <td><code>populations</code></td>
@@ -309,7 +299,7 @@ $$</p>
 <tr>
 <td><code>timeout_in_seconds</code></td>
 <td style="text-align: right;">3600</td>
-<td>Lí­mite temporal de búsqueda.</td>
+<td>Límite temporal de búsqueda.</td>
 </tr>
 <tr>
 <td><code>batching</code></td>
@@ -357,11 +347,18 @@ $$</p>
 </table>
 <p>La selección usa <code>model_selection="best"</code>, que elige una ecuación equilibrando pérdida y complejidad según el criterio interno de PySR. El bundle conserva también <code>candidate_equations</code>, con al menos <code>symbolic_min_candidate_equations</code> fórmulas normalizadas cuando están disponibles.</p>
 <h2 id="complejidad">Complejidad<a class="headerlink" href="#complejidad" title="Permanent link">&para;</a></h2>
-<p>La complejidad es una medida estructural de la expresión. Aumenta con variables, constantes y operadores. No equivale a número de parámetros en sentido estadí­stico clásico, pero funciona como proxy de legibilidad.</p>
+<p>La complejidad es una medida estructural de la expresión. Aumenta con variables, constantes y operadores. No equivale a número de parámetros en sentido estadístico clásico, pero funciona como proxy de legibilidad.</p>
 <p>Una fórmula con complejidad baja puede ser:</p>
-<p>$$
+<p>[
 g(x)=a+b\cdot TimeToExpiration
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$g(x)$ es la expresión simbólica candidata.</li>
+<li>$a$ es el término constante.</li>
+<li>$b$ es el coeficiente de la variable.</li>
+<li><code>TimeToExpiration</code> es el tiempo hasta vencimiento usado por la expresión.</li>
+</ul>
 <p>Una fórmula de complejidad alta puede incluir múltiples productos, cocientes y potencias. Aunque tenga menor error de fidelidad, puede dejar de ser útil como explicación si exige demasiado esfuerzo para interpretarla. En documentación técnica, la ecuación elegida debe presentarse siempre junto con:</p>
 <ul>
 <li>Complejidad.</li>
@@ -371,7 +368,7 @@ $$</p>
 </ul>
 <h2 id="fidelidad-y-uso-correcto">Fidelidad y uso correcto<a class="headerlink" href="#fidelidad-y-uso-correcto" title="Permanent link">&para;</a></h2>
 <p>La fidelidad se calcula sobre el 20% reservado:</p>
-<p>$$
+<p>[
 RMSE_{sym} =
 \sqrt{
 \frac{1}{n}\sum_i
@@ -379,9 +376,16 @@ RMSE_{sym} =
 \hat{\sigma}_{principal}(x_i)-g(x_i)
 \right)^2
 }
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$RMSE_{sym}$ es el error cuadrático medio de fidelidad de la expresión simbólica.</li>
+<li>$n$ es el número de observaciones del conjunto reservado.</li>
+<li>$\hat{\sigma}_{principal}(x_i)$ es la predicción del modelo principal.</li>
+<li>$g(x_i)$ es la predicción de la fórmula simbólica.</li>
+</ul>
 <p>Un RMSE bajo indica que la ecuación reproduce bien al modelo principal en la muestra evaluada. No garantiza buen comportamiento fuera de distribución, ni validez financiera universal. La ecuación simbólica debe usarse como resumen interpretable, no como sustituto operativo salvo validación adicional.</p>
-<h2 id="por-qua-es-aotil-en-este-tfm">Por qué es útil en este TFM<a class="headerlink" href="#por-qua-es-aotil-en-este-tfm" title="Permanent link">&para;</a></h2>
+<h2 id="por-que-es-util-en-este-tfm">Por qué es útil en este TFM<a class="headerlink" href="#por-que-es-util-en-este-tfm" title="Permanent link">&para;</a></h2>
 <p>La regresión simbólica aporta una pieza que otros métodos no dan:</p>
 <table>
 <thead>
@@ -398,7 +402,7 @@ $$</p>
 <td>No produce una fórmula compacta.</td>
 </tr>
 <tr>
-<td><a href="../surrogate-trees/">írbol surrogate</a></td>
+<td><a href="../surrogate-trees/">árbol surrogate</a></td>
 <td>Reglas por umbrales.</td>
 <td>Puede ser discontinuo y grande.</td>
 </tr>
@@ -409,7 +413,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<p>Para un tribunal, la ecuación simbólica permite discutir si el comportamiento aprendido puede reducirse a una relación matemática razonable. Si la fórmula seleccionada usa <code>StrikePrice</code>, <code>UnderlyingPrice</code> y <code>TimeToExpiration</code> de forma coherente con la geometrí­a de la superficie, refuerza la interpretabilidad del pipeline. Si la fórmula necesita mucha complejidad, esa conclusión también es informativa: el modelo principal no se deja resumir fácilmente.</p>
+<p>Para un tribunal, la ecuación simbólica permite discutir si el comportamiento aprendido puede reducirse a una relación matemática razonable. Si la fórmula seleccionada usa <code>StrikePrice</code>, <code>UnderlyingPrice</code> y <code>TimeToExpiration</code> de forma coherente con la geometría de la superficie, refuerza la interpretabilidad del pipeline. Si la fórmula necesita mucha complejidad, esa conclusión también es informativa: el modelo principal no se deja resumir fácilmente.</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Cranmer, M. (2023). <em>Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl</em>. arXiv.</li>

@@ -9,7 +9,8 @@
   --doc-nav-bg: #132033;
   --doc-nav-bg-deep: #0d1726;
   --doc-nav-hover: #20334d;
-  --doc-nav-current: #d8e8f7;
+  --doc-nav-current: #e4effa;
+  --doc-nav-current-text: #10243a;
   --doc-nav-current-bg: #203b57;
 }
 
@@ -102,9 +103,9 @@ body {
 
 .wy-menu-vertical li.current > a,
 .wy-menu-vertical li.on a {
-  background: var(--doc-nav-current-bg);
-  color: #ffffff;
-  border-left-color: var(--doc-nav-current);
+  background: var(--doc-nav-current);
+  color: var(--doc-nav-current-text) !important;
+  border-left-color: #66a3d7;
   border-right: 0;
   font-weight: 700;
   margin-top: 1px;
@@ -119,6 +120,15 @@ body {
   color: #cbd9e8;
   border-right: 0;
   font-weight: 500;
+}
+
+.wy-menu-vertical li.current > ul li.current > a,
+.wy-menu-vertical li.current > ul a.current,
+.wy-menu-vertical li.current > ul li.on > a {
+  background: var(--doc-nav-current);
+  color: var(--doc-nav-current-text) !important;
+  border-left-color: #66a3d7;
+  font-weight: 700;
 }
 
 .wy-menu-vertical li.current > ul a:hover {
@@ -137,6 +147,22 @@ body {
 }
 
 .wy-menu-vertical li.toctree-l3 {
+  display: none;
+}
+
+.wy-menu-vertical li.toctree-l4,
+.wy-menu-vertical li.toctree-l5,
+.wy-menu-vertical li.toctree-l6 {
+  display: none;
+}
+
+.wy-menu-vertical a[href^="#"]:not([href="#"]),
+.wy-menu-vertical a[href*="/#"] {
+  display: none;
+}
+
+.wy-menu-vertical li:has(> a[href^="#"]:not([href="#"])),
+.wy-menu-vertical li:has(> a[href*="/#"]) {
   display: none;
 }
 
@@ -227,33 +253,35 @@ code {
 .rst-footer-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 34px;
-  padding-top: 16px;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 26px;
+  padding-top: 12px;
   border-top: 1px solid var(--doc-border);
 }
 
 .rst-footer-buttons.doc-top-navigation {
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   padding-top: 0;
-  padding-bottom: 14px;
+  padding-bottom: 10px;
   border-top: 0;
   border-bottom: 1px solid var(--doc-border);
 }
 
 .rst-footer-buttons .btn {
   max-width: 48%;
-  min-width: 190px;
+  min-width: 170px;
   white-space: normal;
   text-align: left;
-  border-radius: 6px;
+  border-radius: 5px;
   border: 1px solid #c9d6e4;
   background: #ffffff;
   color: #16314f;
-  box-shadow: 0 3px 10px rgba(22, 40, 68, 0.05);
-  padding: 8px 11px;
-  line-height: 1.25;
+  box-shadow: 0 2px 7px rgba(22, 40, 68, 0.045);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  line-height: 1.16;
 }
 
 .rst-footer-buttons .btn:hover {
@@ -271,18 +299,19 @@ code {
 
 .doc-nav-kicker {
   display: block;
-  font-size: 0.63rem;
+  font-size: 0.56rem;
   text-transform: uppercase;
-  letter-spacing: 0.045em;
+  letter-spacing: 0.04em;
   color: var(--doc-muted);
   font-weight: 700;
-  margin-bottom: 1px;
+  margin-bottom: 0;
 }
 
 .doc-nav-title {
   display: block;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  line-height: 1.16;
 }
 
 .rst-content .MathJax,

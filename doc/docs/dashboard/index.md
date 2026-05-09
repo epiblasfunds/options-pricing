@@ -1,4 +1,4 @@
-﻿# Dashboard: cometido
+# Dashboard: cometido
 
 El dashboard es la capa de inspección del proyecto. No entrena modelos; consume bundles explicables generados a partir de modelos entrenados y permite analizar su comportamiento desde cuatro perspectivas:
 

@@ -93,14 +93,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../">Comparativa de familias</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Regresión lineal</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#configuracia3n">Configuración</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#interpretabilidad">Interpretabilidad</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#limitaciones">Limitaciones</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../random-forest/">Random Forest</a>
                 </li>
@@ -196,14 +188,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="regresia3n-lineal">Regresión lineal<a class="headerlink" href="#regresia3n-lineal" title="Permanent link">&para;</a></h1>
-<p>La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mí­nima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.</p>
+                <h1 id="regresion-lineal">Regresión lineal<a class="headerlink" href="#regresion-lineal" title="Permanent link">&para;</a></h1>
+<p>La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mínima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.</p>
 <p>La forma del modelo es:</p>
-<p>$$
+<p>[
 \hat{\sigma}=\beta_0+\sum_{j=1}^{p}\beta_j x_j
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.</li>
+</ul>
 <p>donde $x_j$ son features como <code>TTEYears</code>, <code>sqrtTTEYears</code>, <code>logMoneyness</code>, <code>logMoneynessSq</code>, <code>logForwardMoneyness</code>, <code>rate</code>, <code>isCall</code> e <code>isPut</code>.</p>
-<h2 id="configuracia3n">Configuración<a class="headerlink" href="#configuracia3n" title="Permanent link">&para;</a></h2>
+<h2 id="configuracion">Configuración<a class="headerlink" href="#configuracion" title="Permanent link">&para;</a></h2>
 <p>La familia <code>LinearRegressionFamily</code> no define espacio de búsqueda. Se entrena una única configuración:</p>
 <table>
 <thead>
@@ -236,10 +232,18 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<p>En modo progresivo, el modelo recibe <code>sample_weight</code> para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mí­nimos cuadrados ponderados:</p>
-<p>$$
+<p>En modo progresivo, el modelo recibe <code>sample_weight</code> para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mínimos cuadrados ponderados:</p>
+<p>[
 \min_{\beta}\sum_i w_i(y_i-\beta_0-x_i^\top\beta)^2
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>El operador $\min$ representa el problema de optimización.</li>
+<li>$\theta$ o $\beta$ son los parámetros del modelo.</li>
+<li>$L$ es la función de pérdida.</li>
+<li>$w_i$ es el peso de la observación cuando aplica.</li>
+<li>$y_i$ es el valor real y $f(x_i)$ la predicción.</li>
+</ul>
 <h2 id="interpretabilidad">Interpretabilidad<a class="headerlink" href="#interpretabilidad" title="Permanent link">&para;</a></h2>
 <p>La ventaja de esta familia es que los coeficientes tienen lectura directa condicionada al resto de features. Sin embargo, esa lectura exige cuidado: si las features están correlacionadas, un coeficiente no representa un efecto causal aislado. En este proyecto, su valor principal es servir como control. Si la regresión lineal obtiene rendimiento razonable, las transformaciones financieras ya capturan una parte significativa de la estructura.</p>
 <h2 id="limitaciones">Limitaciones<a class="headerlink" href="#limitaciones" title="Permanent link">&para;</a></h2>

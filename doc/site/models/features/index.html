@@ -75,20 +75,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Diseño de variables</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Características financieras</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#variables-originales">Variables originales</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#features-derivadas">Features derivadas</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#moneyness">Moneyness</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#forward-moneyness">Forward moneyness</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#por-que-estas-features">Por qué estas features</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#features-para-dashboard">Features para dashboard</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -315,22 +301,49 @@
 </table>
 <h2 id="moneyness">Moneyness<a class="headerlink" href="#moneyness" title="Permanent link">&para;</a></h2>
 <p>La moneyness se mide como:</p>
-<p>$$
+<p>[
 m=\frac{F}{K}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$m$ es la moneyness.</li>
+<li>$F$ es el precio del futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+</ul>
 <p>y su versión logaritmica:</p>
-<p>$$
+<p>[
 \ell=\log(m)=\log(F/K)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\ell$ es la log-moneyness.</li>
+<li>$m$ es la moneyness.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+</ul>
 <p>La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores positivos y negativos representan regiones a distinto lado del strike con una escala más natural para modelos.</p>
 <h2 id="forward-moneyness">Forward moneyness<a class="headerlink" href="#forward-moneyness" title="Permanent link">&para;</a></h2>
 <p>El proyecto usa:</p>
-<p>$$
+<p>[
 F^{adj}=F e^{rT}
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$F^{adj}$ es el forward ajustado por tipo y vencimiento.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$r$ es el tipo de interés.</li>
+<li>$T$ es el vencimiento en años.</li>
+</ul>
+<p>[
 \ell_F=\log(F^{adj}/K)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$F^{adj}$ es el forward ajustado por tipo y vencimiento.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$r$ es el tipo de interés.</li>
+<li>$T$ es el vencimiento en años.</li>
+</ul>
 <p>Esta variable incorpora el efecto del tipo y el vencimiento sobre la relación forward-strike. Aunque Black-76 ya toma $F$ como futuro, esta transformación da al modelo una variable donde tipos y tiempo interactúan explícitamente.</p>
 <h2 id="por-que-estas-features">Por qué estas features<a class="headerlink" href="#por-que-estas-features" title="Permanent link">&para;</a></h2>
 <p>La volatilidad implícita suele organizarse por moneyness y vencimiento, no por niveles absolutos de strike. Un mismo strike puede representar estados muy distintos si el IBEX está en otro nivel. Por eso se priorizan variables relativas y transformadas.</p>

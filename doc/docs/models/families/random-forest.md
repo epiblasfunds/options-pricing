@@ -1,10 +1,16 @@
 # Random Forest
 
-Random Forest es un ensamble de árboles de decisión entrenados sobre muestras bootstrap y subconjuntos de variables. La predicción final es el promedio:
+Random Forest es un ensamble de Árboles de decisión entrenados sobre muestras bootstrap y subconjuntos de variables. La predicción final es el promedio:
 
-$$
+\[
 \hat{\sigma}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}(x)$ es la volatilidad predicha.
+- $B$ es el número de árboles.
+- $T_b(x)$ es la predicción del árbol $b$.
 
 Esta familia captura no linealidades e interacciones sin exigir escalado de features. Es adecuada como modelo tabular robusto y como punto intermedio entre interpretabilidad y capacidad predictiva.
 
@@ -22,11 +28,11 @@ Esta familia captura no linealidades e interacciones sin exigir escalado de feat
 
 | Hiperparámetro | Valores | Influencia |
 | --- | --- | --- |
-| `n_estimators` | 300, 400, 500 | Más árboles reducen varianza pero aumentan coste. |
+| `n_estimators` | 300, 400, 500 | Más Árboles reducen varianza pero aumentan coste. |
 | `max_depth` | `None`, 8, 12, 16 | Profundidad alta aumenta flexibilidad y riesgo de sobreajuste. |
 | `min_samples_split` | 2, 5, 10 | Controla cuándo se permite dividir un nodo. |
 | `min_samples_leaf` | 1, 2, 5, 10 | Regulariza hojas pequeñas. |
-| `max_features` | `sqrt`, `log2`, 0.3, 0.5, 0.8 | Controla diversidad entre árboles. |
+| `max_features` | `sqrt`, `log2`, 0.3, 0.5, 0.8 | Controla diversidad entre Árboles. |
 | `max_samples` | `None`, 0.6, 0.8, 0.9 | Submuestreo de filas por árbol. |
 | `min_impurity_decrease` | 0, 1e-6, 1e-5, 1e-4 | Exige mejora mínima para dividir. |
 | `ccp_alpha` | 0, 1e-6, 1e-5, 1e-4 | Poda por complejidad. |
@@ -39,5 +45,5 @@ En esta familia, el entrenamiento progresivo se implementa como pesos de muestra
 
 ## Interpretación
 
-Random Forest no produce una fórmula compacta. Sus importancias internas pueden estar sesgadas por variables con muchos puntos de corte. Por eso en el dashboard se interpreta mediante [SHAP](../../dashboard/global/shap-fundamentals.md), [árboles surrogate](../../dashboard/global/surrogate-trees.md) y [regresión simbólica](../../dashboard/global/symbolic-regression.md).
+Random Forest no produce una fórmula compacta. Sus importancias internas pueden estar sesgadas por variables con muchos puntos de corte. Por eso en el dashboard se interpreta mediante [SHAP](../../dashboard/global/shap-fundamentals.md), [Árboles surrogate](../../dashboard/global/surrogate-trees.md) y [regresión simbólica](../../dashboard/global/symbolic-regression.md).
 

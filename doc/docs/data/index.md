@@ -1,4 +1,4 @@
-﻿# Datos: visión general del ETL
+# Datos: visión general del ETL
 
 El ETL transforma ficheros fuente de mercado y tipos en una base final de volatilidad implícita. La cadena está diseñada como una secuencia de pasos materializados. Cada paso tiene entradas claras, validaciones de calidad, transformaciones financieras y una salida persistida.
 

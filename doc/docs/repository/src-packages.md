@@ -1,4 +1,4 @@
-﻿<!-- LTeX: language=es -->
+<!-- LTeX: language=es -->
 
 # Paquetes de `src`
 

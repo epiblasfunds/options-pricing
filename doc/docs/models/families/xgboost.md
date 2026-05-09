@@ -1,10 +1,16 @@
-﻿# XGBoost
+# XGBoost
 
 XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:
 
-$$
+\[
 \hat{\sigma}^{(m)}(x)=\hat{\sigma}^{(m-1)}(x)+\eta T_m(x)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}^{(m)}(x)$ es la predicción tras la iteración $m$.
+- $\eta$ es el learning rate.
+- $T_m(x)$ es el árbol añadido en la iteración $m$.
 
 donde $\eta$ es el learning rate. En el repositorio se usa `XGBRegressor` con `booster="gbtree"`, `tree_method="hist"` y objetivo `reg:pseudohubererror`.
 
@@ -28,7 +34,7 @@ donde $\eta$ es el learning rate. En el repositorio se usa `XGBRegressor` con `b
 | `min_child_weight` | 1 a 20 | Regulariza nodos con bajo soporte. |
 | `subsample` | 0.6 a 1.0 | Submuestreo de filas. |
 | `colsample_bytree` | 0.6 a 1.0 | Submuestreo de columnas por árbol. |
-| `gamma` | 0 a 0.5 | Mejora mí­nima exigida para split. |
+| `gamma` | 0 a 0.5 | Mejora mínima exigida para split. |
 | `reg_alpha` | 0 a 0.5 | Regularización L1. |
 | `reg_lambda` | 0.5 a 3.0 | Regularización L2. |
 | `max_bin` | 128, 256, 512 | Resolución de histogramas. |
@@ -39,7 +45,7 @@ La familia explora 200 configuraciones. El conjunto externo de validación del f
 
 ## Progressive training
 
-En modo progresivo, XGBoost reparte `n_estimators` entre fases acumulativas ordenadas por cercaní­a a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así­, el modelo aprende primero la zona central y después incorpora alas.
+En modo progresivo, XGBoost reparte `n_estimators` entre fases acumulativas ordenadas por cercanía a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así, el modelo aprende primero la zona central y después incorpora alas.
 
 ## Interpretación
 

@@ -148,18 +148,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../local-shap-waterfall/">SHAP local y waterfall</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Vecinos y soporte local</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#calculo-de-vecinos">Cálculo de vecinos</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#soporte-local">Soporte local</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#proyeccia3n-pca">Proyección PCA</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#relacia3n-con-shap-local">Relación con SHAP local</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -201,7 +189,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="vecinos-y-soporte-local">Vecinos y soporte local<a class="headerlink" href="#vecinos-y-soporte-local" title="Permanent link">&para;</a></h1>
-<p>El análisis de vecinos mide si una muestra está cerca de observaciones históricas usadas como referencia. Es una herramienta de soporte empí­rico: no explica por sí­ sola qué feature causa una predicción, pero indica si el escenario que se está explicando pertenece a una región conocida del espacio de datos.</p>
+<p>El análisis de vecinos mide si una muestra está cerca de observaciones históricas usadas como referencia. Es una herramienta de soporte empírico: no explica por sí sola qué feature causa una predicción, pero indica si el escenario que se está explicando pertenece a una región conocida del espacio de datos.</p>
 <p>En el proyecto, los vecinos se calculan contra el split de train transformado. Esta decisión evita usar como referencia principal el mismo split de test que se está diagnosticando. El objetivo es contestar: dado un contrato o una entrada manual, qué casos históricos del entrenamiento se parecen más en el espacio de features del modelo.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Training reference frame] --&gt; B[Feature frame train]
@@ -257,7 +245,7 @@
 </tr>
 </tbody>
 </table>
-<p>La distancia se calcula tras estandarización para que una variable con escala grande no domine por unidades. Esto es imprescindible porque las features pueden estar en dí­as, precios, ratios o indicadores.</p>
+<p>La distancia se calcula tras estandarización para que una variable con escala grande no domine por unidades. Esto es imprescindible porque las features pueden estar en días, precios, ratios o indicadores.</p>
 <h2 id="soporte-local">Soporte local<a class="headerlink" href="#soporte-local" title="Permanent link">&para;</a></h2>
 <p>Una muestra con vecinos cercanos tiene mayor soporte local. Esto no garantiza que la predicción sea correcta, pero reduce el riesgo de extrapolación. Por el contrario, una muestra aislada debe interpretarse con cautela: el modelo puede estar extrapolando a una región poco observada.</p>
 <p>La lectura recomendada es:</p>
@@ -287,11 +275,17 @@
 </tr>
 </tbody>
 </table>
-<h2 id="proyeccia3n-pca">Proyección PCA<a class="headerlink" href="#proyeccia3n-pca" title="Permanent link">&para;</a></h2>
+<h2 id="proyeccion-pca">Proyección PCA<a class="headerlink" href="#proyeccion-pca" title="Permanent link">&para;</a></h2>
 <p>El mapa 3D usa PCA para proyectar el entorno a tres componentes. PCA es una transformación lineal que busca direcciones de máxima varianza:</p>
-<p>$$
+<p>[
 Z = XW
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$Z$ es la matriz proyectada en componentes principales.</li>
+<li>$X$ es la matriz estandarizada de features.</li>
+<li>$W$ contiene los vectores principales de PCA.</li>
+</ul>
 <p>donde $W$ contiene los vectores principales. La proyección no pretende asignar significado financiero directo a cada eje. Sirve para visualizar proximidad relativa.</p>
 <p>El bundle guarda:</p>
 <ul>
@@ -302,17 +296,17 @@ $$</p>
 <li>varianza explicada</li>
 </ul>
 <p>Si la muestra aparece dentro de una nube de vecinos, la explicación local tiene mejor soporte visual. Si aparece separada, conviene advertir que el resultado puede depender de extrapolación.</p>
-<h2 id="relacia3n-con-shap-local">Relación con SHAP local<a class="headerlink" href="#relacia3n-con-shap-local" title="Permanent link">&para;</a></h2>
+<h2 id="relacion-con-shap-local">Relación con SHAP local<a class="headerlink" href="#relacion-con-shap-local" title="Permanent link">&para;</a></h2>
 <p><a href="../local-shap-waterfall/">SHAP local</a> contesta qué variables empujan la predicción. Los vecinos contestan si hay observaciones parecidas. Juntas permiten una explicación más sólida:</p>
 <pre><code class="language-mermaid">flowchart LR
     A[Waterfall SHAP] --&gt; C[Drivers de predicción]
-    B[Vecinos] --&gt; D[Soporte empí­rico]
+    B[Vecinos] --&gt; D[Soporte empírico]
     C --&gt; E[Conclusión local]
     D --&gt; E
     classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
     class A,B,C,D,E method;
 </code></pre>
-<p>Una explicación local sin vecinos puede ser matemáticamente correcta pero empí­ricamente frágil. Una tabla de vecinos sin waterfall muestra similitud, pero no atribuye la predicción. La combinación es lo que permite defender una predicción individual ante revisión.</p>
+<p>Una explicación local sin vecinos puede ser matemáticamente correcta pero empíricamente frágil. Una tabla de vecinos sin waterfall muestra similitud, pero no atribuye la predicción. La combinación es lo que permite defender una predicción individual ante revisión.</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Cover, T. y Hart, P. (1967). <em>Nearest Neighbor Pattern Classification</em>. IEEE Transactions on Information Theory.</li>

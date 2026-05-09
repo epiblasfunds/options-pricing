@@ -1,18 +1,32 @@
-﻿# Superficies de volatilidad
+# Superficies de volatilidad
 
 La pestaña [Behaviour And Surface](../behaviour-surface.md) trata el modelo como una función de superficie. En lugar de limitarse a predicciones punto a punto, se pregunta cómo se mueve la volatilidad estimada cuando se modifican moneyness y vencimiento alrededor de una operación real.
 
-En opciones, la volatilidad implí­cita se analiza habitualmente como una superficie:
+En opciones, la volatilidad implícita se analiza habitualmente como una superficie:
 
-$$
+\[
 \sigma = \sigma(K,T)
-$$
+\]
+
+donde:
+
+- $\sigma$ es la volatilidad implícita.
+- $K$ es el strike.
+- $T$ es el tiempo hasta vencimiento.
 
 o, de forma más comparable entre niveles de mercado:
 
-$$
+\[
 \sigma = \sigma(m,T), \quad m=\frac{F}{K}
-$$
+\]
+
+donde:
+
+- $\sigma$ es la volatilidad implícita.
+- $m$ es la moneyness, definida como $F/K$.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
+- $T$ es el tiempo hasta vencimiento.
 
 donde $F$ es el futuro subyacente, $K$ el strike y $T$ el tiempo hasta vencimiento. El dashboard usa esta segunda lectura, porque la moneyness permite comparar contratos aunque el nivel del IBEX cambie.
 
@@ -40,12 +54,18 @@ La función `build_surfaces_frame` genera las superficies. Para cada ancla selec
 1. Toma una fila real del split de test.
 2. Fija el subyacente base $F$.
 3. Construye `surface_grid_size` valores de moneyness entre 0.8 y 1.2.
-4. Construye `surface_grid_size` valores de vencimiento entre 1 dí­a y el máximo entre $1.5$ veces el vencimiento del ancla y 30 dí­as.
+4. Construye `surface_grid_size` valores de vencimiento entre 1 día y el máximo entre $1.5$ veces el vencimiento del ancla y 30 días.
 5. Reconstruye el strike como:
 
-$$
+\[
 K = \frac{F}{m}
-$$
+\]
+
+donde:
+
+- $K$ es el strike reconstruido.
+- $F$ es el precio del futuro subyacente fijado por el ancla.
+- $m$ es la moneyness objetivo de la grilla.
 
 6. Mantiene el resto de variables del ancla y predice la volatilidad con el modelo principal.
 
@@ -70,15 +90,21 @@ El heatmap es contrafactual: algunos puntos de la grilla pueden no corresponder 
 
 La superficie 3D representa la misma matriz que el heatmap. Su ventaja es visual: permite ver pendientes y curvaturas cuando el color no basta. Su riesgo es que la perspectiva puede exagerar cambios. Para documentación formal, la superficie 3D debe usarse como apoyo visual, no como única evidencia.
 
-Una superficie aceptable para un modelo de volatilidad deberí­a evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.
+Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.
 
 ## Smile curve
 
 Un smile es un corte de la superficie a vencimiento fijo:
 
-$$
+\[
 m \longmapsto \hat{\sigma}(m \mid T=T_k)
-$$
+\]
+
+donde:
+
+- $m$ es la moneyness del corte.
+- $\hat{\sigma}$ es la volatilidad predicha.
+- $T_k$ es el vencimiento fijo usado para construir el smile.
 
 El smile permite comparar cómo cambia la curvatura entre vencimientos. En muchos mercados de equity index options se espera skew: volatilidades distintas entre strikes bajos y altos. El dashboard no impone esa forma; la muestra para inspeccionar si el modelo la aprende.
 
@@ -86,28 +112,34 @@ Una lectura rigurosa distingue:
 
 - Smile aprendido de forma suave.
 - Skew pronunciado pero continuo.
-- Lí­neas que se cruzan por cambios de estructura temporal.
+- Líneas que se cruzan por cambios de estructura temporal.
 - Oscilaciones sin soporte financiero claro.
 
 ## Term structure
 
 La term structure es el corte opuesto:
 
-$$
+\[
 T \longmapsto \hat{\sigma}(T \mid m=m_k)
-$$
+\]
+
+donde:
+
+- $T$ es el tiempo hasta vencimiento del corte.
+- $\hat{\sigma}$ es la volatilidad predicha.
+- $m_k$ es la moneyness fija usada para construir la term structure.
 
 Permite evaluar si el modelo predice niveles distintos entre corto y largo plazo para una misma zona de moneyness. Esta vista es importante porque el vencimiento corto puede tener mayor ruido relativo y porque los contratos largos pueden estar menos representados.
 
 ## Checks financieros
 
-Los checks de superficie del proyecto son heurí­sticos. No constituyen una prueba completa de ausencia de arbitraje. Sirven para detectar patrones sospechosos:
+Los checks de superficie del proyecto son heurísticos. No constituyen una prueba completa de ausencia de arbitraje. Sirven para detectar patrones sospechosos:
 
 - Saltos locales elevados.
 - Cambios bruscos por vencimiento.
 - Irregularidad visual de la superficie.
 
-La documentación debe llamarlos avisos, no validaciones matemáticas concluyentes. Una validación formal de no arbitraje requerirí­a condiciones sobre convexidad en strike, monotoní­a de precios descontados y consistencia entre vencimientos, trabajando sobre precios de opción y no solo sobre volatilidades predichas.
+La documentación debe llamarlos avisos, no validaciones matemáticas concluyentes. Una validación formal de no arbitraje requeriría condiciones sobre convexidad en strike, monotonía de precios descontados y consistencia entre vencimientos, trabajando sobre precios de opción y no solo sobre volatilidades predichas.
 
 ## Referencias
 

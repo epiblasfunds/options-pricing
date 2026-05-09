@@ -240,30 +240,75 @@
 </ul>
 <h2 id="tipo-compuesto-hasta-vencimiento">Tipo compuesto hasta vencimiento<a class="headerlink" href="#tipo-compuesto-hasta-vencimiento" title="Permanent link">&para;</a></h2>
 <p>El tipo usado por Black-76 se calcula como un tipo compuesto desde la fecha de ejecución hasta vencimiento. Para períodos de al menos un día, se recorren días hábiles y se acumula:</p>
-<p>$$
+<p>[
 \prod_i \left(1 + r_i \frac{n_i}{N}\right)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$r_i$ es el tipo diario en decimal.</li>
+<li>$n_i$ es el número de días cubiertos por el tipo $i$.</li>
+<li>$N$ es la base anual de cómputo, configurada como 360.</li>
+</ul>
 <p>donde $N=360$, $r_i$ es el tipo diario en decimal y $n_i$ es el número de días naturales cubiertos por ese tipo. Los lunes cubren tres días para recoger el fin de semana.</p>
 <p>El tipo anualizado equivalente es:</p>
-<p>$$
+<p>[
 r_{comp} = \left(\prod_i \left(1 + r_i \frac{n_i}{N}\right)-1\right)\frac{N}{d_c}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$r_i$ es el tipo diario en decimal.</li>
+<li>$n_i$ es el número de días cubiertos por el tipo $i$.</li>
+<li>$N$ es la base anual de cómputo, configurada como 360.</li>
+</ul>
 <p>donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimientos intradía se aplica una conversión proporcional con el tipo overnight disponible para evitar explosiones numéricas en vencimientos muy cortos.</p>
 <h2 id="formula-black-76">Fórmula Black-76<a class="headerlink" href="#formula-black-76" title="Permanent link">&para;</a></h2>
 <p>El modelo Black-76 valora opciones sobre forwards/futuros. Para una call:</p>
-<p>$$
+<p>[
 C=e^{-rT}\left(FN(d_1)-KN(d_2)\right)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
 <p>Para una put:</p>
-<p>$$
+<p>[
 P=e^{-rT}\left(KN(-d_2)-FN(-d_1)\right)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
 <p>con:</p>
-<p>$$
+<p>[
 d_1=\frac{\ln(F/K)+\frac{1}{2}\sigma^2T}{\sigma\sqrt{T}},
 \qquad
 d_2=d_1-\sigma\sqrt{T}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
 <p>En el proyecto:</p>
 <ul>
 <li>$F$ es el precio del futuro subyacente.</li>
@@ -274,9 +319,16 @@ $$</p>
 </ul>
 <h2 id="solver-de-volatilidad-implicita">Solver de volatilidad implícita<a class="headerlink" href="#solver-de-volatilidad-implicita" title="Permanent link">&para;</a></h2>
 <p>La volatilidad se obtiene buscando la raíz:</p>
-<p>$$
+<p>[
 g(\sigma)=P_{Black76}(F,K,T,r,\sigma)-P_{mercado}=0
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$g(\sigma)$ es la función cuya raíz se busca.</li>
+<li>$P_{Black76}$ es el precio teórico Black-76.</li>
+<li>$P_{mercado}$ es el precio observado.</li>
+<li>$\sigma$ es la volatilidad implícita candidata.</li>
+</ul>
 <p>El solver usa bisección entre los límites de volatilidad configurados. Si la función no cambia de signo o aparece un valor no finito, la fila se marca como no resoluble. Las filas sin solución dentro de los límites se eliminan antes de persistir la salida.</p>
 <pre><code class="language-mermaid">flowchart LR
     A[(sigma min)] --&gt; C{Signo válido?}

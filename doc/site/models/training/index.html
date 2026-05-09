@@ -83,20 +83,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../splits-kfolds/">Splits temporales y k-folds</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Entrenamiento y selección</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#busqueda-de-hiperparametros">Búsqueda de hiperparámetros</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#metricas-base">Métricas base</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#metrica-de-seleccion">Métrica de selección</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#early-stopping">Early stopping</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#escalado">Escalado</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#artefactos-de-entrenamiento">Artefactos de entrenamiento</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../retraining-progressive/">Reentrenamiento y progressive training</a>
                 </li>
@@ -219,15 +205,36 @@
 <p>La búsqueda no agota necesariamente todo el espacio. Para familias grandes, el número de iteraciones está acotado. El sistema registra cuántas configuraciones se han explorado frente a la cardinalidad máxima.</p>
 <h2 id="metricas-base">Métricas base<a class="headerlink" href="#metricas-base" title="Permanent link">&para;</a></h2>
 <p>Las métricas base son:</p>
-<p>$$
+<p>[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$MAE$ es el error absoluto medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<p>[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$RMSE$ es la raíz del error cuadrático medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<p>[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$R^2$ es el coeficiente de determinación.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo.</li>
+<li>$\bar{y}$ es la media de los valores reales.</li>
+</ul>
 <p>Se calculan para train y validation en cada fold. Luego se agregan media y desviación estándar entre folds.</p>
 <h2 id="metrica-de-seleccion">Métrica de selección<a class="headerlink" href="#metrica-de-seleccion" title="Permanent link">&para;</a></h2>
 <p>La selección no usa solo RMSE medio. Usa una métrica compuesta que penaliza:</p>
@@ -236,9 +243,17 @@ $$</p>
 <li>Variabilidad entre folds.</li>
 <li>Gap de sobreajuste cuando validation es peor que train.</li>
 </ul>
-<p>$$
+<p>[
 CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$CE_1$ es la métrica compuesta de selección.</li>
+<li>$RMSE_{val}$ es el RMSE medio de validación.</li>
+<li>$RMSE_{train}$ es el RMSE medio de entrenamiento.</li>
+<li>$std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.</li>
+<li>$\alpha$ y $\beta$ son penalizaciones configuradas.</li>
+</ul>
 <p>Esto evita elegir una configuración que gane por poco en un fold pero sea inestable o claramente sobreajustada.</p>
 <h2 id="early-stopping">Early stopping<a class="headerlink" href="#early-stopping" title="Permanent link">&para;</a></h2>
 <p>El early stopping aparece en las familias con entrenamiento iterativo:</p>
@@ -260,7 +275,7 @@ $$</p>
 <p>El conjunto externo de validation del fold no se usa para ajustar early stopping; se reserva para estimar rendimiento del candidato. Esto mantiene separadas las decisiones internas de optimización y la evaluación del fold.</p>
 <h2 id="escalado">Escalado<a class="headerlink" href="#escalado" title="Permanent link">&para;</a></h2>
 <p>Las familias neuronales guardan un scaler para features numéricas. El scaler se ajusta solo con datos permitidos en la fase correspondiente. En evaluación final, el scaler se ajusta con el bloque de entrenamiento disponible y se aplica a test sin aprender de test.</p>
-<p>Los modelos de árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.</p>
+<p>Los modelos de Árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.</p>
 <h2 id="artefactos-de-entrenamiento">Artefactos de entrenamiento<a class="headerlink" href="#artefactos-de-entrenamiento" title="Permanent link">&para;</a></h2>
 <p>Al terminar la búsqueda por familia se guarda:</p>
 <ul>

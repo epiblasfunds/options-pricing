@@ -134,22 +134,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Superficies de volatilidad</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#construccia3n-en-el-repositorio">Construcción en el repositorio</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#heatmap-de-superficie">Heatmap de superficie</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#superficie-3d">Superficie 3D</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#smile-curve">Smile curve</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#term-structure">Term structure</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#checks-financieros">Checks financieros</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../ice/">Curvas ICE</a>
                 </li>
@@ -206,14 +190,28 @@
               
                 <h1 id="superficies-de-volatilidad">Superficies de volatilidad<a class="headerlink" href="#superficies-de-volatilidad" title="Permanent link">&para;</a></h1>
 <p>La pestaña <a href="../../behaviour-surface/">Behaviour And Surface</a> trata el modelo como una función de superficie. En lugar de limitarse a predicciones punto a punto, se pregunta cómo se mueve la volatilidad estimada cuando se modifican moneyness y vencimiento alrededor de una operación real.</p>
-<p>En opciones, la volatilidad implí­cita se analiza habitualmente como una superficie:</p>
-<p>$$
+<p>En opciones, la volatilidad implícita se analiza habitualmente como una superficie:</p>
+<p>[
 \sigma = \sigma(K,T)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el tiempo hasta vencimiento.</li>
+</ul>
 <p>o, de forma más comparable entre niveles de mercado:</p>
-<p>$$
+<p>[
 \sigma = \sigma(m,T), \quad m=\frac{F}{K}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$m$ es la moneyness, definida como $F/K$.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el tiempo hasta vencimiento.</li>
+</ul>
 <p>donde $F$ es el futuro subyacente, $K$ el strike y $T$ el tiempo hasta vencimiento. El dashboard usa esta segunda lectura, porque la moneyness permite comparar contratos aunque el nivel del IBEX cambie.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Ancla real del test] --&gt; B[Fijar variables de contexto]
@@ -230,21 +228,29 @@ $$</p>
     class E,F process;
     class G plot;
 </code></pre>
-<h2 id="construccia3n-en-el-repositorio">Construcción en el repositorio<a class="headerlink" href="#construccia3n-en-el-repositorio" title="Permanent link">&para;</a></h2>
+<h2 id="construccion-en-el-repositorio">Construcción en el repositorio<a class="headerlink" href="#construccion-en-el-repositorio" title="Permanent link">&para;</a></h2>
 <p>La función <code>build_surfaces_frame</code> genera las superficies. Para cada ancla seleccionada:</p>
 <ol>
 <li>Toma una fila real del split de test.</li>
 <li>Fija el subyacente base $F$.</li>
 <li>Construye <code>surface_grid_size</code> valores de moneyness entre 0.8 y 1.2.</li>
-<li>Construye <code>surface_grid_size</code> valores de vencimiento entre 1 dí­a y el máximo entre $1.5$ veces el vencimiento del ancla y 30 dí­as.</li>
+<li>Construye <code>surface_grid_size</code> valores de vencimiento entre 1 día y el máximo entre $1.5$ veces el vencimiento del ancla y 30 días.</li>
 <li>Reconstruye el strike como:</li>
 </ol>
-<p>$$
+<p>[
 K = \frac{F}{m}
-$$</p>
-<ol>
-<li>Mantiene el resto de variables del ancla y predice la volatilidad con el modelo principal.</li>
-</ol>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$K$ es el strike reconstruido.</li>
+<li>$F$ es el precio del futuro subyacente fijado por el ancla.</li>
+<li>
+<p>$m$ es la moneyness objetivo de la grilla.</p>
+</li>
+<li>
+<p>Mantiene el resto de variables del ancla y predice la volatilidad con el modelo principal.</p>
+</li>
+</ul>
 <p>El parámetro actual <code>surface_grid_size</code> es 24. Por tanto, cada ancla genera $24 \times 24 = 576$ puntos contrafactuales. Este tamaño ofrece una superficie suficientemente densa para detectar curvatura y discontinuidades sin generar artefactos excesivamente pesados.</p>
 <h2 id="heatmap-de-superficie">Heatmap de superficie<a class="headerlink" href="#heatmap-de-superficie" title="Permanent link">&para;</a></h2>
 <p>El heatmap representa $\hat{\sigma}(m,T)$ con color. Es la visualización más estable para lectura técnica porque evita perspectiva 3D y permite detectar regiones.</p>
@@ -278,34 +284,46 @@ $$</p>
 <p>El heatmap es contrafactual: algunos puntos de la grilla pueden no corresponder a contratos observados exactamente. Por eso se complementa con <a href="../../sample/neighbours/">vecinos locales</a> y diagnóstico de error.</p>
 <h2 id="superficie-3d">Superficie 3D<a class="headerlink" href="#superficie-3d" title="Permanent link">&para;</a></h2>
 <p>La superficie 3D representa la misma matriz que el heatmap. Su ventaja es visual: permite ver pendientes y curvaturas cuando el color no basta. Su riesgo es que la perspectiva puede exagerar cambios. Para documentación formal, la superficie 3D debe usarse como apoyo visual, no como única evidencia.</p>
-<p>Una superficie aceptable para un modelo de volatilidad deberí­a evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.</p>
+<p>Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.</p>
 <h2 id="smile-curve">Smile curve<a class="headerlink" href="#smile-curve" title="Permanent link">&para;</a></h2>
 <p>Un smile es un corte de la superficie a vencimiento fijo:</p>
-<p>$$
+<p>[
 m \longmapsto \hat{\sigma}(m \mid T=T_k)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$m$ es la moneyness del corte.</li>
+<li>$\hat{\sigma}$ es la volatilidad predicha.</li>
+<li>$T_k$ es el vencimiento fijo usado para construir el smile.</li>
+</ul>
 <p>El smile permite comparar cómo cambia la curvatura entre vencimientos. En muchos mercados de equity index options se espera skew: volatilidades distintas entre strikes bajos y altos. El dashboard no impone esa forma; la muestra para inspeccionar si el modelo la aprende.</p>
 <p>Una lectura rigurosa distingue:</p>
 <ul>
 <li>Smile aprendido de forma suave.</li>
 <li>Skew pronunciado pero continuo.</li>
-<li>Lí­neas que se cruzan por cambios de estructura temporal.</li>
+<li>Líneas que se cruzan por cambios de estructura temporal.</li>
 <li>Oscilaciones sin soporte financiero claro.</li>
 </ul>
 <h2 id="term-structure">Term structure<a class="headerlink" href="#term-structure" title="Permanent link">&para;</a></h2>
 <p>La term structure es el corte opuesto:</p>
-<p>$$
+<p>[
 T \longmapsto \hat{\sigma}(T \mid m=m_k)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$T$ es el tiempo hasta vencimiento del corte.</li>
+<li>$\hat{\sigma}$ es la volatilidad predicha.</li>
+<li>$m_k$ es la moneyness fija usada para construir la term structure.</li>
+</ul>
 <p>Permite evaluar si el modelo predice niveles distintos entre corto y largo plazo para una misma zona de moneyness. Esta vista es importante porque el vencimiento corto puede tener mayor ruido relativo y porque los contratos largos pueden estar menos representados.</p>
 <h2 id="checks-financieros">Checks financieros<a class="headerlink" href="#checks-financieros" title="Permanent link">&para;</a></h2>
-<p>Los checks de superficie del proyecto son heurí­sticos. No constituyen una prueba completa de ausencia de arbitraje. Sirven para detectar patrones sospechosos:</p>
+<p>Los checks de superficie del proyecto son heurísticos. No constituyen una prueba completa de ausencia de arbitraje. Sirven para detectar patrones sospechosos:</p>
 <ul>
 <li>Saltos locales elevados.</li>
 <li>Cambios bruscos por vencimiento.</li>
 <li>Irregularidad visual de la superficie.</li>
 </ul>
-<p>La documentación debe llamarlos avisos, no validaciones matemáticas concluyentes. Una validación formal de no arbitraje requerirí­a condiciones sobre convexidad en strike, monotoní­a de precios descontados y consistencia entre vencimientos, trabajando sobre precios de opción y no solo sobre volatilidades predichas.</p>
+<p>La documentación debe llamarlos avisos, no validaciones matemáticas concluyentes. Una validación formal de no arbitraje requeriría condiciones sobre convexidad en strike, monotonía de precios descontados y consistencia entre vencimientos, trabajando sobre precios de opción y no solo sobre volatilidades predichas.</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Gatheral, J. (2006). <em>The Volatility Surface: A Practitioner's Guide</em>.</li>

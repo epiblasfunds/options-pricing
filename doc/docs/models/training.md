@@ -1,4 +1,4 @@
-﻿# Entrenamiento y selección
+# Entrenamiento y selección
 
 El entrenamiento se organiza en dos niveles. Primero se exploran hiperparámetros por familia mediante [k-folds temporales](splits-kfolds.md). Después se toma la mejor configuración y se reentrena en fases posteriores.
 
@@ -24,17 +24,38 @@ La búsqueda no agota necesariamente todo el espacio. Para familias grandes, el 
 
 Las métricas base son:
 
-$$
+\[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
-$$
+\]
 
-$$
+donde:
+
+- $MAE$ es el error absoluto medio.
+- $n$ es el número de observaciones.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo para la observación $i$.
+
+\[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
-$$
+\]
 
-$$
+donde:
+
+- $RMSE$ es la raíz del error cuadrático medio.
+- $n$ es el número de observaciones.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo para la observación $i$.
+
+\[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
-$$
+\]
+
+donde:
+
+- $R^2$ es el coeficiente de determinación.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo.
+- $\bar{y}$ es la media de los valores reales.
 
 Se calculan para train y validation en cada fold. Luego se agregan media y desviación estándar entre folds.
 
@@ -46,9 +67,17 @@ La selección no usa solo RMSE medio. Usa una métrica compuesta que penaliza:
 - Variabilidad entre folds.
 - Gap de sobreajuste cuando validation es peor que train.
 
-$$
+\[
 CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$
+\]
+
+donde:
+
+- $CE_1$ es la métrica compuesta de selección.
+- $RMSE_{val}$ es el RMSE medio de validación.
+- $RMSE_{train}$ es el RMSE medio de entrenamiento.
+- $std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.
+- $\alpha$ y $\beta$ son penalizaciones configuradas.
 
 Esto evita elegir una configuración que gane por poco en un fold pero sea inestable o claramente sobreajustada.
 
@@ -78,7 +107,7 @@ El conjunto externo de validation del fold no se usa para ajustar early stopping
 
 Las familias neuronales guardan un scaler para features numéricas. El scaler se ajusta solo con datos permitidos en la fase correspondiente. En evaluación final, el scaler se ajusta con el bloque de entrenamiento disponible y se aplica a test sin aprender de test.
 
-Los modelos de árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.
+Los modelos de Árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.
 
 ## Artefactos de entrenamiento
 

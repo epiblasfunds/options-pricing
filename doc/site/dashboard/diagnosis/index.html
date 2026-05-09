@@ -154,20 +154,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Diagnóstico</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Diagnóstico de rendimiento</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#performance-summary">Performance Summary</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#predicted-vs-actual">Predicted vs Actual</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#residual-heatmap">Residual Heatmap</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#error-by-moneyness">Error by Moneyness</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#error-by-maturity">Error by Maturity</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#financial-warnings">Financial Warnings</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -214,21 +200,48 @@
 </code></pre>
 <h2 id="performance-summary">Performance Summary<a class="headerlink" href="#performance-summary" title="Permanent link">&para;</a></h2>
 <p>La caja <code>Performance Summary</code> muestra métricas agregadas sobre el conjunto de test:</p>
-<p>$$
+<p>[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$MAE$ es el error absoluto medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<p>[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$RMSE$ es la raíz del error cuadrático medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<p>[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$R^2$ es el coeficiente de determinación.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo.</li>
+<li>$\bar{y}$ es la media de los valores reales.</li>
+</ul>
 <p>Es el resumen más compacto de calidad final. RMSE es especialmente sensible a errores grandes, mientras que MAE representa error medio típico.</p>
 <h2 id="predicted-vs-actual">Predicted vs Actual<a class="headerlink" href="#predicted-vs-actual" title="Permanent link">&para;</a></h2>
 <p>El scatter compara volatilidad real contra volatilidad predicha. La diagonal representa predicción perfecta:</p>
-<p>$$
+<p>[
 \hat{y}=y
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{y}$ es la predicción del modelo.</li>
+<li>$y$ es el valor real observado.</li>
+<li>La igualdad representa la diagonal de predicción perfecta.</li>
+</ul>
 <p>Lecturas importantes:</p>
 <ul>
 <li>Nube pegada a diagonal: buena calibración general.</li>
@@ -238,9 +251,16 @@ $$</p>
 </ul>
 <h2 id="residual-heatmap">Residual Heatmap<a class="headerlink" href="#residual-heatmap" title="Permanent link">&para;</a></h2>
 <p>El heatmap de residuos agrega error absoluto por regiones de moneyness y vencimiento:</p>
-<p>$$
+<p>[
 AE_i = |y_i-\hat{y}_i|
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$AE_i$ o $AbsoluteError_i$ es el error absoluto de la observación $i$.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo.</li>
+<li>$Residual_i$ es el residuo de la observación $i$.</li>
+</ul>
 <p>Permite detectar si el modelo falla más en:</p>
 <ul>
 <li>Corto plazo.</li>
@@ -253,9 +273,15 @@ $$</p>
 <h2 id="error-by-moneyness">Error by Moneyness<a class="headerlink" href="#error-by-moneyness" title="Permanent link">&para;</a></h2>
 <p>Esta caja muestra patrones de residual frente a moneyness. Ayuda a ver si el modelo subestima o sobreestima volatilidad en regiones centrales o extremas.</p>
 <p>La moneyness considerada en dashboard es:</p>
-<p>$$
+<p>[
 m=\frac{F}{K}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$m$ es la moneyness.</li>
+<li>$F$ es el precio del futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+</ul>
 <p>y también se usan transformaciones logarítmicas en artefactos relacionados. Errores concentrados lejos de $m=1$ suelen indicar dificultad en las alas.</p>
 <h2 id="error-by-maturity">Error by Maturity<a class="headerlink" href="#error-by-maturity" title="Permanent link">&para;</a></h2>
 <p>Esta caja muestra error frente a tiempo hasta vencimiento. Es esencial porque los vencimientos cortos suelen ser más sensibles a microestructura y a pequeños desfases temporales, mientras que vencimientos largos pueden tener menos observaciones o dinámicas distintas.</p>

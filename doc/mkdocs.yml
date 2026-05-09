@@ -6,7 +6,7 @@ site_dir: site
 theme:
   name: readthedocs
   locale: es
-  navigation_depth: 4
+  navigation_depth: 2
   collapse_navigation: true
   sticky_navigation: true
   include_homepage_in_sidebar: true

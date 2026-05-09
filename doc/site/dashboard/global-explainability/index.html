@@ -118,16 +118,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Explicabilidad global</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Mapa de la pestaña</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#shap-explainability">SHAP Explainability</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#visualizaciones-disponibles">Visualizaciones disponibles</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#modelos-equivalentes">Modelos equivalentes</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#lectura-recomendada">Lectura recomendada</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../global/shap-fundamentals/">Fundamentos de SHAP</a>
                 </li>
@@ -198,9 +188,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="pestaaa-global-explainability">Pestaña Global Explainability<a class="headerlink" href="#pestaaa-global-explainability" title="Permanent link">&para;</a></h1>
-<p>Esta página es el mapa de lectura de la pestaña de explicabilidad global. La explicación detallada de cada concepto está separada en páginas especí­ficas para que la documentación pueda leerse de forma rigurosa: <a href="../global/shap-fundamentals/">fundamentos de SHAP</a>, <a href="../global/shap-visualizations/">visualizaciones SHAP</a>, <a href="../global/surrogate-trees/">árboles surrogate</a> y <a href="../global/symbolic-regression/">regresión simbólica</a>.</p>
-<p>La pestaña combina dos enfoques. El primero es atributivo: <a href="../global/shap-fundamentals/">SHAP</a> descompone predicciones en contribuciones por variable. El segundo es aproximativo: los <a href="../global/surrogate-trees/">árboles surrogate</a> y la <a href="../global/symbolic-regression/">regresión simbólica</a> construyen modelos interpretables que imitan al modelo principal.</p>
+                <h1 id="pestana-global-explainability">Pestaña Global Explainability<a class="headerlink" href="#pestana-global-explainability" title="Permanent link">&para;</a></h1>
+<p>Esta página es el mapa de lectura de la pestaña de explicabilidad global. La explicación detallada de cada concepto está separada en páginas específicas para que la documentación pueda leerse de forma rigurosa: <a href="../global/shap-fundamentals/">fundamentos de SHAP</a>, <a href="../global/shap-visualizations/">visualizaciones SHAP</a>, <a href="../global/surrogate-trees/">Árboles surrogate</a> y <a href="../global/symbolic-regression/">regresión simbólica</a>.</p>
+<p>La pestaña combina dos enfoques. El primero es atributivo: <a href="../global/shap-fundamentals/">SHAP</a> descompone predicciones en contribuciones por variable. El segundo es aproximativo: los <a href="../global/surrogate-trees/">Árboles surrogate</a> y la <a href="../global/symbolic-regression/">regresión simbólica</a> construyen modelos interpretables que imitan al modelo principal.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Predicciones final-test] --&gt; B[SHAP global]
     B --&gt; C[Summary beeswarm]
@@ -208,7 +198,7 @@
     B --&gt; E[Dependence]
     B --&gt; F[Heatmap]
     A --&gt; G[Modelos equivalentes]
-    G --&gt; H[írboles surrogate]
+    G --&gt; H[Árboles surrogate]
     G --&gt; I[Regresión simbólica]
     H --&gt; J[Fidelidad y reglas]
     I --&gt; K[Fórmula, complejidad y candidatos]
@@ -222,9 +212,16 @@
 <h2 id="shap-explainability">SHAP Explainability<a class="headerlink" href="#shap-explainability" title="Permanent link">&para;</a></h2>
 <p><a href="../global/shap-fundamentals/">SHAP</a> se usa porque permite comparar modelos heterogéneos bajo una misma semántica de atribución. El proyecto emplea <code>shap.Explainer</code> con algoritmo de permutación, adecuado para tratar el estimador como caja negra y explicar familias tan distintas como XGBoost, Random Forest o redes neuronales.</p>
 <p>Las contribuciones cumplen:</p>
-<p>$$
+<p>[
 \hat{\sigma}<em ij="ij">i = \phi_0 + \sum_j \phi</em>
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}$ o $f(x)$ es la predicción del modelo.</li>
+<li>$\phi_0$ es el valor base del explicador.</li>
+<li>$\phi_j$ es la contribución SHAP de la feature $j$.</li>
+<li>$p$ es el número de features explicadas.</li>
+</ul>
 <p>En esta pestaña se agregan varias filas explicadas para estudiar comportamiento global. La interpretación local de una fila concreta se desarrolla en <a href="../sample/local-shap-waterfall/">SHAP local y waterfall</a>.</p>
 <h2 id="visualizaciones-disponibles">Visualizaciones disponibles<a class="headerlink" href="#visualizaciones-disponibles" title="Permanent link">&para;</a></h2>
 <table>
@@ -258,7 +255,7 @@ $$</p>
 </tr>
 <tr>
 <td><code>Surrogate trees</code></td>
-<td><a href="../global/surrogate-trees/">írboles surrogate</a></td>
+<td><a href="../global/surrogate-trees/">Árboles surrogate</a></td>
 <td>Reglas aproximadas del modelo principal.</td>
 </tr>
 <tr>
@@ -270,16 +267,22 @@ $$</p>
 </table>
 <h2 id="modelos-equivalentes">Modelos equivalentes<a class="headerlink" href="#modelos-equivalentes" title="Permanent link">&para;</a></h2>
 <p>Los modelos equivalentes no sustituyen al modelo principal. Su target es la predicción del modelo principal:</p>
-<p>$$
+<p>[
 \hat{\sigma}_{principal}(x) \approx h(x)
-$$</p>
-<p>donde $h$ puede ser un árbol o una expresión simbólica. La calidad de esa aproximación se llama fidelidad. Una fidelidad alta indica que la explicación equivalente reproduce al modelo; no indica por sí­ sola que el modelo sea correcto frente al mercado.</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.</li>
+<li>$g$ o $h$ es el modelo interpretable aproximador.</li>
+<li>$x$ es el vector de entrada explicado.</li>
+</ul>
+<p>donde $h$ puede ser un árbol o una expresión simbólica. La calidad de esa aproximación se llama fidelidad. Una fidelidad alta indica que la explicación equivalente reproduce al modelo; no indica por sí sola que el modelo sea correcto frente al mercado.</p>
 <h2 id="lectura-recomendada">Lectura recomendada<a class="headerlink" href="#lectura-recomendada" title="Permanent link">&para;</a></h2>
 <p>Para defender un resultado ante revisión técnica:</p>
 <ol>
 <li>Leer el ranking <a href="../global/shap-fundamentals/">SHAP</a> para identificar drivers principales.</li>
 <li>Usar dependence plots para comprobar dirección y no linealidad.</li>
-<li>Revisar <a href="../global/surrogate-trees/">árboles surrogate</a> de baja profundidad para reglas globales.</li>
+<li>Revisar <a href="../global/surrogate-trees/">Árboles surrogate</a> de baja profundidad para reglas globales.</li>
 <li>Revisar <a href="../global/symbolic-regression/">regresión simbólica</a> para una fórmula compacta y sus métricas.</li>
 <li>Contrastar con <a href="../behaviour/ice/">ICE</a>, <a href="../behaviour/ale/">ALE</a> y diagnóstico si aparecen patrones dudosos.</li>
 </ol>

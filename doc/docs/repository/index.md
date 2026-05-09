@@ -1,4 +1,4 @@
-﻿# Estructura del repositorio
+# Estructura del repositorio
 
 El repositorio está organizado alrededor de cuatro ejes: configuración declarativa, procesamiento de datos, entrenamiento de modelos y visualización/serving. La convención principal es que `resources/` define parámetros y rutas lógicas, mientras que `src/` contiene paquetes especializados que consumen esa configuración.
 

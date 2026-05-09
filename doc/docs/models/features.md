@@ -1,4 +1,4 @@
-﻿# Características del modelo
+# Características del modelo
 
 Las features se diseñan para representar la geometría financiera de la superficie de volatilidad. En lugar de entrenar directamente con strike y subyacente como magnitudes separadas, se construyen variables relativas que son más estables entre niveles de mercado.
 
@@ -56,15 +56,28 @@ El vector final incluye:
 
 La moneyness se mide como:
 
-$$
+\[
 m=\frac{F}{K}
-$$
+\]
+
+donde:
+
+- $m$ es la moneyness.
+- $F$ es el precio del futuro subyacente.
+- $K$ es el strike.
 
 y su versión logaritmica:
 
-$$
+\[
 \ell=\log(m)=\log(F/K)
-$$
+\]
+
+donde:
+
+- $\ell$ es la log-moneyness.
+- $m$ es la moneyness.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
 
 La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores positivos y negativos representan regiones a distinto lado del strike con una escala más natural para modelos.
 
@@ -72,13 +85,27 @@ La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores
 
 El proyecto usa:
 
-$$
+\[
 F^{adj}=F e^{rT}
-$$
+\]
 
-$$
+donde:
+
+- $F^{adj}$ es el forward ajustado por tipo y vencimiento.
+- $F$ es el futuro subyacente.
+- $r$ es el tipo de interés.
+- $T$ es el vencimiento en años.
+
+\[
 \ell_F=\log(F^{adj}/K)
-$$
+\]
+
+donde:
+
+- $F^{adj}$ es el forward ajustado por tipo y vencimiento.
+- $F$ es el futuro subyacente.
+- $r$ es el tipo de interés.
+- $T$ es el vencimiento en años.
 
 Esta variable incorpora el efecto del tipo y el vencimiento sobre la relación forward-strike. Aunque Black-76 ya toma $F$ como futuro, esta transformación da al modelo una variable donde tipos y tiempo interactúan explícitamente.
 

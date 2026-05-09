@@ -38,15 +38,25 @@ La vista previa sirve para comprobar que la muestra explicada corresponde al con
 
 La salida resume:
 
-$$
+\[
 \hat{\sigma}=f(x)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}$ es la volatilidad implícita predicha.
+- $f$ es el modelo entrenado.
+- $X$ o las variables entre paréntesis son las entradas financieras del modelo.
 
 Si la observación pertenece al dataset y existe volatilidad real, también puede leerse el residual:
 
-$$
+\[
 e=\sigma-\hat{\sigma}
-$$
+\]
+
+donde:
+
+- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
 
 El residual evalúa acierto frente a mercado. El [waterfall SHAP](sample/local-shap-waterfall.md) explica la predicción del modelo.
 
@@ -54,9 +64,16 @@ El residual evalúa acierto frente a mercado. El [waterfall SHAP](sample/local-s
 
 El waterfall local usa [SHAP](global/shap-fundamentals.md) para construir:
 
-$$
+\[
 \hat{\sigma}(x)=\phi_0+\phi_1(x)+\cdots+\phi_p(x)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
+- $\phi_0$ es el valor base del explicador.
+- $\phi_j$ es la contribución SHAP de la feature $j$.
+- $p$ es el número de features explicadas.
 
 La lectura completa está en [SHAP local y waterfall](sample/local-shap-waterfall.md).
 

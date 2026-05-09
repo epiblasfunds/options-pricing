@@ -1,6 +1,6 @@
-﻿# Vecinos y soporte local
+# Vecinos y soporte local
 
-El análisis de vecinos mide si una muestra está cerca de observaciones históricas usadas como referencia. Es una herramienta de soporte empí­rico: no explica por sí­ sola qué feature causa una predicción, pero indica si el escenario que se está explicando pertenece a una región conocida del espacio de datos.
+El análisis de vecinos mide si una muestra está cerca de observaciones históricas usadas como referencia. Es una herramienta de soporte empírico: no explica por sí sola qué feature causa una predicción, pero indica si el escenario que se está explicando pertenece a una región conocida del espacio de datos.
 
 En el proyecto, los vecinos se calculan contra el split de train transformado. Esta decisión evita usar como referencia principal el mismo split de test que se está diagnosticando. El objetivo es contestar: dado un contrato o una entrada manual, qué casos históricos del entrenamiento se parecen más en el espacio de features del modelo.
 
@@ -42,7 +42,7 @@ Los parámetros actuales son:
 | `neighbors_k` | 200 | Número de vecinos guardados por muestra. |
 | `neighbor_reference_split` | train | Split usado como referencia histórica. |
 
-La distancia se calcula tras estandarización para que una variable con escala grande no domine por unidades. Esto es imprescindible porque las features pueden estar en dí­as, precios, ratios o indicadores.
+La distancia se calcula tras estandarización para que una variable con escala grande no domine por unidades. Esto es imprescindible porque las features pueden estar en días, precios, ratios o indicadores.
 
 ## Soporte local
 
@@ -61,9 +61,15 @@ La lectura recomendada es:
 
 El mapa 3D usa PCA para proyectar el entorno a tres componentes. PCA es una transformación lineal que busca direcciones de máxima varianza:
 
-$$
+\[
 Z = XW
-$$
+\]
+
+donde:
+
+- $Z$ es la matriz proyectada en componentes principales.
+- $X$ es la matriz estandarizada de features.
+- $W$ contiene los vectores principales de PCA.
 
 donde $W$ contiene los vectores principales. La proyección no pretende asignar significado financiero directo a cada eje. Sirve para visualizar proximidad relativa.
 
@@ -84,14 +90,14 @@ Si la muestra aparece dentro de una nube de vecinos, la explicación local tiene
 ```mermaid
 flowchart LR
     A[Waterfall SHAP] --> C[Drivers de predicción]
-    B[Vecinos] --> D[Soporte empí­rico]
+    B[Vecinos] --> D[Soporte empírico]
     C --> E[Conclusión local]
     D --> E
     classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
     class A,B,C,D,E method;
 ```
 
-Una explicación local sin vecinos puede ser matemáticamente correcta pero empí­ricamente frágil. Una tabla de vecinos sin waterfall muestra similitud, pero no atribuye la predicción. La combinación es lo que permite defender una predicción individual ante revisión.
+Una explicación local sin vecinos puede ser matemáticamente correcta pero empíricamente frágil. Una tabla de vecinos sin waterfall muestra similitud, pero no atribuye la predicción. La combinación es lo que permite defender una predicción individual ante revisión.
 
 ## Referencias
 

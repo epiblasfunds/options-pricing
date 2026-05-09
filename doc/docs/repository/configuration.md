@@ -1,4 +1,4 @@
-﻿# Configuración y resources
+# Configuración y resources
 
 La configuración del proyecto se concentra en `resources/`. El paquete `src/config` carga esos JSON y expone objetos tipados que el resto del código consume. Esta decisión hace que el comportamiento principal del sistema sea trazable sin modificar código: años de datos, columnas esperadas, nombres de ficheros, splits temporales, tamaños de muestras y parámetros de dashboard viven en ficheros declarativos.
 
@@ -67,13 +67,29 @@ Este fichero configura los datos de entrenamiento y las métricas de selección:
 
 Las métricas compuestas penalizan no solo error, sino también inestabilidad y sobreajuste. Conceptualmente:
 
-$$
+\[
 CE_1 = RMSE_{val} + \alpha \cdot std(RMSE_{val}) + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$
+\]
 
-$$
+donde:
+
+- $CE_1$ es la métrica compuesta de selección.
+- $RMSE_{val}$ es el RMSE medio de validación.
+- $RMSE_{train}$ es el RMSE medio de entrenamiento.
+- $std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.
+- $\alpha$ y $\beta$ son penalizaciones configuradas.
+
+\[
 CE_2 = RMSE_{val} + \gamma \cdot CE_1 + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$
+\]
+
+donde:
+
+- $CE_1$ es la métrica compuesta de selección.
+- $RMSE_{val}$ es el RMSE medio de validación.
+- $RMSE_{train}$ es el RMSE medio de entrenamiento.
+- $std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.
+- $\alpha$ y $\beta$ son penalizaciones configuradas.
 
 La primera se usa en búsqueda por k-folds; la segunda resume el reentrenamiento contra validación.
 

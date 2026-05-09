@@ -120,20 +120,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Fundamentos de SHAP</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#descomposicia3n-aditiva">Descomposición aditiva</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#relacia3n-con-valores-de-shapley">Relación con valores de Shapley</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#aproximacia3n-por-permutacia3n-en-el-proyecto">Aproximación por permutación en el proyecto</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#qua-significa-explicar-variables-raw">Qué significa explicar variables raw</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#limitaciones-de-lectura">Limitaciones de lectura</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../shap-visualizations/">Visualizaciones SHAP</a>
                 </li>
@@ -203,152 +189,74 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="fundamentos-de-shap">Fundamentos de SHAP<a class="headerlink" href="#fundamentos-de-shap" title="Permanent link">&para;</a></h1>
-<p><a href="./">SHAP</a> es el marco de explicabilidad usado en el proyecto para atribuir una predicción de volatilidad implí­cita a las variables de entrada visibles del dashboard: tipo de opción, strike, subyacente, tiempo hasta vencimiento y tipo de interés. En términos prácticos, <a href="./">SHAP</a> responde a una pregunta local: dada una muestra $x$, cuánto ha contribuido cada variable a mover la predicción desde un valor base hasta la volatilidad estimada por el modelo.</p>
-<p>La motivación para usar <a href="./">SHAP</a> en este proyecto es doble. Primero, los modelos candidatos no comparten una forma paramétrica: hay regresión lineal, árboles, boosting y redes neuronales. Una explicación basada solo en coeficientes no serí­a comparable entre familias. Segundo, el resultado debe ser defendible ante revisión técnica: las contribuciones deben sumar la predicción, estar definidas sobre una referencia explí­cita y permitir comparar explicaciones globales y locales con la misma semántica.</p>
+<p><a href="./">SHAP</a> es el marco de explicabilidad usado en el proyecto para atribuir una predicción de volatilidad implícita a las variables visibles del dashboard: <code>OptionType</code>, <code>StrikePrice</code>, <code>UnderlyingPrice</code>, <code>TimeToExpiration</code> y <code>Rate</code>. La idea es descomponer una predicción individual en un valor base y una suma de contribuciones por feature.</p>
 <pre><code class="language-mermaid">flowchart LR
-    A[Modelo de volatilidad f] --&gt; B[Predicción para x]
-    C[Distribución de referencia] --&gt; D[Valor base phi0]
+    A[Modelo principal] --&gt; B[Predicción]
+    C[Fondo de referencia] --&gt; D[Valor base]
     B --&gt; E[Contribuciones SHAP]
     D --&gt; E
-    E --&gt; F[phi0 + suma phij = f(x)]
-    classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    E --&gt; F[Predicción explicada]
     classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
     classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
-    class A,B model;
-    class C,D data;
-    class E,F method;
+    classDef result fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,D data;
+    class E method;
+    class F result;
 </code></pre>
-<h2 id="descomposicia3n-aditiva">Descomposición aditiva<a class="headerlink" href="#descomposicia3n-aditiva" title="Permanent link">&para;</a></h2>
-<p>La forma general de una explicación <a href="./">SHAP</a> es:</p>
-<p>$$
+<h2 id="descomposicion-aditiva">Descomposición aditiva<a class="headerlink" href="#descomposicion-aditiva" title="Permanent link">&para;</a></h2>
+<p>La explicación SHAP tiene forma aditiva:</p>
+<p>[
 f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
-$$</p>
-<p>donde $f(x)$ es la predicción del modelo principal, $\phi_0$ es el valor base y $\phi_j(x)$ es la contribución atribuida a la feature $j$. En esta documentación, "contribución" no significa causalidad. Significa atribución de una diferencia predictiva respecto a una referencia definida por el fondo usado por el explicador.</p>
-<p>El valor base $\phi_0$ se interpreta como la predicción esperada cuando todaví­a no se ha condicionado en las features concretas de la muestra. En el pipeline, el fondo se toma de una muestra del dataset de test configurada por <code>shap_background_size</code>. Para cada fila explicada, el codificador de explicabilidad reconstruye el espacio raw y llama al runtime del modelo, de modo que la explicación se calcula contra el mismo estimador que se evalúa y se publica en el bundle.</p>
-<h2 id="relacia3n-con-valores-de-shapley">Relación con valores de Shapley<a class="headerlink" href="#relacia3n-con-valores-de-shapley" title="Permanent link">&para;</a></h2>
-<p><a href="./">SHAP</a> toma su fundamento de los valores de Shapley de teorí­a de juegos cooperativos. En ese marco, las features se interpretan como jugadores que cooperan para producir un pago: la predicción. El valor de Shapley de una feature es la contribución marginal media que aporta al añadirla a todos los posibles subconjuntos de features.</p>
-<p>La forma conceptual es:</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$f(x)$ es la predicción del modelo principal para la muestra $x$.</li>
+<li>$\phi_0$ es el valor base definido por el fondo del explicador.</li>
+<li>$\phi_j(x)$ es la contribución atribuida a la feature $j$ para la muestra $x$.</li>
+<li>$p$ es el número total de features explicadas.</li>
+</ul>
+<p>Una contribución positiva aumenta la volatilidad predicha respecto al valor base; una contribución negativa la reduce. Esta atribución no implica causalidad: explica el comportamiento del modelo entrenado bajo una referencia concreta.</p>
+<h2 id="valores-de-shapley">Valores de Shapley<a class="headerlink" href="#valores-de-shapley" title="Permanent link">&para;</a></h2>
+<p>SHAP se basa en los valores de Shapley de teoría de juegos cooperativos. En ese marco, las features son jugadores y la predicción es el pago a repartir. La atribución de una feature es su contribución marginal media al incorporarse a todos los posibles subconjuntos de features.</p>
+<p>[
 \phi_j =
 \sum_{S \subseteq N \setminus {j}}
 \frac{|S|!(p-|S|-1)!}{p!}
 \left[
 v(S \cup {j})-v(S)
 \right]
-$$</p>
-<p>donde $N$ es el conjunto de features, $S$ es un subconjunto que no contiene $j$, $p$ es el número total de features y $v(S)$ es el valor esperado del modelo cuando se conocen las features de $S$. El término entre corchetes mide cuánto cambia la predicción al incorporar $j$ a una coalición ya conocida. El peso combinatorio promedia esa contribución sobre todos los órdenes posibles de entrada de las features.</p>
-<p>Esta definición proporciona tres propiedades importantes:</p>
-<table>
-<thead>
-<tr>
-<th>Propiedad</th>
-<th>Interpretación en el dashboard</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Eficiencia</td>
-<td>Las contribuciones suman exactamente la diferencia entre predicción y valor base.</td>
-</tr>
-<tr>
-<td>Simetrí­a</td>
-<td>Dos features con el mismo efecto marginal reciben la misma atribución.</td>
-</tr>
-<tr>
-<td>Dummy</td>
-<td>Una feature que no cambia el modelo no recibe contribución.</td>
-</tr>
-<tr>
-<td>Aditividad</td>
-<td>En modelos aditivos, la explicación respeta la suma de componentes.</td>
-</tr>
-</tbody>
-</table>
-<p>Estas propiedades son la razón por la que <a href="./">SHAP</a> es más riguroso que una importancia basada únicamente en permutación global o en impureza de árboles. La importancia global por permutación contesta cuánto se degrada el rendimiento al alterar una columna; <a href="./">SHAP</a> construye una contabilidad local de la predicción.</p>
-<h2 id="aproximacia3n-por-permutacia3n-en-el-proyecto">Aproximación por permutación en el proyecto<a class="headerlink" href="#aproximacia3n-por-permutacia3n-en-el-proyecto" title="Permanent link">&para;</a></h2>
-<p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta elección es deliberada: el pipeline debe explicar estimadores heterogéneos sin depender de un algoritmo especí­fico para árboles o redes. La aproximación por permutación trata el modelo como caja negra y evalúa predicciones bajo perturbaciones de las features.</p>
-<p>En <code>src/model2dashboard/artifact_builders.py</code>, la función <code>build_shap_artifacts</code> construye:</p>
-<table>
-<thead>
-<tr>
-<th>Artefacto</th>
-<th>Muestra</th>
-<th>Uso</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>global_shap</code></td>
-<td><code>shap_explain_size</code> filas de test</td>
-<td>Beeswarm, barras, dependence y heatmap global.</td>
-</tr>
-<tr>
-<td><code>local_shap</code></td>
-<td><code>sample_option_size</code> filas seleccionadas</td>
-<td>Waterfall local para muestras del dashboard.</td>
-</tr>
-<tr>
-<td>Fondo</td>
-<td><code>shap_background_size</code> filas</td>
-<td>Referencia contra la que se calcula $\phi_0$.</td>
-</tr>
-</tbody>
-</table>
-<p>Cada fila se explica con:</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$N$ es el conjunto completo de features.</li>
+<li>$S$ es un subconjunto de features que no contiene la feature $j$.</li>
+<li>$p$ es el número total de features.</li>
+<li>$v(S)$ es el valor esperado del modelo cuando se conocen las features de $S$.</li>
+<li>$\phi_j$ es la atribución de Shapley asignada a la feature $j$.</li>
+</ul>
+<p>Esta definición aporta eficiencia, simetría, tratamiento nulo de features irrelevantes y consistencia aditiva. Por eso resulta más defendible que una importancia global sin descomposición local.</p>
+<h2 id="aproximacion-por-permutacion">Aproximación por permutación<a class="headerlink" href="#aproximacion-por-permutacion" title="Permanent link">&para;</a></h2>
+<p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta variante trata el modelo como caja negra, por lo que sirve para regresión lineal, Random Forest, XGBoost y redes neuronales con una interfaz común.</p>
+<p>El presupuesto de evaluación por fila es:</p>
+<p>[
 max_evals = 2p+1
-$$</p>
-<p>donde $p$ es el número de features de explicabilidad. En el estado actual del proyecto, esas features son las entradas raw visibles: <code>OptionType</code>, <code>StrikePrice</code>, <code>UnderlyingPrice</code>, <code>TimeToExpiration</code> y <code>Rate</code>. El uso de entradas raw mejora la lectura financiera de la explicación. El modelo real puede recibir features transformadas, pero el explicador reconstruye esas transformaciones al llamar al runtime.</p>
-<pre><code class="language-mermaid">flowchart TD
-    A[Raw frame test] --&gt; B[Explainability frame]
-    B --&gt; C[Encoder raw/numérico]
-    C --&gt; D[Encoded background]
-    C --&gt; E[Encoded row]
-    D --&gt; F[Permutation SHAP]
-    E --&gt; F
-    F --&gt; G[StoredShapExplanation]
-    G --&gt; H[Beeswarm, barras, dependence, heatmap, waterfall]
-    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
-    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
-    classDef artifact fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
-    class A,B,D,E data;
-    class C,F process;
-    class G,H artifact;
-</code></pre>
-<h2 id="qua-significa-explicar-variables-raw">Qué significa explicar variables raw<a class="headerlink" href="#qua-significa-explicar-variables-raw" title="Permanent link">&para;</a></h2>
-<p>La decisión de explicar variables raw tiene una consecuencia importante. Si <code>StrikePrice</code> recibe una contribución alta, esa contribución resume el efecto que se produce al cambiar el strike raw y reconstruir las features derivadas que dependen de él. Por tanto, no debe leerse como el efecto aislado de una columna interna llamada <code>logMoneyness</code>. Debe leerse como el efecto agregado de la información de strike en el contrato explicado.</p>
-<p>Lo mismo ocurre con <code>UnderlyingPrice</code>. En el entrenamiento, el subyacente participa en variables como <code>logMoneyness</code> y <code>logForwardMoneyness</code>. En <a href="./">SHAP</a>, la contribución asociada a <code>UnderlyingPrice</code> se calcula en la interfaz raw y captura cómo la predicción cambia cuando la variable raw es conocida frente al fondo.</p>
-<p>Esta capa de reconstrucción es útil para un tribunal técnico porque separa dos niveles:</p>
-<table>
-<thead>
-<tr>
-<th>Nivel</th>
-<th>Variables</th>
-<th>Uso</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Interpretación financiera</td>
-<td><code>StrikePrice</code>, <code>UnderlyingPrice</code>, <code>TimeToExpiration</code>, <code>Rate</code>, <code>OptionType</code></td>
-<td>Explicación comunicable y auditable.</td>
-</tr>
-<tr>
-<td>Entrada del estimador</td>
-<td><code>logMoneyness</code>, <code>sqrtTTEYears</code>, <code>rate</code>, indicadores, interacciones</td>
-<td>Fidelidad predictiva del modelo.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="limitaciones-de-lectura">Limitaciones de lectura<a class="headerlink" href="#limitaciones-de-lectura" title="Permanent link">&para;</a></h2>
-<p><a href="./">SHAP</a> no prueba causalidad. Una contribución positiva de <code>Rate</code> no significa que subir tipos cause necesariamente más volatilidad en mercado; significa que, en el modelo entrenado y bajo la distribución de referencia usada, conocer ese valor de <code>Rate</code> desplaza la predicción hacia arriba respecto al valor base.</p>
-<p>También hay que tener cuidado cuando las features están correlacionadas. En opciones, strike, subyacente, moneyness y vencimiento no son variables independientes en la práctica. La aproximación por permutación puede evaluar combinaciones que no son frecuentes en el mercado. Por eso el proyecto complementa <a href="./">SHAP</a> con <a href="../../behaviour/ale/">ALE</a>, vecinos locales y checks de superficie. La explicación global no debe sustituir el diagnóstico de soporte empí­rico.</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$max_evals$ es el número máximo de evaluaciones del modelo por explicación.</li>
+<li>$p$ es el número de features de explicabilidad.</li>
+</ul>
+<p>El fondo se toma de una muestra controlada por <code>shap_background_size</code>; las filas explicadas globalmente por <code>shap_explain_size</code>; y las filas locales por <code>sample_option_size</code>.</p>
+<h2 id="variables-raw-y-fidelidad">Variables raw y fidelidad<a class="headerlink" href="#variables-raw-y-fidelidad" title="Permanent link">&para;</a></h2>
+<p>Las explicaciones se calculan sobre variables raw visibles. Esto mejora la lectura financiera: si <code>StrikePrice</code> tiene una contribución alta, el lector ve el efecto agregado del strike como input financiero, aunque internamente el modelo use transformaciones como <code>logMoneyness</code> o <code>logForwardMoneyness</code>.</p>
+<p>Esta capa se reconstruye mediante <code>ExplainabilityEncoder</code>: el explicador perturba variables raw, el encoder reconstruye un raw frame válido y el runtime vuelve a generar las features del modelo antes de predecir.</p>
+<h2 id="limitaciones">Limitaciones<a class="headerlink" href="#limitaciones" title="Permanent link">&para;</a></h2>
+<p>SHAP no prueba causalidad y puede verse afectado por correlación entre variables. En opciones, strike, subyacente, moneyness, vencimiento y tipos no son independientes. Por eso se complementa con <a href="../../behaviour/ale/">ALE</a>, <a href="../../behaviour/ice/">ICE</a>, <a href="../../sample/neighbours/">vecinos locales</a> y <a href="../../behaviour/volatility-surfaces/">superficies de volatilidad</a>.</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Shapley, L. S. (1953). <em>A Value for n-Person Games</em>. Contributions to the Theory of Games.</li>
 <li>Lundberg, S. M. y Lee, S.-I. (2017). <em>A Unified Approach to Interpreting Model Predictions</em>. NeurIPS.</li>
-<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capí­tulos sobre Shapley values, PDP, ICE y ALE.</li>
-<li>Apley, D. W. y Zhu, J. (2020). <em>Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models</em>. Journal of the Royal Statistical Society Series B.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>.</li>
 </ul>
               
             </div>

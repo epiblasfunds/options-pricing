@@ -1,4 +1,4 @@
-﻿# Pestaña Diagnosis
+# Pestaña Diagnosis
 
 La pestaña de diagnóstico resume la calidad predictiva del modelo y localiza regiones de error. Su foco no es explicar por qué una feature importa, sino dónde el modelo funciona mejor o peor.
 
@@ -16,17 +16,38 @@ flowchart TD
 
 La caja `Performance Summary` muestra métricas agregadas sobre el conjunto de test:
 
-$$
+\[
 MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
-$$
+\]
 
-$$
+donde:
+
+- $MAE$ es el error absoluto medio.
+- $n$ es el número de observaciones.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo para la observación $i$.
+
+\[
 RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
-$$
+\]
 
-$$
+donde:
+
+- $RMSE$ es la raíz del error cuadrático medio.
+- $n$ es el número de observaciones.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo para la observación $i$.
+
+\[
 R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
-$$
+\]
+
+donde:
+
+- $R^2$ es el coeficiente de determinación.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo.
+- $\bar{y}$ es la media de los valores reales.
 
 Es el resumen más compacto de calidad final. RMSE es especialmente sensible a errores grandes, mientras que MAE representa error medio típico.
 
@@ -34,9 +55,15 @@ Es el resumen más compacto de calidad final. RMSE es especialmente sensible a e
 
 El scatter compara volatilidad real contra volatilidad predicha. La diagonal representa predicción perfecta:
 
-$$
+\[
 \hat{y}=y
-$$
+\]
+
+donde:
+
+- $\hat{y}$ es la predicción del modelo.
+- $y$ es el valor real observado.
+- La igualdad representa la diagonal de predicción perfecta.
 
 Lecturas importantes:
 
@@ -49,9 +76,16 @@ Lecturas importantes:
 
 El heatmap de residuos agrega error absoluto por regiones de moneyness y vencimiento:
 
-$$
+\[
 AE_i = |y_i-\hat{y}_i|
-$$
+\]
+
+donde:
+
+- $AE_i$ o $AbsoluteError_i$ es el error absoluto de la observación $i$.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo.
+- $Residual_i$ es el residuo de la observación $i$.
 
 Permite detectar si el modelo falla más en:
 
@@ -69,9 +103,15 @@ Esta caja muestra patrones de residual frente a moneyness. Ayuda a ver si el mod
 
 La moneyness considerada en dashboard es:
 
-$$
+\[
 m=\frac{F}{K}
-$$
+\]
+
+donde:
+
+- $m$ es la moneyness.
+- $F$ es el precio del futuro subyacente.
+- $K$ es el strike.
 
 y también se usan transformaciones logarítmicas en artefactos relacionados. Errores concentrados lejos de $m=1$ suelen indicar dificultad en las alas.
 

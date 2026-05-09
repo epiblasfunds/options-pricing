@@ -85,22 +85,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../training/">Entrenamiento y selección</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Reentrenamiento y progressive training</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#reentrenamiento-no-progresivo">Reentrenamiento no progresivo</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#progressive-training">Progressive training</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#diferencias-por-familia">Diferencias por familia</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#pesos-por-segmento">Pesos por segmento</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#metricas-adicionales-de-reentrenamiento">Métricas adicionales de reentrenamiento</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#modelo-final">Modelo final</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#relacion-con-explicabilidad">Relación con Explicabilidad</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -220,9 +204,17 @@
 <h2 id="reentrenamiento-no-progresivo">Reentrenamiento no progresivo<a class="headerlink" href="#reentrenamiento-no-progresivo" title="Permanent link">&para;</a></h2>
 <p>En entrenamiento no progresivo, el modelo recibe todo el bloque de entrenamiento de la fase de una vez. Si la familia es iterativa, se crea una partición interna para early stopping; si no lo es, ajusta directamente sobre todo el bloque permitido.</p>
 <p>Este modo representa el entrenamiento estándar:</p>
-<p>$$
+<p>[
 \min_{\theta} \sum_{i \in Train} L(y_i, f_{\theta}(x_i))
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>El operador $\min$ representa el problema de optimización.</li>
+<li>$\theta$ o $\beta$ son los parámetros del modelo.</li>
+<li>$L$ es la función de pérdida.</li>
+<li>$w_i$ es el peso de la observación cuando aplica.</li>
+<li>$y_i$ es el valor real y $f(x_i)$ la predicción.</li>
+</ul>
 <p>Ventajas:</p>
 <ul>
 <li>Usa toda la información disponible de forma uniforme.</li>
@@ -231,9 +223,16 @@ $$</p>
 </ul>
 <h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
 <p>El entrenamiento progresivo ordena observaciones por cercanía a ATM usando la magnitud de la log-moneyness:</p>
-<p>$$
+<p>[
 |\ell| = |\log(F/K)|
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\ell$ es la log-moneyness.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>El valor absoluto mide distancia a ATM.</li>
+</ul>
 <p>Luego divide el entrenamiento en segmentos. El primer segmento contiene observaciones más cercanas a ATM; los siguientes incorporan progresivamente regiones más alejadas.</p>
 <pre><code class="language-mermaid">flowchart LR
     A[Ordenar por |logMoneyness|] --&gt; B[Segmento 1: más ATM]
@@ -276,13 +275,25 @@ $$</p>
 <p>La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos, mientras que modelos iterativos pueden aprender por fases.</p>
 <h2 id="pesos-por-segmento">Pesos por segmento<a class="headerlink" href="#pesos-por-segmento" title="Permanent link">&para;</a></h2>
 <p>Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:</p>
-<p>$$
+<p>[
 w_s \propto S-s
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$w_s$ es el peso asignado al segmento $s$.</li>
+<li>$S$ es el número total de segmentos.</li>
+<li>$s$ es el índice del segmento ordenado por cercanía a ATM.</li>
+</ul>
 <p>y se normalizan para mantener escala media estable:</p>
-<p>$$
+<p>[
 \tilde{w}_i=\frac{w_i}{\bar{w}}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\tilde{w}_i$ es el peso normalizado de la observación $i$.</li>
+<li>$w_i$ es el peso bruto de la observación.</li>
+<li>$\bar{w}$ es la media de pesos brutos.</li>
+</ul>
 <p>Esto no elimina las alas; solo reduce su influencia relativa al inicio o en el objetivo ponderado.</p>
 <h2 id="metricas-adicionales-de-reentrenamiento">Métricas adicionales de reentrenamiento<a class="headerlink" href="#metricas-adicionales-de-reentrenamiento" title="Permanent link">&para;</a></h2>
 <p>En reentrenamiento se calculan métricas base y métricas de dispersión:</p>

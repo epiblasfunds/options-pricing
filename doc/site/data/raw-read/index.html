@@ -255,12 +255,22 @@
 </ul>
 <h2 id="filtrado-de-universo-ibex">Filtrado de universo IBEX<a class="headerlink" href="#filtrado-de-universo-ibex" title="Permanent link">&para;</a></h2>
 <p>El filtrado inicial aplica dos condiciones:</p>
-<p>$$
+<p>[
 \text{es_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$c$ es el código de contrato.</li>
+<li>$\text{es_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.</li>
+</ul>
+<p>[
 \text{es_mensual}(c)=\text{longitud}(c)\in{\text{longitud opción},\text{longitud futuro}}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$c$ es el código de contrato.</li>
+<li>$\text{es_mensual}(c)$ indica si la longitud del contrato corresponde a vencimientos mensuales configurados.</li>
+</ul>
 <p>Solo se conservan filas que cumplen ambas. Esto mantiene el universo consistente entre contratos y operaciones.</p>
 <h2 id="construccion-de-la-base-de-tipos">Construcción de la base de tipos<a class="headerlink" href="#construccion-de-la-base-de-tipos" title="Permanent link">&para;</a></h2>
 <p>La base de tipos combina EONIA y €STR. Antes de la fecha de corte se utiliza EONIA ajustado por el spread configurado; desde la fecha de corte se utiliza €STR directamente.</p>
@@ -279,13 +289,19 @@ $$</p>
     class B,D decisión;
 </code></pre>
 <p>La lógica financiera es construir una serie continua de referencia monetaria. Para fechas antiguas, el ajuste aproxima la transición entre EONIA y €STR:</p>
-<p>$$
+<p>[
 r_t =
 \begin{cases}
 \text{EONIA}<em _mathrm_corte="\mathrm{corte">t - s, &amp; t &lt; t</em> \
 \text{€STR}}<em _mathrm_corte="\mathrm{corte">t, &amp; t \ge t</em>
 \end{cases}
-$$}</p>
+]}</p>
+<p>donde:</p>
+<ul>
+<li>$r_t$ es el tipo usado en la fecha $t$.</li>
+<li>$s$ es el spread de ajuste entre EONIA y €STR.</li>
+<li>$t_{\mathrm{corte}}$ es la fecha de cambio de régimen de tipos.</li>
+</ul>
 <h2 id="validaciones-y-salidas">Validaciones y salidas<a class="headerlink" href="#validaciones-y-salidas" title="Permanent link">&para;</a></h2>
 <p>Este paso no realiza todavía las validaciones financieras profundas; su cometido principal es lectura, selección y tipado. Las salidas son:</p>
 <table>
