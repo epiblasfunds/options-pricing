@@ -65,7 +65,7 @@ La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos
 
 ## Pesos por segmento
 
-Conceptualmente, si hay \(S\) segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:
+Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:
 
 $$
 w_s \propto S-s

@@ -42,13 +42,13 @@ El vector final incluye:
 
 | Feature | Fórmula | Motivo |
 | --- | --- | --- |
-| `TTEYears` | \(T=\frac{T_{días}}{365}\) | Normaliza vencimiento a años. |
-| `sqrtTTEYears` | \(\sqrt{T}\) | Aparece naturalmente en Black-76 y captura escala temporal no lineal. |
-| `logMoneyness` | \(\log(F/K)\) | Describe posición relativa frente al strike. |
-| `logMoneynessSq` | \(\log(F/K)^2\) | Captura curvatura de smile. |
-| `logMoneynessXSqrtTTE` | \(\log(F/K)\sqrt{T}\) | Captura interacción smile-vencimiento. |
-| `logForwardMoneyness` | \(\log(F e^{rT}/K)\) | Incluye desplazamiento por tipo en el forward ajustado. |
-| `rate` | \(r\) | Conserva sensibilidad directa a tipos. |
+| `TTEYears` | $T=\frac{T_{días}}{365}$ | Normaliza vencimiento a años. |
+| `sqrtTTEYears` | $\sqrt{T}$ | Aparece naturalmente en Black-76 y captura escala temporal no lineal. |
+| `logMoneyness` | $\log(F/K)$ | Describe posición relativa frente al strike. |
+| `logMoneynessSq` | $\log(F/K)^2$ | Captura curvatura de smile. |
+| `logMoneynessXSqrtTTE` | $\log(F/K)\sqrt{T}$ | Captura interacción smile-vencimiento. |
+| `logForwardMoneyness` | $\log(F e^{rT}/K)$ | Incluye desplazamiento por tipo en el forward ajustado. |
+| `rate` | $r$ | Conserva sensibilidad directa a tipos. |
 | `isCall` | indicador call | Codifica tipo de opción. |
 | `isPut` | indicador put | Codifica tipo de opción. |
 
@@ -66,7 +66,7 @@ $$
 \ell=\log(m)=\log(F/K)
 $$
 
-La log-moneyness es simétrica alrededor de ATM: cuando \(F=K\), \(\ell=0\). Valores positivos y negativos representan regiones a distinto lado del strike con una escala más natural para modelos.
+La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores positivos y negativos representan regiones a distinto lado del strike con una escala más natural para modelos.
 
 ## Forward moneyness
 
@@ -80,7 +80,7 @@ $$
 \ell_F=\log(F^{adj}/K)
 $$
 
-Esta variable incorpora el efecto del tipo y el vencimiento sobre la relación forward-strike. Aunque Black-76 ya toma \(F\) como futuro, esta transformación da al modelo una variable donde tipos y tiempo interactúan explícitamente.
+Esta variable incorpora el efecto del tipo y el vencimiento sobre la relación forward-strike. Aunque Black-76 ya toma $F$ como futuro, esta transformación da al modelo una variable donde tipos y tiempo interactúan explícitamente.
 
 ## Por qué estas features
 

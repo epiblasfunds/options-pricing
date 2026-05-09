@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Características financieras - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Caracter\u00edsticas financieras";
+        var mkdocs_page_input_path = "models\\features.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Visión general</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Diseño de variables</a>
+    <ul class="current">
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Características financieras</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#variables-originales">Variables originales</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#features-derivadas">Features derivadas</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#moneyness">Moneyness</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#forward-moneyness">Forward moneyness</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#por-que-estas-features">Por qué estas features</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#features-para-dashboard">Features para dashboard</a>
+    </li>
+    </ul>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/tensor-train/">Red tensor-train</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Modelos de volatilidad</li>
+          <li class="breadcrumb-item">Diseño de variables</li>
+      <li class="breadcrumb-item active">Características financieras</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="caracteristicas-del-modelo">Características del modelo<a class="headerlink" href="#caracteristicas-del-modelo" title="Permanent link">&para;</a></h1>
+<p>Las features se diseñan para representar la geometría financiera de la superficie de volatilidad. En lugar de entrenar directamente con strike y subyacente como magnitudes separadas, se construyen variables relativas que son más estables entre niveles de mercado.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[OptionType] --&gt; H[isCall, isPut]
+    B[StrikePrice K] --&gt; E[logMoneyness]
+    C[UnderlyingPrice F] --&gt; E
+    D[TimeToExpiration días] --&gt; F[TTEYears y sqrtTTEYears]
+    E --&gt; G[Interacciones de moneyness]
+    F --&gt; G
+    C --&gt; I[Forward price]
+    D --&gt; I
+    J[Rate r] --&gt; I
+    I --&gt; K[logForwardMoneyness]
+    E --&gt; L[Feature frame final]
+    F --&gt; L
+    G --&gt; L
+    H --&gt; L
+    K --&gt; L
+    J --&gt; L
+</code></pre>
+<h2 id="variables-originales">Variables originales<a class="headerlink" href="#variables-originales" title="Permanent link">&para;</a></h2>
+<p>Las entradas raw del modelo son:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OptionType</code></td>
+<td>Tipo call/put.</td>
+</tr>
+<tr>
+<td><code>StrikePrice</code></td>
+<td>Strike de la opción.</td>
+</tr>
+<tr>
+<td><code>UnderlyingPrice</code></td>
+<td>Precio del futuro subyacente asociado temporalmente.</td>
+</tr>
+<tr>
+<td><code>TimeToExpiration</code></td>
+<td>Tiempo restante hasta vencimiento, en días.</td>
+</tr>
+<tr>
+<td><code>Rate</code></td>
+<td>Tipo de interés compuesto hasta vencimiento.</td>
+</tr>
+</tbody>
+</table>
+<p>Estas variables también son las que se exponen al usuario en predicción manual, porque son interpretables y suficientes para reconstruir el vector de entrenamiento.</p>
+<h2 id="features-derivadas">Features derivadas<a class="headerlink" href="#features-derivadas" title="Permanent link">&para;</a></h2>
+<p>El vector final incluye:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Fórmula</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TTEYears</code></td>
+<td>$T=\frac{T_{días}}{365}$</td>
+<td>Normaliza vencimiento a años.</td>
+</tr>
+<tr>
+<td><code>sqrtTTEYears</code></td>
+<td>$\sqrt{T}$</td>
+<td>Aparece naturalmente en Black-76 y captura escala temporal no lineal.</td>
+</tr>
+<tr>
+<td><code>logMoneyness</code></td>
+<td>$\log(F/K)$</td>
+<td>Describe posición relativa frente al strike.</td>
+</tr>
+<tr>
+<td><code>logMoneynessSq</code></td>
+<td>$\log(F/K)^2$</td>
+<td>Captura curvatura de smile.</td>
+</tr>
+<tr>
+<td><code>logMoneynessXSqrtTTE</code></td>
+<td>$\log(F/K)\sqrt{T}$</td>
+<td>Captura interacción smile-vencimiento.</td>
+</tr>
+<tr>
+<td><code>logForwardMoneyness</code></td>
+<td>$\log(F e^{rT}/K)$</td>
+<td>Incluye desplazamiento por tipo en el forward ajustado.</td>
+</tr>
+<tr>
+<td><code>rate</code></td>
+<td>$r$</td>
+<td>Conserva sensibilidad directa a tipos.</td>
+</tr>
+<tr>
+<td><code>isCall</code></td>
+<td>indicador call</td>
+<td>Codifica tipo de opción.</td>
+</tr>
+<tr>
+<td><code>isPut</code></td>
+<td>indicador put</td>
+<td>Codifica tipo de opción.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="moneyness">Moneyness<a class="headerlink" href="#moneyness" title="Permanent link">&para;</a></h2>
+<p>La moneyness se mide como:</p>
+<p>$$
+m=\frac{F}{K}
+$$</p>
+<p>y su versión logaritmica:</p>
+<p>$$
+\ell=\log(m)=\log(F/K)
+$$</p>
+<p>La log-moneyness es simétrica alrededor de ATM: cuando $F=K$, $\ell=0$. Valores positivos y negativos representan regiones a distinto lado del strike con una escala más natural para modelos.</p>
+<h2 id="forward-moneyness">Forward moneyness<a class="headerlink" href="#forward-moneyness" title="Permanent link">&para;</a></h2>
+<p>El proyecto usa:</p>
+<p>$$
+F^{adj}=F e^{rT}
+$$</p>
+<p>$$
+\ell_F=\log(F^{adj}/K)
+$$</p>
+<p>Esta variable incorpora el efecto del tipo y el vencimiento sobre la relación forward-strike. Aunque Black-76 ya toma $F$ como futuro, esta transformación da al modelo una variable donde tipos y tiempo interactúan explícitamente.</p>
+<h2 id="por-que-estas-features">Por qué estas features<a class="headerlink" href="#por-que-estas-features" title="Permanent link">&para;</a></h2>
+<p>La volatilidad implícita suele organizarse por moneyness y vencimiento, no por niveles absolutos de strike. Un mismo strike puede representar estados muy distintos si el IBEX está en otro nivel. Por eso se priorizan variables relativas y transformadas.</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[Nivel absoluto] --&gt; B[Puede cambiar con régimen de mercado]
+    C[Moneyness] --&gt; D[Comparable entre fechas]
+    E[Vencimiento] --&gt; F[Estructura temporal]
+    G[Tipo opción] --&gt; H[Asimetría call/put observada]
+    D --&gt; I[Superficie de volatilidad]
+    F --&gt; I
+    H --&gt; I
+</code></pre>
+<h2 id="features-para-dashboard">Features para dashboard<a class="headerlink" href="#features-para-dashboard" title="Permanent link">&para;</a></h2>
+<p>El <a href="../../dashboard/">dashboard</a> conserva tanto inputs raw como features derivadas. Esto permite dos vistas:</p>
+<ul>
+<li>Vista financiera: strike, subyacente, tiempo, tipo y tipo de opción.</li>
+<li>Vista de modelo: moneyness, log-moneyness, vencimiento en años, indicadores y features transformadas.</li>
+</ul>
+<p>Para explicabilidad global y local, las explicaciones se calculan sobre las features visibles de entrada cuando se necesita una lectura más cercana al usuario, y sobre el vector transformado cuando se necesita fidelidad al runtime del modelo.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../" class="btn btn-neutral float-left" title="Visión general"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../splits-kfolds/" class="btn btn-neutral float-right" title="Splits temporales y k-folds">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../splits-kfolds/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

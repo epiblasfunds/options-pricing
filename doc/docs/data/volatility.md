@@ -48,7 +48,7 @@ $$
 \prod_i \left(1 + r_i \frac{n_i}{N}\right)
 $$
 
-donde \(N=360\), \(r_i\) es el tipo diario en decimal y \(n_i\) es el número de días naturales cubiertos por ese tipo. Los lunes cubren tres días para recoger el fin de semana.
+donde $N=360$, $r_i$ es el tipo diario en decimal y $n_i$ es el número de días naturales cubiertos por ese tipo. Los lunes cubren tres días para recoger el fin de semana.
 
 El tipo anualizado equivalente es:
 
@@ -56,7 +56,7 @@ $$
 r_{comp} = \left(\prod_i \left(1 + r_i \frac{n_i}{N}\right)-1\right)\frac{N}{d_c}
 $$
 
-donde \(d_c\) es el número de días naturales hasta vencimiento. Para vencimientos intradía se aplica una conversión proporcional con el tipo overnight disponible para evitar explosiones numéricas en vencimientos muy cortos.
+donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimientos intradía se aplica una conversión proporcional con el tipo overnight disponible para evitar explosiones numéricas en vencimientos muy cortos.
 
 ## Fórmula Black-76
 
@@ -82,11 +82,11 @@ $$
 
 En el proyecto:
 
-- \(F\) es el precio del futuro subyacente.
-- \(K\) es el strike.
-- \(T\) es el tiempo a vencimiento en años.
-- \(r\) es el tipo compuesto en decimal.
-- \(\sigma\) es la volatilidad implícita que se quiere resolver.
+- $F$ es el precio del futuro subyacente.
+- $K$ es el strike.
+- $T$ es el tiempo a vencimiento en años.
+- $r$ es el tipo compuesto en decimal.
+- $\sigma$ es la volatilidad implícita que se quiere resolver.
 
 ## Solver de volatilidad implícita
 

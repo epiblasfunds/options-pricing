@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>XGBoost - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "XGBoost";
+        var mkdocs_page_input_path = "models\\families\\xgboost.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Familias de modelos</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">XGBoost</a>
+    <ul class="current">
+    <li class="toctree-l3"><a class="reference internal" href="#configuracia3n-fija">Configuración fija</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#espacio-de-baosqueda">Espacio de búsqueda</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#progressive-training">Progressive training</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#interpretacia3n">Interpretación</a>
+    </li>
+    </ul>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../tensor-train/">Red tensor-train</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Modelos de volatilidad</li>
+          <li class="breadcrumb-item">Familias de modelos</li>
+      <li class="breadcrumb-item active">XGBoost</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="xgboost">XGBoost<a class="headerlink" href="#xgboost" title="Permanent link">&para;</a></h1>
+<p>XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:</p>
+<p>$$
+\hat{\sigma}^{(m)}(x)=\hat{\sigma}^{(m-1)}(x)+\eta T_m(x)
+$$</p>
+<p>donde $\eta$ es el learning rate. En el repositorio se usa <code>XGBRegressor</code> con <code>booster="gbtree"</code>, <code>tree_method="hist"</code> y objetivo <code>reg:pseudohubererror</code>.</p>
+<h2 id="configuracia3n-fija">Configuración fija<a class="headerlink" href="#configuracia3n-fija" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>objective</code></td>
+<td><code>reg:pseudohubererror</code></td>
+<td>Pérdida robusta frente a errores grandes.</td>
+</tr>
+<tr>
+<td><code>eval_metric</code></td>
+<td><code>rmse</code></td>
+<td>Métrica monitorizada.</td>
+</tr>
+<tr>
+<td><code>tree_method</code></td>
+<td><code>hist</code></td>
+<td>Entrenamiento eficiente por histogramas.</td>
+</tr>
+<tr>
+<td><code>base_score</code></td>
+<td>0.20</td>
+<td>Inicialización cercana a la media esperada de volatilidad.</td>
+</tr>
+<tr>
+<td><code>grow_policy</code></td>
+<td><code>depthwise</code></td>
+<td>Crecimiento por niveles de profundidad.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="espacio-de-baosqueda">Espacio de búsqueda<a class="headerlink" href="#espacio-de-baosqueda" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Hiperparámetro</th>
+<th>Valores</th>
+<th>Influencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n_estimators</code></td>
+<td>400 a 1400</td>
+<td>Número máximo de árboles.</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>0.01 a 0.1</td>
+<td>Paso de cada árbol; menor valor suele requerir más estimadores.</td>
+</tr>
+<tr>
+<td><code>max_depth</code></td>
+<td>3 a 6</td>
+<td>Complejidad de interacciones por árbol.</td>
+</tr>
+<tr>
+<td><code>min_child_weight</code></td>
+<td>1 a 20</td>
+<td>Regulariza nodos con bajo soporte.</td>
+</tr>
+<tr>
+<td><code>subsample</code></td>
+<td>0.6 a 1.0</td>
+<td>Submuestreo de filas.</td>
+</tr>
+<tr>
+<td><code>colsample_bytree</code></td>
+<td>0.6 a 1.0</td>
+<td>Submuestreo de columnas por árbol.</td>
+</tr>
+<tr>
+<td><code>gamma</code></td>
+<td>0 a 0.5</td>
+<td>Mejora mí­nima exigida para split.</td>
+</tr>
+<tr>
+<td><code>reg_alpha</code></td>
+<td>0 a 0.5</td>
+<td>Regularización L1.</td>
+</tr>
+<tr>
+<td><code>reg_lambda</code></td>
+<td>0.5 a 3.0</td>
+<td>Regularización L2.</td>
+</tr>
+<tr>
+<td><code>max_bin</code></td>
+<td>128, 256, 512</td>
+<td>Resolución de histogramas.</td>
+</tr>
+<tr>
+<td><code>num_parallel_tree</code></td>
+<td>1, 2, 4</td>
+<td>Permite comportamiento más tipo random forest dentro de boosting.</td>
+</tr>
+<tr>
+<td><code>early_stopping_rounds</code></td>
+<td>30, 50, 80</td>
+<td>Detención si no mejora en validación interna.</td>
+</tr>
+</tbody>
+</table>
+<p>La familia explora 200 configuraciones. El conjunto externo de validación del fold no se usa como early stopping; se reserva para medir el candidato.</p>
+<h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
+<p>En modo progresivo, XGBoost reparte <code>n_estimators</code> entre fases acumulativas ordenadas por cercaní­a a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así­, el modelo aprende primero la zona central y después incorpora alas.</p>
+<h2 id="interpretacia3n">Interpretación<a class="headerlink" href="#interpretacia3n" title="Permanent link">&para;</a></h2>
+<p>XGBoost suele ser competitivo en datos tabulares, pero su explicación directa no es trivial. En el proyecto se audita con <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a>, <a href="../../../dashboard/behaviour/ale/">ALE</a> y surrogates.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../random-forest/" class="btn btn-neutral float-left" title="Random Forest"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../neural-networks/" class="btn btn-neutral float-right" title="Redes neuronales">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../random-forest/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../neural-networks/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

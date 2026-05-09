@@ -71,7 +71,7 @@ Hay tres puntos donde se evita lookahead:
 - Los splits de entrenamiento respetan el orden temporal.
 - El early stopping usa una partición interna del bloque de entrenamiento, no el test final.
 
-Formalmente, si una observación evaluada ocurre en \(t_j\), el entrenamiento usado para selección o ajuste no debe incluir observaciones de \(t>t_j\) en el mismo proceso de decisión.
+Formalmente, si una observación evaluada ocurre en $t_j$, el entrenamiento usado para selección o ajuste no debe incluir observaciones de $t>t_j$ en el mismo proceso de decisión.
 
 ## Data snooping
 

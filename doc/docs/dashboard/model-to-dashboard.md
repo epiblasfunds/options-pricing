@@ -53,7 +53,7 @@ El split de train se conserva como referencia para vecinos. Esta separación es 
 
 ## SHAP
 
-Se calculan explicaciones SHAP mediante un explainer de permutación:
+Se calculan explicaciones [SHAP](global/shap-fundamentals.md) mediante un explainer de permutación:
 
 - Un fondo pequeño muestreado del dataset.
 - Una muestra global para beeswarm, barras y heatmap.
@@ -65,11 +65,11 @@ $$
 \hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
 $$
 
-donde \(\phi_0\) es el valor base y \(\phi_j\) la contribución de cada feature.
+donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.
 
 ## Árboles surrogate
 
-Para varias profundidades configuradas se entrena un árbol que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:
+Para varias profundidades configuradas se entrena un [árbol surrogate](global/surrogate-trees.md) que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:
 
 $$
 \hat{\sigma}_{modelo} \quad \text{vs} \quad \hat{\sigma}_{árbol}
@@ -79,7 +79,7 @@ Se guardan métricas, importancias, reglas textuales, número de hojas y profund
 
 ## Regresión simbólica
 
-La regresión simbólica busca una expresión cerrada que aproxime el modelo principal. El proceso explora ecuaciones con operadores aritméticos y selecciona una expresión que equilibra error y complejidad.
+La [regresión simbólica](global/symbolic-regression.md) busca una expresión cerrada que aproxime el modelo principal. En el proyecto se implementa con PySR, una búsqueda evolutiva de expresiones, no con reinforcement learning ni con un método de enjambre.
 
 El bundle guarda:
 
@@ -92,20 +92,20 @@ El bundle guarda:
 
 ## Superficies, ICE y ALE
 
-Las superficies se generan alrededor de anclas representativas del test. Para cada ancla se construye una grilla de moneyness y vencimiento, manteniendo el resto de variables fijas.
+Las [superficies de volatilidad](behaviour/volatility-surfaces.md) se generan alrededor de anclas representativas del test. Para cada ancla se construye una grilla de moneyness y vencimiento, manteniendo el resto de variables fijas.
 
-ICE e ALE se calculan para features de análisis:
+[ICE](behaviour/ice.md) y [ALE](behaviour/ale.md) se calculan para features de análisis:
 
 - Strike.
 - Subyacente.
 - Tiempo a vencimiento.
 - Tipo de interés.
 
-ICE muestra respuestas individuales. ALE muestra efecto acumulado centrado por bins, más robusto cuando hay correlaciones entre variables.
+[ICE](behaviour/ice.md) muestra respuestas individuales. [ALE](behaviour/ale.md) muestra efecto acumulado centrado por bins, más robusto cuando hay correlaciones entre variables.
 
 ## Vecinos
 
-Los vecinos se calculan contra el split de train transformado. Se estandarizan features y se recuperan observaciones más cercanas. También se guarda una proyección PCA para representar distancias en 3D.
+Los [vecinos](sample/neighbours.md) se calculan contra el split de train transformado. Se estandarizan features y se recuperan observaciones más cercanas. También se guarda una proyección PCA para representar distancias en 3D.
 
 ## Estructura del bundle
 
@@ -123,7 +123,6 @@ Cada carpeta de modelo contiene:
 - Stub de respuesta manual.
 
 El dashboard puede arrancar sin recalcular estos artefactos, lo que reduce tiempo de respuesta.
-
 
 
 

@@ -31,7 +31,7 @@ $$
 \hat{\sigma}=f(\text{tipo de opción}, K, F, \tau, r)
 $$
 
-donde \(K\) es el strike, \(F\) es el precio del futuro subyacente, \(\tau\) es el tiempo hasta vencimiento y \(r\) es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad \(\sigma\) que hace que el precio Black-76 coincida con el precio negociado:
+donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ es el tiempo hasta vencimiento y $r$ es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:
 
 $$
 P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
@@ -83,14 +83,14 @@ El dashboard muestra métricas de error y fidelidad que sirven para diagnosticar
 
 | Métrica | Fórmula | Uso |
 | --- | --- | --- |
-| MAE | \( \frac{1}{n}\sum_i \lvert y_i-\hat{y}_i\rvert \) | Error medio absoluto, robusto y fácil de interpretar en unidades de volatilidad. |
-| RMSE | \( \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2} \) | Penaliza más los errores grandes y es la métrica principal para selección. |
-| \(R^2\) | \(1-\frac{\sum_i(y_i-\hat{y}_i)^2}{\sum_i(y_i-\bar{y})^2}\) | Proporción explicada de la variabilidad de la volatilidad. |
-| Residual | \(y_i-\hat{y}_i\) | Dirección del error de una observación. |
-| Error absoluto | \(\lvert y_i-\hat{y}_i\rvert\) | Magnitud local del fallo, usada en heatmaps. |
+| MAE | $ \frac{1}{n}\sum_i \lvert y_i-\hat{y}_i\rvert $ | Error medio absoluto, robusto y fácil de interpretar en unidades de volatilidad. |
+| RMSE | $ \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2} $ | Penaliza más los errores grandes y es la métrica principal para selección. |
+| $R^2$ | $1-\frac{\sum_i(y_i-\hat{y}_i)^2}{\sum_i(y_i-\bar{y})^2}$ | Proporción explicada de la variabilidad de la volatilidad. |
+| Residual | $y_i-\hat{y}_i$ | Dirección del error de una observación. |
+| Error absoluto | $\lvert y_i-\hat{y}_i\rvert$ | Magnitud local del fallo, usada en heatmaps. |
 | Fidelidad de surrogate | Error entre modelo principal y modelo equivalente | Indica cuánto se puede confiar en árboles y expresiones simbólicas como aproximaciones. |
 
-Además de estas métricas, el dashboard muestra importancias SHAP, curvas ICE/ALE, mapas de vecinos, superficies locales, smiles, term structures y avisos de consistencia financiera sobre superficies generadas.
+Además de estas métricas, el dashboard muestra importancias [SHAP](dashboard/global/shap-fundamentals.md), curvas [ICE](dashboard/behaviour/ice.md) y [ALE](dashboard/behaviour/ale.md), mapas de [vecinos](dashboard/sample/neighbours.md), [superficies locales](dashboard/behaviour/volatility-surfaces.md), smiles, term structures y avisos de consistencia financiera sobre superficies generadas. La regresión simbólica y los árboles surrogate se documentan como explicadores equivalentes, siempre con métricas de fidelidad para no confundir explicación del modelo con verdad de mercado.
 
 ## Lectura recomendada
 
