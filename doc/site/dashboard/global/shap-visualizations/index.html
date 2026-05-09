@@ -122,20 +122,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../shap-fundamentals/">Fundamentos de SHAP</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Visualizaciones SHAP</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#summary-beeswarm">Summary beeswarm</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#importancia-media-absoluta">Importancia media absoluta</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#dependence-plot">Dependence plot</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#heatmap-de-contribuciones">Heatmap de contribuciones</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#coherencia-entre-visualizaciones">Coherencia entre visualizaciones</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../surrogate-trees/">Árboles surrogate</a>
                 </li>
@@ -220,7 +206,7 @@
     class E,F,G,H,I plot;
 </code></pre>
 <h2 id="summary-beeswarm">Summary beeswarm<a class="headerlink" href="#summary-beeswarm" title="Permanent link">&para;</a></h2>
-<p>El beeswarm ordena features por importancia global y muestra una nube de contribuciones individuales. Cada punto representa una observación. La posición horizontal es $\phi_j(x_i)$; el color representa el valor observado de la feature cuando la librerí­a puede mostrarlo de forma interpretable.</p>
+<p>El beeswarm ordena features por importancia global y muestra una nube de contribuciones individuales. Cada punto representa una observación. La posición horizontal es $\phi_j(x_i)$; el color representa el valor observado de la feature cuando la librería puede mostrarlo de forma interpretable.</p>
 <p>La lectura técnica se apoya en cuatro patrones:</p>
 <table>
 <thead>
@@ -248,19 +234,31 @@
 </tr>
 </tbody>
 </table>
-<p>En volatilidad implí­cita, una feature puede ser importante aunque no tenga un signo único. Por ejemplo, <code>StrikePrice</code> puede elevar o reducir la predicción dependiendo del nivel del subyacente y del vencimiento. En ese caso, lo relevante no es buscar un coeficiente global, sino identificar regí­menes.</p>
+<p>En volatilidad implícita, una feature puede ser importante aunque no tenga un signo único. Por ejemplo, <code>StrikePrice</code> puede elevar o reducir la predicción dependiendo del nivel del subyacente y del vencimiento. En ese caso, lo relevante no es buscar un coeficiente global, sino identificar regímenes.</p>
 <h2 id="importancia-media-absoluta">Importancia media absoluta<a class="headerlink" href="#importancia-media-absoluta" title="Permanent link">&para;</a></h2>
 <p>La importancia global que se muestra en barras se calcula como:</p>
-<p>$$
+<p>[
 I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$I_j$ es la importancia global de la feature $j$.</li>
+<li>$n$ es el número de observaciones explicadas.</li>
+<li>$\phi_j(x_i)$ es la contribución SHAP de la feature $j$ en la observación $i$.</li>
+<li>$x_i$ es la observación explicada.</li>
+</ul>
 <p>Esta magnitud mide cuánto desplaza una feature la predicción en promedio, sin conservar el signo. Es adecuada para ranking, pero no para concluir dirección. Una feature con efectos positivos y negativos fuertes puede tener importancia alta aunque su efecto medio firmado sea cercano a cero.</p>
 <p>La diferencia con la importancia de árboles es relevante. La importancia de impureza de un Random Forest depende de splits internos del propio estimador; la importancia <a href="../shap-fundamentals/">SHAP</a> se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar XGBoost, redes y lineal bajo la misma medida visual.</p>
 <h2 id="dependence-plot">Dependence plot<a class="headerlink" href="#dependence-plot" title="Permanent link">&para;</a></h2>
 <p>El dependence plot dibuja el valor de una feature frente a su contribución <a href="../shap-fundamentals/">SHAP</a>:</p>
-<p>$$
+<p>[
 x_{ij} \longmapsto \phi_j(x_i)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$x_{ij}$ es el valor de la feature $j$ en la observación $i$.</li>
+<li>$\phi_j(x_i)$ es la contribución SHAP asociada a esa feature y observación.</li>
+</ul>
 <p>No es una curva de respuesta pura. Es una proyección de contribuciones locales. Por eso puede mostrar dispersión vertical: dos observaciones con el mismo valor de feature pueden tener contribuciones distintas si el modelo usa interacciones con vencimiento, moneyness, tipo o subyacente.</p>
 <p>Para interpretar un dependence plot en este proyecto:</p>
 <ul>
@@ -285,7 +283,7 @@ $$</p>
 <td>Bloques de filas con contribuciones parecidas.</td>
 </tr>
 <tr>
-<td>Regí­menes</td>
+<td>Regímenes</td>
 <td>Cambios de signo sistemáticos por feature.</td>
 </tr>
 <tr>
@@ -311,7 +309,7 @@ $$</p>
     classDef plot fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
     class A,B,C,D,E,F,G plot;
 </code></pre>
-<p>Si <code>TimeToExpiration</code> aparece como importante en barras, el dependence plot debe mostrar cómo varí­an sus contribuciones. Si además el heatmap revela un bloque de vencimientos cortos y el diagnóstico muestra mayor error en corto plazo, hay una historia técnica coherente. Si las visualizaciones se contradicen, la documentación del resultado debe reflejar la incertidumbre y no forzar una conclusión.</p>
+<p>Si <code>TimeToExpiration</code> aparece como importante en barras, el dependence plot debe mostrar cómo varían sus contribuciones. Si además el heatmap revela un bloque de vencimientos cortos y el diagnóstico muestra mayor error en corto plazo, hay una historia técnica coherente. Si las visualizaciones se contradicen, la documentación del resultado debe reflejar la incertidumbre y no forzar una conclusión.</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Lundberg, S. M. y Lee, S.-I. (2017). <em>A Unified Approach to Interpreting Model Predictions</em>. NeurIPS.</li>

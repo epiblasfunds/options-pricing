@@ -1,4 +1,4 @@
-﻿# Underlying Step
+# Underlying Step
 
 El cuarto paso asigna a cada operación de opción el precio del futuro subyacente más reciente disponible en el momento de la operación. Esta es una de las partes más importantes para evitar lookahead en el propio ETL.
 
@@ -39,9 +39,15 @@ Se validan de nuevo opciones, futuros y candidatos de subyacente:
 
 Primero se une cada trade de opción con su contrato de futuro candidato. Luego se ordenan las operaciones de opción y futuro por fecha-hora de ejecución. Para cada opción se selecciona el último trade del futuro con:
 
-$$
+\[
 t_{futuro} \le t_{opción}
-$$
+\]
+
+donde:
+
+- $t_{futuro}$ es la hora de la operación de futuro usada como subyacente.
+- $t_{opción}$ es la hora de la operación de opción.
+- La desigualdad impide usar información futura.
 
 Este criterio evita usar información futura. La operación de futuro elegida puede ser de la misma sesión o anterior, pero nunca posterior a la opción.
 
@@ -66,9 +72,15 @@ flowchart TD
 
 La base calcula el lag entre opción y subyacente en minutos:
 
-$$
+\[
 Lag_{min}=\frac{\lvert t_{opción}-t_{subyacente}\rvert}{60}
-$$
+\]
+
+donde:
+
+- $Lag_{min}$ es el desfase temporal en minutos.
+- $t_{opción}$ es la hora de la opción.
+- $t_{subyacente}$ es la hora del futuro subyacente asignado.
 
 Aunque la unión as-of ya impone $t_{subyacente}\le t_{opción}$, se guarda el valor absoluto como magnitud de distancia temporal. Este campo permite filtrar operaciones cuyo precio de futuro sea demasiado antiguo en el paso de [volatilidad implícita](volatility.md).
 

@@ -26,6 +26,23 @@
     return "Documentación";
   }
 
+  function removePageAnchorsFromSidebar() {
+    document.querySelectorAll(".wy-menu-vertical a[href]").forEach(function (link) {
+      var href = link.getAttribute("href") || "";
+      if (href !== "#" && href.indexOf("#") !== -1) {
+        var item = link.closest("li");
+        if (item) {
+          item.remove();
+        }
+      }
+    });
+    document.querySelectorAll(".wy-menu-vertical ul").forEach(function (list) {
+      if (!list.querySelector("li")) {
+        list.remove();
+      }
+    });
+  }
+
   function relabelNavigationButtons() {
     document.querySelectorAll(".rst-footer-buttons a").forEach(function (link) {
       var text = link.textContent.replace(/\s+/g, " ").trim();
@@ -60,6 +77,7 @@
   }
 
   function enhanceNavigation() {
+    removePageAnchorsFromSidebar();
     relabelNavigationButtons();
     addTopNavigationButtons();
     relabelNavigationButtons();

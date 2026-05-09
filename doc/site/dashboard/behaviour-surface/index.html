@@ -132,14 +132,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Superficies y respuesta</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Mapa de la pestaña</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#surface-analysis">Surface Analysis</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#feature-response-analysis">Feature Response Analysis</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#criterio-de-lectura">Criterio de lectura</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../behaviour/volatility-surfaces/">Superficies de volatilidad</a>
                 </li>
@@ -219,9 +211,15 @@
 </code></pre>
 <h2 id="surface-analysis">Surface Analysis<a class="headerlink" href="#surface-analysis" title="Permanent link">&para;</a></h2>
 <p>La sección de superficies toma una observación real como ancla y genera una grilla contrafactual de moneyness y vencimiento. El strike se reconstruye como:</p>
-<p>$$
+<p>[
 K = \frac{F}{m}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$K$ es el strike reconstruido.</li>
+<li>$F$ es el precio del futuro subyacente fijado por el ancla.</li>
+<li>$m$ es la moneyness objetivo de la grilla.</li>
+</ul>
 <p>La metodología completa se desarrolla en <a href="../behaviour/volatility-surfaces/">superficies de volatilidad</a>. Las vistas disponibles son:</p>
 <table>
 <thead>

@@ -1,4 +1,4 @@
-﻿# Modelos de volatilidad: visión general
+# Modelos de volatilidad: visión general
 
 La parte de modelos toma [`VOLATILITY_DB`](../data/volatility.md), genera variables financieras y entrena varias familias de regresión para aproximar la volatilidad implícita. El diseño separa tres problemas:
 
@@ -23,9 +23,15 @@ flowchart TD
 
 La variable objetivo es `ImpliedVolatility`, calculada durante el ETL mediante inversión Black-76. El modelo aprende una aproximación:
 
-$$
+\[
 \hat{\sigma}=f(X)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}$ es la volatilidad implícita predicha.
+- $f$ es el modelo entrenado.
+- $X$ o las variables entre paréntesis son las entradas financieras del modelo.
 
 donde $X$ no son directamente todas las columnas raw, sino una representación financiera compacta basada en vencimiento, moneyness, tipo y tipo de opción.
 

@@ -220,13 +220,29 @@
 </code></pre>
 <h2 id="problema-que-se-quiere-resolver">Problema que se quiere resolver<a class="headerlink" href="#problema-que-se-quiere-resolver" title="Permanent link">&para;</a></h2>
 <p>El objetivo es aproximar la función de volatilidad implícita:</p>
-<p>$$
+<p>[
 \hat{\sigma}=f(\text{tipo de opción}, K, F, \tau, r)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}$ es la volatilidad implícita predicha.</li>
+<li>$f$ es el modelo entrenado.</li>
+<li>$X$ o las variables entre paréntesis son las entradas financieras del modelo.</li>
+</ul>
 <p>donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ es el tiempo hasta vencimiento y $r$ es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:</p>
-<p>$$
+<p>[
 P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$P_{mercado}$ es el precio observado.</li>
+<li>$P_{Black76}$ es el precio teórico del modelo Black-76.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$\tau$ es el tiempo hasta vencimiento.</li>
+<li>$r$ es el tipo de interés.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+</ul>
 <p>El proyecto trata esta volatilidad como una superficie dependiente de la moneyness y del vencimiento, pero también como una variable modelable con aprendizaje automático. La explicabilidad es parte del requisito funcional: el dashboard debe contestar preguntas como:</p>
 <ul>
 <li>Qué variables explican globalmente las predicciones del modelo.</li>
@@ -366,5 +382,5 @@ $$</p>
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-05-09 19:13:08.652525+00:00
+Build Date UTC : 2026-05-09 22:22:52.511148+00:00
 -->

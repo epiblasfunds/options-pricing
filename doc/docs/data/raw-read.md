@@ -1,4 +1,4 @@
-﻿# Read Raw Step
+# Read Raw Step
 
 El primer paso convierte ficheros fuente heterogéneos en tres bases limpias: contratos, operaciones y tipos. Su objetivo es reducir volumen, normalizar tipos y dejar solo el universo de instrumentos que el proyecto modela.
 
@@ -45,13 +45,23 @@ Después se asignan nombres de columnas según el schema declarado y se seleccio
 
 El filtrado inicial aplica dos condiciones:
 
-$$
+\[
 \text{es\_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
-$$
+\]
 
-$$
+donde:
+
+- $c$ es el código de contrato.
+- $\text{es\_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.
+
+\[
 \text{es\_mensual}(c)=\text{longitud}(c)\in\{\text{longitud opción},\text{longitud futuro}\}
-$$
+\]
+
+donde:
+
+- $c$ es el código de contrato.
+- $\text{es\_mensual}(c)$ indica si la longitud del contrato corresponde a vencimientos mensuales configurados.
 
 Solo se conservan filas que cumplen ambas. Esto mantiene el universo consistente entre contratos y operaciones.
 
@@ -77,13 +87,19 @@ flowchart LR
 
 La lógica financiera es construir una serie continua de referencia monetaria. Para fechas antiguas, el ajuste aproxima la transición entre EONIA y €STR:
 
-$$
+\[
 r_t =
 \begin{cases}
 \text{EONIA}_t - s, & t < t_{\mathrm{corte}} \\
 \text{€STR}_t, & t \ge t_{\mathrm{corte}}
 \end{cases}
-$$
+\]
+
+donde:
+
+- $r_t$ es el tipo usado en la fecha $t$.
+- $s$ es el spread de ajuste entre EONIA y €STR.
+- $t_{\mathrm{corte}}$ es la fecha de cambio de régimen de tipos.
 
 ## Validaciones y salidas
 

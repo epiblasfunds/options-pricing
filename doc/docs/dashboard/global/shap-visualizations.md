@@ -22,7 +22,7 @@ flowchart TD
 
 ## Summary beeswarm
 
-El beeswarm ordena features por importancia global y muestra una nube de contribuciones individuales. Cada punto representa una observación. La posición horizontal es $\phi_j(x_i)$; el color representa el valor observado de la feature cuando la librerí­a puede mostrarlo de forma interpretable.
+El beeswarm ordena features por importancia global y muestra una nube de contribuciones individuales. Cada punto representa una observación. La posición horizontal es $\phi_j(x_i)$; el color representa el valor observado de la feature cuando la librería puede mostrarlo de forma interpretable.
 
 La lectura técnica se apoya en cuatro patrones:
 
@@ -33,22 +33,22 @@ La lectura técnica se apoya en cuatro patrones:
 | Colores mezclados | Interacciones o relación no monótona. |
 | Colas aisladas | Casos extremos que conviene revisar con [SHAP local](../sample/local-shap-waterfall.md) y vecinos. |
 
-En volatilidad implí­cita, una feature puede ser importante aunque no tenga un signo único. Por ejemplo, `StrikePrice` puede elevar o reducir la predicción dependiendo del nivel del subyacente y del vencimiento. En ese caso, lo relevante no es buscar un coeficiente global, sino identificar regí­menes.
+En volatilidad implícita, una feature puede ser importante aunque no tenga un signo único. Por ejemplo, `StrikePrice` puede elevar o reducir la predicción dependiendo del nivel del subyacente y del vencimiento. En ese caso, lo relevante no es buscar un coeficiente global, sino identificar regímenes.
 
 ## Importancia media absoluta
 
 La importancia global que se muestra en barras se calcula como:
 
-$$
+\[
 I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
-$$
+\]
 
 donde:
 
 - $I_j$ es la importancia global de la feature $j$.
-- $n$ es el n?mero de observaciones explicadas.
-- $\phi_j(x_i)$ es la contribuci?n SHAP de la feature $j$ en la observaci?n $i$.
-- $x_i$ es la observaci?n explicada.
+- $n$ es el número de observaciones explicadas.
+- $\phi_j(x_i)$ es la contribución SHAP de la feature $j$ en la observación $i$.
+- $x_i$ es la observación explicada.
 
 Esta magnitud mide cuánto desplaza una feature la predicción en promedio, sin conservar el signo. Es adecuada para ranking, pero no para concluir dirección. Una feature con efectos positivos y negativos fuertes puede tener importancia alta aunque su efecto medio firmado sea cercano a cero.
 
@@ -58,14 +58,14 @@ La diferencia con la importancia de árboles es relevante. La importancia de imp
 
 El dependence plot dibuja el valor de una feature frente a su contribución [SHAP](shap-fundamentals.md):
 
-$$
+\[
 x_{ij} \longmapsto \phi_j(x_i)
-$$
+\]
 
 donde:
 
-- $x_{ij}$ es el valor de la feature $j$ en la observaci?n $i$.
-- $\phi_j(x_i)$ es la contribuci?n SHAP asociada a esa feature y observaci?n.
+- $x_{ij}$ es el valor de la feature $j$ en la observación $i$.
+- $\phi_j(x_i)$ es la contribución SHAP asociada a esa feature y observación.
 
 No es una curva de respuesta pura. Es una proyección de contribuciones locales. Por eso puede mostrar dispersión vertical: dos observaciones con el mismo valor de feature pueden tener contribuciones distintas si el modelo usa interacciones con vencimiento, moneyness, tipo o subyacente.
 
@@ -85,7 +85,7 @@ El heatmap permite ver:
 | Uso | Qué buscar |
 | --- | --- |
 | Segmentación | Bloques de filas con contribuciones parecidas. |
-| Regí­menes | Cambios de signo sistemáticos por feature. |
+| Regímenes | Cambios de signo sistemáticos por feature. |
 | Observaciones singulares | Filas con una feature dominante. |
 | Redundancia | Features que actúan siempre de forma muy parecida. |
 
@@ -107,7 +107,7 @@ flowchart LR
     class A,B,C,D,E,F,G plot;
 ```
 
-Si `TimeToExpiration` aparece como importante en barras, el dependence plot debe mostrar cómo varí­an sus contribuciones. Si además el heatmap revela un bloque de vencimientos cortos y el diagnóstico muestra mayor error en corto plazo, hay una historia técnica coherente. Si las visualizaciones se contradicen, la documentación del resultado debe reflejar la incertidumbre y no forzar una conclusión.
+Si `TimeToExpiration` aparece como importante en barras, el dependence plot debe mostrar cómo varían sus contribuciones. Si además el heatmap revela un bloque de vencimientos cortos y el diagnóstico muestra mayor error en corto plazo, hay una historia técnica coherente. Si las visualizaciones se contradicen, la documentación del resultado debe reflejar la incertidumbre y no forzar una conclusión.
 
 ## Referencias
 

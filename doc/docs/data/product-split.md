@@ -1,4 +1,4 @@
-﻿# Product Split Step
+# Product Split Step
 
 El tercer paso separa `TRADE_IBEX_DB` en operaciones de opciones, operaciones de futuros y una tabla de relación entre cada opción y los futuros que comparten vencimiento.
 

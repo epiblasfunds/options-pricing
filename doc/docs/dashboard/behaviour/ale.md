@@ -1,10 +1,10 @@
-﻿# Curvas ALE
+# Curvas ALE
 
 ALE, del inglés *Accumulated Local Effects*, estima el efecto medio acumulado de una feature sobre la predicción del modelo usando variaciones locales dentro de regiones observadas. En este proyecto complementa a las [curvas ICE](ice.md): ICE enseña trayectorias individuales; ALE resume un efecto agregado menos vulnerable a combinaciones contrafactuales irreales cuando las variables están correlacionadas.
 
 La definición continua para una feature $j$ es:
 
-$$
+\[
 ALE_j(z)=
 \int_{z_0}^{z}
 E\left[
@@ -13,7 +13,16 @@ E\left[
 \right]ds
 -
 C
-$$
+\]
+
+donde:
+
+- $ALE_j(z)$ es el efecto local acumulado de la feature $j$.
+- $z$ es el valor hasta el que se acumula el efecto.
+- $z_0$ es el punto inicial de integración.
+- $f(X)$ es la predicción del modelo.
+- $X_j$ es la feature analizada.
+- $C$ es la constante de centrado.
 
 donde $C$ centra la curva para que su media sea cero. La interpretación es relativa: un valor ALE positivo indica que, en esa zona, la feature empuja la predicción por encima del promedio de efecto acumulado.
 
@@ -44,26 +53,43 @@ La función `build_ale_frame` implementa una aproximación por bins:
 4. Predice dos escenarios locales: feature igual a $l_k$ y feature igual a $u_k$.
 5. Calcula la diferencia media:
 
-$$
+\[
 \Delta_k =
 \frac{1}{|I_k|}
 \sum_{i \in I_k}
 \left[
 f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
 \right]
-$$
+\]
+
+donde:
+
+- $\Delta_k$ es el incremento local medio del bin $k$.
+- $I_k$ es el conjunto de observaciones dentro del bin $k$.
+- $l_k$ y $u_k$ son los bordes inferior y superior del bin.
+- $x_{i,-j}$ son las demás features de la observación $i$.
 
 6. Acumula incrementos:
 
-$$
+\[
 \tilde{ALE}_k=\sum_{r \leq k}\Delta_r
-$$
+\]
+
+donde:
+
+- $\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.
+- $\Delta_r$ es el incremento local medio del bin $r$.
 
 7. Centra la curva restando la media:
 
-$$
+\[
 ALE_k = \tilde{ALE}_k - \frac{1}{K}\sum_{r=1}^{K}\tilde{ALE}_r
-$$
+\]
+
+donde:
+
+- $\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.
+- $\Delta_r$ es el incremento local medio del bin $r$.
 
 Este procedimiento usa cambios dentro de bins donde existen datos. Por eso suele ser más prudente que PDP cuando `StrikePrice` y `UnderlyingPrice` están correlacionados o cuando vencimiento y liquidez no se distribuyen uniformemente.
 
@@ -104,11 +130,11 @@ ALE no elimina todas las dificultades de correlación, pero evita promediar de f
 | ALE | Qué efecto acumulado medio aparece dentro de regiones observadas. |
 | [Superficie](volatility-surfaces.md) | Cómo se organiza la predicción en moneyness y vencimiento alrededor de un ancla. |
 
-Si ICE muestra curvas muy heterogéneas y ALE es casi plano, el promedio local está ocultando diferencias entre regí­menes. Si ICE y ALE apuntan en la misma dirección, la conclusión sobre esa feature es más estable.
+Si ICE muestra curvas muy heterogéneas y ALE es casi plano, el promedio local está ocultando diferencias entre regímenes. Si ICE y ALE apuntan en la misma dirección, la conclusión sobre esa feature es más estable.
 
 ## Referencias
 
 - Apley, D. W. y Zhu, J. (2020). *Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models*. Journal of the Royal Statistical Society Series B.
-- Molnar, C. (2022). *Interpretable Machine Learning*. Capí­tulo de Accumulated Local Effects.
+- Molnar, C. (2022). *Interpretable Machine Learning*. Capítulo de Accumulated Local Effects.
 - Friedman, J. H. (2001). *Greedy Function Approximation: A Gradient Boosting Machine*. Annals of Statistics.
 

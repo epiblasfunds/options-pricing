@@ -1,4 +1,4 @@
-﻿# Reentrenamiento y progressive training
+# Reentrenamiento y progressive training
 
 Después de seleccionar hiperparámetros por [k-folds temporales](splits-kfolds.md), el proyecto reentrena la mejor configuración. Hay dos fases principales: una fase train/validation para confirmar rendimiento y una fase final test para producir el modelo que se guarda y se convierte a [bundle de dashboard](../dashboard/model-to-dashboard.md).
 
@@ -21,9 +21,17 @@ En entrenamiento no progresivo, el modelo recibe todo el bloque de entrenamiento
 
 Este modo representa el entrenamiento estándar:
 
-$$
+\[
 \min_{\theta} \sum_{i \in Train} L(y_i, f_{\theta}(x_i))
-$$
+\]
+
+donde:
+
+- El operador $\min$ representa el problema de optimización.
+- $\theta$ o $\beta$ son los parámetros del modelo.
+- $L$ es la función de pérdida.
+- $w_i$ es el peso de la observación cuando aplica.
+- $y_i$ es el valor real y $f(x_i)$ la predicción.
 
 Ventajas:
 
@@ -35,9 +43,16 @@ Ventajas:
 
 El entrenamiento progresivo ordena observaciones por cercanía a ATM usando la magnitud de la log-moneyness:
 
-$$
+\[
 |\ell| = |\log(F/K)|
-$$
+\]
+
+donde:
+
+- $\ell$ es la log-moneyness.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
+- El valor absoluto mide distancia a ATM.
 
 Luego divide el entrenamiento en segmentos. El primer segmento contiene observaciones más cercanas a ATM; los siguientes incorporan progresivamente regiones más alejadas.
 
@@ -67,15 +82,27 @@ La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos
 
 Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:
 
-$$
+\[
 w_s \propto S-s
-$$
+\]
+
+donde:
+
+- $w_s$ es el peso asignado al segmento $s$.
+- $S$ es el número total de segmentos.
+- $s$ es el índice del segmento ordenado por cercanía a ATM.
 
 y se normalizan para mantener escala media estable:
 
-$$
+\[
 \tilde{w}_i=\frac{w_i}{\bar{w}}
-$$
+\]
+
+donde:
+
+- $\tilde{w}_i$ es el peso normalizado de la observación $i$.
+- $w_i$ es el peso bruto de la observación.
+- $\bar{w}$ es la media de pesos brutos.
 
 Esto no elimina las alas; solo reduce su influencia relativa al inicio o en el objetivo ponderado.
 

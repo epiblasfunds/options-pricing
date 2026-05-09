@@ -1,4 +1,4 @@
-﻿# Volatility Step
+# Volatility Step
 
 El último paso del ETL calcula la volatilidad implícita de cada operación de opción. Para ello limpia operaciones sin subyacente fiable, calcula el tipo compuesto hasta vencimiento y resuelve numéricamente la volatilidad que iguala Black-76 al precio observado.
 
@@ -44,17 +44,29 @@ Antes de valorar se exige:
 
 El tipo usado por Black-76 se calcula como un tipo compuesto desde la fecha de ejecución hasta vencimiento. Para períodos de al menos un día, se recorren días hábiles y se acumula:
 
-$$
+\[
 \prod_i \left(1 + r_i \frac{n_i}{N}\right)
-$$
+\]
+
+donde:
+
+- $r_i$ es el tipo diario en decimal.
+- $n_i$ es el número de días cubiertos por el tipo $i$.
+- $N$ es la base anual de cómputo, configurada como 360.
 
 donde $N=360$, $r_i$ es el tipo diario en decimal y $n_i$ es el número de días naturales cubiertos por ese tipo. Los lunes cubren tres días para recoger el fin de semana.
 
 El tipo anualizado equivalente es:
 
-$$
+\[
 r_{comp} = \left(\prod_i \left(1 + r_i \frac{n_i}{N}\right)-1\right)\frac{N}{d_c}
-$$
+\]
+
+donde:
+
+- $r_i$ es el tipo diario en decimal.
+- $n_i$ es el número de días cubiertos por el tipo $i$.
+- $N$ es la base anual de cómputo, configurada como 360.
 
 donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimientos intradía se aplica una conversión proporcional con el tipo overnight disponible para evitar explosiones numéricas en vencimientos muy cortos.
 
@@ -62,23 +74,56 @@ donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimiento
 
 El modelo Black-76 valora opciones sobre forwards/futuros. Para una call:
 
-$$
+\[
 C=e^{-rT}\left(FN(d_1)-KN(d_2)\right)
-$$
+\]
+
+donde:
+
+- $C$ es el precio teórico de una call.
+- $P$ es el precio teórico de una put.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
+- $T$ es el vencimiento en años.
+- $r$ es el tipo compuesto.
+- $\sigma$ es la volatilidad implícita.
+- $N(\cdot)$ es la función de distribución normal estándar.
 
 Para una put:
 
-$$
+\[
 P=e^{-rT}\left(KN(-d_2)-FN(-d_1)\right)
-$$
+\]
+
+donde:
+
+- $C$ es el precio teórico de una call.
+- $P$ es el precio teórico de una put.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
+- $T$ es el vencimiento en años.
+- $r$ es el tipo compuesto.
+- $\sigma$ es la volatilidad implícita.
+- $N(\cdot)$ es la función de distribución normal estándar.
 
 con:
 
-$$
+\[
 d_1=\frac{\ln(F/K)+\frac{1}{2}\sigma^2T}{\sigma\sqrt{T}},
 \qquad
 d_2=d_1-\sigma\sqrt{T}
-$$
+\]
+
+donde:
+
+- $C$ es el precio teórico de una call.
+- $P$ es el precio teórico de una put.
+- $F$ es el futuro subyacente.
+- $K$ es el strike.
+- $T$ es el vencimiento en años.
+- $r$ es el tipo compuesto.
+- $\sigma$ es la volatilidad implícita.
+- $N(\cdot)$ es la función de distribución normal estándar.
 
 En el proyecto:
 
@@ -92,9 +137,16 @@ En el proyecto:
 
 La volatilidad se obtiene buscando la raíz:
 
-$$
+\[
 g(\sigma)=P_{Black76}(F,K,T,r,\sigma)-P_{mercado}=0
-$$
+\]
+
+donde:
+
+- $g(\sigma)$ es la función cuya raíz se busca.
+- $P_{Black76}$ es el precio teórico Black-76.
+- $P_{mercado}$ es el precio observado.
+- $\sigma$ es la volatilidad implícita candidata.
 
 El solver usa bisección entre los límites de volatilidad configurados. Si la función no cambia de signo o aparece un valor no finito, la fila se marca como no resoluble. Las filas sin solución dentro de los límites se eliminan antes de persistir la salida.
 

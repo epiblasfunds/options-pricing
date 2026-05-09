@@ -136,18 +136,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../volatility-surfaces/">Superficies de volatilidad</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Curvas ICE</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#implementacia3n-en-el-proyecto">Implementación en el proyecto</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#interpretacia3n">Interpretación</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#diferencia-con-pdp">Diferencia con PDP</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#limitacia3n-principal-contrafactuales-irreales">Limitación principal: contrafactuales irreales</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../ale/">Curvas ALE</a>
                 </li>
@@ -203,10 +191,17 @@
                 <h1 id="curvas-ice">Curvas ICE<a class="headerlink" href="#curvas-ice" title="Permanent link">&para;</a></h1>
 <p>Las curvas ICE, del inglés <em>Individual Conditional Expectation</em>, muestran cómo cambia la predicción de un modelo para observaciones individuales cuando se modifica una feature y se mantienen las demás variables fijas. En este proyecto se usan para analizar respuestas del modelo de volatilidad ante cambios de strike, subyacente, vencimiento o tipo de interés.</p>
 <p>Formalmente, para una feature $j$, una observación $x_i$ y un valor contrafactual $z$:</p>
-<p>$$
+<p>[
 ICE_i^{(j)}(z)=f(z, x_{i,-j})
-$$</p>
-<p>donde $x_{i,-j}$ representa todas las variables de la observación salvo la feature analizada. Cada lí­nea ICE es una trayectoria individual de predicción.</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$ICE_i^{(j)}(z)$ es la respuesta individual de la observación $i$ para la feature $j$.</li>
+<li>$z$ es el valor contrafactual asignado a la feature analizada.</li>
+<li>$x_{i,-j}$ son las demás features de la observación $i$.</li>
+<li>$f$ es el modelo de predicción de volatilidad.</li>
+</ul>
+<p>donde $x_{i,-j}$ representa todas las variables de la observación salvo la feature analizada. Cada línea ICE es una trayectoria individual de predicción.</p>
 <pre><code class="language-mermaid">flowchart LR
     A[Muestras reales] --&gt; B[Seleccionar feature j]
     B --&gt; C[Construir grilla por cuantiles]
@@ -220,7 +215,7 @@ $$</p>
     class B,D,E process;
     class F plot;
 </code></pre>
-<h2 id="implementacia3n-en-el-proyecto">Implementación en el proyecto<a class="headerlink" href="#implementacia3n-en-el-proyecto" title="Permanent link">&para;</a></h2>
+<h2 id="implementacion-en-el-proyecto">Implementación en el proyecto<a class="headerlink" href="#implementacion-en-el-proyecto" title="Permanent link">&para;</a></h2>
 <p>La función <code>build_ice_frame</code>:</p>
 <ol>
 <li>Muestrea hasta <code>ice_sample_size</code> filas del dataset de dashboard.</li>
@@ -256,8 +251,8 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h2 id="interpretacia3n">Interpretación<a class="headerlink" href="#interpretacia3n" title="Permanent link">&para;</a></h2>
-<p>Una curva ICE no resume el efecto medio. Muestra el efecto condicional para una observación concreta. Esto es crucial en volatilidad implí­cita, porque el efecto de mover strike puede depender del subyacente, del vencimiento y del tipo de opción.</p>
+<h2 id="interpretacion">Interpretación<a class="headerlink" href="#interpretacion" title="Permanent link">&para;</a></h2>
+<p>Una curva ICE no resume el efecto medio. Muestra el efecto condicional para una observación concreta. Esto es crucial en volatilidad implícita, porque el efecto de mover strike puede depender del subyacente, del vencimiento y del tipo de opción.</p>
 <p>Patrones habituales:</p>
 <table>
 <thead>
@@ -288,22 +283,29 @@ $$</p>
 <p>Si las curvas ICE de <code>StrikePrice</code> divergen mucho, el modelo no está usando strike de forma aislada; probablemente la relación con <code>UnderlyingPrice</code> y moneyness domina. Si las curvas ICE de <code>TimeToExpiration</code> cambian mucho en corto plazo, conviene cruzar la lectura con el diagnóstico por maturity.</p>
 <h2 id="diferencia-con-pdp">Diferencia con PDP<a class="headerlink" href="#diferencia-con-pdp" title="Permanent link">&para;</a></h2>
 <p>Un Partial Dependence Plot promedia las curvas ICE:</p>
-<p>$$
+<p>[
 PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n}f(z,x_{i,-j})
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$PDP_j(z)$ es la dependencia parcial de la feature $j$.</li>
+<li>$n$ es el número de observaciones promediadas.</li>
+<li>$z$ es el valor contrafactual de la feature analizada.</li>
+<li>$x_{i,-j}$ son las demás features de la observación $i$.</li>
+</ul>
 <p>El PDP puede ocultar heterogeneidad. Si algunas curvas suben y otras bajan, el promedio puede parecer plano aunque el modelo tenga efectos locales fuertes. Por ese motivo el dashboard prioriza ICE para inspección detallada y <a href="../ale/">ALE</a> para estimar efectos acumulados más robustos ante correlación.</p>
-<h2 id="limitacia3n-principal-contrafactuales-irreales">Limitación principal: contrafactuales irreales<a class="headerlink" href="#limitacia3n-principal-contrafactuales-irreales" title="Permanent link">&para;</a></h2>
+<h2 id="limitacion-principal-contrafactuales-irreales">Limitación principal: contrafactuales irreales<a class="headerlink" href="#limitacion-principal-contrafactuales-irreales" title="Permanent link">&para;</a></h2>
 <p>ICE puede evaluar combinaciones poco plausibles. Por ejemplo, cambiar <code>StrikePrice</code> manteniendo constante el resto puede llevar a moneyness muy alejadas de la distribución observada. El pipeline intenta mitigar esto usando grillas por cuantiles, pero no elimina el problema. Por eso una curva ICE debe interpretarse con soporte local:</p>
 <ul>
-<li>Â¿Existen vecinos históricos cerca del escenario?</li>
-<li>Â¿El valor de feature está dentro de rangos observados?</li>
-<li>Â¿El diagnóstico muestra error alto en esa zona?</li>
-<li>Â¿La superficie local es suave alrededor de ese punto?</li>
+<li>¿Existen vecinos históricos cerca del escenario?</li>
+<li>¿El valor de feature está dentro de rangos observadosí</li>
+<li>¿El diagnóstico muestra error alto en esa zona?</li>
+<li>¿La superficie local es suave alrededor de ese punto?</li>
 </ul>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Goldstein, A., Kapelner, A., Bleich, J. y Pitkin, E. (2015). <em>Peeking Inside the Black Box: Visualizing Statistical Learning with Plots of Individual Conditional Expectation</em>. Journal of Computational and Graphical Statistics.</li>
-<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capí­tulo de ICE y PDP.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capítulo de ICE y PDP.</li>
 </ul>
               
             </div>

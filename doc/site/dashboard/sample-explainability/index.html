@@ -144,18 +144,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Explicabilidad local</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Mapa de la pestaña</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#mode">Mode</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#feature-preview-y-manual-form">Feature Preview y Manual Form</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#sample-output">Sample Output</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#local-shap-waterfall">Local SHAP Waterfall</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#nearest-neighbours">Nearest Neighbours</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../sample/local-shap-waterfall/">SHAP local y waterfall</a>
                 </li>
@@ -230,19 +218,36 @@
 <p>La vista previa sirve para comprobar que la muestra explicada corresponde al contrato deseado. En modo manual, el formulario valida rangos y categorías mediante el esquema de features del dashboard.</p>
 <h2 id="sample-output">Sample Output<a class="headerlink" href="#sample-output" title="Permanent link">&para;</a></h2>
 <p>La salida resume:</p>
-<p>$$
+<p>[
 \hat{\sigma}=f(x)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}$ es la volatilidad implícita predicha.</li>
+<li>$f$ es el modelo entrenado.</li>
+<li>$X$ o las variables entre paréntesis son las entradas financieras del modelo.</li>
+</ul>
 <p>Si la observación pertenece al dataset y existe volatilidad real, también puede leerse el residual:</p>
-<p>$$
+<p>[
 e=\sigma-\hat{\sigma}
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.</li>
+</ul>
 <p>El residual evalúa acierto frente a mercado. El <a href="../sample/local-shap-waterfall/">waterfall SHAP</a> explica la predicción del modelo.</p>
 <h2 id="local-shap-waterfall">Local SHAP Waterfall<a class="headerlink" href="#local-shap-waterfall" title="Permanent link">&para;</a></h2>
 <p>El waterfall local usa <a href="../global/shap-fundamentals/">SHAP</a> para construir:</p>
-<p>$$
+<p>[
 \hat{\sigma}(x)=\phi_0+\phi_1(x)+\cdots+\phi_p(x)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}$ o $f(x)$ es la predicción del modelo.</li>
+<li>$\phi_0$ es el valor base del explicador.</li>
+<li>$\phi_j$ es la contribución SHAP de la feature $j$.</li>
+<li>$p$ es el número de features explicadas.</li>
+</ul>
 <p>La lectura completa está en <a href="../sample/local-shap-waterfall/">SHAP local y waterfall</a>.</p>
 <h2 id="nearest-neighbours">Nearest Neighbours<a class="headerlink" href="#nearest-neighbours" title="Permanent link">&para;</a></h2>
 <p>Los vecinos muestran observaciones históricas cercanas en el espacio transformado del modelo. La utilidad es evaluar soporte local y detectar extrapolación. El cálculo y sus cautelas se documentan en <a href="../sample/neighbours/">vecinos y soporte local</a>.</p>

@@ -1,4 +1,4 @@
-﻿# Splits temporales y k-folds
+# Splits temporales y k-folds
 
 El proyecto trata el tiempo como una restricción de diseño. En datos financieros no se debe entrenar con información posterior a la fecha que se evalúa. Por eso los splits no son aleatorios a nivel global: se ordenan por fecha de ejecución y se cortan temporalmente.
 
@@ -33,7 +33,7 @@ Después de cada corte temporal se comprueba si hay contratos de opción compart
 ```mermaid
 flowchart TD
     A[Split temporal inicial] --> B[Calcular contratos por split]
-    B --> C{Contrato aparece en dos splits?}
+    B --> C{Contrato aparece en dos splitsí}
     C -->|no| D[Conservar filas]
     C -->|si| E[Elegir split ganador]
     E --> F[Eliminar filas del otro split]

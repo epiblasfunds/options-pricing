@@ -124,20 +124,6 @@
                 <li class="toctree-l2"><a class="reference internal" href="../shap-visualizations/">Visualizaciones SHAP</a>
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Árboles surrogate</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#implementacia3n-en-el-repositorio">Implementación en el repositorio</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#profundidad-e-interpretabilidad">Profundidad e interpretabilidad</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#matricas-de-fidelidad">Métricas de fidelidad</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#reglas-textuales">Reglas textuales</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#uso-en-el-tribunal">Uso en el tribunal</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#referencias">Referencias</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../symbolic-regression/">Regresión simbólica</a>
                 </li>
@@ -202,11 +188,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="arboles-surrogate">írboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h1>
+                <h1 id="arboles-surrogate">Árboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h1>
 <p>Un árbol surrogate es un modelo interpretable entrenado para imitar al modelo principal. En el proyecto no se entrena contra la volatilidad real, sino contra las predicciones finales del estimador seleccionado:</p>
-<p>$$
+<p>[
 \hat{\sigma}<em surrogate="surrogate">{principal}(x) \longrightarrow \hat{\sigma}</em>(x)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal para la muestra $x$.</li>
+<li>$\hat{\sigma}_{surrogate}(x)$ es la predicción del árbol surrogate para la misma muestra.</li>
+<li>$x$ es el vector de features de explicabilidad usado para entrenar el surrogate.</li>
+</ul>
 <p>Por tanto, el árbol surrogate explica el comportamiento del modelo, no la verdad de mercado. Esta distinción es fundamental. Si el modelo principal tiene sesgos, el surrogate puede aproximar esos sesgos con reglas legibles. Su utilidad está en convertir una caja negra en una estructura de decisiones aproximada que se pueda revisar, no en demostrar que esas reglas sean leyes financieras.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Dataset de test] --&gt; B[Modelo principal]
@@ -214,7 +206,7 @@ $$</p>
     A --&gt; D[Features de explicabilidad]
     C --&gt; E[Train/test surrogate]
     D --&gt; E
-    E --&gt; F[írbol por profundidad]
+    E --&gt; F[árbol por profundidad]
     F --&gt; G[Reglas textuales]
     F --&gt; H[Importancias]
     F --&gt; I[Métricas de fidelidad]
@@ -225,7 +217,7 @@ $$</p>
     class B,E,F model;
     class G,H,I artifact;
 </code></pre>
-<h2 id="implementacia3n-en-el-repositorio">Implementación en el repositorio<a class="headerlink" href="#implementacia3n-en-el-repositorio" title="Permanent link">&para;</a></h2>
+<h2 id="implementacion-en-el-repositorio">Implementación en el repositorio<a class="headerlink" href="#implementacion-en-el-repositorio" title="Permanent link">&para;</a></h2>
 <p>La función <code>build_surrogate_tree_models</code> construye los surrogates. El flujo es:</p>
 <ol>
 <li>Se genera un <code>explainability_frame</code> con las features raw visibles.</li>
@@ -281,7 +273,7 @@ $$</p>
 <tr>
 <td style="text-align: right;">2</td>
 <td>Reglas muy claras; útil para resumen ejecutivo técnico.</td>
-<td>Puede perder curvatura y regí­menes locales.</td>
+<td>Puede perder curvatura y regímenes locales.</td>
 </tr>
 <tr>
 <td style="text-align: right;">4</td>
@@ -291,7 +283,7 @@ $$</p>
 <tr>
 <td style="text-align: right;">8</td>
 <td>Captura más detalle de la superficie.</td>
-<td>Empieza a ser difí­cil de auditar manualmente.</td>
+<td>Empieza a ser difícil de auditar manualmente.</td>
 </tr>
 <tr>
 <td style="text-align: right;">16</td>
@@ -301,9 +293,9 @@ $$</p>
 </tbody>
 </table>
 <p>En la documentación del resultado conviene justificar qué profundidad se usa para discusión. Si la profundidad 2 tiene RMSE de fidelidad bajo, las reglas globales son especialmente valiosas. Si solo profundidades altas consiguen fidelidad aceptable, el modelo principal probablemente utiliza interacciones complejas y no debe resumirse con pocas reglas.</p>
-<h2 id="matricas-de-fidelidad">Métricas de fidelidad<a class="headerlink" href="#matricas-de-fidelidad" title="Permanent link">&para;</a></h2>
+<h2 id="metricas-de-fidelidad">Métricas de fidelidad<a class="headerlink" href="#metricas-de-fidelidad" title="Permanent link">&para;</a></h2>
 <p>La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:</p>
-<p>$$
+<p>[
 RMSE_{fid} =
 \sqrt{
 \frac{1}{n}\sum_{i=1}^{n}
@@ -313,13 +305,25 @@ RMSE_{fid} =
 \hat{\sigma}</em>(x_i)
 \right)^2
 }
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$RMSE$ es el error cuadrático medio de fidelidad.</li>
+<li>$n$ es el número de observaciones de evaluación.</li>
+<li>$\hat{\sigma}_{principal}(x_i)$ es la predicción del modelo principal.</li>
+<li>$\hat{\sigma}_{surrogate}(x_i)$ o $g(x_i)$ es la predicción del modelo explicable.</li>
+</ul>
 <p>También se guardan MAE y $R^2$ cuando están configurados. Estas métricas no son métricas de mercado. Un surrogate puede tener excelente fidelidad a un modelo malo, y un surrogate con peor fidelidad puede seguir ser útil como resumen parcial. Por eso se debe presentar junto con las métricas de diagnóstico del modelo principal.</p>
 <h2 id="reglas-textuales">Reglas textuales<a class="headerlink" href="#reglas-textuales" title="Permanent link">&para;</a></h2>
 <p>El árbol se exporta con <code>export_text</code>, usando los nombres de features de explicabilidad. Una regla tiene forma:</p>
-<p>$$
+<p>[
 si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$x_j$ es el valor de la feature usada en el nodo del árbol.</li>
+<li>$c$ es el umbral aprendido por el árbol.</li>
+</ul>
 <p>En el caso de variables categóricas codificadas, las reglas deben interpretarse con cautela. <code>OptionType</code> se codifica numéricamente según niveles observados por el encoder; no debe leerse como una magnitud continua real. Para explicar opción call/put con precisión, conviene comprobar el mapeo de niveles en el bundle o contrastar la regla con observaciones filtradas.</p>
 <h2 id="uso-en-el-tribunal">Uso en el tribunal<a class="headerlink" href="#uso-en-el-tribunal" title="Permanent link">&para;</a></h2>
 <p>Los árboles surrogate son útiles para contestar preguntas como:</p>
@@ -333,7 +337,7 @@ $$</p>
 <h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Craven, M. y Shavlik, J. W. (1996). <em>Extracting Tree-Structured Representations of Trained Networks</em>. NeurIPS.</li>
-<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capí­tulo de global surrogate models.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capítulo de global surrogate models.</li>
 <li>Breiman, L., Friedman, J. H., Olshen, R. A. y Stone, C. J. (1984). <em>Classification and Regression Trees</em>.</li>
 </ul>
               

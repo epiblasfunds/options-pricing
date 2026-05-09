@@ -1,4 +1,4 @@
-﻿# De modelo entrenado a bundle visualizable
+# De modelo entrenado a bundle visualizable
 
 El paquete de conversión toma modelos guardados tras el reentrenamiento final y genera un bundle autocontenido. Ese bundle es lo que consume el [dashboard](index.md). La conversión no cambia el modelo principal; calcula artefactos auxiliares que permiten explicarlo sin repetir procesos costosos en cada interacción.
 
@@ -38,13 +38,26 @@ La conversión descubre familias entrenadas en la carpeta de modelos finales. Pa
 
 El dataset de dashboard se construye sobre el split de test. Contiene columnas raw, features transformadas, predicción, residual y error absoluto:
 
-$$
+\[
 Residual_i = y_i-\hat{y}_i
-$$
+\]
 
-$$
+donde:
+
+- $Residual_i$ es el residuo de la observación $i$.
+- $y_i$ es la volatilidad real observada.
+- $\hat{y}_i$ es la volatilidad predicha.
+
+\[
 AbsoluteError_i = |Residual_i|
-$$
+\]
+
+donde:
+
+- $AE_i$ o $AbsoluteError_i$ es el error absoluto de la observación $i$.
+- $y_i$ es el valor real observado.
+- $\hat{y}_i$ es la predicción del modelo.
+- $Residual_i$ es el residuo de la observación $i$.
 
 El split de train se conserva como referencia para vecinos. Esta separación es deliberada:
 
@@ -61,9 +74,16 @@ Se calculan explicaciones [SHAP](global/shap-fundamentals.md) mediante un explai
 
 La explicación aproxima la descomposición:
 
-$$
+\[
 \hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
+- $\phi_0$ es el valor base del explicador.
+- $\phi_j$ es la contribución SHAP de la feature $j$.
+- $p$ es el número de features explicadas.
 
 donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.
 
@@ -71,9 +91,13 @@ donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.
 
 Para varias profundidades configuradas se entrena un [árbol surrogate](global/surrogate-trees.md) que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:
 
-$$
+\[
 \hat{\sigma}_{modelo} \quad \text{vs} \quad \hat{\sigma}_{árbol}
-$$
+\]
+
+donde:
+
+- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
 
 Se guardan métricas, importancias, reglas textuales, número de hojas y profundidad efectiva.
 

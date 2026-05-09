@@ -28,9 +28,15 @@ flowchart TD
 
 La sección de superficies toma una observación real como ancla y genera una grilla contrafactual de moneyness y vencimiento. El strike se reconstruye como:
 
-$$
+\[
 K = \frac{F}{m}
-$$
+\]
+
+donde:
+
+- $K$ es el strike reconstruido.
+- $F$ es el precio del futuro subyacente fijado por el ancla.
+- $m$ es la moneyness objetivo de la grilla.
 
 La metodología completa se desarrolla en [superficies de volatilidad](behaviour/volatility-surfaces.md). Las vistas disponibles son:
 

@@ -81,18 +81,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Validación y selección</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Splits temporales y k-folds</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#split-trainvalidationtest">Split train/validation/test</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#exclusividad-de-contratos">Exclusividad de contratos</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#k-folds-temporales">K-folds temporales</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#lookahead-bias">Lookahead bias</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#data-snooping">Data snooping</a>
-    </li>
-    </ul>
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../training/">Entrenamiento y selección</a>
                 </li>
@@ -226,7 +214,7 @@
 <p>Después de cada corte temporal se comprueba si hay contratos de opción compartidos entre splits. Si un contrato aparece en ambos lados, se asigna a un único split. La prioridad preserva la jerarquía de evaluación: test no debe contaminar trainval, y validation no debe compartir contratos con train.</p>
 <pre><code class="language-mermaid">flowchart TD
     A[Split temporal inicial] --&gt; B[Calcular contratos por split]
-    B --&gt; C{Contrato aparece en dos splits?}
+    B --&gt; C{Contrato aparece en dos splitsí}
     C --&gt;|no| D[Conservar filas]
     C --&gt;|si| E[Elegir split ganador]
     E --&gt; F[Eliminar filas del otro split]

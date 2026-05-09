@@ -352,12 +352,28 @@
 </tbody>
 </table>
 <p>Las métricas compuestas penalizan no solo error, sino también inestabilidad y sobreajuste. Conceptualmente:</p>
-<p>$$
+<p>[
 CE_1 = RMSE_{val} + \alpha \cdot std(RMSE_{val}) + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$CE_1$ es la métrica compuesta de selección.</li>
+<li>$RMSE_{val}$ es el RMSE medio de validación.</li>
+<li>$RMSE_{train}$ es el RMSE medio de entrenamiento.</li>
+<li>$std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.</li>
+<li>$\alpha$ y $\beta$ son penalizaciones configuradas.</li>
+</ul>
+<p>[
 CE_2 = RMSE_{val} + \gamma \cdot CE_1 + \beta \cdot \max(0, RMSE_{val}-RMSE_{train})
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$CE_1$ es la métrica compuesta de selección.</li>
+<li>$RMSE_{val}$ es el RMSE medio de validación.</li>
+<li>$RMSE_{train}$ es el RMSE medio de entrenamiento.</li>
+<li>$std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.</li>
+<li>$\alpha$ y $\beta$ son penalizaciones configuradas.</li>
+</ul>
 <p>La primera se usa en búsqueda por k-folds; la segunda resume el reentrenamiento contra validación.</p>
 <h2 id="dashboard_models_configjson"><code>dashboard_models_config.json</code><a class="headerlink" href="#dashboard_models_configjson" title="Permanent link">&para;</a></h2>
 <p>Este fichero controla el coste y densidad de los artefactos explicables. No cambia el modelo entrenado; cambia el tamaño de las muestras, grillas y surrogates que se guardan para visualización.</p>

@@ -4,9 +4,16 @@ Las curvas ICE, del inglés *Individual Conditional Expectation*, muestran cómo
 
 Formalmente, para una feature $j$, una observación $x_i$ y un valor contrafactual $z$:
 
-$$
+\[
 ICE_i^{(j)}(z)=f(z, x_{i,-j})
-$$
+\]
+
+donde:
+
+- $ICE_i^{(j)}(z)$ es la respuesta individual de la observación $i$ para la feature $j$.
+- $z$ es el valor contrafactual asignado a la feature analizada.
+- $x_{i,-j}$ son las demás features de la observación $i$.
+- $f$ es el modelo de predicción de volatilidad.
 
 donde $x_{i,-j}$ representa todas las variables de la observación salvo la feature analizada. Cada línea ICE es una trayectoria individual de predicción.
 
@@ -62,9 +69,16 @@ Si las curvas ICE de `StrikePrice` divergen mucho, el modelo no está usando str
 
 Un Partial Dependence Plot promedia las curvas ICE:
 
-$$
+\[
 PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n}f(z,x_{i,-j})
-$$
+\]
+
+donde:
+
+- $PDP_j(z)$ es la dependencia parcial de la feature $j$.
+- $n$ es el número de observaciones promediadas.
+- $z$ es el valor contrafactual de la feature analizada.
+- $x_{i,-j}$ son las demás features de la observación $i$.
 
 El PDP puede ocultar heterogeneidad. Si algunas curvas suben y otras bajan, el promedio puede parecer plano aunque el modelo tenga efectos locales fuertes. Por ese motivo el dashboard prioriza ICE para inspección detallada y [ALE](ale.md) para estimar efectos acumulados más robustos ante correlación.
 
@@ -73,7 +87,7 @@ El PDP puede ocultar heterogeneidad. Si algunas curvas suben y otras bajan, el p
 ICE puede evaluar combinaciones poco plausibles. Por ejemplo, cambiar `StrikePrice` manteniendo constante el resto puede llevar a moneyness muy alejadas de la distribución observada. El pipeline intenta mitigar esto usando grillas por cuantiles, pero no elimina el problema. Por eso una curva ICE debe interpretarse con soporte local:
 
 - ¿Existen vecinos históricos cerca del escenario?
-- ¿El valor de feature está dentro de rangos observados?
+- ¿El valor de feature está dentro de rangos observadosí
 - ¿El diagnóstico muestra error alto en esa zona?
 - ¿La superficie local es suave alrededor de ese punto?
 

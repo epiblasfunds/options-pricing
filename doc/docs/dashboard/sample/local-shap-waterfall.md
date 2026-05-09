@@ -1,12 +1,19 @@
-﻿# SHAP local y waterfall
+# SHAP local y waterfall
 
 La explicación local responde a una pregunta distinta de la explicabilidad global: por qué una muestra concreta recibe una volatilidad predicha concreta. El dashboard usa [SHAP](../global/shap-fundamentals.md) local y una visualización waterfall para descomponer una predicción individual.
 
 La identidad de lectura es:
 
-$$
+\[
 \hat{\sigma}(x_i)=\phi_0+\sum_{j=1}^{p}\phi_j(x_i)
-$$
+\]
+
+donde:
+
+- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
+- $\phi_0$ es el valor base del explicador.
+- $\phi_j$ es la contribución SHAP de la feature $j$.
+- $p$ es el número de features explicadas.
 
 El waterfall ordena las contribuciones $\phi_j(x_i)$ y muestra cómo se avanza desde el valor base $\phi_0$ hasta la predicción final $\hat{\sigma}(x_i)$. Las contribuciones positivas empujan la volatilidad hacia arriba; las negativas la reducen.
 
@@ -63,19 +70,23 @@ La segunda frase confunde atribución predictiva con causalidad y omite que stri
 
 Cuando la muestra procede del dataset y tiene volatilidad real, puede compararse:
 
-$$
+\[
 e_i = \sigma_i - \hat{\sigma}(x_i)
-$$
+\]
 
-El waterfall explica $\hat{\sigma}(x_i)$, no el residual. Si el residual es grande, el waterfall sigue siendo una explicación fiel del modelo, pero el modelo ha fallado respecto al dato observado. En ese caso, la pregunta cambia: no solo "por qué predijo esto", sino "por qué esta explicación no fue suficiente para acertar". Ahí­ entran la pestaña de diagnóstico y la comparación con vecinos.
+donde:
+
+- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
+
+El waterfall explica $\hat{\sigma}(x_i)$, no el residual. Si el residual es grande, el waterfall sigue siendo una explicación fiel del modelo, pero el modelo ha fallado respecto al dato observado. En ese caso, la pregunta cambia: no solo "por qué predijo esto", sino "por qué esta explicación no fue suficiente para acertar". Ahí entran la pestaña de diagnóstico y la comparación con vecinos.
 
 ## Limitaciones
 
-La explicación local puede ser inestable si la muestra está fuera de distribución. Una entrada manual con strike o vencimiento lejos del rango histórico puede producir una predicción y una explicación, pero ambas deben etiquetarse como extrapolación. El waterfall no sabe por sí­ mismo si el punto es plausible; por eso el dashboard incluye [vecinos y soporte local](neighbours.md).
+La explicación local puede ser inestable si la muestra está fuera de distribución. Una entrada manual con strike o vencimiento lejos del rango histórico puede producir una predicción y una explicación, pero ambas deben etiquetarse como extrapolación. El waterfall no sabe por sí mismo si el punto es plausible; por eso el dashboard incluye [vecinos y soporte local](neighbours.md).
 
 ## Referencias
 
 - Lundberg, S. M. y Lee, S.-I. (2017). *A Unified Approach to Interpreting Model Predictions*. NeurIPS.
 - Shapley, L. S. (1953). *A Value for n-Person Games*. Contributions to the Theory of Games.
-- Molnar, C. (2022). *Interpretable Machine Learning*. Capí­tulo de Shapley values.
+- Molnar, C. (2022). *Interpretable Machine Learning*. Capítulo de Shapley values.
 

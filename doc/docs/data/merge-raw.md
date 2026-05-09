@@ -1,4 +1,4 @@
-﻿# Merge Raw Step
+# Merge Raw Step
 
 El segundo paso une operaciones con información contractual. La salida `TRADE_IBEX_DB` es la primera base donde cada trade tiene precio, cantidad, código de contrato, strike, vencimiento, tipo de contrato, fecha-hora de ejecución y tiempo hasta vencimiento.
 
@@ -63,9 +63,15 @@ Cuando falta el vencimiento, se reconstruye desde el código de contrato:
 
 La regla de tercer viernes es:
 
-$$
+\[
 d_{3F} = 1 + ((4 - weekday(\text{primer día del mes})) \bmod 7) + 14
-$$
+\]
+
+donde:
+
+- $d_{3F}$ es el día del mes correspondiente al tercer viernes.
+- $weekday$ devuelve el día de la semana del primer día del mes.
+- $\bmod$ es la operación módulo.
 
 Después se agrega la hora de expiración configurada, de forma que el vencimiento sea un datetime y no solo una fecha.
 
@@ -73,17 +79,29 @@ Después se agrega la hora de expiración configurada, de forma que el vencimien
 
 Para opciones con strike missing, el strike se extrae del código. La configuración declara el tramo de caracteres que codifica el strike. Para futuros, el strike no tiene significado económico y no se usa como strike de opción.
 
-$$
+\[
 K = \text{float}(c[\text{strike\_start}:\text{strike\_end}])
-$$
+\]
+
+donde:
+
+- $K$ es el strike extraído del código de contrato.
+- $c$ es el código de contrato.
+- `strike_start` y `strike_end` son posiciones configuradas del substring de strike.
 
 ## Tiempo hasta vencimiento
 
 Se construye una fecha-hora de ejecución combinando fecha de sesión y hora de ejecución. Si la fuente no trae microsegundos, se normaliza con microsegundos cero. El tiempo hasta vencimiento se calcula en días con decimales:
 
-$$
+\[
 T_{días}=\frac{\text{MaturityDatetime}-\text{ExecDatetime}}{24\cdot 3600}
-$$
+\]
+
+donde:
+
+- $T_{días}$ es el tiempo hasta vencimiento expresado en días.
+- `MaturityDatetime` es la fecha-hora de vencimiento.
+- `ExecDatetime` es la fecha-hora de ejecución de la operación.
 
 ## Salida
 

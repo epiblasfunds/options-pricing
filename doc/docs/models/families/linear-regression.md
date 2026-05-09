@@ -1,12 +1,16 @@
-﻿# Regresión lineal
+# Regresión lineal
 
-La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mí­nima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.
+La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mínima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.
 
 La forma del modelo es:
 
-$$
+\[
 \hat{\sigma}=\beta_0+\sum_{j=1}^{p}\beta_j x_j
-$$
+\]
+
+donde:
+
+- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
 
 donde $x_j$ son features como `TTEYears`, `sqrtTTEYears`, `logMoneyness`, `logMoneynessSq`, `logForwardMoneyness`, `rate`, `isCall` e `isPut`.
 
@@ -21,11 +25,19 @@ La familia `LinearRegressionFamily` no define espacio de búsqueda. Se entrena u
 | `n_jobs` | `None` | Ejecución estándar de scikit-learn. |
 | `positive` | `False` | No restringe coeficientes a ser positivos. |
 
-En modo progresivo, el modelo recibe `sample_weight` para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mí­nimos cuadrados ponderados:
+En modo progresivo, el modelo recibe `sample_weight` para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mínimos cuadrados ponderados:
 
-$$
+\[
 \min_{\beta}\sum_i w_i(y_i-\beta_0-x_i^\top\beta)^2
-$$
+\]
+
+donde:
+
+- El operador $\min$ representa el problema de optimización.
+- $\theta$ o $\beta$ son los parámetros del modelo.
+- $L$ es la función de pérdida.
+- $w_i$ es el peso de la observación cuando aplica.
+- $y_i$ es el valor real y $f(x_i)$ la predicción.
 
 ## Interpretabilidad
 

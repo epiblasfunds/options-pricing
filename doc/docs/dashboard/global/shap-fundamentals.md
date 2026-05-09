@@ -21,9 +21,9 @@ flowchart LR
 
 La explicación SHAP tiene forma aditiva:
 
-$$
+\[
 f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
-$$
+\]
 
 donde:
 
@@ -38,14 +38,14 @@ Una contribución positiva aumenta la volatilidad predicha respecto al valor bas
 
 SHAP se basa en los valores de Shapley de teoría de juegos cooperativos. En ese marco, las features son jugadores y la predicción es el pago a repartir. La atribución de una feature es su contribución marginal media al incorporarse a todos los posibles subconjuntos de features.
 
-$$
+\[
 \phi_j =
 \sum_{S \subseteq N \setminus \{j\}}
 \frac{|S|!(p-|S|-1)!}{p!}
 \left[
 v(S \cup \{j\})-v(S)
 \right]
-$$
+\]
 
 donde:
 
@@ -63,9 +63,9 @@ El repositorio usa `shap.Explainer(..., algorithm="permutation")`. Esta variante
 
 El presupuesto de evaluación por fila es:
 
-$$
+\[
 max\_evals = 2p+1
-$$
+\]
 
 donde:
 

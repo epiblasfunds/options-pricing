@@ -112,24 +112,6 @@
                   <li class="toctree-l1 current"><a class="reference internal current" >Generación de artefactos</a>
     <ul class="current">
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">De modelo entrenado a bundle visualizable</a>
-    <ul class="current">
-    <li class="toctree-l3"><a class="reference internal" href="#descubrimiento-y-carga-del-runtime">Descubrimiento y carga del runtime</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#dataset-de-dashboard">Dataset de dashboard</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#shap">SHAP</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#arboles-surrogate">Árboles surrogate</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#regresion-simbolica">Regresión simbólica</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#superficies-ice-y-ale">Superficies, ICE y ALE</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#vecinos">Vecinos</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#estructura-del-bundle">Estructura del bundle</a>
-    </li>
-    </ul>
                 </li>
     </ul>
                   </li>
@@ -239,12 +221,25 @@
 </ul>
 <h2 id="dataset-de-dashboard">Dataset de dashboard<a class="headerlink" href="#dataset-de-dashboard" title="Permanent link">&para;</a></h2>
 <p>El dataset de dashboard se construye sobre el split de test. Contiene columnas raw, features transformadas, predicción, residual y error absoluto:</p>
-<p>$$
+<p>[
 Residual_i = y_i-\hat{y}_i
-$$</p>
-<p>$$
+]</p>
+<p>donde:</p>
+<ul>
+<li>$Residual_i$ es el residuo de la observación $i$.</li>
+<li>$y_i$ es la volatilidad real observada.</li>
+<li>$\hat{y}_i$ es la volatilidad predicha.</li>
+</ul>
+<p>[
 AbsoluteError_i = |Residual_i|
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$AE_i$ o $AbsoluteError_i$ es el error absoluto de la observación $i$.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo.</li>
+<li>$Residual_i$ es el residuo de la observación $i$.</li>
+</ul>
 <p>El split de train se conserva como referencia para vecinos. Esta separación es deliberada:</p>
 <ul>
 <li>Diagnóstico y visualizaciones de rendimiento se hacen sobre test.</li>
@@ -258,15 +253,26 @@ $$</p>
 <li>Una muestra local para waterfalls.</li>
 </ul>
 <p>La explicación aproxima la descomposición:</p>
-<p>$$
+<p>[
 \hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}$ o $f(x)$ es la predicción del modelo.</li>
+<li>$\phi_0$ es el valor base del explicador.</li>
+<li>$\phi_j$ es la contribución SHAP de la feature $j$.</li>
+<li>$p$ es el número de features explicadas.</li>
+</ul>
 <p>donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.</p>
 <h2 id="arboles-surrogate">Árboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h2>
 <p>Para varias profundidades configuradas se entrena un <a href="../global/surrogate-trees/">árbol surrogate</a> que imita las predicciones del modelo principal sobre una muestra. Su objetivo no es sustituir al modelo, sino mostrar reglas aproximadas. La fidelidad se mide comparando:</p>
-<p>$$
+<p>[
 \hat{\sigma}<em árbol="árbol">{modelo} \quad \text{vs} \quad \hat{\sigma}</em>
-$$</p>
+]</p>
+<p>donde:</p>
+<ul>
+<li>Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.</li>
+</ul>
 <p>Se guardan métricas, importancias, reglas textuales, número de hojas y profundidad efectiva.</p>
 <h2 id="regresion-simbolica">Regresión simbólica<a class="headerlink" href="#regresion-simbolica" title="Permanent link">&para;</a></h2>
 <p>La <a href="../global/symbolic-regression/">regresión simbólica</a> busca una expresión cerrada que aproxime el modelo principal. En el proyecto se implementa con PySR, una búsqueda evolutiva de expresiones, no con reinforcement learning ni con un método de enjambre.</p>

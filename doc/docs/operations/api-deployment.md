@@ -1,4 +1,4 @@
-﻿# API, almacenamiento y despliegue
+# API, almacenamiento y despliegue
 
 Además del dashboard, el proyecto incluye una API FastAPI y configuración de despliegue. La API permite ejecutar predicciones y explicabilidad local de muestras manuales usando los mismos modelos y bundles que el dashboard.
 
