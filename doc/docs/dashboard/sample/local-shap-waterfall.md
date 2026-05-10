@@ -12,7 +12,7 @@ La identidad de lectura es:
 
 donde:
 
-- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
+- $\hat{\sigma}(x)$ es la predicción del modelo.
 - $\phi_0$ es el valor base del explicador.
 - $\phi_j$ es la contribución SHAP de la feature $j$.
 - $p$ es el número de features explicadas.
@@ -46,7 +46,7 @@ En ambos casos, la semántica es la misma: explicar la predicción del modelo pr
 
 ## Valor base
 
-El valor base no es una media universal del mercado. Es el valor esperado del modelo sobre el fondo usado por el explicador. En el pipeline, ese fondo se muestrea del dataset de dashboard. Por tanto, si se cambia el procedimiento de muestreo o el split, el baseline puede cambiar.
+El valor base no es una media universal del mercado. Es el valor esperado del modelo sobre el fondo usado por el explicador. Ese fondo se muestrea del dataset de test, obligando que para todas las gráficas SHAP ese fondo sea el mismo para que obtengamos siempre el mismo valor base. Por tanto, si se cambia el procedimiento de muestreo o el split, el baseline puede cambiar.
 
 Esta precisión es importante al defender resultados. Una contribución local debe explicarse como "desplazamiento respecto al baseline del modelo bajo este fondo", no como prima absoluta de mercado atribuida a una variable.
 
@@ -84,9 +84,6 @@ donde:
 
 El waterfall explica $\hat{\sigma}(x_i)$, no el residual. Si el residual es grande, el waterfall sigue siendo una explicación fiel del modelo, pero el modelo ha fallado respecto al dato observado. En ese caso, la pregunta cambia: no solo "por qué predijo esto", sino "por qué esta explicación no fue suficiente para acertar". Ahí entran la pestaña de diagnóstico y la comparación con vecinos.
 
-## Limitaciones
-
-La explicación local puede ser inestable si la muestra está fuera de distribución. Una entrada manual con strike o vencimiento lejos del rango histórico puede producir una predicción y una explicación, pero ambas deben etiquetarse como extrapolación. El waterfall no sabe por sí mismo si el punto es plausible; por eso el dashboard incluye [vecinos y soporte local](neighbours.md).
 
 ## Referencias
 

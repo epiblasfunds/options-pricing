@@ -83,7 +83,7 @@ Para opciones con strike missing, el strike se extrae del código. La configurac
 
 <div class="doc-math">
 \[
-K = \text{float}(c[\text{strike\_start}:\text{strike\_end}])
+K = \text{float}(c[\text{strike_start}:\text{strike_end}])
 \]
 </div>
 

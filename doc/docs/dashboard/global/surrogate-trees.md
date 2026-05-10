@@ -4,38 +4,41 @@ Un árbol surrogate es un modelo interpretable entrenado para imitar al modelo p
 
 <div class="doc-math">
 \[
-\hat{\sigma}_{principal}(x) \longrightarrow \hat{\sigma}_{surrogate}(x)
+\hat{\sigma}_{principal}(x) \longrightarrow \hat{\sigma}_{tree}(x)
 \]
 </div>
 
 donde:
 
 - $\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal para la muestra $x$.
-- $\hat{\sigma}_{surrogate}(x)$ es la predicción del árbol surrogate para la misma muestra.
-- $x$ es el vector de features de explicabilidad usado para entrenar el surrogate.
+- $\hat{\sigma}_{tree}(x)$ es la predicción del árbol surrogate para la misma muestra.
+- $x$ es el vector de features.
 
 Por tanto, el árbol surrogate explica el comportamiento del modelo, no la verdad de mercado. Esta distinción es fundamental. Si el modelo principal tiene sesgos, el surrogate puede aproximar esos sesgos con reglas legibles. Su utilidad está en convertir una caja negra en una estructura de decisiones aproximada que se pueda revisar, no en demostrar que esas reglas sean leyes financieras.
 
+
 ```mermaid
 flowchart TD
-    A[Dataset de test] --> B[Modelo principal]
-    B --> C[Predicciones del modelo]
-    A --> D[Features de explicabilidad]
-    C --> E[Train/test surrogate]
-    D --> E
-    E --> F[árbol por profundidad]
-    F --> G[Reglas textuales]
-    F --> H[Importancias]
-    F --> I[Métricas de fidelidad]
+    A[Train/Test Dataset] --> B[Train/Test Features+OriginalLabels]
+    A --> E[Train/Test Features]
+    B --> C[Modelo principal]
+    C --> D[Train/Test PredictedLabels]
+    D --> F[Train/test Features+PredictedLbales]
+    E --> F
+    F --> G[Modelo Surrogate Tree]
+    G --> H[Reglas textuales]
+    H --> I[Importancias]
+    I --> J[Métricas de fidelidad]
     classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
     classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
     classDef artifact fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
-    class A,C,D data;
-    class B,E,F model;
-    class G,H,I artifact;
+    class A,B,D,E,F data;
+    class C,G model;
+    class H,I,J artifact;
 ```
 
-## Implementación en el repositorio
+
+## Implementación
 
 La función `build_surrogate_tree_models` construye los surrogates. El flujo es:
 
@@ -54,7 +57,24 @@ Los parámetros actuales relevantes son:
 | `surrogate_sample_size` | 12000 | Limita el coste y estabiliza la muestra de imitación. |
 | `random_state` | 42 | Reproducibilidad del muestreo y split. |
 
-## Profundidad e interpretabilidad
+
+El árbol se exporta con `export_text`, usando los nombres de features de explicabilidad. Una regla tiene forma:
+
+<div class="doc-math">
+\[
+si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
+\]
+</div>
+
+donde:
+
+- $x_j$ es el valor de la feature usada en el nodo del árbol.
+- $c$ es el umbral aprendido por el árbol.
+
+En el caso de variables categóricas codificadas, las reglas deben interpretarse con cautela. `OptionType` se codifica numéricamente según niveles observados por el encoder; no debe leerse como una magnitud continua real. Para explicar opción call/put con precisión, conviene comprobar el mapeo de niveles en el bundle o contrastar la regla con observaciones filtradas.
+
+
+## Complejidad e interpretabilidad
 
 La profundidad máxima es el control principal de complejidad. Un árbol de profundidad 2 puede leerse como un pequeño conjunto de reglas globales. Un árbol de profundidad 16 puede acercarse mejor al modelo principal, pero puede ser demasiado grande para una lectura humana completa.
 
@@ -75,13 +95,13 @@ La fidelidad se evalúa comparando predicción del surrogate contra predicción 
 
 <div class="doc-math">
 \[
-RMSE_{fid} =
+RMSE_{tree} =
 \sqrt{
 \frac{1}{n}\sum_{i=1}^{n}
 \left(
 \hat{\sigma}_{principal}(x_i)
 -
-\hat{\sigma}_{surrogate}(x_i)
+\hat{\sigma}_{tree}(x_i)
 \right)^2
 }
 \]
@@ -92,28 +112,12 @@ donde:
 - $RMSE$ es el error cuadrático medio de fidelidad.
 - $n$ es el número de observaciones de evaluación.
 - $\hat{\sigma}_{principal}(x_i)$ es la predicción del modelo principal.
-- $\hat{\sigma}_{surrogate}(x_i)$ o $g(x_i)$ es la predicción del modelo explicable.
+- $\hat{\sigma}_{tree}(x_i)$ o $g(x_i)$ es la predicción del modelo explicable.
 
-También se guardan MAE y $R^2$ cuando están configurados. Estas métricas no son métricas de mercado. Un surrogate puede tener excelente fidelidad a un modelo malo, y un surrogate con peor fidelidad puede seguir ser útil como resumen parcial. Por eso se debe presentar junto con las métricas de diagnóstico del modelo principal.
+También se guardan $MAE$ y $R^2$ cuando están configurados. Estas métricas no son métricas de mercado. Un surrogate puede tener excelente fidelidad a un modelo malo, y un surrogate con peor fidelidad puede seguir ser útil como resumen parcial. Por eso se debe presentar junto con las métricas de diagnóstico del modelo principal.
 
-## Reglas textuales
 
-El árbol se exporta con `export_text`, usando los nombres de features de explicabilidad. Una regla tiene forma:
-
-<div class="doc-math">
-\[
-si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
-\]
-</div>
-
-donde:
-
-- $x_j$ es el valor de la feature usada en el nodo del árbol.
-- $c$ es el umbral aprendido por el árbol.
-
-En el caso de variables categóricas codificadas, las reglas deben interpretarse con cautela. `OptionType` se codifica numéricamente según niveles observados por el encoder; no debe leerse como una magnitud continua real. Para explicar opción call/put con precisión, conviene comprobar el mapeo de niveles en el bundle o contrastar la regla con observaciones filtradas.
-
-## Uso en el tribunal
+## Casos de uso
 
 Los árboles surrogate son útiles para contestar preguntas como:
 

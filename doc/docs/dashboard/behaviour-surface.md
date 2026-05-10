@@ -37,8 +37,8 @@ K = \frac{F}{m}
 donde:
 
 - $K$ es el strike reconstruido.
-- $F$ es el precio del futuro subyacente fijado por el ancla.
-- $m$ es la moneyness objetivo de la grilla.
+- $F$ es el precio del futuro subyacente fijado.
+- $m$ es la moneyness.
 
 La metodología completa se desarrolla en [superficies de volatilidad](behaviour/volatility-surfaces.md). Las vistas disponibles son:
 
@@ -48,7 +48,6 @@ La metodología completa se desarrolla en [superficies de volatilidad](behaviour
 | Superficie 3D | Inspección visual de pendiente y curvatura. |
 | Smile | Cortes a vencimiento fijo. |
 | Term structure | Cortes a moneyness fija. |
-| Surface checks | Avisos heurísticos de irregularidad. |
 
 ## Feature Response Analysis
 
@@ -60,8 +59,3 @@ La sección de respuesta permite estudiar una feature individual. Se muestran do
 | ALE | [Curvas ALE](behaviour/ale.md) | Qué efecto acumulado medio aparece dentro de regiones observadas. |
 
 Estas herramientas son complementarias. [ICE](behaviour/ice.md) revela heterogeneidad; [ALE](behaviour/ale.md) resume un efecto local agregado más robusto ante correlaciones.
-
-## Criterio de lectura
-
-Una superficie profesionalmente defendible no es necesariamente lisa en todos los puntos, pero sí debe tener un comportamiento explicable. Si una región muestra saltos, curvas ICE erráticas o ALE con cambios abruptos, conviene revisar soporte local con [vecinos](sample/neighbours.md) y error regional en [diagnóstico](diagnosis.md).
-

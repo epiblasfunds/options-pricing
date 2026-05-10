@@ -47,18 +47,18 @@ El filtrado inicial aplica dos condiciones:
 
 <div class="doc-math">
 \[
-\text{es\_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
+\text{es_IBEX}(c)=c \text{ empieza por alguno de los prefijos configurados}
 \]
 </div>
 
 donde:
 
 - $c$ es el código de contrato.
-- $\text{es\_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.
+- $\text{es_IBEX}(c)$ indica si el contrato pertenece al universo IBEX configurado.
 
 <div class="doc-math">
 \[
-\text{es\_mensual}(c)=\text{longitud}(c)\in\{\text{longitud opción},\text{longitud futuro}\}
+\text{es_mensual}(c)=\text{longitud}(c)\in\{\text{longitud opción},\text{longitud futuro}\}
 \]
 </div>
 

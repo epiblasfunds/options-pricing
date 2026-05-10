@@ -15,8 +15,8 @@ flowchart TD
     J[Rate r] --> I
     I --> K[logForwardMoneyness]
     E --> L[Feature frame final]
-    F --> L
     G --> L
+    F --> L
     H --> L
     K --> L
     J --> L

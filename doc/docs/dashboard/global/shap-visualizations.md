@@ -54,7 +54,7 @@ donde:
 
 Esta magnitud mide cuánto desplaza una feature la predicción en promedio, sin conservar el signo. Es adecuada para ranking, pero no para concluir dirección. Una feature con efectos positivos y negativos fuertes puede tener importancia alta aunque su efecto medio firmado sea cercano a cero.
 
-La diferencia con la importancia de árboles es relevante. La importancia de impureza de un [Random Forest](../../models/families/random-forest.md) depende de splits internos del propio estimador; la importancia [SHAP](shap-fundamentals.md) se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar [XGBoost](../../models/families/xgboost.md), [redes neuronales](../../models/families/neural-networks.md), [Quantum Inspired](../../models/families/quantum-inspired.md) y [regresión lineal](../../models/families/linear-regression.md) bajo la misma medida visual.
+La importancia [SHAP](shap-fundamentals.md) se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar [XGBoost](../../models/families/xgboost.md), [redes neuronales](../../models/families/neural-networks.md), [Quantum Inspired](../../models/families/quantum-inspired.md) y [regresión lineal](../../models/families/linear-regression.md) bajo la misma medida visual.
 
 ## Dependence plot
 
@@ -82,18 +82,21 @@ Para interpretar un dependence plot en este proyecto:
 
 ## Heatmap de contribuciones
 
-El heatmap organiza observaciones y features como una matriz. La utilidad principal es detectar perfiles explicativos. En una superficie de volatilidad, dos contratos pueden recibir volatilidad parecida por razones distintas: uno puede estar explicado por vencimiento corto y otro por moneyness extrema.
+Un SHAP heatmap muestra cómo contribuye cada variable a la predicción del modelo para un conjunto de observaciones.
 
-El heatmap permite ver:
+Cada columna representa una instancia concreta del dataset, mientras que cada fila representa una variable explicativa del modelo.
 
-| Uso | Qué buscar |
-| --- | --- |
-| Segmentación | Bloques de filas con contribuciones parecidas. |
-| Regímenes | Cambios de signo sistemáticos por feature. |
-| Observaciones singulares | Filas con una feature dominante. |
-| Redundancia | Features que actúan siempre de forma muy parecida. |
+El color indica el valor SHAP de una variable en una instancia:
+- Los valores positivos empujan la predicción hacia arriba.
+- Los valores negativos empujan la predicción hacia abajo.
+- Los valores cercanos a cero tienen poco impacto en esa predicción.
 
-Una lectura rigurosa combina el heatmap con el dataset. Si un bloque explicativo coincide con vencimientos cortos o con zonas de moneyness alejadas de ATM, la interpretación tiene una base financiera. Si el bloque coincide con un artefacto de codificación o con un rango de escasos datos, debe tratarse como advertencia.
+La línea superior, normalmente indicada como $f(x)$, representa la predicción del modelo para cada instancia.
+
+Para leer el gráfico, se observa una columna concreta y se analiza qué variables están aumentando o reduciendo la predicción de esa observación. También puede leerse por filas para ver cómo cambia la influencia de una variable a lo largo de distintas instancias. Las barras laterales, si aparecen, resumen la importancia global de cada variable, replicando la misma información que en el gráfico de [Importancia media absoluta](#importancia-media-absoluta).
+
+Este gráfico no muestra causalidad: indica cómo el modelo ha usado las variables para construir sus predicciones.
+
 
 ## Coherencia entre visualizaciones
 

@@ -6,9 +6,9 @@ El paquete de conversión toma modelos guardados tras el reentrenamiento final y
 flowchart TD
     A[trained_models] --> B[Cargar runtime del modelo]
     C[retrained_metadata] --> B
-    D[Train split raw] --> E[Predicciones train]
+    B --> E[Predicciones train]
+    D[Train split raw] --> E
     F[Test split raw] --> G[Predicciones test]
-    B --> E
     B --> G
     G --> H[Dataset dashboard]
     E --> I[Referencia de vecinos]
@@ -63,7 +63,7 @@ donde:
 - $\hat{y}_i$ es la predicción del modelo.
 - $Residual_i$ es el residuo de la observación $i$.
 
-El split de train se conserva como referencia para vecinos. Esta separación es deliberada:
+El split de train se conserva como referencia para vecinos:
 
 - Diagnóstico y visualizaciones de rendimiento se hacen sobre test.
 - Vecinos se buscan contra train, para dar contexto histórico sin usar el mismo conjunto evaluado como referencia principal.
@@ -80,18 +80,16 @@ La explicación aproxima la descomposición:
 
 <div class="doc-math">
 \[
-\hat{f}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
+f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
 \]
 </div>
 
 donde:
 
-- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
-- $\phi_0$ es el valor base del explicador.
-- $\phi_j$ es la contribución SHAP de la feature $j$.
-- $p$ es el número de features explicadas.
-
-donde $\phi_0$ es el valor base y $\phi_j$ la contribución de cada feature.
+- $f(x)$ es la predicción del modelo principal para la muestra $x$.
+- $\phi_0$ es el valor base definido por el fondo del explicador.
+- $\phi_j(x)$ es la contribución atribuida a la feature $j$ para la muestra $x$.
+- $p$ es el número total de features explicadas.
 
 ## Árboles surrogate
 
@@ -103,17 +101,11 @@ Para varias profundidades configuradas se entrena un [árbol surrogate](global/s
 \]
 </div>
 
-donde:
-
-- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
-
 Se guardan métricas, importancias, reglas textuales, número de hojas y profundidad efectiva.
 
 ## Regresión simbólica
 
-La [regresión simbólica](global/symbolic-regression.md) busca una expresión cerrada que aproxime el modelo principal. En el proyecto se implementa con PySR, una búsqueda evolutiva de expresiones, no con reinforcement learning ni con un método de enjambre.
-
-El bundle guarda:
+La [regresión simbólica](global/symbolic-regression.md) busca una expresión cerrada que aproxime el modelo principal. En el proyecto se implementa con PySR, una búsqueda evolutiva de expresiones. El bundle guarda:
 
 - Ecuación seleccionada.
 - Expresión en LaTeX.

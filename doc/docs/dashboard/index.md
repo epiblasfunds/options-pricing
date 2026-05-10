@@ -61,7 +61,7 @@ flowchart LR
     B --> I[DiagnosisService]
 ```
 
-## Pestanas
+## Pestañas
 
 | Pestaña | Pregunta principal |
 | --- | --- |

@@ -58,10 +58,6 @@ e=\sigma-\hat{\sigma}
 \]
 </div>
 
-donde:
-
-- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
-
 El residual evalúa acierto frente a mercado. El [waterfall SHAP](sample/local-shap-waterfall.md) explica la predicción del modelo.
 
 ## Local SHAP Waterfall

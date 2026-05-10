@@ -6,51 +6,43 @@ La forma objetivo es:
 
 <div class="doc-math">
 \[
-\hat{\sigma}_{principal}(x) \approx g(x_1,\ldots,x_p)
+\hat{\sigma}_{principal}(x) \approx \hat{\sigma}_{sym}(x)
 \]
 </div>
 
 donde:
 
 - $\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.
-- $g$ o $h$ es el modelo interpretable aproximador.
-- $x$ es el vector de entrada explicado.
+- $\hat{\sigma}_{sym}(x)$ es la predicción del symbolic regressor para la misma muestra.
+- $x$ es el vector de features.
 
-donde $g$ es una fórmula formada por variables, constantes y operadores permitidos. Su valor en la documentación es claro: proporciona una aproximación algebraica del comportamiento del modelo, con una complejidad explícita y métricas de fidelidad. Es especialmente útil cuando el tribunal quiere entender si una red o un boosting está aprendiendo una relación interpretable o si depende de interacciones demasiado complejas para resumirse.
+El modelo de regresión simbólica $\hat{\sigma}_{sym}$ es una fórmula formada por variables, constantes y operadores permitidos: proporciona una aproximación algebraica del comportamiento del modelo, con una complejidad explícita y métricas de fidelidad. Es especialmente útil cuando el tribunal quiere entender si una red o un boosting está aprendiendo una relación interpretable o si depende de interacciones demasiado complejas para resumirse.
+
 
 ```mermaid
 flowchart TD
-    A[Modelo principal] --> B[Predicciones final-test]
-    C[Features de explicabilidad] --> D[Muestra simbólica]
-    B --> D
-    D --> E[PySR: búsqueda evolutiva]
-    E --> F[Conjunto de ecuaciones candidatas]
-    F --> G[Selección best]
-    G --> H[Ecuación, LaTeX, complejidad, fidelidad]
+    A["Train/Test Dataset"] --> B["Train/Test Features + Original Labels"]
+    A --> E["Train/Test Features"]
+    B --> C["Modelo principal"]
+    C --> D["Train/Test Predicted Labels"]
+    D --> F["Train/Test Features + Predicted Labels"]
+    E --> F
+    F --> G["Modelo Symbolic Regressor (búsqueda evolutiva)"]
+    G --> H["Conjunto de ecuaciones candidatas"]
+    H --> I["Selección de la mejor"]
+
     classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
-    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
-    classDef artifact fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
-    class A,B,C,D data;
-    class E,F,G method;
-    class H artifact;
+    classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    classDef artifact fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+
+    class A,B,D,E,F data;
+    class C,G model;
+    class H,I artifact;
 ```
-
-## Qué problema resuelve
-
-La [regresión lineal](../../models/families/linear-regression.md) ofrece una fórmula, pero puede ser demasiado rígida. Un [Random Forest](../../models/families/random-forest.md), [XGBoost](../../models/families/xgboost.md), una [red neuronal](../../models/families/neural-networks.md) o [Quantum Inspired](../../models/families/quantum-inspired.md) pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.
-
-En el contexto de volatilidad implícita, una ecuación simbólica puede revelar estructuras como:
-
-- Dependencia con vencimiento.
-- Curvatura respecto a strike o subyacente.
-- Interacción entre precio relativo y tipo.
-- Correcciones no lineales que el modelo principal usa de forma recurrente.
-
-La ecuación no debe presentarse como fórmula de valoración de opciones. Es una aproximación del predictor entrenado. Esa diferencia evita confundir una explicación empírica con un modelo financiero cerrado.
 
 ## Método usado: PySR y búsqueda evolutiva
 
-El repositorio usa `PySRRegressor`, una interfaz Python para SymbolicRegression.jl. El método no es reinforcement learning ni un algoritmo de enjambre. Es una búsqueda evolutiva de expresiones: se mantienen poblaciones de fórmulas candidatas que se modifican mediante operaciones inspiradas en algoritmos genéticos, se evalúan por error y complejidad, y se seleccionan candidatas prometedoras.
+El repositorio usa `PySRRegressor`, una interfaz Python para SymbolicRegression.jl. La regresión simbóliica se basa en búsquedas evolutivas: se mantienen poblaciones de fórmulas candidatas que se modifican mediante operaciones inspiradas en algoritmos genéticos, se evalúan por error y complejidad, y se seleccionan candidatas prometedoras.
 
 Conceptualmente:
 
@@ -68,7 +60,7 @@ flowchart LR
 
 Las expresiones se comparan por su pérdida sobre datos de entrenamiento y por su complejidad estructural. PySR conserva una tabla de ecuaciones candidatas, no solo la mejor fórmula final. Esto es importante para auditoría: una ecuación ligeramente peor pero mucho más simple puede ser más defendible como explicación.
 
-## Configuración concreta
+## Implementación
 
 La función `build_symbolic_regressor_model` configura PySR con:
 
@@ -98,7 +90,7 @@ Los operadores permitidos son:
 
 La selección usa `model_selection="best"`, que elige una ecuación equilibrando pérdida y complejidad según el criterio interno de PySR. El bundle conserva también `candidate_equations`, con al menos `symbolic_min_candidate_equations` fórmulas normalizadas cuando están disponibles.
 
-## Complejidad
+## Complejidad e interpretabilidad
 
 La complejidad es una medida estructural de la expresión. Aumenta con variables, constantes y operadores. No equivale a número de parámetros en sentido estadístico clásico, pero funciona como proxy de legibilidad.
 
@@ -106,7 +98,7 @@ Una fórmula con complejidad baja puede ser:
 
 <div class="doc-math">
 \[
-g(x)=a+b\cdot TimeToExpiration
+    \hat{\sigma}_{sym}(x)=a+b\cdot TimeToExpiration
 \]
 </div>
 
@@ -121,12 +113,12 @@ Una fórmula de complejidad alta puede incluir múltiples productos, cocientes y
 
 - Complejidad.
 - Features usadas.
-- RMSE/MAE/$R^2$ de fidelidad.
+- $RMSE$/$MAE$/$R^2$ de fidelidad.
 - Tabla de candidatas alternativas.
 
-## Fidelidad y uso correcto
+## Métricas de fidelidad
 
-La fidelidad se calcula sobre el 20% reservado:
+La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:
 
 <div class="doc-math">
 \[
@@ -134,7 +126,7 @@ RMSE_{sym} =
 \sqrt{
 \frac{1}{n}\sum_i
 \left(
-\hat{\sigma}_{principal}(x_i)-g(x_i)
+\hat{\sigma}_{principal}(x_i)-\hat{\sigma}_{sym}(x_i)
 \right)^2
 }
 \]
@@ -149,7 +141,16 @@ donde:
 
 Un RMSE bajo indica que la ecuación reproduce bien al modelo principal en la muestra evaluada. No garantiza buen comportamiento fuera de distribución, ni validez financiera universal. La ecuación simbólica debe usarse como resumen interpretable, no como sustituto operativo salvo validación adicional.
 
-## Por qué es útil en este TFM
+## Casos de uso
+
+La [regresión lineal](../../models/families/linear-regression.md) ofrece una fórmula, pero puede ser demasiado rígida. Un [Random Forest](../../models/families/random-forest.md), [XGBoost](../../models/families/xgboost.md), una [red neuronal](../../models/families/neural-networks.md) o [Quantum Inspired](../../models/families/quantum-inspired.md) pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.
+
+En el contexto de volatilidad implícita, una ecuación simbólica puede revelar estructuras como:
+
+- Dependencia con vencimiento.
+- Curvatura respecto a strike o subyacente.
+- Interacción entre precio relativo y tipo.
+- Correcciones no lineales que el modelo principal usa de forma recurrente.
 
 La regresión simbólica aporta una pieza que otros métodos no dan:
 
@@ -159,7 +160,7 @@ La regresión simbólica aporta una pieza que otros métodos no dan:
 | [árbol surrogate](surrogate-trees.md) | Reglas por umbrales. | Puede ser discontinuo y grande. |
 | Regresión simbólica | Fórmula algebraica aproximada. | Puede perder fidelidad o extrapolar mal. |
 
-Para un tribunal, la ecuación simbólica permite discutir si el comportamiento aprendido puede reducirse a una relación matemática razonable. Si la fórmula seleccionada usa `StrikePrice`, `UnderlyingPrice` y `TimeToExpiration` de forma coherente con la geometría de la superficie, refuerza la interpretabilidad del pipeline. Si la fórmula necesita mucha complejidad, esa conclusión también es informativa: el modelo principal no se deja resumir fácilmente.
+La ecuación simbólica permite discutir si el comportamiento aprendido puede reducirse a una relación matemática razonable. Si la fórmula seleccionada usa `StrikePrice`, `UnderlyingPrice` y `TimeToExpiration` de forma coherente con la geometría de la superficie, refuerza la interpretabilidad del pipeline. Si la fórmula necesita mucha complejidad, esa conclusión también es informativa: el modelo principal no se deja resumir fácilmente.
 
 ## Referencias
 
