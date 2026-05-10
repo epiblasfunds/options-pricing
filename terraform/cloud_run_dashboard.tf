@@ -4,6 +4,11 @@ resource "google_cloud_run_service" "dashboard" {
   location = var.gcp_region
 
   template {
+    metadata {
+      annotations = {
+        "run.googleapis.com/startup-cpu-boost" = "true"
+      }
+    }
     spec {
       service_account_name = var.github_actions_service_account_email
 
@@ -27,8 +32,8 @@ resource "google_cloud_run_service" "dashboard" {
 
         resources {
           limits = {
-            memory = "1Gi"
-            cpu    = "1"
+            memory = "2Gi"
+            cpu    = "2"
           }
         }
 
