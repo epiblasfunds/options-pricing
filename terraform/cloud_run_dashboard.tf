@@ -4,6 +4,7 @@ resource "google_cloud_run_service" "dashboard" {
   location = var.gcp_region
 
   template {
+    startup_cpu_boost = true 
     spec {
       service_account_name = var.github_actions_service_account_email
 
@@ -28,7 +29,7 @@ resource "google_cloud_run_service" "dashboard" {
         resources {
           limits = {
             memory = "2Gi"
-            cpu    = "1"
+            cpu    = "2"
           }
         }
 
