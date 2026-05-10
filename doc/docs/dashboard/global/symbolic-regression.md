@@ -37,7 +37,7 @@ flowchart TD
 
 ## Qué problema resuelve
 
-La regresión lineal ofrece una fórmula, pero puede ser demasiado rígida. Un Random Forest, XGBoost o una red neuronal pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.
+La [regresión lineal](../../models/families/linear-regression.md) ofrece una fórmula, pero puede ser demasiado rígida. Un [Random Forest](../../models/families/random-forest.md), [XGBoost](../../models/families/xgboost.md), una [red neuronal](../../models/families/neural-networks.md) o [Quantum Inspired](../../models/families/quantum-inspired.md) pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.
 
 En el contexto de volatilidad implícita, una ecuación simbólica puede revelar estructuras como:
 

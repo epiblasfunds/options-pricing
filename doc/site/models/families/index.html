@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -189,7 +189,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="familias-de-modelos">Familias de modelos<a class="headerlink" href="#familias-de-modelos" title="Permanent link">&para;</a></h1>
-<p>Esta página compara las familias implementadas. El detalle de cada familia está separado en páginas propias: <a href="linear-regression/">regresión lineal</a>, <a href="random-forest/">Random Forest</a>, <a href="xgboost/">XGBoost</a>, <a href="neural-networks/">redes neuronales</a> y <a href="tensor-train/">red tensor-train</a>.</p>
+<p>Esta página compara las familias implementadas. El detalle de cada familia está separado en páginas propias: <a href="linear-regression/">regresión lineal</a>, <a href="random-forest/">Random Forest</a>, <a href="xgboost/">XGBoost</a>, <a href="neural-networks/">redes neuronales</a> y <a href="quantum-inspired/">Quantum Inspired</a>.</p>
 <p>Todas las familias comparten una abstracción común (<code>VolatilityModelFamilyABC</code>). Cada una declara parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas.</p>
 <pre><code class="language-mermaid">classDiagram
     class VolatilityModelFamilyABC {
@@ -225,7 +225,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Regresión lineal</td>
+<td><a href="linear-regression/">Regresión lineal</a></td>
 <td>Alta</td>
 <td>Baja-media</td>
 <td>Bajo</td>
@@ -233,7 +233,7 @@
 <td><a href="linear-regression/">Detalle</a></td>
 </tr>
 <tr>
-<td>Random Forest</td>
+<td><a href="random-forest/">Random Forest</a></td>
 <td>Media</td>
 <td>Media-alta</td>
 <td>Medio</td>
@@ -241,7 +241,7 @@
 <td><a href="random-forest/">Detalle</a></td>
 </tr>
 <tr>
-<td>XGBoost</td>
+<td><a href="xgboost/">XGBoost</a></td>
 <td>Media-baja</td>
 <td>Alta</td>
 <td>Medio-alto</td>
@@ -249,7 +249,7 @@
 <td><a href="xgboost/">Detalle</a></td>
 </tr>
 <tr>
-<td>Red secuencial</td>
+<td><a href="neural-networks/">Red neuronal secuencial</a></td>
 <td>Baja</td>
 <td>Alta</td>
 <td>Alto</td>
@@ -257,12 +257,44 @@
 <td><a href="neural-networks/">Detalle</a></td>
 </tr>
 <tr>
-<td>Red tensor-train</td>
+<td><a href="quantum-inspired/">Quantum Inspired</a></td>
 <td>Baja</td>
 <td>Alta</td>
 <td>Alto</td>
 <td>Sí</td>
-<td><a href="tensor-train/">Detalle</a></td>
+<td><a href="quantum-inspired/">Detalle</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="referencias-desde-codigo">Referencias desde código<a class="headerlink" href="#referencias-desde-codigo" title="Permanent link">&para;</a></h2>
+<p>Cuando el código menciona una familia concreta, la correspondencia documental es:</p>
+<table>
+<thead>
+<tr>
+<th>Identificador en código</th>
+<th>Página</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LinearRegressionFamily</code>, <code>linear_regression</code></td>
+<td><a href="linear-regression/">Regresión lineal</a></td>
+</tr>
+<tr>
+<td><code>RandomForestFamily</code>, <code>random_forest</code></td>
+<td><a href="random-forest/">Random Forest</a></td>
+</tr>
+<tr>
+<td><code>XGBoostFamily</code>, <code>xgboost</code></td>
+<td><a href="xgboost/">XGBoost</a></td>
+</tr>
+<tr>
+<td><code>SequentialNNFamily</code>, <code>sequential_nn</code></td>
+<td><a href="neural-networks/">Red neuronal secuencial</a></td>
+</tr>
+<tr>
+<td><code>QuantumInspiredNNFamily</code>, <code>quantum_inspired_nn</code></td>
+<td><a href="quantum-inspired/">Quantum Inspired</a></td>
 </tr>
 </tbody>
 </table>

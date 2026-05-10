@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2 current"><a class="reference internal current" href="#">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -189,7 +189,9 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="redes-neuronales-secuenciales">Redes neuronales secuenciales<a class="headerlink" href="#redes-neuronales-secuenciales" title="Permanent link">&para;</a></h1>
-<p>La familia <code>SequentialNNFamily</code> usa una red feed-forward con capas densas. Su objetivo es capturar relaciones no lineales suaves entre las features financieras.</p>
+<h2 id="objetivo-dentro-del-proyecto">Objetivo dentro del proyecto<a class="headerlink" href="#objetivo-dentro-del-proyecto" title="Permanent link">&para;</a></h2>
+<p>La familia <code>SequentialNNFamily</code> usa una red feed-forward con capas densas. Su objetivo es capturar relaciones no lineales suaves entre las features financieras y servir de referencia neuronal directa frente a la arquitectura <a href="../quantum-inspired/">Quantum Inspired</a>.</p>
+<h2 id="estructura-del-modelo">Estructura del modelo<a class="headerlink" href="#estructura-del-modelo" title="Permanent link">&para;</a></h2>
 <p>La forma conceptual es:</p>
 <div class="doc-math">
 \[
@@ -206,7 +208,35 @@ h_l=\phi(W_lh_{l-1}+b_l), \quad
 <li>$\phi$ es la función de activación.</li>
 <li>$\hat{\sigma}$ es la salida de volatilidad predicha.</li>
 </ul>
-<h2 id="espacio-de-busqueda">Espacio de búsqueda<a class="headerlink" href="#espacio-de-busqueda" title="Permanent link">&para;</a></h2>
+<h2 id="configuracion-y-busqueda">Configuración y búsqueda<a class="headerlink" href="#configuracion-y-busqueda" title="Permanent link">&para;</a></h2>
+<p>Parámetros fijos principales:</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>patience</code></td>
+<td>12</td>
+<td>Paciencia de early stopping.</td>
+</tr>
+<tr>
+<td><code>epochs</code></td>
+<td>150</td>
+<td>Número máximo de épocas por fase.</td>
+</tr>
+<tr>
+<td><code>verbose</code></td>
+<td>0</td>
+<td>Entrenamiento silencioso.</td>
+</tr>
+</tbody>
+</table>
+<p>Espacio de búsqueda:</p>
 <table>
 <thead>
 <tr>
@@ -269,18 +299,17 @@ h_l=\phi(W_lh_{l-1}+b_l), \quad
 </tbody>
 </table>
 <p>Se exploran 120 configuraciones. Las features numéricas se escalan con <code>StandardScaler</code>; el scaler se guarda junto al modelo.</p>
-<h2 id="early-stopping">Early stopping<a class="headerlink" href="#early-stopping" title="Permanent link">&para;</a></h2>
+<h2 id="entrenamiento-y-progressive-training">Entrenamiento y progressive training<a class="headerlink" href="#entrenamiento-y-progressive-training" title="Permanent link">&para;</a></h2>
 <p>El entrenamiento usa <code>EarlyStopping</code> sobre <code>val_rmse</code>, con paciencia 12 y restauración de los mejores pesos. Si <code>use_lr_scheduler</code> está activo, <code>ReduceLROnPlateau</code> reduce el learning rate cuando el progreso se estanca.</p>
-<h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
-<p>En modo progresivo, la red entrena sucesivamente sobre datasets acumulados por cercanía a ATM. Esto no cambia la arquitectura, pero sí el orden de exposición a los datos.</p>
-<h2 id="interpretacion">Interpretación<a class="headerlink" href="#interpretacion" title="Permanent link">&para;</a></h2>
-<p>Las redes tienen baja interpretabilidad directa. Por eso el proyecto no se apoya en pesos de la red para explicar resultados. Se usan <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>, <a href="../../../dashboard/global/surrogate-trees/">Árboles surrogate</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a> y <a href="../../../dashboard/behaviour/ale/">ALE</a>.</p>
+<p>En modo progresivo, la red entrena sucesivamente sobre datasets acumulados por cercanía a ATM. Esto no cambia la arquitectura, pero sí el orden de exposición a los datos: primero se ajusta la zona central de la superficie y después se incorporan regiones más alejadas.</p>
+<h2 id="interpretabilidad-y-cautelas">Interpretabilidad y cautelas<a class="headerlink" href="#interpretabilidad-y-cautelas" title="Permanent link">&para;</a></h2>
+<p>Las redes tienen baja interpretabilidad directa. Por eso el proyecto no se apoya en pesos de la red para explicar resultados. Se usan <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>, <a href="../../../dashboard/global/surrogate-trees/">árboles surrogate</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a> y <a href="../../../dashboard/behaviour/ale/">ALE</a>.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../xgboost/" class="btn btn-neutral float-left" title="XGBoost"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../tensor-train/" class="btn btn-neutral float-right" title="Red tensor-train">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../quantum-inspired/" class="btn btn-neutral float-right" title="Quantum Inspired">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -306,7 +335,7 @@ h_l=\phi(W_lh_{l-1}+b_l), \quad
       <span><a href="../xgboost/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../tensor-train/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../quantum-inspired/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

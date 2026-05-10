@@ -81,7 +81,7 @@ Son clases de Python que modelan funcionalidad. Es el lugar donde viven las abst
 Componentes principales:
 
 - Familia abstracta de modelos de volatilidad.
-- Familias concretas: lineal, bosque aleatorio, XGBoost, red neuronal secuencial y red neuronal tensor-train.
+- Familias concretas: [regresión lineal](../models/families/linear-regression.md), [Random Forest](../models/families/random-forest.md), [XGBoost](../models/families/xgboost.md), [red neuronal secuencial](../models/families/neural-networks.md) y [Quantum Inspired](../models/families/quantum-inspired.md).
 - Modelo simbólico persistible.
 - Estructuras de dashboard: bundle, SHAP almacenado, árbol surrogate, diagnóstico, PCA de vecinos y stub de API manual.
 

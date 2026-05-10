@@ -1,5 +1,11 @@
 # XGBoost
 
+## Objetivo dentro del proyecto
+
+[XGBoost](xgboost.md) es la familia de boosting tabular. Su papel es probar un modelo de alta capacidad predictiva, regularizado y con early stopping, frente a [Random Forest](random-forest.md), [regresión lineal](linear-regression.md) y las familias neuronales.
+
+## Estructura del modelo
+
 XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:
 
 <div class="doc-math">
@@ -14,9 +20,11 @@ donde:
 - $\eta$ es el learning rate.
 - $T_m(x)$ es el árbol añadido en la iteración $m$.
 
-donde $\eta$ es el learning rate. En el repositorio se usa `XGBRegressor` con `booster="gbtree"`, `tree_method="hist"` y objetivo `reg:pseudohubererror`.
+En el repositorio se usa `XGBRegressor` con `booster="gbtree"`, `tree_method="hist"` y objetivo `reg:pseudohubererror`.
 
-## Configuración fija
+## Configuración y búsqueda
+
+Parámetros fijos principales:
 
 | Parámetro | Valor | Efecto |
 | --- | --- | --- |
@@ -26,7 +34,7 @@ donde $\eta$ es el learning rate. En el repositorio se usa `XGBRegressor` con `b
 | `base_score` | 0.20 | Inicialización cercana a la media esperada de volatilidad. |
 | `grow_policy` | `depthwise` | Crecimiento por niveles de profundidad. |
 
-## Espacio de búsqueda
+Espacio de búsqueda:
 
 | Hiperparámetro | Valores | Influencia |
 | --- | --- | --- |
@@ -45,11 +53,10 @@ donde $\eta$ es el learning rate. En el repositorio se usa `XGBRegressor` con `b
 
 La familia explora 200 configuraciones. El conjunto externo de validación del fold no se usa como early stopping; se reserva para medir el candidato.
 
-## Progressive training
+## Entrenamiento y progressive training
 
-En modo progresivo, XGBoost reparte `n_estimators` entre fases acumulativas ordenadas por cercanía a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así, el modelo aprende primero la zona central y después incorpora alas.
+En modo estándar, XGBoost ajusta árboles sucesivos y usa una partición interna para early stopping. En modo progresivo, reparte `n_estimators` entre fases acumulativas ordenadas por cercanía a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así, el modelo aprende primero la zona central y después incorpora alas.
 
-## Interpretación
+## Interpretabilidad y cautelas
 
-XGBoost suele ser competitivo en datos tabulares, pero su explicación directa no es trivial. En el proyecto se audita con [SHAP](../../dashboard/global/shap-fundamentals.md), [ICE](../../dashboard/behaviour/ice.md), [ALE](../../dashboard/behaviour/ale.md) y surrogates.
-
+XGBoost suele ser competitivo en datos tabulares, pero su explicación directa no es trivial. En el proyecto se audita con [SHAP](../../dashboard/global/shap-fundamentals.md), [árboles surrogate](../../dashboard/global/surrogate-trees.md), [regresión simbólica](../../dashboard/global/symbolic-regression.md), [ICE](../../dashboard/behaviour/ice.md) y [ALE](../../dashboard/behaviour/ale.md).

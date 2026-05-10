@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -251,7 +251,7 @@ I_j = \frac{1}{n}\sum_{i=1}^{n}|\phi_j(x_i)|
 <li>$x_i$ es la observación explicada.</li>
 </ul>
 <p>Esta magnitud mide cuánto desplaza una feature la predicción en promedio, sin conservar el signo. Es adecuada para ranking, pero no para concluir dirección. Una feature con efectos positivos y negativos fuertes puede tener importancia alta aunque su efecto medio firmado sea cercano a cero.</p>
-<p>La diferencia con la importancia de árboles es relevante. La importancia de impureza de un Random Forest depende de splits internos del propio estimador; la importancia <a href="../shap-fundamentals/">SHAP</a> se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar XGBoost, redes y lineal bajo la misma medida visual.</p>
+<p>La diferencia con la importancia de árboles es relevante. La importancia de impureza de un <a href="../../../models/families/random-forest/">Random Forest</a> depende de splits internos del propio estimador; la importancia <a href="../shap-fundamentals/">SHAP</a> se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar <a href="../../../models/families/xgboost/">XGBoost</a>, <a href="../../../models/families/neural-networks/">redes neuronales</a>, <a href="../../../models/families/quantum-inspired/">Quantum Inspired</a> y <a href="../../../models/families/linear-regression/">regresión lineal</a> bajo la misma medida visual.</p>
 <h2 id="dependence-plot">Dependence plot<a class="headerlink" href="#dependence-plot" title="Permanent link">&para;</a></h2>
 <p>El dependence plot dibuja el valor de una feature frente a su contribución <a href="../shap-fundamentals/">SHAP</a>:</p>
 <div class="doc-math">

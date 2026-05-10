@@ -28,19 +28,23 @@ El lag reduce contaminación por proximidad temporal. En opciones, sesiones cons
 
 ## Exclusividad de contratos
 
-Después de cada corte temporal se comprueba si hay contratos de opción compartidos entre splits. Si un contrato aparece en ambos lados, se asigna a un único split. La prioridad preserva la jerarquía de evaluación: test no debe contaminar trainval, y validation no debe compartir contratos con train.
+Después de cada corte temporal se comprueba si hay contratos de opción compartidos entre splits. Si un contrato aparece en ambos lados, se asigna a un único split según volumetría y prioridad:
+
+- La volumetría decide primero: para cada contrato se conserva el split donde aparece con más filas.
+- La prioridad del split actúa como desempate cuando el mismo contrato tiene igual número de filas en ambos lados.
+- Las filas del contrato se eliminan del split perdedor para que no haya contratos compartidos entre train, validation y test.
 
 ```mermaid
 flowchart TD
     A[Split temporal inicial] --> B[Calcular contratos por split]
-    B --> C{Contrato aparece en dos splitsí}
+    B --> C{Contrato aparece en dos splits?}
     C -->|no| D[Conservar filas]
-    C -->|si| E[Elegir split ganador]
+    C -->|si| E[Elegir split ganador por volumetría y prioridad]
     E --> F[Eliminar filas del otro split]
     F --> G[Split sin contratos compartidos]
 ```
 
-La razón es evitar que el modelo observe un contrato durante entrenamiento y luego sea evaluado sobre el mismo contrato en otra fecha. Aunque la fila sea posterior, el identificador contractual puede estar correlacionado con strike, vencimiento y régimen de volatilidad.
+La razón es evitar que el modelo observe un contrato durante entrenamiento y luego sea evaluado sobre el mismo contrato en otra fecha. Aunque la fila sea posterior, el identificador contractual puede estar correlacionado con strike, vencimiento y régimen de volatilidad. La regla por volumetría reduce la pérdida de datos del contrato; la prioridad aporta determinismo cuando la volumetría no basta para decidir.
 
 ## K-folds temporales
 

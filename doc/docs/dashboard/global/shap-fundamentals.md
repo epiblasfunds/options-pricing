@@ -63,7 +63,7 @@ Esta definición aporta eficiencia, simetría, tratamiento nulo de features irre
 
 ## Aproximación por permutación
 
-El repositorio usa `shap.Explainer(..., algorithm="permutation")`. Esta variante trata el modelo como caja negra, por lo que sirve para regresión lineal, Random Forest, XGBoost y redes neuronales con una interfaz común.
+El repositorio usa `shap.Explainer(..., algorithm="permutation")`. Esta variante trata el modelo como caja negra, por lo que sirve para [regresión lineal](../../models/families/linear-regression.md), [Random Forest](../../models/families/random-forest.md), [XGBoost](../../models/families/xgboost.md), [redes neuronales](../../models/families/neural-networks.md) y [Quantum Inspired](../../models/families/quantum-inspired.md) con una interfaz común.
 
 El presupuesto de evaluación por fila es:
 

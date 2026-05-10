@@ -35,7 +35,6 @@ donde:
 - $f$ es el modelo entrenado.
 - $X$ o las variables entre paréntesis son las entradas financieras del modelo.
 
-donde $X$ no son directamente todas las columnas raw, sino una representación financiera compacta basada en vencimiento, moneyness, tipo y tipo de opción.
 
 ## Datos usados para entrenamiento
 
@@ -58,11 +57,11 @@ El proyecto implementa cinco familias:
 
 | Familia | Papel en el estudio |
 | --- | --- |
-| Regresión lineal | Baseline interpretable y control de complejidad. |
-| Random Forest | Modelo no lineal robusto con interacciones por particiones. |
-| XGBoost | Boosting regularizado con early stopping y alto poder predictivo. |
-| Red neuronal secuencial | Aproximador flexible con capas densas. |
-| Red tensor-train | Variante neuronal que fuerza una estructura compacta de interacciones. |
+| [Regresión lineal](families/linear-regression.md) | Baseline interpretable y control de complejidad. |
+| [Random Forest](families/random-forest.md) | Modelo no lineal robusto con interacciones por particiones. |
+| [XGBoost](families/xgboost.md) | Boosting regularizado con early stopping y alto poder predictivo. |
+| [Red neuronal secuencial](families/neural-networks.md) | Aproximador flexible con capas densas. |
+| [Quantum Inspired](families/quantum-inspired.md) | Variante neuronal clásica que usa una estructura tensorial inspirada en computación cuántica para comprimir interacciones. |
 
 Todas comparten una interfaz de familia, lo que permite entrenarlas, seleccionar hiperparámetros, reentrenarlas y guardarlas siguiendo el mismo flujo.
 
@@ -80,7 +79,7 @@ Estos metadatos son tan importantes como el fichero del modelo, porque explican 
 El proyecto aplica dos defensas, desarrolladas con más detalle en [Splits temporales y k-folds](splits-kfolds.md):
 
 - Orden temporal: train siempre precede a validation, y validation precede a test. Además, se deja un lag de fechas entre train y test cuando la configuración lo permite.
-- Exclusividad de contratos: si un mismo contrato de opción aparece en dos splits, se asigna a un único split según prioridad y se eliminan filas del otro. Así se evita que el modelo vea en entrenamiento el mismo contrato que luego aparece en validación o test.
+- Exclusividad de contratos: si un mismo contrato de opción aparece en dos splits, se asigna a un único split según volumetría y prioridad. Primero se conserva el split donde ese contrato tiene más filas; si hay empate, decide la prioridad configurada del split. Así se evita que el modelo vea en entrenamiento el mismo contrato que luego aparece en validación o test.
 
 ```mermaid
 flowchart LR

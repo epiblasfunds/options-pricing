@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -189,6 +189,9 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="xgboost">XGBoost<a class="headerlink" href="#xgboost" title="Permanent link">&para;</a></h1>
+<h2 id="objetivo-dentro-del-proyecto">Objetivo dentro del proyecto<a class="headerlink" href="#objetivo-dentro-del-proyecto" title="Permanent link">&para;</a></h2>
+<p><a href="./">XGBoost</a> es la familia de boosting tabular. Su papel es probar un modelo de alta capacidad predictiva, regularizado y con early stopping, frente a <a href="../random-forest/">Random Forest</a>, <a href="../linear-regression/">regresión lineal</a> y las familias neuronales.</p>
+<h2 id="estructura-del-modelo">Estructura del modelo<a class="headerlink" href="#estructura-del-modelo" title="Permanent link">&para;</a></h2>
 <p>XGBoost construye un ensamble secuencial de árboles. Cada nuevo árbol corrige errores residuales del conjunto anterior. En forma simplificada:</p>
 <div class="doc-math">
 \[
@@ -202,8 +205,9 @@
 <li>$\eta$ es el learning rate.</li>
 <li>$T_m(x)$ es el árbol añadido en la iteración $m$.</li>
 </ul>
-<p>donde $\eta$ es el learning rate. En el repositorio se usa <code>XGBRegressor</code> con <code>booster="gbtree"</code>, <code>tree_method="hist"</code> y objetivo <code>reg:pseudohubererror</code>.</p>
-<h2 id="configuracion-fija">Configuración fija<a class="headerlink" href="#configuracion-fija" title="Permanent link">&para;</a></h2>
+<p>En el repositorio se usa <code>XGBRegressor</code> con <code>booster="gbtree"</code>, <code>tree_method="hist"</code> y objetivo <code>reg:pseudohubererror</code>.</p>
+<h2 id="configuracion-y-busqueda">Configuración y búsqueda<a class="headerlink" href="#configuracion-y-busqueda" title="Permanent link">&para;</a></h2>
+<p>Parámetros fijos principales:</p>
 <table>
 <thead>
 <tr>
@@ -240,7 +244,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="espacio-de-busqueda">Espacio de búsqueda<a class="headerlink" href="#espacio-de-busqueda" title="Permanent link">&para;</a></h2>
+<p>Espacio de búsqueda:</p>
 <table>
 <thead>
 <tr>
@@ -313,10 +317,10 @@
 </tbody>
 </table>
 <p>La familia explora 200 configuraciones. El conjunto externo de validación del fold no se usa como early stopping; se reserva para medir el candidato.</p>
-<h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
-<p>En modo progresivo, XGBoost reparte <code>n_estimators</code> entre fases acumulativas ordenadas por cercanía a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así, el modelo aprende primero la zona central y después incorpora alas.</p>
-<h2 id="interpretacion">Interpretación<a class="headerlink" href="#interpretacion" title="Permanent link">&para;</a></h2>
-<p>XGBoost suele ser competitivo en datos tabulares, pero su explicación directa no es trivial. En el proyecto se audita con <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a>, <a href="../../../dashboard/behaviour/ale/">ALE</a> y surrogates.</p>
+<h2 id="entrenamiento-y-progressive-training">Entrenamiento y progressive training<a class="headerlink" href="#entrenamiento-y-progressive-training" title="Permanent link">&para;</a></h2>
+<p>En modo estándar, XGBoost ajusta árboles sucesivos y usa una partición interna para early stopping. En modo progresivo, reparte <code>n_estimators</code> entre fases acumulativas ordenadas por cercanía a ATM. Cada fase entrena con más segmentos de moneyness y continúa desde el booster anterior. Así, el modelo aprende primero la zona central y después incorpora alas.</p>
+<h2 id="interpretabilidad-y-cautelas">Interpretabilidad y cautelas<a class="headerlink" href="#interpretabilidad-y-cautelas" title="Permanent link">&para;</a></h2>
+<p>XGBoost suele ser competitivo en datos tabulares, pero su explicación directa no es trivial. En el proyecto se audita con <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/surrogate-trees/">árboles surrogate</a>, <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a> y <a href="../../../dashboard/behaviour/ale/">ALE</a>.</p>
               
             </div>
           </div><footer>

@@ -1,6 +1,10 @@
 # Redes neuronales secuenciales
 
-La familia `SequentialNNFamily` usa una red feed-forward con capas densas. Su objetivo es capturar relaciones no lineales suaves entre las features financieras.
+## Objetivo dentro del proyecto
+
+La familia `SequentialNNFamily` usa una red feed-forward con capas densas. Su objetivo es capturar relaciones no lineales suaves entre las features financieras y servir de referencia neuronal directa frente a la arquitectura [Quantum Inspired](quantum-inspired.md).
+
+## Estructura del modelo
 
 La forma conceptual es:
 
@@ -19,7 +23,17 @@ donde:
 - $\phi$ es la función de activación.
 - $\hat{\sigma}$ es la salida de volatilidad predicha.
 
-## Espacio de búsqueda
+## Configuración y búsqueda
+
+Parámetros fijos principales:
+
+| Parámetro | Valor | Efecto |
+| --- | --- | --- |
+| `patience` | 12 | Paciencia de early stopping. |
+| `epochs` | 150 | Número máximo de épocas por fase. |
+| `verbose` | 0 | Entrenamiento silencioso. |
+
+Espacio de búsqueda:
 
 | Hiperparámetro | Valores | Influencia |
 | --- | --- | --- |
@@ -36,15 +50,12 @@ donde:
 
 Se exploran 120 configuraciones. Las features numéricas se escalan con `StandardScaler`; el scaler se guarda junto al modelo.
 
-## Early stopping
+## Entrenamiento y progressive training
 
 El entrenamiento usa `EarlyStopping` sobre `val_rmse`, con paciencia 12 y restauración de los mejores pesos. Si `use_lr_scheduler` está activo, `ReduceLROnPlateau` reduce el learning rate cuando el progreso se estanca.
 
-## Progressive training
+En modo progresivo, la red entrena sucesivamente sobre datasets acumulados por cercanía a ATM. Esto no cambia la arquitectura, pero sí el orden de exposición a los datos: primero se ajusta la zona central de la superficie y después se incorporan regiones más alejadas.
 
-En modo progresivo, la red entrena sucesivamente sobre datasets acumulados por cercanía a ATM. Esto no cambia la arquitectura, pero sí el orden de exposición a los datos.
+## Interpretabilidad y cautelas
 
-## Interpretación
-
-Las redes tienen baja interpretabilidad directa. Por eso el proyecto no se apoya en pesos de la red para explicar resultados. Se usan [SHAP](../../dashboard/global/shap-fundamentals.md), [regresión simbólica](../../dashboard/global/symbolic-regression.md), [Árboles surrogate](../../dashboard/global/surrogate-trees.md), [ICE](../../dashboard/behaviour/ice.md) y [ALE](../../dashboard/behaviour/ale.md).
-
+Las redes tienen baja interpretabilidad directa. Por eso el proyecto no se apoya en pesos de la red para explicar resultados. Se usan [SHAP](../../dashboard/global/shap-fundamentals.md), [regresión simbólica](../../dashboard/global/symbolic-regression.md), [árboles surrogate](../../dashboard/global/surrogate-trees.md), [ICE](../../dashboard/behaviour/ice.md) y [ALE](../../dashboard/behaviour/ale.md).

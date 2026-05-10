@@ -1,6 +1,6 @@
 # Familias de modelos
 
-Esta página compara las familias implementadas. El detalle de cada familia está separado en páginas propias: [regresión lineal](families/linear-regression.md), [Random Forest](families/random-forest.md), [XGBoost](families/xgboost.md), [redes neuronales](families/neural-networks.md) y [red tensor-train](families/tensor-train.md).
+Esta página compara las familias implementadas. El detalle de cada familia está separado en páginas propias: [regresión lineal](families/linear-regression.md), [Random Forest](families/random-forest.md), [XGBoost](families/xgboost.md), [redes neuronales](families/neural-networks.md) y [Quantum Inspired](families/quantum-inspired.md).
 
 Todas las familias comparten una abstracción común (`VolatilityModelFamilyABC`). Cada una declara parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas.
 
@@ -30,11 +30,23 @@ classDiagram
 
 | Familia | Interpretabilidad directa | Flexibilidad | Coste | Escalado | Página |
 | --- | --- | --- | --- | --- | --- |
-| Regresión lineal | Alta | Baja-media | Bajo | No imprescindible | [Detalle](families/linear-regression.md) |
-| Random Forest | Media | Media-alta | Medio | No | [Detalle](families/random-forest.md) |
-| XGBoost | Media-baja | Alta | Medio-alto | No | [Detalle](families/xgboost.md) |
-| Red secuencial | Baja | Alta | Alto | Sí | [Detalle](families/neural-networks.md) |
-| Red tensor-train | Baja | Alta | Alto | Sí | [Detalle](families/tensor-train.md) |
+| [Regresión lineal](families/linear-regression.md) | Alta | Baja-media | Bajo | No imprescindible | [Detalle](families/linear-regression.md) |
+| [Random Forest](families/random-forest.md) | Media | Media-alta | Medio | No | [Detalle](families/random-forest.md) |
+| [XGBoost](families/xgboost.md) | Media-baja | Alta | Medio-alto | No | [Detalle](families/xgboost.md) |
+| [Red neuronal secuencial](families/neural-networks.md) | Baja | Alta | Alto | Sí | [Detalle](families/neural-networks.md) |
+| [Quantum Inspired](families/quantum-inspired.md) | Baja | Alta | Alto | Sí | [Detalle](families/quantum-inspired.md) |
+
+## Referencias desde código
+
+Cuando el código menciona una familia concreta, la correspondencia documental es:
+
+| Identificador en código | Página |
+| --- | --- |
+| `LinearRegressionFamily`, `linear_regression` | [Regresión lineal](families/linear-regression.md) |
+| `RandomForestFamily`, `random_forest` | [Random Forest](families/random-forest.md) |
+| `XGBoostFamily`, `xgboost` | [XGBoost](families/xgboost.md) |
+| `SequentialNNFamily`, `sequential_nn` | [Red neuronal secuencial](families/neural-networks.md) |
+| `QuantumInspiredNNFamily`, `quantum_inspired_nn` | [Quantum Inspired](families/quantum-inspired.md) |
 
 ## Criterio de selección
 

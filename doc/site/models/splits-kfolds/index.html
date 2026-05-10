@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -211,16 +211,21 @@
 </ol>
 <p>El lag reduce contaminación por proximidad temporal. En opciones, sesiones consecutivas pueden contener contratos y estados de mercado muy parecidos; separar unos días hace más conservadora la evaluación.</p>
 <h2 id="exclusividad-de-contratos">Exclusividad de contratos<a class="headerlink" href="#exclusividad-de-contratos" title="Permanent link">&para;</a></h2>
-<p>Después de cada corte temporal se comprueba si hay contratos de opción compartidos entre splits. Si un contrato aparece en ambos lados, se asigna a un único split. La prioridad preserva la jerarquía de evaluación: test no debe contaminar trainval, y validation no debe compartir contratos con train.</p>
+<p>Después de cada corte temporal se comprueba si hay contratos de opción compartidos entre splits. Si un contrato aparece en ambos lados, se asigna a un único split según volumetría y prioridad:</p>
+<ul>
+<li>La volumetría decide primero: para cada contrato se conserva el split donde aparece con más filas.</li>
+<li>La prioridad del split actúa como desempate cuando el mismo contrato tiene igual número de filas en ambos lados.</li>
+<li>Las filas del contrato se eliminan del split perdedor para que no haya contratos compartidos entre train, validation y test.</li>
+</ul>
 <pre><code class="language-mermaid">flowchart TD
     A[Split temporal inicial] --&gt; B[Calcular contratos por split]
-    B --&gt; C{Contrato aparece en dos splitsí}
+    B --&gt; C{Contrato aparece en dos splits?}
     C --&gt;|no| D[Conservar filas]
-    C --&gt;|si| E[Elegir split ganador]
+    C --&gt;|si| E[Elegir split ganador por volumetría y prioridad]
     E --&gt; F[Eliminar filas del otro split]
     F --&gt; G[Split sin contratos compartidos]
 </code></pre>
-<p>La razón es evitar que el modelo observe un contrato durante entrenamiento y luego sea evaluado sobre el mismo contrato en otra fecha. Aunque la fila sea posterior, el identificador contractual puede estar correlacionado con strike, vencimiento y régimen de volatilidad.</p>
+<p>La razón es evitar que el modelo observe un contrato durante entrenamiento y luego sea evaluado sobre el mismo contrato en otra fecha. Aunque la fila sea posterior, el identificador contractual puede estar correlacionado con strike, vencimiento y régimen de volatilidad. La regla por volumetría reduce la pérdida de datos del contrato; la prioridad aporta determinismo cuando la volumetría no basta para decidir.</p>
 <h2 id="k-folds-temporales">K-folds temporales<a class="headerlink" href="#k-folds-temporales" title="Permanent link">&para;</a></h2>
 <p>Los k-folds se construyen dentro del conjunto de train. No se usan filas de validation final ni de test final durante la búsqueda de hiperparámetros. El enfoque es de ventanas temporales crecientes o recortadas desde el final: cada fold contiene un bloque efectivo, y dentro de ese bloque se vuelve a aplicar split temporal train/val.</p>
 <pre><code class="language-mermaid">flowchart TD
