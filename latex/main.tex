@@ -1,0 +1,109 @@
+% Plantilla LaTeX para memoria TFM.
+% Compilacion recomendada:
+%   pdflatex main.tex
+%   bibtex main
+%   pdflatex main.tex
+%   pdflatex main.tex
+
+\documentclass[oneside,openright,titlepage,numbers=noenddot,openany,headinclude,footinclude=true,
+cleardoublepage=empty,abstractoff,BCOR=5mm,paper=a4,fontsize=12pt,main=spanish]{scrreprt}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{listings}
+\usepackage{wallpaper}
+\usepackage{variables}
+
+\usepackage[beramono,eulerchapternumbers,linedheaders,parts,a5paper,dottedtoc,
+manychapters,pdfspacing]{classicthesis}
+
+\input{macros}
+\input{classicthesis-config}
+
+\definecolor{ugrColor}{HTML}{c6474b}
+\definecolor{ugrColor2}{HTML}{c6474b}
+\definecolor{lightgray}{HTML}{F4F4F4}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\setlength{\parindent}{0pt}
+\usepackage[skip=10pt plus1pt, indent=13pt]{parskip}
+\usepackage[top=1in, bottom=1.5in, left=1in, right=1in]{geometry}
+\linespread{1.12}
+\setlist[itemize]{itemsep=0.35em,topsep=0.35em}
+\setlist[enumerate]{itemsep=0.35em,topsep=0.35em}
+
+\lstset{
+  basicstyle=\small\ttfamily,
+  breaklines=true,
+  columns=fullflexible,
+  backgroundcolor=\color{lightgray},
+  frame=single
+}
+
+\usepackage{titling}
+\author{\AuthorName}
+\date{\Time}
+\title{\ProjectTitle}
+\input{titlepage}
+
+\begin{document}
+
+\ThisULCornerWallPaper{1}{ugrA4.pdf}
+\maketitle
+
+\newpage
+\input{prefaces/declaration_of_originality}
+\input{prefaces/licensing}
+\input{prefaces/resumen}
+\input{prefaces/abstract}
+
+\tableofcontents
+
+\chapter*{Introduccion}
+\addcontentsline{toc}{chapter}{\footnotesize INTRODUCCION}
+\input{prefaces/introduccion}
+
+\ctparttext{\color{black}\begin{center}
+Fundamentos teoricos, diseno experimental y resultados de la estimacion explicable de volatilidad implicita.
+\end{center}}
+\part{Memoria}
+
+\input{chapters/01_introduccion}
+\input{chapters/02_marco_teorico}
+\input{chapters/03_metodologia}
+\input{chapters/04_resultados_discusion}
+\input{chapters/05_conclusiones}
+
+\bibliographystyle{plainnat}
+\bibliography{research}
+
+\appendix
+\ctparttext{\color{black}\begin{center}
+Anexos tecnicos que recogen la trazabilidad completa de la documentacion disponible en \path{doc/docs/}.
+\end{center}}
+\part{Anexos}
+
+\input{appendices/A_repositorio}
+\input{appendices/B_datos}
+\input{appendices/C_modelos}
+\input{appendices/D_dashboard}
+\input{appendices/E_operacion}
+\input{appendices/F_trazabilidad_docs}
+
+\end{document}

@@ -1,0 +1,231 @@
+\chapter{Metodologia}
+\label{chap:metodologia}
+
+\section{Diseno del estudio}
+
+El estudio es empirico y experimental. Es empirico porque parte de operaciones reales de mercado y de series de tipos. Es experimental porque compara varias familias de modelos bajo una metodologia comun y analiza el resultado con un conjunto de artefactos explicables. La unidad observacional final es una operacion de opcion para la que se ha podido asociar un futuro subyacente anterior o simultaneo, calcular el tiempo hasta vencimiento, obtener un tipo compuesto y resolver la volatilidad implicita.
+
+La metodologia se organiza en cuatro bloques: construccion de datos, generacion de variables, entrenamiento de modelos y explicabilidad. Cada bloque produce artefactos persistidos. Esta decision facilita la replicabilidad: una etapa puede reejecutarse, validarse y depurarse sin recomputar todo el proyecto.
+
+\section{Fuentes de datos y alcance temporal}
+
+El repositorio trabaja con ficheros de mercado de 2017 a 2022, contratos, operaciones y series EONIA/euro short-term rate. La configuracion declara \path{first_year=2017} y \path{last_year=2022}. Las fuentes se transforman en bases intermedias:
+
+\begin{itemize}
+  \item \path{CCONTRACTS_C2}: informacion contractual, strike y vencimiento.
+  \item \path{TGENTRADES}: operaciones ejecutadas, precio, cantidad, hora y contrato.
+  \item \path{RATES_DATABASE}: tipos usados para calcular el tipo compuesto hasta vencimiento.
+\end{itemize}
+
+El dominio se restringe a opciones y futuros sobre IBEX con vencimientos mensuales. Las opciones semanales y contratos fuera del dominio se descartan para mantener coherencia entre producto modelado y subyacente asociado.
+
+\section{Pipeline ETL}
+
+El ETL se implementa como una secuencia de StepLoaders y builders. Los StepLoaders orquestan lectura, cache y validacion; los builders construyen las salidas materiales. La cadena documentada en \path{doc/docs/data/} contiene cinco pasos.
+
+\subsection{Read Raw Step}
+
+El primer paso normaliza cabeceras y tipos, filtra el universo IBEX y construye la base de tipos. La configuracion define columnas esperadas para contratos, operaciones y rates. La limpieza temprana evita que etapas posteriores mezclen problemas de lectura con problemas financieros.
+
+\subsection{Merge Raw Step}
+
+El segundo paso une operaciones y contratos por fecha de sesion y codigo de contrato. Tambien imputa vencimientos y strikes cuando pueden reconstruirse desde el codigo de contrato. La codificacion declara prefijos \path{CIBX}, \path{PIBX} y \path{FIBX}, longitudes esperadas, posiciones de mes y anio, y mapa de letras de futuros. El vencimiento se asume en el tercer viernes del mes con hora de expiracion configurada.
+
+\subsection{Product Split Step}
+
+El tercer paso separa opciones y futuros. Genera bases de operaciones de opciones, operaciones de futuros y relacion opcion-subyacente. Esta separacion es necesaria porque las opciones aportan el precio a invertir y los futuros aportan el subyacente usado por Black-76.
+
+\subsection{Underlying Step}
+
+El cuarto paso enlaza cada opcion con una ejecucion de futuro temporalmente valida mediante una union as-of. La regla fundamental es no usar informacion posterior a la operacion de la opcion. La salida incluye precio del subyacente, fecha-hora del subyacente y lag en minutos.
+
+\subsection{Volatility Step}
+
+El quinto paso filtra operaciones, calcula tipos compuestos hasta vencimiento y resuelve la volatilidad implicita. La configuracion fija un filtro de tipo de operacion \path{M}, lag maximo de subyacente de 180 minutos y parametros del solver. La salida final, \path{VOLATILITY_DB}, contiene 19 columnas y 312.615 observaciones validas.
+
+\section{Validaciones de calidad}
+
+Las validaciones transversales son:
+
+\begin{itemize}
+  \item Precios y cantidades positivos.
+  \item Claves sin duplicados ambiguos.
+  \item Ausencia de valores perdidos en salidas materializadas.
+  \item Vencimientos coherentes con codigos de contrato.
+  \item Strike coherente con el codigo de opcion.
+  \item Subyacente temporalmente anterior o simultaneo.
+  \item Volatilidad implicita resoluble dentro del rango configurado.
+\end{itemize}
+
+Estas validaciones persiguen replicabilidad y calidad financiera. Una volatilidad calculada sobre un subyacente posterior, un vencimiento mal interpretado o un precio no positivo tendria apariencia numerica, pero no significado economico valido.
+
+\section{Base final y estadisticas descriptivas}
+
+La base \path{VOLATILITY_DB} cubre operaciones entre el 2 de enero de 2017 y el 28 de junio de 2022. Contiene 151.424 calls y 161.191 puts. La volatilidad implicita media es 0,2061, con mediana 0,1738, primer cuartil 0,1419 y tercer cuartil 0,2265. El maximo observado, 8,8457, indica la presencia de casos extremos que justifican el uso de metricas robustas y diagnosticos por region.
+
+El lag del subyacente en la base final tiene mediana 0,080 minutos y media 7,991 minutos, con maximo inferior a 180 minutos por el filtro configurado. El tiempo hasta vencimiento medio es 23,44 dias, con mediana 21,20 dias. El tipo de interes medio es negativo, -0,5511 en las unidades de la base, coherente con el periodo europeo de tipos bajos y negativos.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Base & Filas & Columnas \\
+\midrule
+\path{TRADE_IBEX_DB} & 16.468.230 & 13 \\
+\path{OPTIONS_TRADES_DB} & 428.448 & 12 \\
+\path{FUTURES_TRADES_DB} & 16.039.780 & 12 \\
+\path{OPTION_TRADES_UNDERLYING_DB} & 428.448 & 16 \\
+\path{VOLATILITY_DB} & 312.615 & 19 \\
+\bottomrule
+\end{tabular}
+\caption{Tamanos de las principales bases materializadas.}
+\end{table}
+
+\section{Variables de modelado}
+
+La configuracion conserva de \path{VOLATILITY_DB} fecha-hora de ejecucion, codigo de contrato, tipo de opcion, strike, precio del subyacente, tiempo hasta vencimiento, tipo de interes y volatilidad implicita. Sin embargo, no todas estas columnas se usan como predictores. La fecha-hora y el codigo de contrato se conservan para trazabilidad y particiones, no como entradas finales del modelo.
+
+Las variables raw de entrada son tipo de opcion, strike, subyacente, tiempo hasta vencimiento y tipo. A partir de ellas se generan features financieras:
+
+\begin{itemize}
+  \item \path{TTEYears}: tiempo hasta vencimiento en anios.
+  \item \path{sqrtTTEYears}: raiz del tiempo, coherente con la escala de Black-76.
+  \item \path{logMoneyness}: $\ln(K/F)$.
+  \item \path{logMoneynessSq}: curvatura de la moneyness.
+  \item \path{logMoneynessXSqrtTTE}: interaccion entre moneyness y vencimiento.
+  \item \path{logForwardMoneyness}: moneyness ajustada forward.
+  \item \path{rate}: tipo de interes.
+\end{itemize}
+
+Estas variables evitan depender de identificadores y expresan relaciones financieras conocidas. Tambien facilitan la interpretacion posterior, porque SHAP, ICE y ALE pueden relacionarse con conceptos de superficie de volatilidad.
+
+\section{Particiones temporales}
+
+La configuracion usa \path{train_size=0.85} y un lag temporal de 15 dias. Los datos generados se distribuyen en:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrl}
+\toprule
+Split & Filas & Columnas & Periodo \\
+\midrule
+Train & 243.791 & 12 & 2017-01-02 a 2020-11-09 \\
+Validation & 26.093 & 12 & 2020-12-01 a 2021-08-10 \\
+Trainval & 273.223 & 12 & 2017-01-02 a 2021-08-10 \\
+Test & 36.973 & 12 & 2021-09-01 a 2022-06-28 \\
+\bottomrule
+\end{tabular}
+\caption{Particiones temporales de entrenamiento y evaluacion.}
+\end{table}
+
+La busqueda de hiperparametros se realiza dentro de train mediante cinco k-folds temporales y dos bloques extra. El test final se reserva para evaluacion y visualizacion; no interviene en la seleccion de hiperparametros.
+
+\section{Entrenamiento y seleccion}
+
+Todas las familias comparten una abstraccion comun. Cada familia declara nombre, parametros fijos, espacio de busqueda, instanciacion, entrenamiento y persistencia. Esta interfaz reduce diferencias accidentales entre modelos y permite que la comparacion se centre en capacidad predictiva y estabilidad.
+
+La seleccion no usa solamente RMSE medio. El repositorio define metricas compuestas que penalizan desviacion entre folds y sobreajuste. Una de ellas tiene la forma:
+
+\[
+CE_1=RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0,RMSE_{val}-RMSE_{train}).
+\]
+
+Esta expresion favorece modelos con buen error medio, baja variabilidad entre folds y brecha razonable entre entrenamiento y validacion. Para redes y XGBoost se emplea early stopping. Las familias neuronales ajustan un scaler solo con los datos permitidos en cada fase.
+
+\section{Reentrenamiento y progressive training}
+
+Una vez seleccionados los hiperparametros, el modelo se reentrena. Hay una fase train/validation y una fase final test. El progressive training ordena segmentos por cercania a at-the-money e incorpora progresivamente regiones mas alejadas. La intuicion es que la zona central suele ser mas estable y liquida, mientras que las alas requieren aprender comportamientos mas extremos.
+
+El progressive training se adapta a cada familia. Random Forest usa pesos mayores en segmentos mas cercanos a ATM. XGBoost reparte estimadores entre fases acumulativas. Las redes ajustan fases sucesivas conservando conocimiento previo. Esta variante no se asume superior en todos los casos; se evalua empiricamente.
+
+\section{Construccion del dashboard}
+
+El paquete \path{model2dashboard} transforma modelos entrenados en bundles visualizables. Carga el modelo final y sus metadatos, reconstruye features, genera predicciones sobre test, calcula residuos y error absoluto, y produce artefactos explicables:
+
+\begin{itemize}
+  \item SHAP global y local.
+  \item Arboles surrogate para varias profundidades.
+  \item Regresion simbolica con PySR.
+  \item Superficies de volatilidad sobre anclas representativas.
+  \item Curvas ICE y ALE.
+  \item Vecinos cercanos frente al split de entrenamiento.
+  \item Diagnosticos agregados y mapas de error.
+\end{itemize}
+
+El dashboard se organiza en pestanas: Global Explainability, Behaviour and Surface, Sample Explainability y Diagnosis. Cada pestana responde a una pregunta distinta y evita reducir la evaluacion del modelo a una sola metrica.
+
+\section{Operacion y despliegue}
+
+El repositorio incluye API con FastAPI, almacenamiento local o GCP, dockerfiles y terraform. La API permite prediccion y explicabilidad local. La configuracion de \path{clientserver.json} declara URL base, timeout, cache, rutas locales de modelos y rutas de almacenamiento cloud. Esta capa no es el foco cuantitativo del TFM, pero demuestra que el modelo puede integrarse como servicio y no solo como notebook experimental.
+
+\section{Protocolo reproducible de ejecucion}
+
+La reproducibilidad se apoya en una secuencia fija. Primero se cargan recursos de configuracion. Despues se ejecuta el ETL por pasos: lectura raw, merge, split por producto, asociacion de subyacente y volatilidad. A continuacion se generan datos de entrenamiento y particiones. Luego se ejecuta busqueda de hiperparametros por familia, reentrenamiento train/validation y reentrenamiento final test. Por ultimo, se construye el bundle del dashboard.
+
+Esta secuencia evita dependencias implicitas. Si cambia la configuracion del solver, debe regenerarse \path{VOLATILITY_DB}. Si cambian las features, deben regenerarse splits y modelos. Si cambia la configuracion de dashboard, basta con reconstruir bundles desde modelos ya entrenados, siempre que los artefactos requeridos sigan existiendo.
+
+\section{Manejo de contratos compartidos}
+
+Una particularidad de las opciones es que un mismo contrato puede aparecer durante muchas sesiones. Si se hiciera un split puramente por filas, el modelo podria ver en train operaciones del mismo contrato que aparece en test. Aunque las fechas fueran distintas, el codigo de contrato contiene informacion sobre vencimiento y strike, y podria inducir una forma de memorizacion.
+
+El proyecto resuelve esta situacion asignando contratos compartidos a una unica particion segun prioridad. La regla conserva la jerarquia de evaluacion: test debe permanecer limpio frente a trainval, y validation frente a train. Esta decision sacrifica algunas filas, pero mejora la credibilidad de la evaluacion fuera de muestra.
+
+\section{Tratamiento de outliers}
+
+La base final conserva volatilidades extremas cuando superan las validaciones del solver y de dominio. Esta decision evita limpiar en exceso el fenomeno que se quiere modelar. Sin embargo, la presencia de un maximo de volatilidad implicita de 8,8457 obliga a interpretar RMSE con cuidado y a complementar con MAE y diagnosticos por region.
+
+Los outliers pueden proceder de varias fuentes: opciones con precio muy pequeno, vencimientos cortos, baja liquidez, diferencias temporales entre opcion y futuro, o episodios de mercado tensionado. En lugar de eliminarlos de manera manual, el proyecto los deja visibles para que el dashboard muestre donde se concentran los errores. Esta estrategia es mas transparente que ocultar observaciones dificiles sin un criterio financiero documentado.
+
+\section{Feature engineering financiero}
+
+El feature engineering intenta equilibrar conocimiento financiero y aprendizaje automatico. Usar strike y subyacente por separado permite que modelos no lineales descubran relaciones, pero la log-moneyness introduce una escala mas natural. La raiz del tiempo hasta vencimiento se alinea con la forma de Black-76, donde la volatilidad aparece multiplicada por $\sqrt{T}$. La interaccion entre log-moneyness y raiz de vencimiento permite representar que smiles y term structures no son independientes.
+
+El tipo de opcion se mantiene porque calls y puts pueden tener distinta distribucion de precios y liquidez, aunque bajo paridad teorica compartan informacion. El tipo de interes se incluye porque afecta al descuento y a forward moneyness. La fecha y el contrato se conservan para control y trazabilidad, pero no como variables predictivas principales para evitar fuga y memorizacion.
+
+\section{Justificacion de familias}
+
+La regresion lineal responde a la pregunta: cuanto se puede explicar con una relacion sencilla. Random Forest responde a la pregunta: que rendimiento se logra con particiones robustas y poca necesidad de ajuste de escala. XGBoost responde a la pregunta: si un boosting regularizado mejora la frontera de error en datos tabulares. Las redes neuronales responden a la pregunta: si una funcion parametrica flexible aprovecha mejor las features continuas. La red tensor-train responde a la pregunta: si una estructura compacta de interacciones aporta ventaja frente a una red densa convencional.
+
+No todas las familias tienen el mismo coste operacional. Los modelos lineales son baratos y faciles de versionar. Random Forest puede ocupar mas memoria y ser mas lento en inferencia si tiene muchos arboles. XGBoost suele ser eficiente, pero sus hiperparametros influyen mucho. Las redes requieren dependencias pesadas y escalado. Estas diferencias tambien importan si el modelo se expone via API.
+
+\section{Metadatos como parte del resultado}
+
+Los metadatos no son un subproducto. En cada familia se guardan resultados de busqueda, parametros probados, mejor configuracion, metricas agregadas, resultados de reentrenamiento y metricas finales. En modelos con early stopping se guarda informacion de mejor iteracion o epoca. En dashboard se conserva configuracion de muestras, metricas de surrogates y parametros de explicabilidad.
+
+Esta decision facilita auditoria. Si un modelo produce una prediccion discutible, no basta con mirar el fichero serializado. Hay que saber con que datos se entreno, que particion uso, que parametros tuvo, que rendimiento alcanzo y que explicadores se generaron. La memoria adopta esa vision: el modelo es el conjunto de estimador, datos, configuracion y metadatos.
+
+\section{Construccion de artefactos explicables}
+
+La construccion del dashboard no se ejecuta de forma interactiva desde cero para cada grafico. Muchos artefactos se precomputan para que la interfaz sea fluida y reproducible. Se toman muestras de test para SHAP, anclas para superficies, muestras para ICE/ALE, conjuntos para vecinos y subconjuntos para regresion simbolica. La configuracion fija tamanos y semillas.
+
+Este enfoque tiene ventajas y compromisos. Precomputar reduce coste y estabiliza visualizaciones, pero las explicaciones se refieren a las muestras elegidas. Por eso el dashboard tambien permite entrada manual para predicciones locales, siempre con las cautelas de soporte historico. La combinacion de artefactos precomputados y calculos locales ofrece un equilibrio pragmatico.
+
+\section{Criterios de lectura de resultados}
+
+Los resultados se leen en tres niveles. El primer nivel es cuantitativo: MAE, RMSE y $R^2$ en test. El segundo es estructural: residuos por moneyness, vencimiento y superficie. El tercero es explicativo: drivers SHAP, respuesta ICE/ALE, reglas surrogate, formulas simbolicas y vecinos. Un modelo solo se considera adecuado si supera razonablemente los tres niveles.
+
+Esta jerarquia evita seleccionar un modelo solo por una metrica. Si dos modelos tienen RMSE parecido, puede preferirse el que tenga errores mas estables, explicaciones mas coherentes o mejor soporte local. Si un modelo es ligeramente mejor en RMSE pero produce superficies irregulares o surrogates de baja fidelidad, su uso operativo seria mas discutible.
+
+\section{Calidad de software}
+
+El repositorio separa codigo de configuracion, datos, modelos, dashboard y API. Esta separacion facilita pruebas y mantenimiento. Los enums de columnas reducen errores por cadenas literales. Los loaders encapsulan validaciones y los builders encapsulan transformaciones. Las configuraciones JSON hacen que muchas decisiones sean modificables sin editar codigo.
+
+La presencia de pruebas en \path{tests/} y configuracion de \path{pytest} sugiere una orientacion a calidad. En un TFM aplicado, esta parte es relevante porque los resultados dependen de software ejecutable. Una memoria basada en notebooks aislados puede ser dificil de reproducir; una memoria conectada a paquetes, tests, configuracion y artefactos persistidos tiene mayor trazabilidad.
+
+\section{Gestion de dependencias}
+
+El fichero \path{requirements.txt} incluye pandas, numpy, scikit-learn, shap, matplotlib, plotly, dash, pydantic, fastapi, uvicorn, google-cloud-storage, pysr, keras, xgboost, tensorflow y mkdocs, entre otros. Estas dependencias reflejan las capas del proyecto: datos, modelado, explicabilidad, visualizacion, API, cloud y documentacion.
+
+La gestion de dependencias tambien afecta a replicabilidad. Versiones distintas de XGBoost, TensorFlow o SHAP pueden cambiar resultados o formatos de serializacion. Por ello, una version final del TFM deberia conservar el entorno usado para producir los metadatos de resultados. La memoria documenta los resultados disponibles, pero la reproduccion exacta requiere respetar versiones y datos.
+
+\section{Ciclo de vida de una prediccion}
+
+El ciclo de vida de una prediccion empieza con una fila raw o una entrada manual: tipo de opcion, strike, subyacente, tiempo hasta vencimiento y tipo. El sistema transforma esas variables en features, aplica el modelo seleccionado y devuelve volatilidad predicha. Si la fila pertenece al dataset de test, puede calcular residual y error absoluto porque existe volatilidad implicita observada. Si es manual, solo hay prediccion y explicaciones condicionadas.
+
+Despues se anaden capas de interpretacion. SHAP local explica la contribucion de cada variable. Los vecinos informan soporte historico. Las superficies e ICE/ALE contextualizan como cambiaria la prediccion si se modificara una variable. El diagnostico global permite comparar esa prediccion con patrones generales de error. Este ciclo convierte una salida numerica en una decision informada.
+
+\section{Razonamiento sobre muestras del dashboard}
+
+El dashboard no puede calcular todos los artefactos exhaustivamente para millones de combinaciones. Por eso usa muestras: background SHAP, muestras explicadas, anclas de superficie, puntos de curvas y vecinos. La configuracion fija esos tamanos para equilibrar coste y representatividad. Por ejemplo, el tamano de background SHAP controla el coste de permutaciones; el tamano de vecinos controla memoria y tiempo de consulta; el grid de superficie controla resolucion visual.
+
+La eleccion de muestras introduce variabilidad. Para reducirla se usa semilla aleatoria. Aun asi, una conclusion basada en una visualizacion concreta debe leerse como diagnostico de la muestra usada, no como prueba universal. Esta cautela es parte de la metodologia y evita sobreinterpretar graficos.
