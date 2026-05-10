@@ -1,0 +1,8 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{\footnotesize ABSTRACT}
+
+This Master's thesis develops an end-to-end pipeline to estimate and explain the implied volatility of IBEX options from real market transactions. Implied volatility is not directly observed: it is obtained by inverting a pricing model, here Black-76, in order to find the volatility that makes the theoretical price consistent with the traded price. The resulting dataset is cleaned, validated and used to train several regression model families. A dashboard then turns the selected model into an inspectable system rather than a purely predictive black box.
+
+The methodology combines a reproducible ETL, data quality checks, financial feature engineering, chronological train-validation-test splits, temporal k-fold hyperparameter search and final out-of-sample evaluation. Linear regression, Random Forest, XGBoost, sequential neural networks and a tensor-train-inspired neural network are compared under a common modelling interface. The available results show that nonlinear models capture the volatility surface more effectively than the linear baseline. Among the reported final-test runs, Random Forest provides the best quantitative compromise, with a test RMSE close to 0.0884 and a test $R^2$ close to 0.791.
+
+The main contribution is not only predictive accuracy but explainability. The final model is converted into global and local interpretability artifacts: SHAP values, ICE and ALE curves, volatility surfaces, surrogate trees, symbolic regression, nearest neighbours and residual diagnostics. These artifacts make it possible to understand which variables support a prediction, where the model fails, and how faithful the interpretable approximations are to the main estimator.

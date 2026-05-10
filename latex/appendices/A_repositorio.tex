@@ -1,0 +1,19 @@
+\chapter{Anexo A: repositorio y configuracion}
+
+Este anexo resume la documentacion de \path{doc/docs/repository/}. El repositorio esta organizado para separar responsabilidades: configuracion, enums, gestion de datos, modelos, conversion a dashboard, interfaz de usuario, API, pruebas y recursos. La raiz contiene tambien notebooks exploratorios, datos, salidas, infraestructura y la documentacion MkDocs.
+
+\section{Estructura logica}
+
+El flujo logico de ejecucion es: datos fuente, ETL, base de volatilidad, generacion de features, entrenamiento, reentrenamiento, conversion a dashboard, ejecucion de UI/API y despliegue. Esta separacion evita que una pieza conozca demasiados detalles de otra. El ETL produce bases fiables; las familias de modelos entrenan estimadores; \path{model2dashboard} hace de puente hacia los artefactos explicables.
+
+\section{Configuracion centralizada}
+
+La configuracion vive en \path{resources/}. \path{data_config.json} define rango temporal, codificacion de contratos, columnas, prefijos, filtros, hora de vencimiento y parametros del solver de volatilidad. \path{volatility_models_config.json} define columnas de entrenamiento, features, splits, k-folds, metricas y progressive training. \path{dashboard_models_config.json} fija tamanos de muestras, SHAP, vecinos, superficies, ICE, ALE, surrogate trees y regresion simbolica. \path{clientserver.json} declara rutas de modelos, cache, almacenamiento local/GCP y configuracion de API/dashboard. \path{cloud_config.json} completa la parte cloud.
+
+\section{Paquetes de \texttt{src}}
+
+\path{src/config} carga y valida configuracion. \path{src/enums} centraliza nombres de columnas y contratos. \path{src/data_management} implementa loaders y builders del ETL. \path{src/volatility_models} contiene utilidades de entrenamiento y modelos persistidos. \path{src/python_models} define abstracciones serializables de modelos y artefactos. \path{src/model2dashboard} construye bundles explicables. \path{src/dashboard} implementa la aplicacion Dash. \path{src/api} expone prediccion y explicabilidad local.
+
+\section{Artefactos persistidos}
+
+El repositorio guarda bases intermedias en \path{data/}, modelos entrenados en \path{src/volatility_models/trained_models}, metadatos en \path{src/volatility_models/trained_metadata} y bundles de dashboard en \path{src/dashboard/saved_models}. Esta persistencia permite inspeccionar resultados sin repetir todo el pipeline.

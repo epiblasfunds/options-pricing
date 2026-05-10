@@ -1,0 +1,88 @@
+\chapter{Introduccion}
+\label{chap:introduccion}
+
+\section{Planteamiento del problema}
+
+El precio de una opcion resume informacion sobre expectativas, cobertura, liquidez, microestructura y aversion al riesgo. Para comparar contratos distintos no basta con mirar su precio monetario, porque una opcion con vencimiento corto, otra con vencimiento largo, una call fuera de dinero y una put muy dentro de dinero tienen escalas de precio diferentes. La volatilidad implicita proporciona una normalizacion: es la volatilidad que, introducida en un modelo de valoracion, reproduce el precio negociado en mercado.
+
+El problema de investigacion de este trabajo se formula asi: dado un contrato de opcion sobre el IBEX, su strike, su tipo call/put, el precio del futuro subyacente, el tiempo hasta vencimiento y el tipo de interes aplicable, se quiere estimar la volatilidad implicita y explicar los factores que sostienen esa estimacion. La funcion objetivo puede escribirse como:
+
+\[
+\hat{\sigma}=f(\text{tipo}, K, F, \tau, r),
+\]
+
+donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ el tiempo hasta vencimiento y $r$ el tipo libre de riesgo usado en la valoracion. La variable objetivo $\sigma$ procede de resolver:
+
+\[
+P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma).
+\]
+
+Esta formulacion revela dos niveles de dificultad. El primero es financiero y numerico: construir una base fiable de volatilidades implicitas requiere unir operaciones, contratos, futuros subyacentes y curvas de tipos, y despues resolver una ecuacion no lineal por cada operacion valida. El segundo es estadistico: una vez calculada la volatilidad implicita, hay que aprender una superficie que no es lineal, que presenta smiles, cambios por vencimiento y sensibilidad distinta en zonas at-the-money y en alas.
+
+\section{Justificacion academica y profesional}
+
+El interes academico del trabajo reside en unir tres areas que suelen tratarse por separado. La primera es la valoracion de derivados, con Black-76 como modelo de referencia para opciones sobre futuros \citep{black1976pricing}. La segunda es el aprendizaje automatico aplicado a datos tabulares financieros, donde los modelos de arboles, boosting y redes neuronales compiten con baselines lineales. La tercera es la explicabilidad, que permite examinar atribuciones globales y locales mediante tecnicas como SHAP \citep{lundberg2017shap}, ICE \citep{goldstein2015ice}, ALE \citep{apley2020ale}, arboles surrogate y regresion simbolica.
+
+El interes profesional es aun mas directo. En un entorno de mercado no basta con que un modelo produzca una cifra. Los equipos de riesgo, validacion, tecnologia y negocio necesitan responder preguntas operativas: que variables dominan la prediccion, que regiones de moneyness o vencimiento concentran error, si una prediccion concreta esta apoyada por observaciones historicas cercanas, y si una aproximacion interpretable reproduce con fidelidad el comportamiento del modelo principal. Por tanto, la explicabilidad se incorpora como parte del producto final y no como una fase posterior.
+
+\section{Antecedentes}
+
+La literatura clasica de valoracion de opciones parte de Black--Scholes y sus extensiones. Para opciones sobre futuros, Black-76 adapta la estructura de valoracion al precio forward o futuro \citep{black1976pricing}. La volatilidad implicita se usa posteriormente como representacion de mercado, porque permite pasar del precio observado a una magnitud comparable entre contratos. La idea de superficie de volatilidad aparece cuando se observa que la volatilidad implicita no es constante, sino que depende del strike y del vencimiento; este hecho motiva aproximaciones de smiles, skews y term structures, asi como modelos de volatilidad local o estocastica \citep{dupire1994pricing,hull2018options,bergomi2016stochastic}.
+
+En aprendizaje automatico, los modelos de arboles y ensembles han demostrado buen comportamiento en datos tabulares. Random Forest combina multiples arboles entrenados con aleatoriedad para reducir varianza \citep{breiman2001random}; XGBoost implementa gradient boosting regularizado y eficiente \citep{chen2016xgboost}. Las redes neuronales ofrecen capacidad de aproximacion flexible, y las estructuras tensoriales, como tensor-train, buscan representar interacciones de forma compacta \citep{oseledets2011tensor}. En este trabajo no se presupone a priori que la familia mas compleja sea la mejor: la comparacion se realiza mediante particiones temporales y metricas fuera de muestra.
+
+En explicabilidad, SHAP proporciona una semantica aditiva de atribucion basada en valores de Shapley \citep{shapley1953value,lundberg2017shap}; ICE y ALE estudian la respuesta de la prediccion ante cambios de variables; los arboles surrogate traducen el modelo a reglas aproximadas; y la regresion simbolica busca ecuaciones cerradas que resuman relaciones no lineales \citep{cranmer2020symbolic}. El proyecto combina estas tecnicas para cubrir interpretabilidad global, local y funcional.
+
+\section{Objetivos}
+
+El objetivo general es construir y documentar un sistema reproducible para estimar y explicar volatilidad implicita de opciones sobre el IBEX. Este objetivo se descompone en los siguientes objetivos especificos:
+
+\begin{enumerate}
+  \item Construir una base de volatilidad implicita a partir de datos de contratos, operaciones, futuros y tipos de interes.
+  \item Implementar validaciones de calidad que eviten precios no positivos, vencimientos incoherentes, claves ambiguas, valores perdidos y uso de informacion posterior a la operacion.
+  \item Definir variables financieras compactas que representen moneyness, vencimiento, tipo de interes y tipo de opcion sin introducir identificadores que faciliten memorizacion.
+  \item Comparar varias familias de modelos bajo una interfaz comun y con separacion temporal entre entrenamiento, validacion y test.
+  \item Seleccionar modelos mediante metricas de error y criterios de robustez, evitando lookahead bias y data snooping.
+  \item Transformar el modelo final en artefactos explicables que permitan auditar rendimiento, drivers globales, predicciones locales y comportamiento de superficie.
+  \item Documentar todos los componentes del repositorio, incluidos datos, modelos, dashboard, API, configuracion y despliegue.
+\end{enumerate}
+
+\section{Contribucion del TFM}
+
+La contribucion del trabajo es una arquitectura completa que conecta datos de mercado, calculo financiero, aprendizaje automatico y explicabilidad. La memoria no se limita a presentar un experimento aislado. Describe una cadena operativa en la que cada etapa materializa su salida, valida sus entradas y conserva metadatos suficientes para reproducir decisiones.
+
+El resultado final tiene tres capas. La primera es la capa de datos, que produce \path{VOLATILITY_DB} con 312.615 observaciones validas de opciones entre el 2 de enero de 2017 y el 28 de junio de 2022. La segunda es la capa de modelado, que compara familias lineales, ensembles y redes bajo el mismo protocolo. La tercera es la capa de explicabilidad, que genera un bundle de dashboard autocontenido con predicciones, residuos, SHAP, superficies, curvas de respuesta, vecinos y modelos equivalentes.
+
+La aportacion especifica esta en hacer que la explicabilidad sea verificable. Un arbol surrogate o una expresion simbolica no se presentan como verdad de mercado, sino como aproximaciones al modelo principal con metricas de fidelidad. Del mismo modo, una contribucion SHAP local se complementa con vecinos cercanos y diagnostico de soporte historico. Esta distincion es fundamental para no confundir interpretacion del modelo con causalidad financiera.
+
+\section{Estructura del documento}
+
+El capitulo \ref{chap:marco} desarrolla los fundamentos teoricos de volatilidad implicita, Black-76, aprendizaje automatico y explicabilidad. El capitulo \ref{chap:metodologia} describe la metodologia replicable: fuentes de datos, ETL, validaciones, features, particiones, familias de modelos y generacion del dashboard. El capitulo \ref{chap:resultados} presenta los resultados cuantitativos y discute su interpretacion financiera y tecnica. El capitulo \ref{chap:conclusiones} sintetiza los hallazgos, limitaciones y lineas futuras.
+
+Los anexos recogen la documentacion tecnica disponible en \path{doc/docs/}. Se han organizado por repositorio, datos, modelos, dashboard, operacion y una matriz de trazabilidad que menciona cada pagina Markdown fuente. De este modo, la memoria principal mantiene una narrativa academica y los anexos conservan el detalle operativo necesario para reproducir el sistema.
+
+\section{Preguntas de investigacion}
+
+La pregunta general se descompone en preguntas mas concretas que guian la memoria:
+
+\begin{enumerate}
+  \item Que procedimiento permite transformar operaciones de mercado en una base de volatilidad implicita suficientemente limpia para entrenar modelos.
+  \item Que representacion de variables financieras evita memorizar contratos y conserva informacion economica relevante.
+  \item Que familias de modelos equilibran capacidad predictiva, estabilidad temporal y facilidad de explicacion.
+  \item Que tecnicas de explicabilidad son adecuadas para auditar un modelo de volatilidad implicita desde perspectivas global, local y funcional.
+  \item Que limitaciones aparecen al interpretar un modelo entrenado sobre volatilidades calculadas y no observadas directamente.
+\end{enumerate}
+
+Estas preguntas reflejan que el TFM no es solamente una competicion de modelos. Si el objetivo fuera minimizar una metrica en un conjunto de test, bastaria con presentar la tabla de resultados. En cambio, el valor del trabajo esta en mostrar una cadena completa: desde la lectura de ficheros hasta la explicacion local de una prediccion concreta.
+
+\section{Alcance y exclusiones}
+
+El alcance del trabajo se limita a opciones sobre IBEX y futuros asociados disponibles en el repositorio. Se estudian operaciones comprendidas entre 2017 y junio de 2022. La memoria no intenta calibrar un modelo teorico de volatilidad estocastica ni construir una superficie arbitrage-free de produccion. Tampoco pretende proporcionar precios de mercado oficiales. El foco es construir una aproximacion supervisada de la volatilidad implicita calculada y hacerla inspeccionable.
+
+Quedan fuera del alcance varias extensiones relevantes: incorporar order book, modelar spreads bid-ask, incluir variables macroeconomicas, analizar dividendos de manera independiente, estudiar otros indices o comparar mercados internacionales. Estas exclusiones no restan interes al trabajo; delimitan un problema abordable con los datos y codigo disponibles.
+
+\section{Criterios de exito}
+
+El trabajo se considera satisfactorio si cumple cuatro criterios. Primero, la base final debe ser trazable: cada columna importante debe poder explicarse desde una fuente o transformacion. Segundo, el protocolo de evaluacion debe ser temporal y evitar fugas. Tercero, el modelo seleccionado debe superar de forma clara al baseline lineal. Cuarto, el dashboard debe permitir explicar tanto el rendimiento agregado como predicciones individuales.
+
+Estos criterios son deliberadamente mas amplios que una metrica unica. En finanzas, la confianza en un modelo surge de una combinacion de datos, metodologia, resultados, diagnostico y gobernanza. Un modelo con buen RMSE pero sin trazabilidad puede ser inutil para validacion; un modelo muy interpretable pero impreciso puede servir como benchmark, pero no como predictor final; un dashboard visualmente rico pero sin fidelidad de surrogates puede inducir conclusiones erroneas.

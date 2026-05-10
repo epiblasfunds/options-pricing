@@ -1,0 +1,69 @@
+\chapter{Anexo F: matriz de trazabilidad de documentacion}
+
+Este anexo menciona explicitamente cada pagina Markdown fuente de \path{doc/docs/} y su ubicacion en la memoria. Se presenta como lista por bloques para evitar problemas de compilacion con rutas largas dentro de tablas.
+
+\section{Inicio y repositorio}
+
+\begin{itemize}
+  \item \path{index.md}: introduccion, metodologia general y lectura recomendada del proyecto.
+  \item \path{repository/index.md}: Anexo A, estructura logica y responsabilidades.
+  \item \path{repository/configuration.md}: Anexo A, configuracion centralizada.
+  \item \path{repository/src-packages.md}: Anexo A, paquetes de \path{src}.
+\end{itemize}
+
+\section{Datos}
+
+\begin{itemize}
+  \item \path{data/index.md}: capitulo de metodologia y Anexo B, vision del ETL.
+  \item \path{data/raw-read.md}: Anexo B, lectura raw.
+  \item \path{data/merge-raw.md}: Anexo B, union de mercado y contratos.
+  \item \path{data/product-split.md}: Anexo B, separacion de opciones y futuros.
+  \item \path{data/underlying.md}: Anexo B, asociacion temporal del subyacente.
+  \item \path{data/volatility.md}: marco teorico, metodologia y Anexo B, Black-76 y solver.
+\end{itemize}
+
+\section{Modelos}
+
+\begin{itemize}
+  \item \path{models/index.md}: capitulo de metodologia y Anexo C.
+  \item \path{models/features.md}: metodologia y Anexo C, feature engineering.
+  \item \path{models/splits-kfolds.md}: marco teorico, metodologia y Anexo C.
+  \item \path{models/training.md}: metodologia y Anexo C, seleccion y metricas.
+  \item \path{models/retraining-progressive.md}: resultados y Anexo C, progressive training.
+  \item \path{models/families.md}: marco teorico, resultados y Anexo C.
+  \item \path{models/families/linear-regression.md}: marco teorico, resultados y Anexo C.
+  \item \path{models/families/random-forest.md}: marco teorico, resultados y Anexo C.
+  \item \path{models/families/xgboost.md}: marco teorico, resultados y Anexo C.
+  \item \path{models/families/neural-networks.md}: marco teorico y Anexo C.
+  \item \path{models/families/tensor-train.md}: marco teorico, resultados y Anexo C.
+\end{itemize}
+
+\section{Dashboard}
+
+\begin{itemize}
+  \item \path{dashboard/index.md}: metodologia y Anexo D, cometido del dashboard.
+  \item \path{dashboard/model-to-dashboard.md}: metodologia y Anexo D, bundle visualizable.
+  \item \path{dashboard/global-explainability.md}: resultados y Anexo D.
+  \item \path{dashboard/global/shap-fundamentals.md}: marco teorico, discusion y Anexo D.
+  \item \path{dashboard/global/shap-visualizations.md}: discusion y Anexo D.
+  \item \path{dashboard/global/surrogate-trees.md}: marco teorico, discusion y Anexo D.
+  \item \path{dashboard/global/symbolic-regression.md}: marco teorico, discusion y Anexo D.
+  \item \path{dashboard/behaviour-surface.md}: resultados y Anexo D.
+  \item \path{dashboard/behaviour/volatility-surfaces.md}: resultados y Anexo D.
+  \item \path{dashboard/behaviour/ice.md}: marco teorico, resultados y Anexo D.
+  \item \path{dashboard/behaviour/ale.md}: marco teorico, resultados y Anexo D.
+  \item \path{dashboard/sample-explainability.md}: resultados y Anexo D.
+  \item \path{dashboard/sample/local-shap-waterfall.md}: resultados y Anexo D.
+  \item \path{dashboard/sample/neighbours.md}: resultados y Anexo D.
+  \item \path{dashboard/diagnosis.md}: resultados y Anexo D.
+\end{itemize}
+
+\section{Operacion y activos de documentacion}
+
+\begin{itemize}
+  \item \path{operations/api-deployment.md}: metodologia y Anexo E.
+  \item \path{javascripts/mathjax-config.js}: Anexo E, soporte de renderizado matematico en MkDocs.
+  \item \path{javascripts/mermaid-init.js}: Anexo E, soporte de diagramas Mermaid.
+  \item \path{javascripts/nav-labels.js}: Anexo E, ajustes de navegacion.
+  \item \path{stylesheets/extra.css}: Anexo E, estilos adicionales de la documentacion.
+\end{itemize}

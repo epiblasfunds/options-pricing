@@ -1,0 +1,29 @@
+\chapter{Anexo D: dashboard y explicabilidad}
+
+Este anexo recoge \path{doc/docs/dashboard/}. El dashboard convierte modelos entrenados en una herramienta inspeccionable.
+
+\section{Cometido del dashboard}
+
+\path{dashboard/index.md} define selector de modelo, arquitectura de servicios y pestanas. El dashboard trabaja con modelos guardados, metadatos, datasets de test y artefactos explicables. Sus pestanas principales son Global Explainability, Behaviour and Surface, Sample Explainability y Diagnosis.
+
+\section{De modelo a bundle}
+
+\path{model-to-dashboard.md} documenta descubrimiento del runtime, dataset de dashboard, SHAP, arboles surrogate, regresion simbolica, superficies, ICE, ALE, vecinos y estructura del bundle. El bundle incluye predicciones de test, residuos, error absoluto, features transformadas y artefactos precomputados.
+
+\section{Explicabilidad global}
+
+\path{global-explainability.md} describe la pestana global. \path{global/shap-fundamentals.md} explica SHAP, valores de Shapley, aproximacion por permutacion, variables raw y limitaciones. \path{global/shap-visualizations.md} recoge beeswarm, importancia media absoluta, dependence plot y heatmap de contribuciones.
+
+\path{global/surrogate-trees.md} documenta arboles surrogate, profundidad, fidelidad y reglas textuales. \path{global/symbolic-regression.md} describe regresion simbolica con PySR, complejidad, configuracion, fidelidad y uso correcto. Ambos explican el modelo principal, no directamente la verdad de mercado.
+
+\section{Superficies y respuesta}
+
+\path{behaviour-surface.md} define la pestana Behaviour and Surface. \path{behaviour/volatility-surfaces.md} documenta heatmaps, superficies 3D, smiles, term structures y checks financieros. \path{behaviour/ice.md} explica curvas ICE, interpretacion, diferencia con PDP y riesgo de contrafactuales irreales. \path{behaviour/ale.md} explica curvas ALE, ventaja frente a PDP y uso conjunto con ICE.
+
+\section{Explicabilidad local}
+
+\path{sample-explainability.md} recoge modo de muestra, formulario manual, salida de muestra, waterfall local y vecinos. \path{sample/local-shap-waterfall.md} explica muestras de dataset y manuales, valor base, lectura financiera, relacion con residual y limitaciones. \path{sample/neighbours.md} documenta vecinos, soporte local, PCA y relacion con SHAP local.
+
+\section{Diagnostico}
+
+\path{diagnosis.md} describe Performance Summary, predicted vs actual, residual heatmap, error by moneyness, error by maturity y warnings financieros. Esta pestana vincula metricas globales con regiones concretas de fallo.
