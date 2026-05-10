@@ -84,17 +84,6 @@ C=e^{-rT}\left(FN(d_1)-KN(d_2)\right)
 \]
 </div>
 
-donde:
-
-- $C$ es el precio teórico de una call.
-- $P$ es el precio teórico de una put.
-- $F$ es el futuro subyacente.
-- $K$ es el strike.
-- $T$ es el vencimiento en años.
-- $r$ es el tipo compuesto.
-- $\sigma$ es la volatilidad implícita.
-- $N(\cdot)$ es la función de distribución normal estándar.
-
 Para una put:
 
 <div class="doc-math">
@@ -102,17 +91,6 @@ Para una put:
 P=e^{-rT}\left(KN(-d_2)-FN(-d_1)\right)
 \]
 </div>
-
-donde:
-
-- $C$ es el precio teórico de una call.
-- $P$ es el precio teórico de una put.
-- $F$ es el futuro subyacente.
-- $K$ es el strike.
-- $T$ es el vencimiento en años.
-- $r$ es el tipo compuesto.
-- $\sigma$ es la volatilidad implícita.
-- $N(\cdot)$ es la función de distribución normal estándar.
 
 con:
 
@@ -132,16 +110,9 @@ donde:
 - $K$ es el strike.
 - $T$ es el vencimiento en años.
 - $r$ es el tipo compuesto.
-- $\sigma$ es la volatilidad implícita.
+- $\sigma$ es la volatilidad implícita que se quiere resolver.
 - $N(\cdot)$ es la función de distribución normal estándar.
 
-En el proyecto:
-
-- $F$ es el precio del futuro subyacente.
-- $K$ es el strike.
-- $T$ es el tiempo a vencimiento en años.
-- $r$ es el tipo compuesto en decimal.
-- $\sigma$ es la volatilidad implícita que se quiere resolver.
 
 ## Solver de volatilidad implícita
 
@@ -179,9 +150,6 @@ flowchart LR
     class C,F decisión;
 ```
 
-## Filtro de tipo de operación
-
-Antes de calcular la volatilidad se filtra por el tipo de operación configurado. En la configuración actual se conserva el tipo `M`. Esto homogeneiza el origen de precios y evita mezclar modalidades de ejecución con interpretaciones distintas.
 
 ## Salida final
 

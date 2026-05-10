@@ -25,6 +25,13 @@ flowchart LR
 
 ## Problema que se quiere resolver
 
+Siendo:
+
+- $K$ es el strike.
+- $F$ es el precio del futuro subyacente.
+- $\tau$ es el tiempo hasta vencimiento.
+- $r$ es el tipo de interés anualizado utilizado en la valoración.
+
 El objetivo es aproximar la función de volatilidad implícita:
 
 <div class="doc-math">
@@ -37,10 +44,6 @@ donde:
 
 - $\hat{\sigma}$ es la volatilidad implícita predicha.
 - $f$ es el modelo entrenado.
-- $K$ es el strike.
-- $F$ es el precio del futuro subyacente.
-- $\tau$ es el tiempo hasta vencimiento.
-- $r$ es el tipo de interés anualizado utilizado en la valoración.
 
 La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:
 
@@ -54,10 +57,6 @@ donde:
 
 - $P_{mercado}$ es el precio observado.
 - $P_{Black76}$ es el precio teórico del modelo Black-76.
-- $F$ es el futuro subyacente.
-- $K$ es el strike.
-- $\tau$ es el tiempo hasta vencimiento.
-- $r$ es el tipo de interés.
 - $\sigma$ es la volatilidad implícita.
 
 El proyecto trata esta volatilidad como una superficie dependiente de la moneyness y del vencimiento, pero también como una variable modelable con aprendizaje automático. La explicabilidad es parte del requisito funcional: el dashboard debe contestar preguntas como:

@@ -75,20 +75,16 @@ max\_evals = 2p+1
 
 donde:
 
-- $max\_evals$ es el número máximo de evaluaciones del modelo por explicación.
+- $max\\_evals$ es el número máximo de evaluaciones del modelo por explicación.
 - $p$ es el número de features de explicabilidad.
 
 El fondo se toma de una muestra controlada por `shap_background_size`; las filas explicadas globalmente por `shap_explain_size`; y las filas locales por `sample_option_size`.
 
 ## Variables raw y fidelidad
 
-Las explicaciones se calculan sobre variables raw visibles. Esto mejora la lectura financiera: si `StrikePrice` tiene una contribución alta, el lector ve el efecto agregado del strike como input financiero, aunque internamente el modelo use transformaciones como `logMoneyness` o `logForwardMoneyness`.
+Las explicaciones se calculan sobre variables raw visibles. Es decir, las variables raw son aquellas que vienen directas de [`VOLATILITY_DB`](../../data/volatility.md), antes de hacer el feature engineering y sacar las [Features Derivadas](../../models/features.md). Esto mejora la lectura financiera: si `StrikePrice` tiene una contribución alta, el lector ve el efecto agregado del strike como input financiero, aunque internamente el modelo use transformaciones como `logMoneyness` o `logForwardMoneyness`.
 
 Esta capa se reconstruye mediante `ExplainabilityEncoder`: el explicador perturba variables raw, el encoder reconstruye un raw frame válido y el runtime vuelve a generar las features del modelo antes de predecir.
-
-## Limitaciones
-
-SHAP no prueba causalidad y puede verse afectado por correlación entre variables. En opciones, strike, subyacente, moneyness, vencimiento y tipos no son independientes. Por eso se complementa con [ALE](../behaviour/ale.md), [ICE](../behaviour/ice.md), [vecinos locales](../sample/neighbours.md) y [superficies de volatilidad](../behaviour/volatility-surfaces.md).
 
 ## Referencias
 

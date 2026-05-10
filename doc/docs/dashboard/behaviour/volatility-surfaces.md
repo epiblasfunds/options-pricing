@@ -32,13 +32,13 @@ donde:
 - $K$ es el strike.
 - $T$ es el tiempo hasta vencimiento.
 
-donde $F$ es el futuro subyacente, $K$ el strike y $T$ el tiempo hasta vencimiento. El dashboard usa esta segunda lectura, porque la moneyness permite comparar contratos aunque el nivel del IBEX cambie.
+El dashboard usa esta segunda lectura, porque la moneyness permite comparar contratos aunque el nivel del IBEX cambie.
 
 ```mermaid
 flowchart TD
     A[Ancla real del test] --> B[Fijar variables de contexto]
-    B --> C[Grilla de moneyness 0.8-1.2]
-    B --> D[Grilla de vencimiento]
+    B --> C[Valores de moneyness 0.8-1.2]
+    B --> D[Valores de vencimiento]
     C --> E[Reconstruir strike K=F/m]
     D --> E
     E --> F[Predicción del modelo]
@@ -50,6 +50,7 @@ flowchart TD
     class E,F process;
     class G plot;
 ```
+De aquí en adelante, un **ancla** es una observación real del conjunto de test que se usa como punto de referencia para generar escenarios contrafactuales alrededor de sus condiciones de mercado.
 
 ## Construcción en el repositorio
 
@@ -90,13 +91,11 @@ Lecturas relevantes:
 | Saltos entre celdas vecinas | Posible discontinuidad del modelo o falta de soporte local. |
 | Variación extrema en corto vencimiento | Sensibilidad alta a microestructura o escasez de datos. |
 
-El heatmap es contrafactual: algunos puntos de la grilla pueden no corresponder a contratos observados exactamente. Por eso se complementa con [vecinos locales](../sample/neighbours.md) y diagnóstico de error.
+El heatmap es contrafactual: algunos puntos de la grilla pueden no corresponder a contratos observados exactamente. Por eso se complementa con [vecinos locales](../sample/neighbours.md) y [diagnóstico de error](../diagnosis.md).
 
 ## Superficie 3D
 
-La superficie 3D representa la misma matriz que el heatmap. Su ventaja es visual: permite ver pendientes y curvaturas cuando el color no basta. Su riesgo es que la perspectiva puede exagerar cambios. Para documentación formal, la superficie 3D debe usarse como apoyo visual, no como única evidencia.
-
-Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.
+La superficie 3D representa la misma matriz que el heatmap. Su ventaja es visual: permite ver pendientes y curvaturas cuando el color no basta. Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.
 
 ## Smile curve
 
@@ -116,13 +115,6 @@ donde:
 
 El smile permite comparar cómo cambia la curvatura entre vencimientos. En muchos mercados de equity index options se espera skew: volatilidades distintas entre strikes bajos y altos. El dashboard no impone esa forma; la muestra para inspeccionar si el modelo la aprende.
 
-Una lectura rigurosa distingue:
-
-- Smile aprendido de forma suave.
-- Skew pronunciado pero continuo.
-- Líneas que se cruzan por cambios de estructura temporal.
-- Oscilaciones sin soporte financiero claro.
-
 ## Term structure
 
 La term structure es el corte opuesto:
@@ -140,16 +132,6 @@ donde:
 - $m_k$ es la moneyness fija usada para construir la term structure.
 
 Permite evaluar si el modelo predice niveles distintos entre corto y largo plazo para una misma zona de moneyness. Esta vista es importante porque el vencimiento corto puede tener mayor ruido relativo y porque los contratos largos pueden estar menos representados.
-
-## Checks financieros
-
-Los checks de superficie del proyecto son heurísticos. No constituyen una prueba completa de ausencia de arbitraje. Sirven para detectar patrones sospechosos:
-
-- Saltos locales elevados.
-- Cambios bruscos por vencimiento.
-- Irregularidad visual de la superficie.
-
-La documentación debe llamarlos avisos, no validaciones matemáticas concluyentes. Una validación formal de no arbitraje requeriría condiciones sobre convexidad en strike, monotonía de precios descontados y consistencia entre vencimientos, trabajando sobre precios de opción y no solo sobre volatilidades predichas.
 
 ## Referencias
 

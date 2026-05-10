@@ -57,33 +57,12 @@ La lectura recomendada es:
 | Distancias altas | Posible extrapolación. |
 | Vecinos con moneyness/vencimiento muy distintos | La métrica de distancia puede no estar capturando la similitud financiera deseada. |
 
-## Proyección PCA
+## Mapa 3D: proyección PCA
 
-El mapa 3D usa PCA para proyectar el entorno a tres componentes. PCA es una transformación lineal que busca direcciones de máxima varianza:
+Para poder observar las distancias entre muestras, es necesario hacer una reducción de dimensionalidad. Para ello se ha utilizado PCA con 3 componentes principales. Estas componentes principales no se han calculado con todos los datos de entrenamiento, sino, una vez extraídos los vecinos, las componentes principales se calculan únicamente con este vecindario ya fijado. 
 
-<div class="doc-math">
-\[
-Z = XW
-\]
-</div>
+Esto implica que las componentes principales que se muestran en el mapa 3D cambian de la explicación de una muestra a otra. La decisión ha sido tomada porque no se está utilizando para otra cosa más que para ganar una intuición espacial de cercanía visual, y de esta manera, las distancias relativas serían mucho más fieles a la realidad porque habría menos pares para representar distancias.
 
-donde:
-
-- $Z$ es la matriz proyectada en componentes principales.
-- $X$ es la matriz estandarizada de features.
-- $W$ contiene los vectores principales de PCA.
-
-donde $W$ contiene los vectores principales. La proyección no pretende asignar significado financiero directo a cada eje. Sirve para visualizar proximidad relativa.
-
-El bundle guarda:
-
-- `feature_names`
-- valores de relleno
-- escalas usadas
-- componentes
-- varianza explicada
-
-Si la muestra aparece dentro de una nube de vecinos, la explicación local tiene mejor soporte visual. Si aparece separada, conviene advertir que el resultado puede depender de extrapolación.
 
 ## Relación con SHAP local
 

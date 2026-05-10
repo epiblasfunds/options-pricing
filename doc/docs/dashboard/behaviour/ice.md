@@ -22,7 +22,7 @@ donde $x_{i,-j}$ representa todas las variables de la observación salvo la feat
 ```mermaid
 flowchart LR
     A[Muestras reales] --> B[Seleccionar feature j]
-    B --> C[Construir grilla por cuantiles]
+    B --> C[Construir grid por cuantiles]
     C --> D[Sustituir j por cada valor]
     D --> E[Predicción del modelo]
     E --> F[Curvas individuales ICE]
@@ -39,7 +39,7 @@ flowchart LR
 La función `build_ice_frame`:
 
 1. Muestrea hasta `ice_sample_size` filas del dataset de dashboard.
-2. Para cada feature en `ANALYSIS_FEATURE_NAMES`, crea una grilla por cuantiles con `curve_points`.
+2. Para cada feature en `ANALYSIS_FEATURE_NAMES`, crea un grid por cuantiles con `curve_points`.
 3. Modifica el raw frame mediante `apply_feature_override`.
 4. Vuelve a predecir con `predict_raw_frame`.
 5. Guarda `feature_name`, `sample_id`, `feature_value` y `prediction`.
@@ -63,7 +63,7 @@ Patrones habituales:
 | Curvas casi paralelas | Efecto similar entre observaciones; poca interacción visible. |
 | Curvas con pendientes diferentes | Heterogeneidad; interacción con otras variables. |
 | Cruces frecuentes | El ranking de predicciones cambia al mover la feature. |
-| Saltos o dientes | Posible discontinuidad del modelo o grilla en zona poco soportada. |
+| Saltos o dientes | Posible discontinuidad del modelo o grid en zona poco soportada. |
 
 Si las curvas ICE de `StrikePrice` divergen mucho, el modelo no está usando strike de forma aislada; probablemente la relación con `UnderlyingPrice` y moneyness domina. Si las curvas ICE de `TimeToExpiration` cambian mucho en corto plazo, conviene cruzar la lectura con el diagnóstico por maturity.
 
@@ -88,10 +88,10 @@ El PDP puede ocultar heterogeneidad. Si algunas curvas suben y otras bajan, el p
 
 ## Limitación principal: contrafactuales irreales
 
-ICE puede evaluar combinaciones poco plausibles. Por ejemplo, cambiar `StrikePrice` manteniendo constante el resto puede llevar a moneyness muy alejadas de la distribución observada. El pipeline intenta mitigar esto usando grillas por cuantiles, pero no elimina el problema. Por eso una curva ICE debe interpretarse con soporte local:
+ICE puede evaluar combinaciones poco plausibles. Por ejemplo, cambiar `StrikePrice` manteniendo constante el resto puede llevar a moneyness muy alejadas de la distribución observada. El pipeline intenta mitigar esto usando grids por cuantiles, pero no elimina el problema. Por eso una curva ICE debe interpretarse con soporte local:
 
 - ¿Existen vecinos históricos cerca del escenario?
-- ¿El valor de feature está dentro de rangos observadosí
+- ¿El valor de feature está dentro de rangos observados?
 - ¿El diagnóstico muestra error alto en esa zona?
 - ¿La superficie local es suave alrededor de ese punto?
 

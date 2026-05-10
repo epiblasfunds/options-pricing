@@ -32,25 +32,25 @@ Las contribuciones cumplen:
 
 <div class="doc-math">
 \[
-\hat{\sigma}_i = \phi_0 + \sum_j \phi_{ij}
+\hat{\sigma} = \phi_0 + \sum_j \phi_j
 \]
 </div>
 
 donde:
 
-- $\hat{\sigma}$ o $f(x)$ es la predicción del modelo.
+- $\hat{\sigma}$ es la predicción del modelo.
 - $\phi_0$ es el valor base del explicador.
 - $\phi_j$ es la contribución SHAP de la feature $j$.
 - $p$ es el número de features explicadas.
 
-En esta pestaña se agregan varias filas explicadas para estudiar comportamiento global. La interpretación local de una fila concreta se desarrolla en [SHAP local y waterfall](sample/local-shap-waterfall.md).
+En esta pestaña se agregan varias filas explicadas para estudiar comportamiento global. La interpretación local de una muestra de opción del IBEX concreta se desarrolla en [SHAP local y waterfall](sample/local-shap-waterfall.md).
 
 ## Visualizaciones disponibles
 
 | Caja | Página de detalle | Función |
 | --- | --- | --- |
 | `Summary` | [Visualizaciones SHAP](global/shap-visualizations.md) | Beeswarm de contribuciones individuales. |
-| `Feature Importance` | [Visualizaciones SHAP](global/shap-visualizations.md) | Ranking por $\frac{1}{n}\sum_i|\phi_{ij}|$. |
+| `Feature Importance` | [Visualizaciones SHAP](global/shap-visualizations.md) | Ranking por $\frac{1}{n} sum_{muestra}\|\phi_{j,muestra}\|$. |
 | `Dependence` | [Visualizaciones SHAP](global/shap-visualizations.md) | Relación entre valor de feature y contribución. |
 | `Heatmap` | [Visualizaciones SHAP](global/shap-visualizations.md) | Matriz de perfiles explicativos por observación. |
 | `Surrogate trees` | [Árboles surrogate](global/surrogate-trees.md) | Reglas aproximadas del modelo principal. |
@@ -69,14 +69,12 @@ Los modelos equivalentes no sustituyen al modelo principal. Su target es la pred
 donde:
 
 - $\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.
-- $g$ o $h$ es el modelo interpretable aproximador.
+- $h$ es el modelo interpretable aproximador.
 - $x$ es el vector de entrada explicado.
 
 donde $h$ puede ser un árbol o una expresión simbólica. La calidad de esa aproximación se llama fidelidad. Una fidelidad alta indica que la explicación equivalente reproduce al modelo; no indica por sí sola que el modelo sea correcto frente al mercado.
 
 ## Lectura recomendada
-
-Para defender un resultado ante revisión técnica:
 
 1. Leer el ranking [SHAP](global/shap-fundamentals.md) para identificar drivers principales.
 2. Usar dependence plots para comprobar dirección y no linealidad.

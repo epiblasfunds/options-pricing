@@ -55,49 +55,40 @@ La función `build_ale_frame` implementa una aproximación por bins:
 4. Predice dos escenarios locales: feature igual a $l_k$ y feature igual a $u_k$.
 5. Calcula la diferencia media:
 
-<div class="doc-math">
-\[
-\Delta_k =
-\frac{1}{|I_k|}
-\sum_{i \in I_k}
-\left[
-f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
-\right]
-\]
-</div>
+    $$
+    \Delta_k =
+    \frac{1}{|I_k|}
+    \sum_{i \in I_k}
+    \left[
+    f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
+    \right]
+    $$
 
-donde:
+    donde:
 
-- $\Delta_k$ es el incremento local medio del bin $k$.
-- $I_k$ es el conjunto de observaciones dentro del bin $k$.
-- $l_k$ y $u_k$ son los bordes inferior y superior del bin.
-- $x_{i,-j}$ son las demás features de la observación $i$.
+    - $\Delta_k$ es el incremento local medio del bin $k$. Aproxima al término de la fórmula comentada al inicio: $E\left[
+    \frac{\partial f(X)}{\partial X_j}
+    \mid X_j=s
+    \right]$.
+    - $I_k$ es el conjunto de observaciones dentro del bin $k$.
+    - $l_k$ y $u_k$ son los bordes inferior y superior del bin.
+    - $x_{i,-j}$ son las demás features de la observación $i$.
 
 6. Acumula incrementos:
 
-<div class="doc-math">
-\[
-\tilde{ALE}_k=\sum_{r \leq k}\Delta_r
-\]
-</div>
+    $$
+    ALE^u_k=\sum_{r \leq k}\Delta_r
+    $$
 
-donde:
-
-- $\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.
-- $\Delta_r$ es el incremento local medio del bin $r$.
+    donde $ALE^u_k$ es el efecto acumulado sin centrar hasta el bin $k$.
 
 7. Centra la curva restando la media:
 
-<div class="doc-math">
-\[
-ALE_k = \tilde{ALE}_k - \frac{1}{K}\sum_{r=1}^{K}\tilde{ALE}_r
-\]
-</div>
+    $$
+    ALE_k = ALE^u_k - \frac{1}{K}\sum_{r = 1}^K ALE^u_r
+    $$
 
-donde:
-
-- $\tilde{ALE}_k$ es el efecto acumulado sin centrar hasta el bin $k$.
-- $\Delta_r$ es el incremento local medio del bin $r$.
+    donde  $ALE^u_k$ es el efecto acumulado sin centrar hasta el bin $k$.
 
 Este procedimiento usa cambios dentro de bins donde existen datos. Por eso suele ser más prudente que PDP cuando `StrikePrice` y `UnderlyingPrice` están correlacionados o cuando vencimiento y liquidez no se distribuyen uniformemente.
 
