@@ -42,7 +42,7 @@ services:
     volumes:
       - .:/work
     working_dir: /work
-    command: ["latexmk", "-xelatex", "main.tex"]
+    command: ["latexmk", "-pdf", "main.tex"]
 
   clean-latex:
     build:
