@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1778444768.375 "main.aux" "main.bbl" "main" 1778444785.9524 0
+["bibtex main"] 1778445902.08234 "main.aux" "main.bbl" "main" 1778445910.04594 0
   "./research.bib" 1778435106.16261 2593 3beeac059fcec838ec3f016dd6ddcd15 ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/natbib/plainnat.bst" 1233624470 26816 ffe5423d2019860bad9f54bc402fac15 ""
-  "main.aux" 1778444784.49557 44407 fbe5cc9e545b24b45835df464ae69908 "pdflatex"
+  "main.aux" 1778445909.46229 43042 d872f1305b7711a81b4fd229e469f5ea "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1778444768.66165 "main.tex" "main.pdf" "main" 1778444785.95776 0
+["pdflatex"] 1778445902.203 "main.tex" "main.pdf" "main" 1778445910.05099 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/adobe/palatino/pplb8r.tfm" 1136768653 2532 9ad73cf4dd2173a847f2a5f5608e0b9a ""
@@ -312,12 +312,12 @@
   "classicthesis-config.tex" 1778431174.89085 13691 347dd2dd020624fcb71dad6788411986 ""
   "classicthesis.sty" 1778433529.08785 34400 aedcdac7f151c0549c1c7aa109a6c8d9 ""
   "macros.tex" 1778431174.9047 1098 60b4ca2a2bc89be18990b7e1c9609fb5 ""
-  "main.aux" 1778444784.49557 44407 fbe5cc9e545b24b45835df464ae69908 "pdflatex"
-  "main.bbl" 1778444768.56676 2654 f81d9b9f47d95ac929d128fd926b5a19 "bibtex main"
-  "main.tex" 1778444744.28184 64792 98fad60650de2c3af6e78c12e3f32b9f ""
-  "main.toc" 1778444784.63719 5000 06d17c431c0b8113b044bf9527e77d37 "pdflatex"
-  "prefaces/abstract.tex" 1778443844.47269 1867 5c5949d185a6dd9ce76361735cb4559e ""
-  "prefaces/resumen.tex" 1778443847.57148 1930 f97d2f14312c90e37b116ec66105414a ""
+  "main.aux" 1778445909.46229 43042 d872f1305b7711a81b4fd229e469f5ea "pdflatex"
+  "main.bbl" 1778445902.17531 2654 f81d9b9f47d95ac929d128fd926b5a19 "bibtex main"
+  "main.tex" 1778445882.74475 60970 ff3565181e32b5a84b7ff826ef4d1238 ""
+  "main.toc" 1778445909.50889 4812 2430dd5bbc331a3409e3ae32299fbe65 "pdflatex"
+  "prefaces/abstract.tex" 1778445817.98381 2300 978364c20027894a809cebf7dd99d0ab ""
+  "prefaces/resumen.tex" 1778445813.03025 2379 054d8f864aa265d3f9aae25ebd9b1795 ""
   "titlepage.tex" 1778444114.82057 684 030a8e71cf8046b24cc191ff356ffe0b ""
   "variables.sty" 1778444311.97235 1265 3d1ede89d240da1c054e74755f054e57 ""
   (generated)
