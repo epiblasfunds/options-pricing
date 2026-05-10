@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  10 MAY 2026 18:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  10 MAY 2026 20:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1823,39 +1823,23 @@ Package pdftex.def Info: ai_volatility_options_cover.pdf  used on input line 84
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
 al/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc} <./ai_volatility_option
-s_cover.pdf>] (./prefaces/licensing.tex
-Underfull \hbox (badness 10000) in paragraph at lines 3--4
-
- []
-
-
-Overfull \hbox (7.94577pt too wide) in paragraph at lines 5--6
-[]\T1/pplj/m/n/12 Yo, \T1/pplj/b/n/12 Nom-bre del es-tu-dian-te\T1/pplj/m/n/12 
-, es-tu-dian-te del Más-ter en In-te-li-gen-cia Ar-ti-fi-cial y Compu-
- []
-
-[2]
-Underfull \hbox (badness 10000) in paragraph at lines 25--26
-
- []
-
-[3]) (./prefaces/resumen.tex
+s_cover.pdf>] (./prefaces/resumen.tex
 LaTeX Font Info:    Trying to load font information for TS1+pplj on input line 
-15.
+16.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/ts1pplj.fd
 File: ts1pplj.fd 2004/09/06 font definitions for TS1/pplj.
 )
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 11.40997pt on input line 21.
+(Font)              scaled to size 11.40997pt on input line 22.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 6.25204pt on input line 21.
+(Font)              scaled to size 6.25204pt on input line 22.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 11.40997pt on input line 21.
+(Font)              scaled to size 11.40997pt on input line 22.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 6.25204pt on input line 21.
- [4])
-(./prefaces/abstract.tex [5])
+(Font)              scaled to size 6.25204pt on input line 22.
+ [2])
+(./prefaces/abstract.tex [3])
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
 (Font)              scaled to size 12.50409pt on input line 91.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
@@ -1873,7 +1857,7 @@ Package tocbasic Info: character protrusion at toc deactivated on input line 91
  (./main.toc
 LaTeX Info: Redefining \. on input line 2.
 LaTeX Info: Redefining \% on input line 2.
- [6
+ [4
 
 ])
 \tf@toc=\write5
@@ -1883,7 +1867,7 @@ LaTeX Info: Redefining \. on input line 93.
 LaTeX Info: Redefining \% on input line 93.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
 (babel)             Reported on input line 93.
- [7]
+ [5]
 chapter 1.
 
 Class scrreprt Warning: \float@addtolists detected!
@@ -1899,56 +1883,56 @@ Class scrreprt Warning: \float@addtolists detected!
 (scrreprt)              \float@addtolist interface has been
 (scrreprt)              removed from all KOMA-Script classes.
 
-[8
+[6
 
 ]
 chapter 2.
-[9
+[7
 
 ]
 LaTeX Info: Redefining \. on input line 113.
 LaTeX Info: Redefining \% on input line 113.
- [10]
+ [8]
 chapter 3.
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/pplj/m/sc/12'.
 (microtype)             Ignoring protrusion settings for this character.
-[11
+[9
 
 ]
 LaTeX Info: Redefining \. on input line 148.
 LaTeX Info: Redefining \% on input line 148.
- [12]
+ [10]
 Overfull \hbox (21.69167pt too wide) in paragraph at lines 179--180
  [][] 
  []
 
 LaTeX Info: Redefining \. on input line 191.
 LaTeX Info: Redefining \% on input line 191.
-[13]
+[11]
 chapter 4.
-[14
+[12
 
 ]
 LaTeX Info: Redefining \. on input line 275.
 LaTeX Info: Redefining \% on input line 275.
- [15]
+ [13]
 LaTeX Info: Redefining \. on input line 299.
 LaTeX Info: Redefining \% on input line 299.
- [16]
+ [14]
 LaTeX Info: Redefining \. on input line 332.
 LaTeX Info: Redefining \% on input line 332.
- [17]
+ [15]
 LaTeX Info: Redefining \. on input line 335.
 LaTeX Info: Redefining \% on input line 335.
- [18]
+ [16]
 chapter 5.
 
 Overfull \hbox (10.31056pt too wide) in paragraph at lines 397--398
  [][] 
  []
 
-[19
+[17
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+fvm on input line 41
@@ -1973,7 +1957,7 @@ LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
 (Font)              scaled to size 9.30756pt on input line 425.
 LaTeX Info: Redefining \. on input line 437.
 LaTeX Info: Redefining \% on input line 437.
-[20]
+[18]
 Underfull \hbox (badness 1454) in paragraph at lines 456--456
 []|\T1/pplj/m/n/10.95 Red neu-ro-nal se-cuen-
  []
@@ -1985,10 +1969,10 @@ Overfull \hbox (18.84639pt too wide) in paragraph at lines 487--488
 
 LaTeX Info: Redefining \. on input line 494.
 LaTeX Info: Redefining \% on input line 494.
-[21]
+[19]
 LaTeX Info: Redefining \. on input line 494.
 LaTeX Info: Redefining \% on input line 494.
- [22]
+ [20]
 Overfull \hbox (31.23169pt too wide) in paragraph at lines 513--514
 []\T1/pplj/m/n/12 El pro-yec-to in-clu-ye una va-rian-te pro-gres-si-ve ATM. Or
 -de-na ob-ser-va-cio-nes por $\OMS/zplm/m/n/12 j []\OT1/zplm/m/n/12 (\OML/zplm/
@@ -2005,23 +1989,23 @@ lj/m/n/12 , \T1/fvm/m/n/12 /run_model/predict/ \T1/pplj/m/n/12 y \T1/fvm/m/n/12
 
 LaTeX Info: Redefining \. on input line 565.
 LaTeX Info: Redefining \% on input line 565.
-[23]
+[21]
 LaTeX Info: Redefining \. on input line 565.
 LaTeX Info: Redefining \% on input line 565.
- [24]
+ [22]
 Overfull \hbox (95.63371pt too wide) in paragraph at lines 588--589
  [][] 
  []
 
 LaTeX Info: Redefining \. on input line 623.
 LaTeX Info: Redefining \% on input line 623.
-[25]
+[23]
 LaTeX Info: Redefining \. on input line 636.
 LaTeX Info: Redefining \% on input line 636.
- [26]
+ [24]
 LaTeX Info: Redefining \. on input line 667.
 LaTeX Info: Redefining \% on input line 667.
- [27]
+ [25]
 chapter 6.
 
 Overfull \hbox (3.43959pt too wide) in paragraph at lines 686--702
@@ -2033,31 +2017,31 @@ Overfull \hbox (29.71236pt too wide) in paragraph at lines 718--727
  [][] 
  []
 
-[28
+[26
 
 ]
 LaTeX Info: Redefining \. on input line 771.
 LaTeX Info: Redefining \% on input line 771.
- [29]
+ [27]
 LaTeX Info: Redefining \. on input line 807.
 LaTeX Info: Redefining \% on input line 807.
- [30]
+ [28]
 LaTeX Info: Redefining \. on input line 835.
 LaTeX Info: Redefining \% on input line 835.
- [31]
+ [29]
 LaTeX Info: Redefining \. on input line 855.
 LaTeX Info: Redefining \% on input line 855.
- [32]
+ [30]
 chapter 7.
-[33
+[31
 
 ]
 chapter A.
-[34
+[32
 
 ]
 chapter B.
-[35
+[33
 
 ]
 chapter C.
@@ -2066,16 +2050,16 @@ Overfull \hbox (33.07277pt too wide) in paragraph at lines 927--928
  [][] 
  []
 
-[36
+[34
 
 ]
 chapter D.
-(./main.bbl [37
+(./main.bbl [35
 
-]) [38
+]) [36
 
 ]
-runsystem(latexminted cleantemp  --timestamp 20260510180951Z FAD58DE7366495DB46
+runsystem(latexminted cleantemp  --timestamp 20260510202608Z FAD58DE7366495DB46
 50CFEFAC2FCD61)...executed safely (allowed).
 
  (./main.aux
@@ -2274,7 +2258,6 @@ epstopdf-sys.cfg    2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
  ot1zplm.fd    2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
   Ustmry.fd
 ai_volatility_options_cover.pdf    Graphic file (type pdf)
-prefaces/licensing.tex
 prefaces/resumen.tex
  ts1pplj.fd    2004/09/06 font definitions for TS1/pplj.
 prefaces/abstract.tex
@@ -2284,11 +2267,11 @@ prefaces/abstract.tex
 
  ) 
 Here is how much of TeX's memory you used:
- 44549 strings out of 467349
- 925673 string characters out of 5415641
- 1696655 words of memory out of 5000000
- 72647 multiletter control sequences out of 15000+600000
- 721860 words of font info for 210 fonts, out of 8000000 for 9000
+ 44528 strings out of 467349
+ 925266 string characters out of 5415641
+ 1696684 words of memory out of 5000000
+ 72635 multiletter control sequences out of 15000+600000
+ 719070 words of font info for 206 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  108i,23n,127p,11207b,981s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
@@ -2302,13 +2285,12 @@ l/texlive/2026/texmf-dist/fonts/type1/public/fpl/fplrc8a.pfb></usr/local/texliv
 e/2026/texmf-dist/fonts/type1/public/fpl/fplrij8a.pfb></usr/local/texlive/2026/
 texmf-dist/fonts/type1/public/bera/fvmr8a.pfb></usr/local/texlive/2026/texmf-di
 st/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2026/texmf-dist/font
-s/type1/urw/palatino/uplbi8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type
-1/urw/palatino/uplr8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/urw/p
-alatino/uplri8a.pfb>
-Output written on main.pdf (38 pages, 255457 bytes).
+s/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1
+/urw/palatino/uplri8a.pfb>
+Output written on main.pdf (36 pages, 238561 bytes).
 PDF statistics:
- 662 PDF objects out of 1000 (max. 8388607)
- 587 compressed objects within 6 object streams
- 151 named destinations out of 1000 (max. 500000)
- 31658 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 644 PDF objects out of 1000 (max. 8388607)
+ 573 compressed objects within 6 object streams
+ 149 named destinations out of 1000 (max. 500000)
+ 31146 words of extra memory for PDF output out of 35830 (max. 10000000)
 
