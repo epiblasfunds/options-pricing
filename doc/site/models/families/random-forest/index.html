@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -189,7 +189,10 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="random-forest">Random Forest<a class="headerlink" href="#random-forest" title="Permanent link">&para;</a></h1>
-<p>Random Forest es un ensamble de Árboles de decisión entrenados sobre muestras bootstrap y subconjuntos de variables. La predicción final es el promedio:</p>
+<h2 id="objetivo-dentro-del-proyecto">Objetivo dentro del proyecto<a class="headerlink" href="#objetivo-dentro-del-proyecto" title="Permanent link">&para;</a></h2>
+<p><a href="./">Random Forest</a> funciona como modelo tabular robusto y como punto intermedio entre interpretabilidad y capacidad predictiva. Captura no linealidades e interacciones sin exigir escalado de features, y sirve para comparar si una familia de árboles ensamble mejora claramente el baseline de <a href="../linear-regression/">regresión lineal</a>.</p>
+<h2 id="estructura-del-modelo">Estructura del modelo<a class="headerlink" href="#estructura-del-modelo" title="Permanent link">&para;</a></h2>
+<p>Random Forest es un ensamble de árboles de decisión entrenados sobre muestras bootstrap y subconjuntos de variables. La predicción final es el promedio:</p>
 <div class="doc-math">
 \[
 \hat{\sigma}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
@@ -202,8 +205,8 @@
 <li>$B$ es el número de árboles.</li>
 <li>$T_b(x)$ es la predicción del árbol $b$.</li>
 </ul>
-<p>Esta familia captura no linealidades e interacciones sin exigir escalado de features. Es adecuada como modelo tabular robusto y como punto intermedio entre interpretabilidad y capacidad predictiva.</p>
-<h2 id="configuracion-fija">Configuración fija<a class="headerlink" href="#configuracion-fija" title="Permanent link">&para;</a></h2>
+<h2 id="configuracion-y-busqueda">Configuración y búsqueda<a class="headerlink" href="#configuracion-y-busqueda" title="Permanent link">&para;</a></h2>
+<p>Parámetros fijos principales:</p>
 <table>
 <thead>
 <tr>
@@ -240,7 +243,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="espacio-de-busqueda">Espacio de búsqueda<a class="headerlink" href="#espacio-de-busqueda" title="Permanent link">&para;</a></h2>
+<p>Espacio de búsqueda:</p>
 <table>
 <thead>
 <tr>
@@ -253,7 +256,7 @@
 <tr>
 <td><code>n_estimators</code></td>
 <td>300, 400, 500</td>
-<td>Más Árboles reducen varianza pero aumentan coste.</td>
+<td>Más árboles reducen varianza pero aumentan coste.</td>
 </tr>
 <tr>
 <td><code>max_depth</code></td>
@@ -273,7 +276,7 @@
 <tr>
 <td><code>max_features</code></td>
 <td><code>sqrt</code>, <code>log2</code>, 0.3, 0.5, 0.8</td>
-<td>Controla diversidad entre Árboles.</td>
+<td>Controla diversidad entre árboles.</td>
 </tr>
 <tr>
 <td><code>max_samples</code></td>
@@ -293,10 +296,10 @@
 </tbody>
 </table>
 <p>La búsqueda muestrea 120 configuraciones con semilla fija. No agota el espacio completo; busca una cobertura razonable manteniendo coste controlado.</p>
-<h2 id="progressive-training">Progressive training<a class="headerlink" href="#progressive-training" title="Permanent link">&para;</a></h2>
-<p>En esta familia, el entrenamiento progresivo se implementa como pesos de muestra. Las observaciones más cercanas a ATM reciben mayor peso. Esto prioriza la región central de la superficie sin retirar observaciones de alas.</p>
-<h2 id="interpretacion">Interpretación<a class="headerlink" href="#interpretacion" title="Permanent link">&para;</a></h2>
-<p>Random Forest no produce una fórmula compacta. Sus importancias internas pueden estar sesgadas por variables con muchos puntos de corte. Por eso en el dashboard se interpreta mediante <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/surrogate-trees/">Árboles surrogate</a> y <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>.</p>
+<h2 id="entrenamiento-y-progressive-training">Entrenamiento y progressive training<a class="headerlink" href="#entrenamiento-y-progressive-training" title="Permanent link">&para;</a></h2>
+<p>En entrenamiento estándar, cada árbol se ajusta sobre una muestra bootstrap y el ensamble promedia sus predicciones. En modo progresivo, esta familia no entrena por fases: recibe pesos de muestra mayores para observaciones cercanas a ATM. Esto prioriza la región central de la superficie sin retirar observaciones de alas.</p>
+<h2 id="interpretabilidad-y-cautelas">Interpretabilidad y cautelas<a class="headerlink" href="#interpretabilidad-y-cautelas" title="Permanent link">&para;</a></h2>
+<p>Random Forest no produce una fórmula compacta. Sus importancias internas pueden estar sesgadas por variables con muchos puntos de corte. Por eso en el dashboard se interpreta mediante <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/surrogate-trees/">árboles surrogate</a>, <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a> y <a href="../../../dashboard/behaviour/ale/">ALE</a>.</p>
               
             </div>
           </div><footer>

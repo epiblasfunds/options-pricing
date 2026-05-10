@@ -93,8 +93,8 @@ Esto evita elegir una configuración que gane por poco en un fold pero sea inest
 
 El early stopping aparece en las familias con entrenamiento iterativo:
 
-- XGBoost usa un conjunto interno de validación para detener boosting cuando no mejora.
-- Redes neuronales monitorizan RMSE de validación interna y restauran los mejores pesos.
+- [XGBoost](families/xgboost.md) usa un conjunto interno de validación para detener boosting cuando no mejora.
+- [Redes neuronales](families/neural-networks.md) y [Quantum Inspired](families/quantum-inspired.md) monitorizan RMSE de validación interna y restauran los mejores pesos.
 - Las redes pueden reducir learning rate si el progreso se estanca.
 
 ```mermaid
@@ -115,7 +115,7 @@ El conjunto externo de validation del fold no se usa para ajustar early stopping
 
 Las familias neuronales guardan un scaler para features numéricas. El scaler se ajusta solo con datos permitidos en la fase correspondiente. En evaluación final, el scaler se ajusta con el bloque de entrenamiento disponible y se aplica a test sin aprender de test.
 
-Los modelos de Árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.
+Los modelos de árboles, [Random Forest](families/random-forest.md) y [XGBoost](families/xgboost.md), y la [regresión lineal](families/linear-regression.md) se guardan sin scaler adicional en el flujo actual.
 
 ## Artefactos de entrenamiento
 

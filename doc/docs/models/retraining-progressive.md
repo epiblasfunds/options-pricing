@@ -74,13 +74,34 @@ La intención financiera es estabilizar primero la zona más líquida y central 
 
 | Familia | Progressive training |
 | --- | --- |
-| Lineal | Usa pesos de muestra mayores en segmentos más ATM. |
-| Random Forest | Usa pesos de muestra mayores en segmentos más ATM. |
-| XGBoost | Entrena fases acumulativas, repartiendo estimadores entre segmentos. |
-| Red secuencial | Entrena sucesivamente sobre datasets acumulados por segmento. |
-| Red tensor-train | Sigue el esquema progresivo de la familia neuronal. |
+| [Regresión lineal](families/linear-regression.md) | Usa pesos de muestra mayores en segmentos más ATM. |
+| [Random Forest](families/random-forest.md) | Usa pesos de muestra mayores en segmentos más ATM. |
+| [XGBoost](families/xgboost.md) | Entrena fases acumulativas, repartiendo estimadores entre segmentos. |
+| [Red neuronal secuencial](families/neural-networks.md) | Entrena sucesivamente sobre datasets acumulados por segmento. |
+| [Quantum Inspired](families/quantum-inspired.md) | Sigue el esquema progresivo de la familia neuronal, manteniendo el bloque tensorial inspirado en representaciones cuánticas. |
 
 La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos, mientras que modelos iterativos pueden aprender por fases.
+
+## Métrica custom_error_2
+
+Durante el reentrenamiento train/validation se calcula `custom_error_2`, una métrica compuesta análoga a `custom_error_1`, pero adaptada a la fase posterior a la búsqueda por k-folds. Su objetivo es comparar el reentrenamiento de la mejor configuración sin olvidar la calidad ya observada durante selección.
+
+<div class="doc-math">
+\[
+CE_2 = RMSE_{val}+\gamma \cdot CE_1+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
+\]
+</div>
+
+donde:
+
+- $CE_2$ es la métrica compuesta de reentrenamiento.
+- $RMSE_{val}$ es el RMSE de validación en la fase train/validation.
+- $RMSE_{train}$ es el RMSE de entrenamiento en la misma fase.
+- $CE_1$ es el mejor `custom_error_1` heredado de la búsqueda por [k-folds temporales](splits-kfolds.md).
+- $\gamma$ pondera la calidad histórica del candidato durante selección.
+- $\beta$ penaliza el gap de sobreajuste cuando validation es peor que train.
+
+Así, un reentrenamiento no se juzga solo por su RMSE puntual en validation. También se penaliza si el candidato venía de una selección inestable o si al reentrenar aumenta la distancia entre train y validation.
 
 ## Pesos por segmento
 

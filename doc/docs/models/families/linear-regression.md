@@ -1,6 +1,10 @@
 # Regresión lineal
 
-La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con modelos de árboles o redes, sino establecer una referencia mínima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.
+## Objetivo dentro del proyecto
+
+La regresión lineal se usa como baseline interpretable. Su función principal no es competir en flexibilidad con [Random Forest](random-forest.md), [XGBoost](xgboost.md) o [redes neuronales](neural-networks.md), sino establecer una referencia mínima: cuánto de la superficie de volatilidad puede explicarse mediante una combinación lineal de las features financieras diseñadas.
+
+## Estructura del modelo
 
 La forma del modelo es:
 
@@ -12,11 +16,11 @@ La forma del modelo es:
 
 donde:
 
-- Los símbolos de la fórmula se definen en el contexto técnico inmediatamente anterior.
+- $\hat{\sigma}$ es la volatilidad implícita predicha.
+- $x_j$ representa features como `TTEYears`, `sqrtTTEYears`, `logMoneyness`, `logMoneynessSq`, `logForwardMoneyness`, `rate`, `isCall` e `isPut`.
+- $\beta_0$ y $\beta_j$ son los parámetros estimados.
 
-donde $x_j$ son features como `TTEYears`, `sqrtTTEYears`, `logMoneyness`, `logMoneynessSq`, `logForwardMoneyness`, `rate`, `isCall` e `isPut`.
-
-## Configuración
+## Configuración y búsqueda
 
 La familia `LinearRegressionFamily` no define espacio de búsqueda. Se entrena una única configuración:
 
@@ -27,7 +31,9 @@ La familia `LinearRegressionFamily` no define espacio de búsqueda. Se entrena u
 | `n_jobs` | `None` | Ejecución estándar de scikit-learn. |
 | `positive` | `False` | No restringe coeficientes a ser positivos. |
 
-En modo progresivo, el modelo recibe `sample_weight` para ponderar más las observaciones cercanas a ATM. Esto no cambia la forma lineal, pero modifica el objetivo de mínimos cuadrados ponderados:
+## Entrenamiento y progressive training
+
+En entrenamiento estándar se ajusta por mínimos cuadrados. En modo progresivo, el modelo recibe `sample_weight` para ponderar más las observaciones cercanas a ATM:
 
 <div class="doc-math">
 \[
@@ -37,17 +43,13 @@ En modo progresivo, el modelo recibe `sample_weight` para ponderar más las obse
 
 donde:
 
-- El operador $\min$ representa el problema de optimización.
-- $\theta$ o $\beta$ son los parámetros del modelo.
-- $L$ es la función de pérdida.
-- $w_i$ es el peso de la observación cuando aplica.
-- $y_i$ es el valor real y $f(x_i)$ la predicción.
+- $w_i$ es el peso de la observación cuando se activa progressive training.
+- $y_i$ es la volatilidad real y $\beta_0+x_i^\top\beta$ la predicción.
 
-## Interpretabilidad
+El progressive training no cambia la forma lineal. Solo cambia el objetivo ponderado para priorizar la zona central de la superficie.
 
-La ventaja de esta familia es que los coeficientes tienen lectura directa condicionada al resto de features. Sin embargo, esa lectura exige cuidado: si las features están correlacionadas, un coeficiente no representa un efecto causal aislado. En este proyecto, su valor principal es servir como control. Si la regresión lineal obtiene rendimiento razonable, las transformaciones financieras ya capturan una parte significativa de la estructura.
+## Interpretabilidad y cautelas
 
-## Limitaciones
+La ventaja de esta familia es que los coeficientes tienen lectura directa condicionada al resto de features. Esa lectura exige cuidado: si las features están correlacionadas, un coeficiente no representa un efecto causal aislado. En este proyecto, su valor principal es servir como control.
 
-La regresión lineal puede capturar curvatura solo si la feature ya está creada, como `logMoneynessSq`. No aprende automáticamente interacciones no incluidas. Por eso se compara con familias más flexibles y con artefactos de explicabilidad del dashboard.
-
+La regresión lineal puede capturar curvatura solo si la feature ya está creada, como `logMoneynessSq`. No aprende automáticamente interacciones no incluidas. Por eso se compara con familias más flexibles y con los artefactos del dashboard: [SHAP](../../dashboard/global/shap-fundamentals.md), [árboles surrogate](../../dashboard/global/surrogate-trees.md), [regresión simbólica](../../dashboard/global/symbolic-regression.md), [ICE](../../dashboard/behaviour/ice.md) y [ALE](../../dashboard/behaviour/ale.md).

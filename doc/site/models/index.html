@@ -112,7 +112,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -256,24 +256,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Regresión lineal</td>
+<td><a href="families/linear-regression/">Regresión lineal</a></td>
 <td>Baseline interpretable y control de complejidad.</td>
 </tr>
 <tr>
-<td>Random Forest</td>
+<td><a href="families/random-forest/">Random Forest</a></td>
 <td>Modelo no lineal robusto con interacciones por particiones.</td>
 </tr>
 <tr>
-<td>XGBoost</td>
+<td><a href="families/xgboost/">XGBoost</a></td>
 <td>Boosting regularizado con early stopping y alto poder predictivo.</td>
 </tr>
 <tr>
-<td>Red neuronal secuencial</td>
+<td><a href="families/neural-networks/">Red neuronal secuencial</a></td>
 <td>Aproximador flexible con capas densas.</td>
 </tr>
 <tr>
-<td>Red tensor-train</td>
-<td>Variante neuronal que fuerza una estructura compacta de interacciones.</td>
+<td><a href="families/quantum-inspired/">Quantum Inspired</a></td>
+<td>Variante neuronal clásica que usa una estructura tensorial inspirada en computación cuántica para comprimir interacciones.</td>
 </tr>
 </tbody>
 </table>
@@ -289,7 +289,7 @@
 <p>El proyecto aplica dos defensas, desarrolladas con más detalle en <a href="splits-kfolds/">Splits temporales y k-folds</a>:</p>
 <ul>
 <li>Orden temporal: train siempre precede a validation, y validation precede a test. Además, se deja un lag de fechas entre train y test cuando la configuración lo permite.</li>
-<li>Exclusividad de contratos: si un mismo contrato de opción aparece en dos splits, se asigna a un único split según prioridad y se eliminan filas del otro. Así se evita que el modelo vea en entrenamiento el mismo contrato que luego aparece en validación o test.</li>
+<li>Exclusividad de contratos: si un mismo contrato de opción aparece en dos splits, se asigna a un único split según volumetría y prioridad. Primero se conserva el split donde ese contrato tiene más filas; si hay empate, decide la prioridad configurada del split. Así se evita que el modelo vea en entrenamiento el mismo contrato que luego aparece en validación o test.</li>
 </ul>
 <pre><code class="language-mermaid">flowchart LR
     A[Datos ordenados por fecha] --&gt; B[Train]

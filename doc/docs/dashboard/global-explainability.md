@@ -26,7 +26,7 @@ flowchart TD
 
 ## SHAP Explainability
 
-[SHAP](global/shap-fundamentals.md) se usa porque permite comparar modelos heterogéneos bajo una misma semántica de atribución. El proyecto emplea `shap.Explainer` con algoritmo de permutación, adecuado para tratar el estimador como caja negra y explicar familias tan distintas como XGBoost, Random Forest o redes neuronales.
+[SHAP](global/shap-fundamentals.md) se usa porque permite comparar modelos heterogéneos bajo una misma semántica de atribución. El proyecto emplea `shap.Explainer` con algoritmo de permutación, adecuado para tratar el estimador como caja negra y explicar familias tan distintas como [XGBoost](../models/families/xgboost.md), [Random Forest](../models/families/random-forest.md), [redes neuronales](../models/families/neural-networks.md) o [Quantum Inspired](../models/families/quantum-inspired.md).
 
 Las contribuciones cumplen:
 

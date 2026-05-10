@@ -38,7 +38,7 @@ nav:
           - Random Forest: models/families/random-forest.md
           - XGBoost: models/families/xgboost.md
           - Redes neuronales: models/families/neural-networks.md
-          - Red tensor-train: models/families/tensor-train.md
+          - Quantum Inspired: models/families/quantum-inspired.md
   - Dashboard:
       - Cometido del dashboard: dashboard/index.md
       - Generación de artefactos:

@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -270,8 +270,8 @@ CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RM
 <h2 id="early-stopping">Early stopping<a class="headerlink" href="#early-stopping" title="Permanent link">&para;</a></h2>
 <p>El early stopping aparece en las familias con entrenamiento iterativo:</p>
 <ul>
-<li>XGBoost usa un conjunto interno de validación para detener boosting cuando no mejora.</li>
-<li>Redes neuronales monitorizan RMSE de validación interna y restauran los mejores pesos.</li>
+<li><a href="../families/xgboost/">XGBoost</a> usa un conjunto interno de validación para detener boosting cuando no mejora.</li>
+<li><a href="../families/neural-networks/">Redes neuronales</a> y <a href="../families/quantum-inspired/">Quantum Inspired</a> monitorizan RMSE de validación interna y restauran los mejores pesos.</li>
 <li>Las redes pueden reducir learning rate si el progreso se estanca.</li>
 </ul>
 <pre><code class="language-mermaid">flowchart LR
@@ -287,7 +287,7 @@ CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RM
 <p>El conjunto externo de validation del fold no se usa para ajustar early stopping; se reserva para estimar rendimiento del candidato. Esto mantiene separadas las decisiones internas de optimización y la evaluación del fold.</p>
 <h2 id="escalado">Escalado<a class="headerlink" href="#escalado" title="Permanent link">&para;</a></h2>
 <p>Las familias neuronales guardan un scaler para features numéricas. El scaler se ajusta solo con datos permitidos en la fase correspondiente. En evaluación final, el scaler se ajusta con el bloque de entrenamiento disponible y se aplica a test sin aprender de test.</p>
-<p>Los modelos de Árboles y la regresión lineal se guardan sin scaler adicional en el flujo actual.</p>
+<p>Los modelos de árboles, <a href="../families/random-forest/">Random Forest</a> y <a href="../families/xgboost/">XGBoost</a>, y la <a href="../families/linear-regression/">regresión lineal</a> se guardan sin scaler adicional en el flujo actual.</p>
 <h2 id="artefactos-de-entrenamiento">Artefactos de entrenamiento<a class="headerlink" href="#artefactos-de-entrenamiento" title="Permanent link">&para;</a></h2>
 <p>Al terminar la búsqueda por familia se guarda:</p>
 <ul>

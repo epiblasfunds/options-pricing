@@ -112,7 +112,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="models/families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="models/families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="models/families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -230,9 +230,12 @@
 <ul>
 <li>$\hat{\sigma}$ es la volatilidad implícita predicha.</li>
 <li>$f$ es el modelo entrenado.</li>
-<li>$X$ o las variables entre paréntesis son las entradas financieras del modelo.</li>
+<li>$K$ es el strike.</li>
+<li>$F$ es el precio del futuro subyacente.</li>
+<li>$\tau$ es el tiempo hasta vencimiento.</li>
+<li>$r$ es el tipo de interés anualizado utilizado en la valoración.</li>
 </ul>
-<p>donde $K$ es el strike, $F$ es el precio del futuro subyacente, $\tau$ es el tiempo hasta vencimiento y $r$ es el tipo de interés anualizado utilizado en la valoración. La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:</p>
+<p>La variable objetivo procede de resolver la volatilidad $\sigma$ que hace que el precio Black-76 coincida con el precio negociado:</p>
 <div class="doc-math">
 \[
 P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
@@ -275,13 +278,13 @@ P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
 <h2 id="familias-de-modelos-de-volatilidad">Familias de modelos de volatilidad<a class="headerlink" href="#familias-de-modelos-de-volatilidad" title="Permanent link">&para;</a></h2>
 <p>El repositorio implementa una abstracción común para <a href="models/families/">familias de modelos</a>. Cada familia declara su nombre, parámetros fijos, espacio de búsqueda, modo de instanciación, entrenamiento y persistencia. Las familias cubiertas son:</p>
 <ul>
-<li>Regresión lineal, usada como baseline interpretable.</li>
-<li>Random Forest, para capturar no linealidades e interacciones sin exigir escalado.</li>
-<li>XGBoost, para boosting con regularización y early stopping.</li>
-<li>Red neuronal secuencial, para aproximación flexible con escalado numérico.</li>
-<li>Red neuronal inspirada en tensores, que introduce una capa tensor-train como extractor compacto de interacciones.</li>
+<li><a href="models/families/linear-regression/">Regresión lineal</a>, usada como baseline interpretable.</li>
+<li><a href="models/families/random-forest/">Random Forest</a>, para capturar no linealidades e interacciones sin exigir escalado.</li>
+<li><a href="models/families/xgboost/">XGBoost</a>, para boosting con regularización y early stopping.</li>
+<li><a href="models/families/neural-networks/">Red neuronal secuencial</a>, para aproximación flexible con escalado numérico.</li>
+<li><a href="models/families/quantum-inspired/">Quantum Inspired</a>, red neuronal clásica que usa una factorización tensorial inspirada en conceptos de computación cuántica.</li>
 </ul>
-<p>El entrenamiento se divide en tres niveles: <a href="models/splits-kfolds/">búsqueda por k-folds temporales</a> dentro de train, reentrenamiento con los mejores hiperparámetros y evaluación final contra test. Esta separación evita seleccionar hiperparámetros mirando el conjunto final.</p>
+<p>El entrenamiento se divide en tres niveles: <a href="models/splits-kfolds/">búsqueda por k-folds temporales</a> dentro de train, reentrenamiento con los mejores hiperparámetros y evaluación final contra test. Esta separación evita seleccionar hiperparámetros mirando el conjunto final. En los cortes temporales, la <a href="models/splits-kfolds/#exclusividad-de-contratos">exclusividad de contratos</a> se resuelve por volumetría del contrato en cada split y prioridad de split como desempate, de modo que un mismo contrato de opción no queda repartido entre entrenamiento, validación y test.</p>
 <h2 id="metricas-del-dashboard">Métricas del dashboard<a class="headerlink" href="#metricas-del-dashboard" title="Permanent link">&para;</a></h2>
 <p>El dashboard muestra métricas de error y fidelidad que sirven para diagnosticar tanto el modelo principal como sus aproximaciones explicables:</p>
 <table>
@@ -388,5 +391,5 @@ P_{mercado}=P_{Black76}(F,K,\tau,r,\sigma)
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-05-09 22:44:11.257928+00:00
+Build Date UTC : 2026-05-10 10:40:15.527704+00:00
 -->

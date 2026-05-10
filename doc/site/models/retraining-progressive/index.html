@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -257,28 +257,46 @@
 </thead>
 <tbody>
 <tr>
-<td>Lineal</td>
+<td><a href="../families/linear-regression/">Regresión lineal</a></td>
 <td>Usa pesos de muestra mayores en segmentos más ATM.</td>
 </tr>
 <tr>
-<td>Random Forest</td>
+<td><a href="../families/random-forest/">Random Forest</a></td>
 <td>Usa pesos de muestra mayores en segmentos más ATM.</td>
 </tr>
 <tr>
-<td>XGBoost</td>
+<td><a href="../families/xgboost/">XGBoost</a></td>
 <td>Entrena fases acumulativas, repartiendo estimadores entre segmentos.</td>
 </tr>
 <tr>
-<td>Red secuencial</td>
+<td><a href="../families/neural-networks/">Red neuronal secuencial</a></td>
 <td>Entrena sucesivamente sobre datasets acumulados por segmento.</td>
 </tr>
 <tr>
-<td>Red tensor-train</td>
-<td>Sigue el esquema progresivo de la familia neuronal.</td>
+<td><a href="../families/quantum-inspired/">Quantum Inspired</a></td>
+<td>Sigue el esquema progresivo de la familia neuronal, manteniendo el bloque tensorial inspirado en representaciones cuánticas.</td>
 </tr>
 </tbody>
 </table>
 <p>La diferencia clave es que modelos no iterativos reciben el sesgo ATM como pesos, mientras que modelos iterativos pueden aprender por fases.</p>
+<h2 id="metrica-custom_error_2">Métrica custom_error_2<a class="headerlink" href="#metrica-custom_error_2" title="Permanent link">&para;</a></h2>
+<p>Durante el reentrenamiento train/validation se calcula <code>custom_error_2</code>, una métrica compuesta análoga a <code>custom_error_1</code>, pero adaptada a la fase posterior a la búsqueda por k-folds. Su objetivo es comparar el reentrenamiento de la mejor configuración sin olvidar la calidad ya observada durante selección.</p>
+<div class="doc-math">
+\[
+CE_2 = RMSE_{val}+\gamma \cdot CE_1+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$CE_2$ es la métrica compuesta de reentrenamiento.</li>
+<li>$RMSE_{val}$ es el RMSE de validación en la fase train/validation.</li>
+<li>$RMSE_{train}$ es el RMSE de entrenamiento en la misma fase.</li>
+<li>$CE_1$ es el mejor <code>custom_error_1</code> heredado de la búsqueda por <a href="../splits-kfolds/">k-folds temporales</a>.</li>
+<li>$\gamma$ pondera la calidad histórica del candidato durante selección.</li>
+<li>$\beta$ penaliza el gap de sobreajuste cuando validation es peor que train.</li>
+</ul>
+<p>Así, un reentrenamiento no se juzga solo por su RMSE puntual en validation. También se penaliza si el candidato venía de una selección inestable o si al reentrenar aumenta la distancia entre train y validation.</p>
 <h2 id="pesos-por-segmento">Pesos por segmento<a class="headerlink" href="#pesos-por-segmento" title="Permanent link">&para;</a></h2>
 <p>Conceptualmente, si hay $S$ segmentos ordenados de ATM a alas, los pesos decrecen con el segmento:</p>
 <div class="doc-math">

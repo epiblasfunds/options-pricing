@@ -89,11 +89,12 @@ CE_2 = RMSE_{val} + \gamma \cdot CE_1 + \beta \cdot \max(0, RMSE_{val}-RMSE_{tra
 
 donde:
 
-- $CE_1$ es la métrica compuesta de selección.
-- $RMSE_{val}$ es el RMSE medio de validación.
-- $RMSE_{train}$ es el RMSE medio de entrenamiento.
-- $std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.
-- $\alpha$ y $\beta$ son penalizaciones configuradas.
+- $CE_2$ es la métrica compuesta de reentrenamiento train/validation.
+- $RMSE_{val}$ es el RMSE de validación en el reentrenamiento.
+- $RMSE_{train}$ es el RMSE de entrenamiento en el reentrenamiento.
+- $CE_1$ es el mejor custom error heredado de la búsqueda por k-folds.
+- $\gamma$ pondera la calidad histórica del candidato seleccionado.
+- $\beta$ penaliza el gap de sobreajuste cuando validation es peor que train.
 
 La primera se usa en búsqueda por k-folds; la segunda resume el reentrenamiento contra validación.
 

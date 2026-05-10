@@ -54,7 +54,7 @@ donde:
 
 Esta magnitud mide cuánto desplaza una feature la predicción en promedio, sin conservar el signo. Es adecuada para ranking, pero no para concluir dirección. Una feature con efectos positivos y negativos fuertes puede tener importancia alta aunque su efecto medio firmado sea cercano a cero.
 
-La diferencia con la importancia de árboles es relevante. La importancia de impureza de un Random Forest depende de splits internos del propio estimador; la importancia [SHAP](shap-fundamentals.md) se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar XGBoost, redes y lineal bajo la misma medida visual.
+La diferencia con la importancia de árboles es relevante. La importancia de impureza de un [Random Forest](../../models/families/random-forest.md) depende de splits internos del propio estimador; la importancia [SHAP](shap-fundamentals.md) se calcula sobre el modelo ya entrenado y conserva la semántica de atribución aditiva. Esto permite comparar [XGBoost](../../models/families/xgboost.md), [redes neuronales](../../models/families/neural-networks.md), [Quantum Inspired](../../models/families/quantum-inspired.md) y [regresión lineal](../../models/families/linear-regression.md) bajo la misma medida visual.
 
 ## Dependence plot
 

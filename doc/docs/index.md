@@ -92,13 +92,13 @@ El resultado final del ETL es [`VOLATILITY_DB`](data/volatility.md), una tabla d
 
 El repositorio implementa una abstracción común para [familias de modelos](models/families.md). Cada familia declara su nombre, parámetros fijos, espacio de búsqueda, modo de instanciación, entrenamiento y persistencia. Las familias cubiertas son:
 
-- Regresión lineal, usada como baseline interpretable.
-- Random Forest, para capturar no linealidades e interacciones sin exigir escalado.
-- XGBoost, para boosting con regularización y early stopping.
-- Red neuronal secuencial, para aproximación flexible con escalado numérico.
-- Red neuronal inspirada en tensores, que introduce una capa tensor-train como extractor compacto de interacciones.
+- [Regresión lineal](models/families/linear-regression.md), usada como baseline interpretable.
+- [Random Forest](models/families/random-forest.md), para capturar no linealidades e interacciones sin exigir escalado.
+- [XGBoost](models/families/xgboost.md), para boosting con regularización y early stopping.
+- [Red neuronal secuencial](models/families/neural-networks.md), para aproximación flexible con escalado numérico.
+- [Quantum Inspired](models/families/quantum-inspired.md), red neuronal clásica que usa una factorización tensorial inspirada en conceptos de computación cuántica.
 
-El entrenamiento se divide en tres niveles: [búsqueda por k-folds temporales](models/splits-kfolds.md) dentro de train, reentrenamiento con los mejores hiperparámetros y evaluación final contra test. Esta separación evita seleccionar hiperparámetros mirando el conjunto final.
+El entrenamiento se divide en tres niveles: [búsqueda por k-folds temporales](models/splits-kfolds.md) dentro de train, reentrenamiento con los mejores hiperparámetros y evaluación final contra test. Esta separación evita seleccionar hiperparámetros mirando el conjunto final. En los cortes temporales, la [exclusividad de contratos](models/splits-kfolds.md#exclusividad-de-contratos) se resuelve por volumetría del contrato en cada split y prioridad de split como desempate, de modo que un mismo contrato de opción no queda repartido entre entrenamiento, validación y test.
 
 ## Métricas del dashboard
 

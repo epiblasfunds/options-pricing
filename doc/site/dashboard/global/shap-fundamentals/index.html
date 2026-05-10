@@ -100,7 +100,7 @@
                 </li>
                 <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/tensor-train/">Red tensor-train</a>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
                 </li>
     </ul>
                   </li>
@@ -242,7 +242,7 @@ v(S \cup \{j\})-v(S)
 </ul>
 <p>Esta definición aporta eficiencia, simetría, tratamiento nulo de features irrelevantes y consistencia aditiva. Por eso resulta más defendible que una importancia global sin descomposición local.</p>
 <h2 id="aproximacion-por-permutacion">Aproximación por permutación<a class="headerlink" href="#aproximacion-por-permutacion" title="Permanent link">&para;</a></h2>
-<p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta variante trata el modelo como caja negra, por lo que sirve para regresión lineal, Random Forest, XGBoost y redes neuronales con una interfaz común.</p>
+<p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta variante trata el modelo como caja negra, por lo que sirve para <a href="../../../models/families/linear-regression/">regresión lineal</a>, <a href="../../../models/families/random-forest/">Random Forest</a>, <a href="../../../models/families/xgboost/">XGBoost</a>, <a href="../../../models/families/neural-networks/">redes neuronales</a> y <a href="../../../models/families/quantum-inspired/">Quantum Inspired</a> con una interfaz común.</p>
 <p>El presupuesto de evaluación por fila es:</p>
 <div class="doc-math">
 \[
