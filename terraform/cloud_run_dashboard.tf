@@ -27,7 +27,7 @@ resource "google_cloud_run_service" "dashboard" {
 
         resources {
           limits = {
-            memory = "1Gi"
+            memory = "2Gi"
             cpu    = "1"
           }
         }
