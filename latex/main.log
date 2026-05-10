@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  10 MAY 2026 20:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  10 MAY 2026 20:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1825,19 +1825,19 @@ Package pdftex.def Info: ai_volatility_options_cover.pdf  used on input line 84
 al/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc} <./ai_volatility_option
 s_cover.pdf>] (./prefaces/resumen.tex
 LaTeX Font Info:    Trying to load font information for TS1+pplj on input line 
-16.
+18.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/ts1pplj.fd
 File: ts1pplj.fd 2004/09/06 font definitions for TS1/pplj.
 )
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 11.40997pt on input line 22.
+(Font)              scaled to size 11.40997pt on input line 24.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 6.25204pt on input line 22.
+(Font)              scaled to size 6.25204pt on input line 24.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 11.40997pt on input line 22.
+(Font)              scaled to size 11.40997pt on input line 24.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 6.25204pt on input line 22.
+(Font)              scaled to size 6.25204pt on input line 24.
  [2])
 (./prefaces/abstract.tex [3])
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
@@ -1883,97 +1883,86 @@ Class scrreprt Warning: \float@addtolists detected!
 (scrreprt)              \float@addtolist interface has been
 (scrreprt)              removed from all KOMA-Script classes.
 
-[6
-
-]
-chapter 2.
-[7
-
-]
-LaTeX Info: Redefining \. on input line 113.
-LaTeX Info: Redefining \% on input line 113.
- [8]
-chapter 3.
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/pplj/m/sc/12'.
 (microtype)             Ignoring protrusion settings for this character.
+[6
+
+]
+LaTeX Info: Redefining \. on input line 128.
+LaTeX Info: Redefining \% on input line 128.
+ [7]
+Overfull \hbox (21.69167pt too wide) in paragraph at lines 159--160
+ [][] 
+ []
+
+LaTeX Info: Redefining \. on input line 171.
+LaTeX Info: Redefining \% on input line 171.
+[8]
+chapter 2.
 [9
 
 ]
-LaTeX Info: Redefining \. on input line 148.
-LaTeX Info: Redefining \% on input line 148.
+LaTeX Info: Redefining \. on input line 255.
+LaTeX Info: Redefining \% on input line 255.
  [10]
-Overfull \hbox (21.69167pt too wide) in paragraph at lines 179--180
- [][] 
- []
-
-LaTeX Info: Redefining \. on input line 191.
-LaTeX Info: Redefining \% on input line 191.
-[11]
-chapter 4.
-[12
-
-]
-LaTeX Info: Redefining \. on input line 275.
-LaTeX Info: Redefining \% on input line 275.
+LaTeX Info: Redefining \. on input line 279.
+LaTeX Info: Redefining \% on input line 279.
+ [11]
+LaTeX Info: Redefining \. on input line 312.
+LaTeX Info: Redefining \% on input line 312.
+ [12]
+LaTeX Info: Redefining \. on input line 315.
+LaTeX Info: Redefining \% on input line 315.
  [13]
-LaTeX Info: Redefining \. on input line 299.
-LaTeX Info: Redefining \% on input line 299.
- [14]
-LaTeX Info: Redefining \. on input line 332.
-LaTeX Info: Redefining \% on input line 332.
- [15]
-LaTeX Info: Redefining \. on input line 335.
-LaTeX Info: Redefining \% on input line 335.
- [16]
-chapter 5.
+chapter 3.
 
-Overfull \hbox (10.31056pt too wide) in paragraph at lines 397--398
+Overfull \hbox (10.31056pt too wide) in paragraph at lines 377--378
  [][] 
  []
 
-[17
+[14
 
 ]
-LaTeX Font Info:    Trying to load font information for T1+fvm on input line 41
+LaTeX Font Info:    Trying to load font information for T1+fvm on input line 39
 4.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/bera/t1fvm.fd
 File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 10.20007pt on input line 414.
+(Font)              scaled to size 10.20007pt on input line 394.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `fvm' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Overfull \hbox (52.53357pt too wide) in paragraph at lines 414--415
+Overfull \hbox (52.53357pt too wide) in paragraph at lines 394--395
 []\T1/pplj/m/n/12 Las en-tra-das raw vi-si-bles son \T1/fvm/m/n/12 OptionType\T
 1/pplj/m/n/12 , \T1/fvm/m/n/12 StrikePrice\T1/pplj/m/n/12 , \T1/fvm/m/n/12 Unde
 rlyingPrice\T1/pplj/m/n/12 , \T1/fvm/m/n/12 TimeToExpiration
  []
 
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.30756pt on input line 425.
-LaTeX Info: Redefining \. on input line 437.
-LaTeX Info: Redefining \% on input line 437.
-[18]
-Underfull \hbox (badness 1454) in paragraph at lines 456--456
+(Font)              scaled to size 9.30756pt on input line 405.
+LaTeX Info: Redefining \. on input line 417.
+LaTeX Info: Redefining \% on input line 417.
+[15]
+Underfull \hbox (badness 1454) in paragraph at lines 436--436
 []|\T1/pplj/m/n/10.95 Red neu-ro-nal se-cuen-
  []
 
 
-Overfull \hbox (18.84639pt too wide) in paragraph at lines 487--488
+Overfull \hbox (18.84639pt too wide) in paragraph at lines 467--468
  [][] 
  []
 
-LaTeX Info: Redefining \. on input line 494.
-LaTeX Info: Redefining \% on input line 494.
-[19]
-LaTeX Info: Redefining \. on input line 494.
-LaTeX Info: Redefining \% on input line 494.
- [20]
-Overfull \hbox (31.23169pt too wide) in paragraph at lines 513--514
+LaTeX Info: Redefining \. on input line 474.
+LaTeX Info: Redefining \% on input line 474.
+[16]
+LaTeX Info: Redefining \. on input line 474.
+LaTeX Info: Redefining \% on input line 474.
+ [17]
+Overfull \hbox (31.23169pt too wide) in paragraph at lines 493--494
 []\T1/pplj/m/n/12 El pro-yec-to in-clu-ye una va-rian-te pro-gres-si-ve ATM. Or
 -de-na ob-ser-va-cio-nes por $\OMS/zplm/m/n/12 j []\OT1/zplm/m/n/12 (\OML/zplm/
 m/it/12 F\OT1/zplm/m/n/12 /\OML/zplm/m/it/12 K\OT1/zplm/m/n/12 )\OMS/zplm/m/n/1
@@ -1981,85 +1970,85 @@ m/it/12 F\OT1/zplm/m/n/12 /\OML/zplm/m/it/12 K\OT1/zplm/m/n/12 )\OMS/zplm/m/n/1
  []
 
 
-Overfull \hbox (70.58951pt too wide) in paragraph at lines 564--565
+Overfull \hbox (70.58951pt too wide) in paragraph at lines 544--545
 \T1/pplj/m/n/12 ción y ex-pli-ca-bi-li-dad lo-cal: \T1/fvm/m/n/12 /health\T1/pp
 lj/m/n/12 , \T1/fvm/m/n/12 /run_model/predict/ \T1/pplj/m/n/12 y \T1/fvm/m/n/12
  /run_model/sample_explainability/\T1/pplj/m/n/12 .
  []
 
-LaTeX Info: Redefining \. on input line 565.
-LaTeX Info: Redefining \% on input line 565.
-[21]
-LaTeX Info: Redefining \. on input line 565.
-LaTeX Info: Redefining \% on input line 565.
+LaTeX Info: Redefining \. on input line 545.
+LaTeX Info: Redefining \% on input line 545.
+[18]
+LaTeX Info: Redefining \. on input line 545.
+LaTeX Info: Redefining \% on input line 545.
+ [19]
+Overfull \hbox (95.63371pt too wide) in paragraph at lines 568--569
+ [][] 
+ []
+
+LaTeX Info: Redefining \. on input line 603.
+LaTeX Info: Redefining \% on input line 603.
+[20]
+LaTeX Info: Redefining \. on input line 616.
+LaTeX Info: Redefining \% on input line 616.
+ [21]
+LaTeX Info: Redefining \. on input line 647.
+LaTeX Info: Redefining \% on input line 647.
  [22]
-Overfull \hbox (95.63371pt too wide) in paragraph at lines 588--589
- [][] 
- []
+chapter 4.
 
-LaTeX Info: Redefining \. on input line 623.
-LaTeX Info: Redefining \% on input line 623.
-[23]
-LaTeX Info: Redefining \. on input line 636.
-LaTeX Info: Redefining \% on input line 636.
- [24]
-LaTeX Info: Redefining \. on input line 667.
-LaTeX Info: Redefining \% on input line 667.
- [25]
-chapter 6.
-
-Overfull \hbox (3.43959pt too wide) in paragraph at lines 686--702
+Overfull \hbox (3.43959pt too wide) in paragraph at lines 666--682
  [][] 
  []
 
 
-Overfull \hbox (29.71236pt too wide) in paragraph at lines 718--727
+Overfull \hbox (29.71236pt too wide) in paragraph at lines 698--707
  [][] 
  []
 
-[26
+[23
 
 ]
-LaTeX Info: Redefining \. on input line 771.
-LaTeX Info: Redefining \% on input line 771.
- [27]
-LaTeX Info: Redefining \. on input line 807.
-LaTeX Info: Redefining \% on input line 807.
- [28]
+LaTeX Info: Redefining \. on input line 751.
+LaTeX Info: Redefining \% on input line 751.
+ [24]
+LaTeX Info: Redefining \. on input line 787.
+LaTeX Info: Redefining \% on input line 787.
+ [25]
+LaTeX Info: Redefining \. on input line 815.
+LaTeX Info: Redefining \% on input line 815.
+ [26]
 LaTeX Info: Redefining \. on input line 835.
 LaTeX Info: Redefining \% on input line 835.
- [29]
-LaTeX Info: Redefining \. on input line 855.
-LaTeX Info: Redefining \% on input line 855.
- [30]
-chapter 7.
-[31
+ [27]
+chapter 5.
+[28
 
 ]
 chapter A.
-[32
+[29
 
 ]
 chapter B.
-[33
+[30
 
 ]
 chapter C.
 
-Overfull \hbox (33.07277pt too wide) in paragraph at lines 927--928
+Overfull \hbox (33.07277pt too wide) in paragraph at lines 907--908
  [][] 
  []
 
-[34
+[31
 
 ]
 chapter D.
-(./main.bbl [35
+(./main.bbl [32
 
-]) [36
+]) [33
 
 ]
-runsystem(latexminted cleantemp  --timestamp 20260510202608Z FAD58DE7366495DB46
+runsystem(latexminted cleantemp  --timestamp 20260510204502Z FAD58DE7366495DB46
 50CFEFAC2FCD61)...executed safely (allowed).
 
  (./main.aux
@@ -2267,13 +2256,13 @@ prefaces/abstract.tex
 
  ) 
 Here is how much of TeX's memory you used:
- 44528 strings out of 467349
- 925266 string characters out of 5415641
- 1696684 words of memory out of 5000000
- 72635 multiletter control sequences out of 15000+600000
- 719070 words of font info for 206 fonts, out of 8000000 for 9000
+ 44395 strings out of 467349
+ 922567 string characters out of 5415641
+ 1695684 words of memory out of 5000000
+ 72531 multiletter control sequences out of 15000+600000
+ 711204 words of font info for 182 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,23n,127p,11207b,981s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,23n,124p,11207b,981s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
@@ -2287,10 +2276,10 @@ texmf-dist/fonts/type1/public/bera/fvmr8a.pfb></usr/local/texlive/2026/texmf-di
 st/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2026/texmf-dist/font
 s/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1
 /urw/palatino/uplri8a.pfb>
-Output written on main.pdf (36 pages, 238561 bytes).
+Output written on main.pdf (33 pages, 234452 bytes).
 PDF statistics:
- 644 PDF objects out of 1000 (max. 8388607)
- 573 compressed objects within 6 object streams
- 149 named destinations out of 1000 (max. 500000)
- 31146 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 620 PDF objects out of 1000 (max. 8388607)
+ 552 compressed objects within 6 object streams
+ 144 named destinations out of 1000 (max. 500000)
+ 18842 words of extra memory for PDF output out of 20736 (max. 10000000)
 

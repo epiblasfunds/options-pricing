@@ -90,26 +90,6 @@ manychapters,pdfspacing]{classicthesis}
 
 \tableofcontents
 
-\chapter{Título del trabajo}
-\label{chap:titulo}
-
-El presente Trabajo Final de Máster se titula \emph{\ProjectTitle}. El título sintetiza la contribución principal del proyecto: construir modelos de inteligencia artificial para estimar volatilidad implícita en opciones del IBEX y convertir dichas estimaciones en un sistema explicable, consultable y operable mediante API y dashboard.
-
-La formulación del título responde a tres decisiones de alcance. En primer lugar, el objeto financiero del trabajo es la volatilidad implícita, no el precio de la opción como variable aislada. En segundo lugar, el dominio empírico son opciones y futuros sobre IBEX, con datos de operaciones y contratos tratados mediante un pipeline específico. En tercer lugar, la aportación no se limita a entrenar un predictor; exige que el modelo pueda ser inspeccionado, validado y usado por perfiles técnicos o financieros mediante artefactos de explicabilidad.
-
-Esta memoria se ha estructurado conforme a la guía orientativa del Máster: resumen, introducción, marco teórico, metodología, resultados y discusión, conclusiones y bibliografía. Los desarrollos técnicos que podrían interrumpir la lectura principal se desplazan a anexos, especialmente los relativos a SHAP, regresión simbólica, modelos surrogate y entrenamiento progresivo centrado en ATM.
-
-\chapter{Resumen}
-\label{chap:resumen}
-
-Este trabajo desarrolla una solución completa para estimar y explicar la volatilidad implícita de opciones sobre el IBEX. La volatilidad implícita no se observa directamente en mercado: se obtiene invirtiendo un modelo de valoración, en este caso Black-76, hasta encontrar la volatilidad que reproduce el precio negociado. A partir de operaciones reales, contratos, futuros subyacentes y series de tipos EONIA/\texteuro{}STR, el proyecto construye una base de volatilidad implícita, entrena varias familias de modelos de regresión y genera artefactos explicables para analizar su comportamiento.
-
-La metodología combina ingeniería de datos, modelización financiera, aprendizaje automático y despliegue cloud. El ETL enlaza cada opción con su futuro subyacente, valida coherencia de contratos, calcula tiempo a vencimiento y resuelve volatilidad implícita. Sobre esta base se diseñan variables financieras como moneyness, log-moneyness, vencimiento en años, raíz del vencimiento y forward moneyness. La comparación de modelos incluye regresión lineal, Random Forest, XGBoost, redes neuronales secuenciales y una arquitectura clásica \emph{quantum inspired}. La selección se realiza con splits temporales, k-folds temporales, métricas de error y penalizaciones por inestabilidad y sobreajuste.
-
-La explicabilidad se incorpora como requisito funcional. El dashboard permite analizar superficies de volatilidad, curvas ICE y ALE, explicabilidad global con SHAP, explicabilidad local mediante waterfall, modelos equivalentes por árboles surrogate y regresión simbólica, vecinos históricos y diagnósticos de error. Además, una API FastAPI permite consultar predicciones y explicaciones locales con los mismos artefactos que usa el dashboard. La infraestructura se prepara para ejecución local o despliegue en Google Cloud mediante Docker, Cloud Storage, Artifact Registry, Cloud Run y Terraform.
-
-La sección de resultados queda preparada para insertar las métricas definitivas. En ella se deberá comparar el rendimiento de todas las familias, evaluar entrenamiento estándar frente a progressive ATM, seleccionar el mejor modelo y analizar con detalle las vistas del dashboard. La contribución central del trabajo es, por tanto, una arquitectura reproducible donde la precisión predictiva se evalúa junto con la coherencia financiera, la robustez y la capacidad de explicación.
-
 \chapter{Introducción}
 \label{chap:introduccion}
 
