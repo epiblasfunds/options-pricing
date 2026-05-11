@@ -40,8 +40,8 @@ services:
       context: ..
       dockerfile: dockerfiles/latex/Dockerfile
     volumes:
-      - .:/work
-    working_dir: /work
+      - ..:/repo
+    working_dir: /repo/latex
     command: ["latexmk", "-pdf", "main.tex"]
 
   clean-latex:
@@ -49,8 +49,8 @@ services:
       context: ..
       dockerfile: dockerfiles/latex/Dockerfile
     volumes:
-      - .:/work
-    working_dir: /work
+      - ..:/repo
+    working_dir: /repo/latex
     command: ["latexmk", "-c", "main.tex"]
 
   clean-latex-full:
@@ -58,6 +58,6 @@ services:
       context: ..
       dockerfile: dockerfiles/latex/Dockerfile
     volumes:
-      - .:/work
-    working_dir: /work
+      - ..:/repo
+    working_dir: /repo/latex
     command: ["latexmk", "-C", "main.tex"]

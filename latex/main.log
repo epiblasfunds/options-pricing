@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  10 MAY 2026 20:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  11 MAY 2026 19:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -949,6 +949,101 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \backup@length=\skip81
 \ar@cellbox=\box88
 )
+(/usr/local/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
+\TX@col@width=\dimen308
+\TX@old@table=\dimen309
+\TX@old@col=\dimen310
+\TX@target=\dimen311
+\TX@delta=\dimen312
+\TX@cols=\count371
+\TX@ftn=\toks48
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+Package: adjustbox 2025/02/26 v1.3c Adjusting TeX boxes (trim, clip, ...)
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2025/11/04 v2.10 package option processing (HA)
+
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks49
+\XKV@tempa@toks=\toks50
+\XKV@tempb@toks=\toks51
+)
+\XKV@depth=\count372
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/adjcalc.sty
+Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back
+-ends (calc, etex, pgfmath)
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/trimclip.sty
+Package: trimclip 2025/02/21 v1.2a Trim and clip general TeX material
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/collectbox/collectbox.sty
+Package: collectbox 2022/10/17 v0.4c Collect macro arguments as boxes
+\collectedbox=\box89
+)
+\tc@llx=\dimen313
+\tc@lly=\dimen314
+\tc@urx=\dimen315
+\tc@ury=\dimen316
+Package trimclip Info: Using driver 'tc-pdftex.def'.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/tc-pdftex.def
+File: tc-pdftex.def 2025/02/26 v2.3 Clipping driver for pdftex
+))
+\adjbox@Width=\dimen317
+\adjbox@Height=\dimen318
+\adjbox@Depth=\dimen319
+\adjbox@Totalheight=\dimen320
+\adjbox@pwidth=\dimen321
+\adjbox@pheight=\dimen322
+\adjbox@pdepth=\dimen323
+\adjbox@ptotalheight=\dimen324
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
+Package: ifoddpage 2022/10/18 v1.2 Conditionals for odd/even page detection
+\c@checkoddpage=\count373
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/varwidth/varwidth.sty
+Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
+\@vwid@box=\box90
+\sift@deathcycles=\count374
+\@vwid@loff=\dimen325
+\@vwid@roff=\dimen326
+)
+==> First Aid for varwidth.sty applied!
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype.sty
+Package: microtype 2026/03/01 v3.2d Micro-typographical refinements (RS)
+\MT@toks=\toks52
+\MT@tempbox=\box91
+\MT@count=\count375
+LaTeX Info: Redefining \noprotrusionifhmode on input line 1084.
+LaTeX Info: Redefining \leftprotrusion on input line 1085.
+\MT@prot@toks=\toks53
+LaTeX Info: Redefining \rightprotrusion on input line 1104.
+LaTeX Info: Redefining \textls on input line 1449.
+\MT@outer@kern=\dimen327
+LaTeX Info: Redefining \microtypecontext on input line 2053.
+LaTeX Info: Redefining \textmicrotypecontext on input line 2070.
+\MT@listname@count=\count376
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype-pdftex.def
+File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
+
+LaTeX Info: Redefining \lsstyle on input line 944.
+LaTeX Info: Redefining \lslig on input line 944.
+\MT@outer@space=\skip82
+)
+Package microtype Info: Loading configuration file microtype.cfg.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype.cfg
+File: microtype.cfg 2026/03/01 v3.2d microtype main configuration file (RS)
+)
+LaTeX Info: Redefining \microtypesetup on input line 3065.
+)
 (./classicthesis.sty
 Package: classicthesis 2015/09/06 v4.2 Typographic style for a classic-looking 
 thesis
@@ -965,35 +1060,6 @@ Package: mathpazo 2020/03/25 PSNFSS-v9.3 Palatino w/ Pazo Math (D.Puga, WaS)
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/bera/beramono.sty
 Package: beramono 2004/01/31 (WaS)
-)
-(/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype.sty
-Package: microtype 2026/03/01 v3.2d Micro-typographical refinements (RS)
-\MT@toks=\toks48
-\MT@tempbox=\box89
-\MT@count=\count371
-LaTeX Info: Redefining \noprotrusionifhmode on input line 1084.
-LaTeX Info: Redefining \leftprotrusion on input line 1085.
-\MT@prot@toks=\toks49
-LaTeX Info: Redefining \rightprotrusion on input line 1104.
-LaTeX Info: Redefining \textls on input line 1449.
-\MT@outer@kern=\dimen308
-LaTeX Info: Redefining \microtypecontext on input line 2053.
-LaTeX Info: Redefining \textmicrotypecontext on input line 2070.
-\MT@listname@count=\count372
-
-(/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype-pdftex.def
-File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
-
-LaTeX Info: Redefining \lsstyle on input line 944.
-LaTeX Info: Redefining \lslig on input line 944.
-\MT@outer@space=\skip82
-)
-Package microtype Info: Loading configuration file microtype.cfg.
-
-(/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/microtype.cfg
-File: microtype.cfg 2026/03/01 v3.2d microtype main configuration file (RS)
-)
-LaTeX Info: Redefining \microtypesetup on input line 3065.
 )
 Package classicthesis Info: A5 paper, Palatino or other on input line 279.
 Package typearea Info: These are the values describing the layout:
@@ -1051,15 +1117,15 @@ nesformat
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2025/01/04 v2.17 Sectioning titles
-\ttl@box=\box90
+\ttl@box=\box92
 \beforetitleunit=\skip83
 \aftertitleunit=\skip84
-\ttl@plus=\dimen309
-\ttl@minus=\dimen310
-\ttl@toksa=\toks50
-\titlewidth=\dimen311
-\titlewidthlast=\dimen312
-\titlewidthfirst=\dimen313
+\ttl@plus=\dimen328
+\ttl@minus=\dimen329
+\ttl@toksa=\toks54
+\titlewidth=\dimen330
+\titlewidthlast=\dimen331
+\titlewidthfirst=\dimen332
 
 
 Package titlesec Warning: Non standard sectioning command \section
@@ -1135,8 +1201,8 @@ Package tocloft Info: The document has chapter divisions on input line 51.
 \cftbeforefigskip=\skip111
 \cftfigindent=\skip112
 \cftfignumwidth=\skip113
-\c@lofdepth=\count373
-\c@lotdepth=\count374
+\c@lofdepth=\count377
+\c@lotdepth=\count378
 \cftbeforelottitleskip=\skip114
 \cftafterlottitleskip=\skip115
 \cftbeforetabskip=\skip116
@@ -1163,11 +1229,11 @@ Package remreset Warning: The remreset package is obsolete:
 )) (/usr/local/texlive/2026/texmf-dist/tex/latex/enumitem/enumitem.sty
 Package: enumitem 2025/02/06 v3.11 Customized lists
 \labelindent=\skip124
-\enit@outerparindent=\dimen314
-\enit@toks=\toks51
-\enit@inbox=\box91
-\enit@count@id=\count375
-\enitdp@description=\count376
+\enit@outerparindent=\dimen333
+\enit@toks=\toks55
+\enit@inbox=\box93
+\enit@count@id=\count379
+\enitdp@description=\count380
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -1175,18 +1241,18 @@ Package: geometry 2026/03/07 v6.0 Page Geometry
 (/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
-\Gm@cnth=\count377
-\Gm@cntv=\count378
-\c@Gm@tempcnt=\count379
-\Gm@bindingoffset=\dimen315
-\Gm@wd@mp=\dimen316
-\Gm@odd@mp=\dimen317
-\Gm@even@mp=\dimen318
-\Gm@layoutwidth=\dimen319
-\Gm@layoutheight=\dimen320
-\Gm@layouthoffset=\dimen321
-\Gm@layoutvoffset=\dimen322
-\Gm@dimlist=\toks52
+\Gm@cnth=\count381
+\Gm@cntv=\count382
+\c@Gm@tempcnt=\count383
+\Gm@bindingoffset=\dimen334
+\Gm@wd@mp=\dimen335
+\Gm@odd@mp=\dimen336
+\Gm@even@mp=\dimen337
+\Gm@layoutwidth=\dimen338
+\Gm@layoutheight=\dimen339
+\Gm@layouthoffset=\dimen340
+\Gm@layoutvoffset=\dimen341
+\Gm@dimlist=\toks56
 )
 
 Class scrreprt Warning: Usage of package `parskip' together
@@ -1194,7 +1260,7 @@ Class scrreprt Warning: Usage of package `parskip' together
 (scrreprt)              I'd suggest to use option
 (scrreprt)              `parskip' with one of it's several values.
 (scrreprt)              Nevertheless, using requested
-(scrreprt)              package `parskip' on input line 44.
+(scrreprt)              package `parskip' on input line 48.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/parskip/parskip.sty
 Package: parskip 2021-03-14 v2.0h non-zero parskip adjustments
@@ -1204,15 +1270,15 @@ Package: variables 2026/05/10 Re-usable thesis information
 ) (./macros.tex
 (/usr/local/texlive/2026/texmf-dist/tex/latex/amscls/amsthm.sty
 Package: amsthm 2020/05/29 v2.20.6
-\thm@style=\toks53
-\thm@bodyfont=\toks54
-\thm@headfont=\toks55
-\thm@notefont=\toks56
-\thm@headpunct=\toks57
+\thm@style=\toks57
+\thm@bodyfont=\toks58
+\thm@headfont=\toks59
+\thm@notefont=\toks60
+\thm@headpunct=\toks61
 \thm@preskip=\skip125
 \thm@postskip=\skip126
 \thm@headsep=\skip127
-\dth@everypar=\toks58
+\dth@everypar=\toks62
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/xpatch/xpatch.sty
 (/usr/local/texlive/2026/texmf-dist/tex/latex/l3kernel/expl3.sty
@@ -1220,7 +1286,7 @@ Package: expl3 2026-03-20 L3 programming layer (loader)
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count380
+\l__color_backend_stack_int=\count384
 ))
 Package: xpatch 2020/03/25 v0.3a Extending etoolbox patching commands
 
@@ -1280,83 +1346,83 @@ File: tikzlibraryshapes.multipart.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibrary
 shapes.multipart.code.tex
 File: pgflibraryshapes.multipart.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfnodepartlowerbox=\box92
-\pgfnodeparttwobox=\box93
-\pgfnodepartthreebox=\box94
-\pgfnodepartfourbox=\box95
-\pgfnodeparttwentybox=\box96
-\pgfnodepartnineteenbox=\box97
-\pgfnodeparteighteenbox=\box98
-\pgfnodepartseventeenbox=\box99
-\pgfnodepartsixteenbox=\box100
-\pgfnodepartfifteenbox=\box101
-\pgfnodepartfourteenbox=\box102
-\pgfnodepartthirteenbox=\box103
-\pgfnodeparttwelvebox=\box104
-\pgfnodepartelevenbox=\box105
-\pgfnodeparttenbox=\box106
-\pgfnodepartninebox=\box107
-\pgfnodeparteightbox=\box108
-\pgfnodepartsevenbox=\box109
-\pgfnodepartsixbox=\box110
-\pgfnodepartfivebox=\box111
+\pgfnodepartlowerbox=\box94
+\pgfnodeparttwobox=\box95
+\pgfnodepartthreebox=\box96
+\pgfnodepartfourbox=\box97
+\pgfnodeparttwentybox=\box98
+\pgfnodepartnineteenbox=\box99
+\pgfnodeparteighteenbox=\box100
+\pgfnodepartseventeenbox=\box101
+\pgfnodepartsixteenbox=\box102
+\pgfnodepartfifteenbox=\box103
+\pgfnodepartfourteenbox=\box104
+\pgfnodepartthirteenbox=\box105
+\pgfnodeparttwelvebox=\box106
+\pgfnodepartelevenbox=\box107
+\pgfnodeparttenbox=\box108
+\pgfnodepartninebox=\box109
+\pgfnodeparteightbox=\box110
+\pgfnodepartsevenbox=\box111
+\pgfnodepartsixbox=\box112
+\pgfnodepartfivebox=\box113
 )))
 (/usr/local/texlive/2026/texmf-dist/tex/latex/bussproofs/bussproofs.sty
 Proof Tree (bussproofs) style macros. Version 1.1.
-\theLevel=\count381
-\myMaxLevel=\count382
-\myBoxA=\box112
-\myBoxB=\box113
-\myBoxC=\box114
-\myBoxD=\box115
-\myBoxLL=\box116
-\myBoxRL=\box117
-\thisAboveSkip=\dimen323
-\thisBelowSkip=\dimen324
-\newScoreStart=\dimen325
-\newScoreEnd=\dimen326
-\newCenter=\dimen327
-\displace=\dimen328
-\leftLowerAmt=\dimen329
-\rightLowerAmt=\dimen330
-\scoreHeight=\dimen331
-\scoreDepth=\dimen332
-\htLbox=\dimen333
-\htRbox=\dimen334
-\htRRbox=\dimen335
-\htRRRbox=\dimen336
-\htAbox=\dimen337
-\htCbox=\dimen338
+\theLevel=\count385
+\myMaxLevel=\count386
+\myBoxA=\box114
+\myBoxB=\box115
+\myBoxC=\box116
+\myBoxD=\box117
+\myBoxLL=\box118
+\myBoxRL=\box119
+\thisAboveSkip=\dimen342
+\thisBelowSkip=\dimen343
+\newScoreStart=\dimen344
+\newScoreEnd=\dimen345
+\newCenter=\dimen346
+\displace=\dimen347
+\leftLowerAmt=\dimen348
+\rightLowerAmt=\dimen349
+\scoreHeight=\dimen350
+\scoreDepth=\dimen351
+\htLbox=\dimen352
+\htRbox=\dimen353
+\htRRbox=\dimen354
+\htRRRbox=\dimen355
+\htAbox=\dimen356
+\htCbox=\dimen357
 ) (/usr/local/texlive/2026/texmf-dist/tex/latex/mathtools/mathtools.sty
 Package: mathtools 2024/10/04 v1.31 mathematical typesetting tools
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2025/03/01 v4.3b Infix arithmetic (KKT,FJ)
-\calc@Acount=\count383
-\calc@Bcount=\count384
-\calc@Adimen=\dimen339
-\calc@Bdimen=\dimen340
+\calc@Acount=\count387
+\calc@Bcount=\count388
+\calc@Adimen=\dimen358
+\calc@Bdimen=\dimen359
 \calc@Askip=\skip128
 \calc@Bskip=\skip129
 LaTeX Info: Redefining \setlength on input line 86.
 LaTeX Info: Redefining \addtolength on input line 87.
-\calc@Ccount=\count385
+\calc@Ccount=\count389
 \calc@Cskip=\skip130
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/mathtools/mhsetup.sty
 Package: mhsetup 2021/03/18 v1.4 programming setup (MH)
 )
-\g_MT_multlinerow_int=\count386
-\l_MT_multwidth_dim=\dimen341
+\g_MT_multlinerow_int=\count390
+\l_MT_multwidth_dim=\dimen360
 \origjot=\skip131
-\l_MT_shortvdotswithinadjustabove_dim=\dimen342
-\l_MT_shortvdotswithinadjustbelow_dim=\dimen343
-\l_MT_above_intertext_sep=\dimen344
-\l_MT_below_intertext_sep=\dimen345
-\l_MT_above_shortintertext_sep=\dimen346
-\l_MT_below_shortintertext_sep=\dimen347
-\xmathstrut@box=\box118
-\xmathstrut@dim=\dimen348
+\l_MT_shortvdotswithinadjustabove_dim=\dimen361
+\l_MT_shortvdotswithinadjustbelow_dim=\dimen362
+\l_MT_above_intertext_sep=\dimen363
+\l_MT_below_intertext_sep=\dimen364
+\l_MT_above_shortintertext_sep=\dimen365
+\l_MT_below_shortintertext_sep=\dimen366
+\xmathstrut@box=\box120
+\xmathstrut@dim=\dimen367
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/scalerel/scalerel.sty
 Package: scalerel 2016/12/29 v1.8 Routines for constrained scaling and stretchi
@@ -1375,23 +1441,23 @@ Package: stmaryrd 1994/03/03 St Mary's Road symbol package
 LaTeX Font Info:    Overwriting symbol font `stmry' in version `bold'
 (Font)                  U/stmry/m/n --> U/stmry/b/n on input line 89.
 )
-\c@theorem=\count387
-\c@proposition=\count388
-\c@lemma=\count389
-\c@corollary=\count390
-\c@definition=\count391
-\c@proofs=\count392
-\c@remark=\count393
-\c@exampleth=\count394
+\c@theorem=\count391
+\c@proposition=\count392
+\c@lemma=\count393
+\c@corollary=\count394
+\c@definition=\count395
+\c@proofs=\count396
+\c@remark=\count397
+\c@exampleth=\count398
 )
 (./classicthesis-config.tex
-\c@dummy=\count395
+\c@dummy=\count399
 \abcd=\skip139
 
 (/usr/local/texlive/2026/texmf-dist/tex/generic/babel/babel.sty
 Package: babel 2026/05/03 v26.7 The multilingual framework for LuaLaTeX, pdfLaT
 eX and XeLaTeX
-\babel@savecnt=\count396
+\babel@savecnt=\count400
 LaTeX Encoding Info:    Redeclaring text command \ij (encoding OT1) on input li
 ne 2080.
 LaTeX Encoding Info:    Redeclaring text command \IJ (encoding OT1) on input li
@@ -1406,12 +1472,12 @@ LaTeX Encoding Info:    Ignoring declaration for text command \IJ (encoding ?)
 on input line 2088.
 LaTeX Encoding Info:    Ignoring declaration for text command \SS (encoding ?) 
 on input line 2113.
-\U@D=\dimen349
+\U@D=\dimen368
 \l@unhyphenated=\language91
 
 (/usr/local/texlive/2026/texmf-dist/tex/generic/babel/txtbabel.def)
 \bbl@readstream=\read4
-\bbl@dirlevel=\count397
+\bbl@dirlevel=\count401
 
 (/usr/local/texlive/2026/texmf-dist/tex/generic/babel/locale/es/babel-spanish.t
 ex)
@@ -1419,8 +1485,8 @@ Package babel Info: Importing font and identification data for spanish
 (babel)             from babel-es.ini. Reported on input line 4348.
  (/usr/local/texlive/2026/texmf-dist/tex/generic/babel-spanish/spanish.ldf
 Language: spanish.ldf 2021/05/27 v5.0q Spanish support from the babel system
-\es@quottoks=\toks59
-\es@quotdepth=\count398
+\es@quottoks=\toks63
+\es@quotdepth=\count402
 Package babel Info: Making " an active character on input line 570.
 Package babel Info: Making . an active character on input line 675.
 Package babel Info: Making < an active character on input line 722.
@@ -1458,25 +1524,15 @@ Package: suffix 2006/07/15 1.5a Variant command support
 )
 (/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.sty
 (/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.tex
-\xs_counta=\count399
-\xs_countb=\count400
+\xs_counta=\count403
+\xs_countb=\count404
 )
 Package: xstring 2023/08/22 v1.86 String manipulations (CT)
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/relsize/relsize.sty
 Package: relsize 2013/03/29 ver 4.1
 )
-\AC@clearlist=\toks60
-)
-(/usr/local/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
-Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
-\TX@col@width=\dimen350
-\TX@old@table=\dimen351
-\TX@old@col=\dimen352
-\TX@target=\dimen353
-\TX@delta=\dimen354
-\TX@cols=\count401
-\TX@ftn=\toks61
+\AC@clearlist=\toks64
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
 Package: caption 2023/08/05 v3.6o Customizing captions (AR)
@@ -1487,17 +1543,17 @@ Package tocbasic Info: Loading of class-dependent code for package caption3
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
-\caption@tempdima=\dimen355
-\captionmargin=\dimen356
-\caption@leftmargin=\dimen357
-\caption@rightmargin=\dimen358
-\caption@width=\dimen359
-\caption@indent=\dimen360
-\caption@parindent=\dimen361
-\caption@hangindent=\dimen362
+\caption@tempdima=\dimen369
+\captionmargin=\dimen370
+\caption@leftmargin=\dimen371
+\caption@rightmargin=\dimen372
+\caption@width=\dimen373
+\caption@indent=\dimen374
+\caption@parindent=\dimen375
+\caption@hangindent=\dimen376
 )
-\c@caption@flags=\count402
-\c@continuedfloat=\count403
+\c@caption@flags=\count405
+\c@continuedfloat=\count406
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: longtable package is loaded.
@@ -1510,15 +1566,15 @@ Package caption Info: wrapfig package is loaded.
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/subfig/subfig.sty
 Package: subfig 2005/06/28 ver: 1.3 subfig package
-\c@KVtest=\count404
+\c@KVtest=\count407
 \sf@farskip=\skip140
-\sf@captopadj=\dimen363
+\sf@captopadj=\dimen377
 \sf@capskip=\skip141
 \sf@nearskip=\skip142
-\c@subfigure=\count405
-\c@subfigure@save=\count406
-\c@subtable=\count407
-\c@subtable@save=\count408
+\c@subfigure=\count408
+\c@subfigure@save=\count409
+\c@subtable=\count410
+\c@subtable@save=\count411
 \sf@top=\skip143
 \sf@bottom=\skip144
 )
@@ -1532,6 +1588,7 @@ Package hyperref Info: Option `bookmarksnumbered' set `true' on input line 177.
 Package hyperref Info: Option `bookmarksopen' set `true' on input line 177.
 Package hyperref Info: Option `hypertexnames' set `true' on input line 177.
 )
+(./doc_diagrams.tex)
 (/usr/local/texlive/2026/texmf-dist/tex/latex/titling/titling.sty
 Package: titling 2009/09/04 v2.1d maketitle typesetting
 \thanksmarkwidth=\skip145
@@ -1546,55 +1603,43 @@ Package: datetime 2015/03/20 v2.60 Date Time Package
 Package: fmtcount 2025/12/02 v3.12 Displaying the values of LaTeX counters (NT,
 VB,NE)
 
-(/usr/local/texlive/2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty
-Package: xkeyval 2025/11/04 v2.10 package option processing (HA)
-
-(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkeyval.tex
-(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkvutils.tex
-\XKV@toks=\toks62
-\XKV@tempa@toks=\toks63
-\XKV@tempb@toks=\toks64
-)
-\XKV@depth=\count409
-File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
-))
 (/usr/local/texlive/2026/texmf-dist/tex/latex/fmtcount/fcprefix.sty
 Package: fcprefix 2012/09/28
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/fmtcount/fcnumparser.sty
 Package: fcnumparser 2017/06/15
-\fc@digit@counter=\count410
+\fc@digit@counter=\count412
 ))
-\c@padzeroesN=\count411
-\fc@tmpcatcode=\count412
-\@DT@modctr=\count413
-\@ordinalctr=\count414
-\@orgargctr=\count415
-\@strctr=\count416
-\@tmpstrctr=\count417
-\@DT@loopN=\count418
-\@DT@X=\count419
+\c@padzeroesN=\count413
+\fc@tmpcatcode=\count414
+\@DT@modctr=\count415
+\@ordinalctr=\count416
+\@orgargctr=\count417
+\@strctr=\count418
+\@tmpstrctr=\count419
+\@DT@loopN=\count420
+\@DT@X=\count421
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/datetime/datetime-defaults.sty
 Package: datetime-defaults 2013/09/10
 )
-\@day=\count420
-\@month=\count421
-\@year=\count422
-\c@HOUR=\count423
-\c@HOURXII=\count424
-\c@MINUTE=\count425
-\c@TOHOUR=\count426
-\c@TOMINUTE=\count427
-\c@SECOND=\count428
-\currenthour=\count429
-\currentminute=\count430
-\currentsecond=\count431
+\@day=\count422
+\@month=\count423
+\@year=\count424
+\c@HOUR=\count425
+\c@HOURXII=\count426
+\c@MINUTE=\count427
+\c@TOHOUR=\count428
+\c@TOMINUTE=\count429
+\c@SECOND=\count430
+\currenthour=\count431
+\currentminute=\count432
+\currentsecond=\count433
 Package datetime Info: No datetime.cfg file found, using default settings on in
 put line 308.
-\@dtctr=\count432
-\dayofyear=\count433
-\dayofweek=\count434
+\@dtctr=\count434
+\dayofyear=\count435
+\dayofweek=\count436
 LaTeX Info: Redefining \today on input line 736.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/datetime/dt-spanish.def
@@ -1609,8 +1654,8 @@ Package: wallpaper 2005/01/18, v1.01 easy wallpaper formatting (MHFW)
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
 Package: eso-pic 2025/12/10 v3.0d eso-pic (RN)
-\ESO@tempdima=\dimen364
-\ESO@tempdimb=\dimen365
+\ESO@tempdima=\dimen378
+\ESO@tempdimb=\dimen379
 )
 \wpXoffset=\skip148
 \wpYoffset=\skip149
@@ -1628,9 +1673,9 @@ Class scrreprt Info: loading recommended package `bookmark'.
 (scrreprt)           `bookmarkpackage=false' before \begin{document} and
 (scrreprt)           you can avoid this message adding:
 (scrreprt)             \usepackage{bookmark}
-(scrreprt)           before \begin{document} on input line 81.
+(scrreprt)           before \begin{document} on input line 86.
 Class scrreprt Info: temporary deactivation of babel-spanish quoting  on input 
-line 81.
+line 86.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/bookmark/bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
@@ -1638,49 +1683,49 @@ Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
 (/usr/local/texlive/2026/texmf-dist/tex/latex/bookmark/bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO
 )
-\BKM@id=\count435
+\BKM@id=\count437
 ))
-Class scrreprt Info: reactivation of babel-spanish quoting  on input line 81.
+Class scrreprt Info: reactivation of babel-spanish quoting  on input line 86.
 
 (./main.aux
-LaTeX Info: Redefining \. on input line 18.
-LaTeX Info: Redefining \% on input line 18.
+LaTeX Info: Redefining \. on input line 19.
+LaTeX Info: Redefining \% on input line 19.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
-(babel)             Reported on input line 18.
+(babel)             Reported on input line 19.
 )
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 81.
-LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
 
 (/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count436
-\scratchdimen=\dimen366
-\scratchbox=\box119
-\nofMPsegments=\count437
-\nofMParguments=\count438
+\scratchcounter=\count438
+\scratchdimen=\dimen380
+\scratchbox=\box121
+\nofMPsegments=\count439
+\nofMParguments=\count440
 \everyMPshowfont=\toks67
-\MPscratchCnt=\count439
-\MPscratchDim=\dimen367
-\MPnumerator=\count440
-\makeMPintoPDFobject=\count441
+\MPscratchCnt=\count441
+\MPscratchDim=\dimen381
+\MPnumerator=\count442
+\makeMPintoPDFobject=\count443
 \everyMPtoPDFconversion=\toks68
 ) (/usr/local/texlive/2026/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -1691,17 +1736,20 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 81.
-LaTeX Info: Redefining \microtypecontext on input line 81.
+Package hyperref Info: Link coloring ON on input line 86.
+Package microtype Info: Patching varwidth to enable character protrusion.
+\MT@vwid@leftmargin=\dimen382
+\MT@vwid@rightmargin=\dimen383
+LaTeX Info: Redefining \microtypecontext on input line 86.
 
 
-Package microtype Warning: Unable to apply patch `item' on input line 81.
+Package microtype Warning: Unable to apply patch `item' on input line 86.
 
-Package microtype Info: Applying patch `toc' on input line 81.
-Package microtype Info: Applying patch `eqnum' on input line 81.
-Package microtype Info: Applying patch `footnote' on input line 81.
-Package microtype Info: Applying patch `verbatim' on input line 81.
-LaTeX Info: Redefining \microtypesetup on input line 81.
+Package microtype Info: Applying patch `toc' on input line 86.
+Package microtype Info: Applying patch `eqnum' on input line 86.
+Package microtype Info: Applying patch `footnote' on input line 86.
+Package microtype Info: Applying patch `verbatim' on input line 86.
+LaTeX Info: Redefining \microtypesetup on input line 86.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -1749,56 +1797,56 @@ File: mt-ppl.cfg 2005/11/16 v1.6 microtype config. file: Palatino (RS)
 Couldn't patch \ttl@straight@ii
 Couldn't patch \ttl@straight@ii
 Couldn't patch \deferred@thm@head!
-LaTeX Info: Redefining \. on input line 81.
-LaTeX Info: Redefining \% on input line 81.
+LaTeX Info: Redefining \. on input line 86.
+LaTeX Info: Redefining \% on input line 86.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Trying to load font information for OT1+pplx on input line 
-84.
+89.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/ot1pplx.fd
 File: ot1pplx.fd 2004/09/06 font definitions for OT1/pplx.
 )
 LaTeX Font Info:    Trying to load font information for OML+zplm on input line 
-84.
+89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/omlzplm.fd
 File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 
-84.
+89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/omszplm.fd
 File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
 )
 LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 
-84.
+89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/omxzplm.fd
 File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
 )
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 15.0049pt on input line 84.
+(Font)              scaled to size 15.0049pt on input line 89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 10.42007pt on input line 84.
+(Font)              scaled to size 10.42007pt on input line 89.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 8.33606pt on input line 84.
+(Font)              scaled to size 8.33606pt on input line 89.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 15.0049pt on input line 84.
+(Font)              scaled to size 15.0049pt on input line 89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 10.42007pt on input line 84.
+(Font)              scaled to size 10.42007pt on input line 89.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 8.33606pt on input line 84.
+(Font)              scaled to size 8.33606pt on input line 89.
 LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 
-84.
+89.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/ot1zplm.fd
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
@@ -1808,13 +1856,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Trying to load font information for U+stmry on input line 8
-4.
+9.
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
 <ai_volatility_options_cover.pdf, id=7, 597.50786pt x 845.04686pt>
 File: ai_volatility_options_cover.pdf Graphic file (type pdf)
 <use ai_volatility_options_cover.pdf>
-Package pdftex.def Info: ai_volatility_options_cover.pdf  used on input line 84
+Package pdftex.def Info: ai_volatility_options_cover.pdf  used on input line 89
 .
 (pdftex.def)             Requested size: 597.5064pt x 845.0448pt.
  [1
@@ -1841,18 +1889,18 @@ LaTeX Font Info:    Font shape `U/msb/m/n' will be
  [2])
 (./prefaces/abstract.tex [3])
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 12.50409pt on input line 91.
+(Font)              scaled to size 12.50409pt on input line 96.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 9.37807pt on input line 91.
+(Font)              scaled to size 9.37807pt on input line 96.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 7.29405pt on input line 91.
+(Font)              scaled to size 7.29405pt on input line 96.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 12.50409pt on input line 91.
+(Font)              scaled to size 12.50409pt on input line 96.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 9.37807pt on input line 91.
+(Font)              scaled to size 9.37807pt on input line 96.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 7.29405pt on input line 91.
-Package tocbasic Info: character protrusion at toc deactivated on input line 91
+(Font)              scaled to size 7.29405pt on input line 96.
+Package tocbasic Info: character protrusion at toc deactivated on input line 96
 .
  (./main.toc
 LaTeX Info: Redefining \. on input line 2.
@@ -1863,10 +1911,10 @@ LaTeX Info: Redefining \% on input line 2.
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
-LaTeX Info: Redefining \. on input line 93.
-LaTeX Info: Redefining \% on input line 93.
+LaTeX Info: Redefining \. on input line 98.
+LaTeX Info: Redefining \% on input line 98.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
-(babel)             Reported on input line 93.
+(babel)             Reported on input line 98.
  [5]
 chapter 1.
 
@@ -1889,171 +1937,660 @@ Package microtype Info: Character `029' is missing
 [6
 
 ]
-LaTeX Info: Redefining \. on input line 128.
-LaTeX Info: Redefining \% on input line 128.
+LaTeX Info: Redefining \. on input line 133.
+LaTeX Info: Redefining \% on input line 133.
  [7]
-Overfull \hbox (21.69167pt too wide) in paragraph at lines 159--160
- [][] 
- []
-
-LaTeX Info: Redefining \. on input line 171.
-LaTeX Info: Redefining \% on input line 171.
-[8]
+<../doc/mermaid-pdf/index/01.pdf, id=178, 602.25pt x 70.3428pt>
+File: ../doc/mermaid-pdf/index/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/index/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/index/01.pdf  used on input line 14
+3.
+(pdftex.def)             Requested size: 452.98212pt x 52.9083pt.
+LaTeX Info: Redefining \. on input line 152.
+LaTeX Info: Redefining \% on input line 152.
+ [8 <../doc/mermaid-pdf/index/01.pdf>]
 chapter 2.
 [9
 
 ]
-LaTeX Info: Redefining \. on input line 255.
-LaTeX Info: Redefining \% on input line 255.
+LaTeX Info: Redefining \. on input line 236.
+LaTeX Info: Redefining \% on input line 236.
  [10]
-LaTeX Info: Redefining \. on input line 279.
-LaTeX Info: Redefining \% on input line 279.
+LaTeX Info: Redefining \. on input line 260.
+LaTeX Info: Redefining \% on input line 260.
  [11]
-LaTeX Info: Redefining \. on input line 312.
-LaTeX Info: Redefining \% on input line 312.
+LaTeX Info: Redefining \. on input line 293.
+LaTeX Info: Redefining \% on input line 293.
  [12]
-LaTeX Info: Redefining \. on input line 315.
-LaTeX Info: Redefining \% on input line 315.
+LaTeX Info: Redefining \. on input line 296.
+LaTeX Info: Redefining \% on input line 296.
  [13]
 chapter 3.
-
-Overfull \hbox (10.31056pt too wide) in paragraph at lines 377--378
- [][] 
- []
-
+<../doc/mermaid-pdf/index/02.pdf, id=259, 186.6975pt x 594.30032pt>
+File: ../doc/mermaid-pdf/index/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/index/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/index/02.pdf  used on input line 33
+7.
+(pdftex.def)             Requested size: 150.2755pt x 478.36089pt.
 [14
 
 ]
-LaTeX Font Info:    Trying to load font information for T1+fvm on input line 39
-4.
+<../doc/mermaid-pdf/data/index/01.pdf, id=267, 602.25pt x 895.42526pt>
+File: ../doc/mermaid-pdf/data/index/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/index/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/index/01.pdf  used on input li
+ne 338.
+(pdftex.def)             Requested size: 321.7273pt x 478.34415pt.
+LaTeX Font Info:    Trying to load font information for T1+fvm on input line 34
+2.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/bera/t1fvm.fd
 File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 10.20007pt on input line 394.
+(Font)              scaled to size 10.20007pt on input line 342.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `fvm' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
+LaTeX Info: Redefining \. on input line 343.
+LaTeX Info: Redefining \% on input line 343.
+ [15 <../doc/mermaid-pdf/index/02.pdf>]
+LaTeX Info: Redefining \. on input line 343.
+LaTeX Info: Redefining \% on input line 343.
+ [16 <../doc/mermaid-pdf/data/index/01.pdf>]
+<../doc/mermaid-pdf/data/raw-read/01.pdf, id=295, 602.25pt x 310.27919pt>
+File: ../doc/mermaid-pdf/data/raw-read/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/raw-read/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/raw-read/01.pdf  used on input
+ line 344.
+(pdftex.def)             Requested size: 452.98212pt x 233.37637pt.
+<../doc/mermaid-pdf/data/raw-read/02.pdf, id=296, 575.2692pt x 322.32419pt>
+File: ../doc/mermaid-pdf/data/raw-read/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/raw-read/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/raw-read/02.pdf  used on input
+ line 345.
+(pdftex.def)             Requested size: 452.97423pt x 253.80212pt.
+<../doc/mermaid-pdf/data/merge-raw/01.pdf, id=297, 378.45387pt x 692.5875pt>
+File: ../doc/mermaid-pdf/data/merge-raw/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/merge-raw/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/merge-raw/01.pdf  used on inpu
+t line 346.
+(pdftex.def)             Requested size: 261.39331pt x 478.36145pt.
+<../doc/mermaid-pdf/data/merge-raw/02.pdf, id=298, 602.25pt x 186.6975pt>
+File: ../doc/mermaid-pdf/data/merge-raw/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/merge-raw/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/merge-raw/02.pdf  used on inpu
+t line 347.
+(pdftex.def)             Requested size: 452.98212pt x 140.42445pt.
+<../doc/mermaid-pdf/data/product-split/01.pdf, id=299, 349.305pt x 620.3175pt>
+File: ../doc/mermaid-pdf/data/product-split/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/product-split/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/product-split/01.pdf  used on 
+input line 351.
+(pdftex.def)             Requested size: 269.36009pt x 478.34639pt.
+<../doc/mermaid-pdf/data/product-split/02.pdf, id=300, 593.3367pt x 228.855pt>
+File: ../doc/mermaid-pdf/data/product-split/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/product-split/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/product-split/02.pdf  used on 
+input line 352.
+(pdftex.def)             Requested size: 452.97763pt x 174.7173pt.
+<../doc/mermaid-pdf/data/underlying/01.pdf, id=301, 602.25pt x 126.4725pt>
+File: ../doc/mermaid-pdf/data/underlying/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/underlying/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/underlying/01.pdf  used on inp
+ut line 353.
+(pdftex.def)             Requested size: 452.98212pt x 95.12624pt.
+<../doc/mermaid-pdf/data/underlying/02.pdf, id=302, 382.5492pt x 863.14468pt>
+File: ../doc/mermaid-pdf/data/underlying/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/underlying/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/underlying/02.pdf  used on inp
+ut line 354.
+(pdftex.def)             Requested size: 212.00793pt x 478.35294pt.
+<../doc/mermaid-pdf/data/volatility/01.pdf, id=303, 387.36719pt x 831.105pt>
+File: ../doc/mermaid-pdf/data/volatility/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/volatility/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/volatility/01.pdf  used on inp
+ut line 355.
+(pdftex.def)             Requested size: 222.9531pt x 478.35088pt.
+<../doc/mermaid-pdf/data/volatility/02.pdf, id=304, 602.25pt x 173.68889pt>
+File: ../doc/mermaid-pdf/data/volatility/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/volatility/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/volatility/02.pdf  used on inp
+ut line 356.
+(pdftex.def)             Requested size: 452.98212pt x 130.64003pt.
+LaTeX Info: Redefining \. on input line 364.
+LaTeX Info: Redefining \% on input line 364.
+ [17 <../doc/mermaid-pdf/data/raw-read/01.pdf>]
+<../doc/mermaid-pdf/data/index/02.pdf, id=321, 602.25pt x 107.4414pt>
+File: ../doc/mermaid-pdf/data/index/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/data/index/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/data/index/02.pdf  used on input li
+ne 365.
+(pdftex.def)             Requested size: 452.98212pt x 80.812pt.
 
-Overfull \hbox (52.53357pt too wide) in paragraph at lines 394--395
+Underfull \hbox (badness 2671) in paragraph at lines 370--371
 []\T1/pplj/m/n/12 Las en-tra-das raw vi-si-bles son \T1/fvm/m/n/12 OptionType\T
 1/pplj/m/n/12 , \T1/fvm/m/n/12 StrikePrice\T1/pplj/m/n/12 , \T1/fvm/m/n/12 Unde
-rlyingPrice\T1/pplj/m/n/12 , \T1/fvm/m/n/12 TimeToExpiration
+rlyingPrice\T1/pplj/m/n/12 ,
  []
 
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.30756pt on input line 405.
-LaTeX Info: Redefining \. on input line 417.
-LaTeX Info: Redefining \% on input line 417.
-[15]
-Underfull \hbox (badness 1454) in paragraph at lines 436--436
+(Font)              scaled to size 9.30756pt on input line 381.
+<../doc/mermaid-pdf/models/features/01.pdf, id=323, 602.25pt x 210.7875pt>
+File: ../doc/mermaid-pdf/models/features/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/features/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/features/01.pdf  used on inp
+ut line 397.
+(pdftex.def)             Requested size: 452.98212pt x 158.54373pt.
+<../doc/mermaid-pdf/models/features/02.pdf, id=324, 602.25pt x 346.4142pt>
+File: ../doc/mermaid-pdf/models/features/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/features/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/features/02.pdf  used on inp
+ut line 398.
+(pdftex.def)             Requested size: 452.98212pt x 260.55531pt.
+
+Underfull \hbox (badness 1454) in paragraph at lines 415--415
 []|\T1/pplj/m/n/10.95 Red neu-ro-nal se-cuen-
  []
 
+LaTeX Info: Redefining \. on input line 421.
+LaTeX Info: Redefining \% on input line 421.
+[18 <../doc/mermaid-pdf/data/raw-read/02.pdf>]
+LaTeX Info: Redefining \. on input line 421.
+LaTeX Info: Redefining \% on input line 421.
+ [19 <../doc/mermaid-pdf/data/merge-raw/01.pdf>]
+LaTeX Info: Redefining \. on input line 421.
+LaTeX Info: Redefining \% on input line 421.
+ [20 <../doc/mermaid-pdf/data/merge-raw/02.pdf>]
+LaTeX Info: Redefining \. on input line 421.
+LaTeX Info: Redefining \% on input line 421.
+ [21 <../doc/mermaid-pdf/data/product-split/01.pdf>]
+<../doc/mermaid-pdf/models/families/01.pdf, id=384, 602.25pt x 321.11969pt>
+File: ../doc/mermaid-pdf/models/families/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/families/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/families/01.pdf  used on inp
+ut line 425.
+(pdftex.def)             Requested size: 452.98212pt x 241.53004pt.
+<../doc/mermaid-pdf/models/families/02.pdf, id=385, 219.70079pt x 691.62387pt>
+File: ../doc/mermaid-pdf/models/families/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/families/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/families/02.pdf  used on inp
+ut line 426.
+(pdftex.def)             Requested size: 151.95575pt x 478.36075pt.
+<../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf, id=386, 602.25pt x
+ 35.1714pt>
+File: ../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf Graphic file (
+type pdf)
+<use ../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/families/quantum-inspired/01
+.pdf  used on input line 427.
+(pdftex.def)             Requested size: 452.98212pt x 26.45415pt.
+LaTeX Info: Redefining \. on input line 433.
+LaTeX Info: Redefining \% on input line 433.
+ [22 <../doc/mermaid-pdf/data/product-split/02.pdf> <../doc/mermaid-pdf/data/un
+derlying/01.pdf>]
+LaTeX Info: Redefining \. on input line 433.
+LaTeX Info: Redefining \% on input line 433.
+ [23 <../doc/mermaid-pdf/data/underlying/02.pdf>]
+LaTeX Info: Redefining \. on input line 433.
+LaTeX Info: Redefining \% on input line 433.
+ [24 <../doc/mermaid-pdf/data/volatility/01.pdf>]
+LaTeX Info: Redefining \. on input line 433.
+LaTeX Info: Redefining \% on input line 433.
 
-Overfull \hbox (18.84639pt too wide) in paragraph at lines 467--468
- [][] 
- []
+[25 <../doc/mermaid-pdf/data/volatility/02.pdf> <../doc/mermaid-pdf/data/index/
+02.pdf> <../doc/mermaid-pdf/models/features/01.pdf>]
+LaTeX Info: Redefining \. on input line 433.
+LaTeX Info: Redefining \% on input line 433.
+ [26 <../doc/mermaid-pdf/models/features/02.pdf>]
+<../doc/mermaid-pdf/models/index/01.pdf, id=492, 219.70079pt x 860.25388pt>
+File: ../doc/mermaid-pdf/models/index/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/index/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/index/01.pdf  used on input 
+line 436.
+(pdftex.def)             Requested size: 122.16333pt x 478.33914pt.
+<../doc/mermaid-pdf/models/index/02.pdf, id=493, 602.25pt x 111.29579pt>
+File: ../doc/mermaid-pdf/models/index/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/index/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/index/02.pdf  used on input 
+line 437.
+(pdftex.def)             Requested size: 452.98212pt x 83.71107pt.
+<../doc/mermaid-pdf/models/splits-kfolds/01.pdf, id=494, 602.25pt x 159.71669pt
+>
+File: ../doc/mermaid-pdf/models/splits-kfolds/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/splits-kfolds/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/01.pdf  used o
+n input line 438.
+(pdftex.def)             Requested size: 452.98212pt x 120.13084pt.
+<../doc/mermaid-pdf/models/splits-kfolds/02.pdf, id=495, 393.38968pt x 715.7138
+8pt>
+File: ../doc/mermaid-pdf/models/splits-kfolds/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/splits-kfolds/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/02.pdf  used o
+n input line 439.
+(pdftex.def)             Requested size: 262.92743pt x 478.35728pt.
+<../doc/mermaid-pdf/models/splits-kfolds/03.pdf, id=496, 602.25pt x 182.6022pt>
 
-LaTeX Info: Redefining \. on input line 474.
-LaTeX Info: Redefining \% on input line 474.
-[16]
-LaTeX Info: Redefining \. on input line 474.
-LaTeX Info: Redefining \% on input line 474.
- [17]
-Overfull \hbox (31.23169pt too wide) in paragraph at lines 493--494
-[]\T1/pplj/m/n/12 El pro-yec-to in-clu-ye una va-rian-te pro-gres-si-ve ATM. Or
--de-na ob-ser-va-cio-nes por $\OMS/zplm/m/n/12 j []\OT1/zplm/m/n/12 (\OML/zplm/
-m/it/12 F\OT1/zplm/m/n/12 /\OML/zplm/m/it/12 K\OT1/zplm/m/n/12 )\OMS/zplm/m/n/1
-2 j$\T1/pplj/m/n/12 ,
- []
+File: ../doc/mermaid-pdf/models/splits-kfolds/03.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/splits-kfolds/03.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/03.pdf  used o
+n input line 440.
+(pdftex.def)             Requested size: 452.98212pt x 137.34416pt.
+<../doc/mermaid-pdf/models/training/01.pdf, id=497, 219.70079pt x 800.02888pt>
+File: ../doc/mermaid-pdf/models/training/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/training/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/training/01.pdf  used on inp
+ut line 451.
+(pdftex.def)             Requested size: 131.36555pt x 478.36082pt.
+<../doc/mermaid-pdf/models/training/02.pdf, id=498, 602.25pt x 126.4725pt>
+File: ../doc/mermaid-pdf/models/training/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/models/training/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/training/02.pdf  used on inp
+ut line 452.
+(pdftex.def)             Requested size: 452.98212pt x 95.12624pt.
+LaTeX Info: Redefining \. on input line 459.
+LaTeX Info: Redefining \% on input line 459.
+ [27 <../doc/mermaid-pdf/models/families/01.pdf>]
+LaTeX Info: Redefining \. on input line 459.
+LaTeX Info: Redefining \% on input line 459.
 
+[28 <../doc/mermaid-pdf/models/families/02.pdf> <../doc/mermaid-pdf/models/fami
+lies/quantum-inspired/01.pdf>]
+LaTeX Info: Redefining \. on input line 459.
+LaTeX Info: Redefining \% on input line 459.
+ [29 <../doc/mermaid-pdf/models/index/01.pdf> <../doc/mermaid-pdf/models/index/
+02.pdf>]
+LaTeX Info: Redefining \. on input line 459.
+LaTeX Info: Redefining \% on input line 459.
+ [30 <../doc/mermaid-pdf/models/splits-kfolds/01.pdf> <../doc/mermaid-pdf/model
+s/splits-kfolds/02.pdf>]
+<../doc/mermaid-pdf/models/retraining-progressive/01.pdf, id=618, 453.61469pt x
+ 730.64969pt>
+File: ../doc/mermaid-pdf/models/retraining-progressive/01.pdf Graphic file (typ
+e pdf)
+<use ../doc/mermaid-pdf/models/retraining-progressive/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/retraining-progressive/01.pd
+f  used on input line 468.
+(pdftex.def)             Requested size: 296.98482pt x 478.36165pt.
+<../doc/mermaid-pdf/models/retraining-progressive/02.pdf, id=619, 602.25pt x 52
+.2753pt>
+File: ../doc/mermaid-pdf/models/retraining-progressive/02.pdf Graphic file (typ
+e pdf)
+<use ../doc/mermaid-pdf/models/retraining-progressive/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/models/retraining-progressive/02.pd
+f  used on input line 469.
+(pdftex.def)             Requested size: 452.98212pt x 39.31883pt.
+LaTeX Info: Redefining \. on input line 493.
+LaTeX Info: Redefining \% on input line 493.
+ [31 <../doc/mermaid-pdf/models/splits-kfolds/03.pdf>]
+LaTeX Info: Redefining \. on input line 493.
+LaTeX Info: Redefining \% on input line 493.
+ [32 <../doc/mermaid-pdf/models/training/01.pdf> <../doc/mermaid-pdf/models/tra
+ining/02.pdf>]
+LaTeX Info: Redefining \. on input line 493.
+LaTeX Info: Redefining \% on input line 493.
+ [33 <../doc/mermaid-pdf/models/retraining-progressive/01.pdf> <../doc/mermaid-
+pdf/models/retraining-progressive/02.pdf>]
+<../doc/mermaid-pdf/dashboard/index/01.pdf, id=679, 602.25pt x 123.5817pt>
+File: ../doc/mermaid-pdf/dashboard/index/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/dashboard/index/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/index/01.pdf  used on inp
+ut line 495.
+(pdftex.def)             Requested size: 452.98212pt x 92.9519pt.
+<../doc/mermaid-pdf/dashboard/index/02.pdf, id=680, 481.8pt x 535.03888pt>
+File: ../doc/mermaid-pdf/dashboard/index/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/dashboard/index/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/index/02.pdf  used on inp
+ut line 496.
+(pdftex.def)             Requested size: 430.74884pt x 478.34657pt.
+<../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf, id=681, 602.25pt x 375
+.32219pt>
+File: ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf Graphic file (type
+ pdf)
+<use ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf
+  used on input line 497.
+(pdftex.def)             Requested size: 452.98212pt x 282.29845pt.
+<../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf, id=682, 602.25pt x 201.
+63329pt>
+File: ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf Graphic file (type 
+pdf)
+<use ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf 
+ used on input line 498.
+(pdftex.def)             Requested size: 452.98212pt x 151.65839pt.
+<../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf, id=683, 444
+.70139pt x 510.94888pt>
+File: ../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf Graphic
+ file (type pdf)
+<use ../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/volatility-surf
+aces/01.pdf  used on input line 499.
+(pdftex.def)             Requested size: 416.32976pt x 478.3507pt.
+<../doc/mermaid-pdf/dashboard/global-explainability/01.pdf, id=684, 602.25pt x 
+176.5797pt>
+File: ../doc/mermaid-pdf/dashboard/global-explainability/01.pdf Graphic file (t
+ype pdf)
+<use ../doc/mermaid-pdf/dashboard/global-explainability/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global-explainability/01.
+pdf  used on input line 500.
+(pdftex.def)             Requested size: 452.98212pt x 132.81433pt.
+<../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf, id=685, 536.96606pt
+ x 396.52138pt>
+File: ../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf Graphic file (t
+ype pdf)
+<use ../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample-explainability/01.
+pdf  used on input line 501.
+(pdftex.def)             Requested size: 452.99026pt x 334.50963pt.
+<../doc/mermaid-pdf/dashboard/diagnosis/01.pdf, id=686, 602.25pt x 103.3461pt>
+File: ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf  used on
+ input line 502.
+(pdftex.def)             Requested size: 452.98212pt x 77.73172pt.
+LaTeX Info: Redefining \. on input line 520.
+LaTeX Info: Redefining \% on input line 520.
+ [34 <../doc/mermaid-pdf/dashboard/index/01.pdf>]
+LaTeX Info: Redefining \. on input line 520.
+LaTeX Info: Redefining \% on input line 520.
+ [35 <../doc/mermaid-pdf/dashboard/index/02.pdf>]
+LaTeX Info: Redefining \. on input line 520.
+LaTeX Info: Redefining \% on input line 520.
+ [36 <../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf> <../doc/mermaid-p
+df/dashboard/behaviour-surface/01.pdf>]
+LaTeX Info: Redefining \. on input line 520.
+LaTeX Info: Redefining \% on input line 520.
 
-Overfull \hbox (70.58951pt too wide) in paragraph at lines 544--545
-\T1/pplj/m/n/12 ción y ex-pli-ca-bi-li-dad lo-cal: \T1/fvm/m/n/12 /health\T1/pp
-lj/m/n/12 , \T1/fvm/m/n/12 /run_model/predict/ \T1/pplj/m/n/12 y \T1/fvm/m/n/12
- /run_model/sample_explainability/\T1/pplj/m/n/12 .
- []
+[37 <../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf>]
+LaTeX Info: Redefining \. on input line 520.
+LaTeX Info: Redefining \% on input line 520.
 
-LaTeX Info: Redefining \. on input line 545.
-LaTeX Info: Redefining \% on input line 545.
-[18]
-LaTeX Info: Redefining \. on input line 545.
-LaTeX Info: Redefining \% on input line 545.
- [19]
-Overfull \hbox (95.63371pt too wide) in paragraph at lines 568--569
- [][] 
- []
+[38 <../doc/mermaid-pdf/dashboard/global-explainability/01.pdf> <../doc/mermaid
+-pdf/dashboard/sample-explainability/01.pdf> <../doc/mermaid-pdf/dashboard/diag
+nosis/01.pdf>]
+<../doc/mermaid-pdf/operations/api-deployment/01.pdf, id=786, 458.67358pt x 571
+.17387pt>
+File: ../doc/mermaid-pdf/operations/api-deployment/01.pdf Graphic file (type pd
+f)
+<use ../doc/mermaid-pdf/operations/api-deployment/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/operations/api-deployment/01.pdf  u
+sed on input line 521.
+(pdftex.def)             Requested size: 384.14238pt x 478.36217pt.
+<../doc/mermaid-pdf/operations/api-deployment/02.pdf, id=787, 602.25pt x 146.46
+72pt>
+File: ../doc/mermaid-pdf/operations/api-deployment/02.pdf Graphic file (type pd
+f)
+<use ../doc/mermaid-pdf/operations/api-deployment/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/operations/api-deployment/02.pdf  u
+sed on input line 522.
+(pdftex.def)             Requested size: 452.98212pt x 110.16524pt.
+<../doc/mermaid-pdf/operations/api-deployment/03.pdf, id=788, 444.70139pt x 529
+.01637pt>
+File: ../doc/mermaid-pdf/operations/api-deployment/03.pdf Graphic file (type pd
+f)
+<use ../doc/mermaid-pdf/operations/api-deployment/03.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/operations/api-deployment/03.pdf  u
+sed on input line 523.
+(pdftex.def)             Requested size: 402.11394pt x 478.35439pt.
+LaTeX Info: Redefining \. on input line 529.
+LaTeX Info: Redefining \% on input line 529.
+ [39 <../doc/mermaid-pdf/operations/api-deployment/01.pdf>]
+LaTeX Info: Redefining \. on input line 529.
+LaTeX Info: Redefining \% on input line 529.
 
-LaTeX Info: Redefining \. on input line 603.
-LaTeX Info: Redefining \% on input line 603.
-[20]
-LaTeX Info: Redefining \. on input line 616.
-LaTeX Info: Redefining \% on input line 616.
- [21]
-LaTeX Info: Redefining \. on input line 647.
-LaTeX Info: Redefining \% on input line 647.
- [22]
+[40 <../doc/mermaid-pdf/operations/api-deployment/02.pdf> <../doc/mermaid-pdf/o
+perations/api-deployment/03.pdf>]
+<../doc/mermaid-pdf/repository/configuration/01.pdf, id=824, 602.25pt x 137.553
+9pt>
+File: ../doc/mermaid-pdf/repository/configuration/01.pdf Graphic file (type pdf
+)
+<use ../doc/mermaid-pdf/repository/configuration/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/configuration/01.pdf  us
+ed on input line 530.
+(pdftex.def)             Requested size: 452.98212pt x 103.46109pt.
+<../doc/mermaid-pdf/repository/configuration/02.pdf, id=825, 602.25pt x 176.579
+7pt>
+File: ../doc/mermaid-pdf/repository/configuration/02.pdf Graphic file (type pdf
+)
+<use ../doc/mermaid-pdf/repository/configuration/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/configuration/02.pdf  us
+ed on input line 531.
+(pdftex.def)             Requested size: 452.98212pt x 132.81433pt.
+<../doc/mermaid-pdf/repository/index/01.pdf, id=826, 602.25pt x 184.77031pt>
+File: ../doc/mermaid-pdf/repository/index/01.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/repository/index/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/01.pdf  used on in
+put line 538.
+(pdftex.def)             Requested size: 452.98212pt x 138.97491pt.
+<../doc/mermaid-pdf/repository/index/02.pdf, id=827, 602.25pt x 215.84639pt>
+File: ../doc/mermaid-pdf/repository/index/02.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/repository/index/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/02.pdf  used on in
+put line 539.
+(pdftex.def)             Requested size: 452.98212pt x 162.34877pt.
+<../doc/mermaid-pdf/repository/index/03.pdf, id=828, 602.25pt x 31.0761pt>
+File: ../doc/mermaid-pdf/repository/index/03.pdf Graphic file (type pdf)
+<use ../doc/mermaid-pdf/repository/index/03.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/03.pdf  used on in
+put line 540.
+(pdftex.def)             Requested size: 452.98212pt x 23.37386pt.
+<../doc/mermaid-pdf/repository/src-packages/01.pdf, id=829, 602.25pt x 340.3917
+pt>
+File: ../doc/mermaid-pdf/repository/src-packages/01.pdf Graphic file (type pdf)
+
+<use ../doc/mermaid-pdf/repository/src-packages/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/repository/src-packages/01.pdf  use
+d on input line 541.
+(pdftex.def)             Requested size: 452.98212pt x 256.02548pt.
+LaTeX Info: Redefining \. on input line 567.
+LaTeX Info: Redefining \% on input line 567.
+ [41 <../doc/mermaid-pdf/repository/configuration/01.pdf> <../doc/mermaid-pdf/r
+epository/configuration/02.pdf>]
+LaTeX Info: Redefining \. on input line 567.
+LaTeX Info: Redefining \% on input line 567.
+ [42 <../doc/mermaid-pdf/repository/index/01.pdf> <../doc/mermaid-pdf/repositor
+y/index/02.pdf> <../doc/mermaid-pdf/repository/index/03.pdf>]
+LaTeX Info: Redefining \. on input line 567.
+LaTeX Info: Redefining \% on input line 567.
+ [43 <../doc/mermaid-pdf/repository/src-packages/01.pdf>]
+LaTeX Info: Redefining \. on input line 607.
+LaTeX Info: Redefining \% on input line 607.
+ [44]
+LaTeX Info: Redefining \. on input line 607.
+LaTeX Info: Redefining \% on input line 607.
+ [45]
 chapter 4.
+LaTeX Font Info:    Font shape `U/msa/m/n' will be
+(Font)              scaled to size 5.21004pt on input line 621.
+LaTeX Font Info:    Font shape `U/msb/m/n' will be
+(Font)              scaled to size 5.21004pt on input line 621.
 
-Overfull \hbox (3.43959pt too wide) in paragraph at lines 666--682
- [][] 
+Underfull \hbox (badness 10000) in paragraph at lines 659--659
+[]|\T1/pplj/m/n/10.95 Red neu-ro-nal se-
  []
 
 
-Overfull \hbox (29.71236pt too wide) in paragraph at lines 698--707
- [][] 
+Underfull \hbox (badness 10000) in paragraph at lines 659--659
+[]|\T1/pplj/m/n/10.95 Quantum Ins-pi-red
  []
 
-[23
+[46
 
 ]
-LaTeX Info: Redefining \. on input line 751.
-LaTeX Info: Redefining \% on input line 751.
- [24]
+Underfull \hbox (badness 10000) in paragraph at lines 679--680
+[]|$\OT1/pplx/m/n/10.95 500$ \T1/pplj/m/n/10.95 ár-bo-les, pro-fun-di-dad má-xi
+-ma $\OT1/pplx/m/n/10.95 8$\T1/pplj/m/n/10.95 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 679--680
+\T1/fvm/m/n/10.95 min_samples_leaf\T1/pplj/m/n/10.95 =10, \T1/fvm/m/n/10.95 max
+_features\T1/pplj/m/n/10.95 =0.5,
+ []
+
+LaTeX Info: Redefining \. on input line 699.
+LaTeX Info: Redefining \% on input line 699.
+[47]
+LaTeX Info: Redefining \. on input line 707.
+LaTeX Info: Redefining \% on input line 707.
+ [48]
+LaTeX Info: Redefining \. on input line 742.
+LaTeX Info: Redefining \% on input line 742.
+ [49]
+LaTeX Info: Redefining \. on input line 759.
+LaTeX Info: Redefining \% on input line 759.
+ [50]
+LaTeX Info: Redefining \. on input line 770.
+LaTeX Info: Redefining \% on input line 770.
+ [51]
+chapter 5.
+[52
+
+]
 LaTeX Info: Redefining \. on input line 787.
 LaTeX Info: Redefining \% on input line 787.
- [25]
-LaTeX Info: Redefining \. on input line 815.
-LaTeX Info: Redefining \% on input line 815.
- [26]
-LaTeX Info: Redefining \. on input line 835.
-LaTeX Info: Redefining \% on input line 835.
- [27]
-chapter 5.
-[28
-
-]
+ [53]
 chapter A.
-[29
+<../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf, id=956, 602.25pt
+ x 117.3183pt>
+File: ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf Graphic file
+ (type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/
+01.pdf  used on input line 792.
+(pdftex.def)             Requested size: 452.98212pt x 88.2409pt.
+[54
 
-]
-chapter B.
-[30
-
-]
-chapter C.
-
-Overfull \hbox (33.07277pt too wide) in paragraph at lines 907--908
- [][] 
+ <../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf>]
+Underfull \hbox (badness 2103) in paragraph at lines 817--818
+[]\T1/pplj/m/n/12 El fon-do se to-ma de una mues-tra con-tro-la-da por \T1/fvm/
+m/n/12 shap_background_size\T1/pplj/m/n/12 ;
  []
 
-[31
+<../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf, id=973, 602.25
+pt x 141.6492pt>
+File: ../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf Graphic fi
+le (type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-visualization
+s/01.pdf  used on input line 819.
+(pdftex.def)             Requested size: 452.98212pt x 106.54137pt.
+<../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf, id=974, 602.25
+pt x 42.1575pt>
+File: ../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf Graphic fi
+le (type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-visualization
+s/02.pdf  used on input line 820.
+(pdftex.def)             Requested size: 452.98212pt x 31.70872pt.
+<../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf, id=975, 602.2
+5pt x 41.1939pt>
+File: ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf Graphic f
+ile (type pdf)
+<use ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfa
+ll/01.pdf  used on input line 821.
+(pdftex.def)             Requested size: 452.98212pt x 30.98395pt.
+<../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf, id=976, 426.63388pt x 4
+56.74638pt>
+File: ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf Graphic file (type 
+pdf)
+<use ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf 
+ used on input line 822.
+(pdftex.def)             Requested size: 446.83304pt x 478.37125pt.
+<../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf, id=977, 551.1792pt x 14
+3.5764pt>
+File: ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf Graphic file (type 
+pdf)
+<use ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf 
+ used on input line 823.
+(pdftex.def)             Requested size: 452.97911pt x 117.99629pt.
+LaTeX Info: Redefining \. on input line 827.
+LaTeX Info: Redefining \% on input line 827.
+[55 <../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf> <../doc/me
+rmaid-pdf/dashboard/global/shap-visualizations/02.pdf> <../doc/mermaid-pdf/dash
+board/sample/local-shap-waterfall/01.pdf>]
+LaTeX Info: Redefining \. on input line 827.
+LaTeX Info: Redefining \% on input line 827.
+ [56 <../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf> <../doc/mermaid-pd
+f/dashboard/sample/neighbours/02.pdf>]
+chapter B.
+<../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf, id=1038, 602.25pt x 45.2892
+pt>
+File: ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf Graphic file (type pdf)
+
+<use ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf  use
+d on input line 839.
+(pdftex.def)             Requested size: 452.98212pt x 34.06424pt.
+[57
+
+ <../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf>]
+chapter C.
+<../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf, id=1055, 219.70079pt x 631.
+39888pt>
+File: ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf Graphic file (type pdf)
+
+<use ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf  use
+d on input line 870.
+(pdftex.def)             Requested size: 166.45135pt x 478.36517pt.
+[58
 
 ]
+LaTeX Info: Redefining \. on input line 895.
+LaTeX Info: Redefining \% on input line 895.
+ [59 <../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf>]
 chapter D.
-(./main.bbl [32
-
-]) [33
+<../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf, id=1079, 415.5525p
+t x 745.82639pt>
+File: ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf Graphic file (
+type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01
+.pdf  used on input line 907.
+(pdftex.def)             Requested size: 266.52336pt x 478.3515pt.
+<../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf, id=1082, 415.5
+525pt x 721.73637pt>
+File: ../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf Graphic fi
+le (type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/symbolic-regressio
+n/01.pdf  used on input line 913.
+(pdftex.def)             Requested size: 275.41953pt x 478.3518pt.
+<../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf, id=1083, 602.2
+5pt x 56.1297pt>
+File: ../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf Graphic fi
+le (type pdf)
+<use ../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf>
+Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/symbolic-regressio
+n/02.pdf  used on input line 914.
+(pdftex.def)             Requested size: 452.98212pt x 42.21791pt.
+[60
 
 ]
-runsystem(latexminted cleantemp  --timestamp 20260510204502Z FAD58DE7366495DB46
+LaTeX Info: Redefining \. on input line 918.
+LaTeX Info: Redefining \% on input line 918.
+ [61 <../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf>]
+LaTeX Info: Redefining \. on input line 918.
+LaTeX Info: Redefining \% on input line 918.
+ [62 <../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf> <../doc/m
+ermaid-pdf/dashboard/global/symbolic-regression/02.pdf>]
+chapter E.
+(./main.bbl [63
+
+]) [64
+
+]
+runsystem(latexminted cleantemp  --timestamp 20260511190604Z FAD58DE7366495DB46
 50CFEFAC2FCD61)...executed safely (allowed).
 
  (./main.aux
-LaTeX Info: Redefining \. on input line 18.
-LaTeX Info: Redefining \% on input line 18.
+LaTeX Info: Redefining \. on input line 19.
+LaTeX Info: Redefining \% on input line 19.
 )
  ***********
 LaTeX2e <2025-11-01>
@@ -2162,15 +2699,26 @@ shellesc.sty    2023/07/08 v1.0d unified shell escape interface for LaTeX
   natbib.sty    2010/09/13 8.31b (PWD, AO)
 booktabs.sty    2020/01/12 v1.61803398 Publication quality tables
    array.sty    2025/09/25 v2.6n Tabular extension package (FMi)
+tabularx.sty    2023/12/11 v2.12a `tabularx' package (DPC)
+adjustbox.sty    2025/02/26 v1.3c Adjusting TeX boxes (trim, clip, ...)
+ xkeyval.sty    2025/11/04 v2.10 package option processing (HA)
+ xkeyval.tex    2014/12/03 v2.7a key=value parser (HA)
+ adjcalc.sty    2012/05/16 v1.1 Provides advanced setlength with multiple back-
+ends (calc, etex, pgfmath)
+trimclip.sty    2025/02/21 v1.2a Trim and clip general TeX material
+collectbox.sty    2022/10/17 v0.4c Collect macro arguments as boxes
+tc-pdftex.def    2025/02/26 v2.3 Clipping driver for pdftex
+ifoddpage.sty    2022/10/18 v1.2 Conditionals for odd/even page detection
+varwidth.sty    2009/03/30 ver 0.92;  Variable-width minipages
+microtype.sty    2026/03/01 v3.2d Micro-typographical refinements (RS)
+microtype-pdftex.def    2026/03/01 v3.2d Definitions specific to pdftex (RS)
+microtype.cfg    2026/03/01 v3.2d microtype main configuration file (RS)
 classicthesis.sty    2015/09/06 v4.2 Typographic style for a classic-looking th
 esis
    ifpdf.sty    2019/10/25 v3.4 ifpdf legacy package. Use iftex instead.
  ifxetex.sty    2019/10/25 v0.7 ifxetex legacy package. Use iftex instead.
 mathpazo.sty    2020/03/25 PSNFSS-v9.3 Palatino w/ Pazo Math (D.Puga, WaS) 
 beramono.sty    2004/01/31 (WaS)
-microtype.sty    2026/03/01 v3.2d Micro-typographical refinements (RS)
-microtype-pdftex.def    2026/03/01 v3.2d Definitions specific to pdftex (RS)
-microtype.cfg    2026/03/01 v3.2d microtype main configuration file (RS)
 textcase.sty    2025/02/16 v1.05 Text only upper/lower case changing (DPC)
 scrlayer-scrpage.sty    2026/02/02 v3.49.2 KOMA-Script package (end user interf
 ace for scrlayer)
@@ -2214,18 +2762,16 @@ mparhack.sty    2021-05-02 v1.5 (T. Sgouros and S. Ulrich)
   suffix.sty    2006/07/15 1.5a Variant command support
  xstring.sty    2023/08/22 v1.86 String manipulations (CT)
  relsize.sty    2013/03/29 ver 4.1
-tabularx.sty    2023/12/11 v2.12a `tabularx' package (DPC)
  caption.sty    2023/08/05 v3.6o Customizing captions (AR)
 caption3.sty    2023/07/31 v2.4d caption3 kernel (AR)
 ltcaption.sty    2021/01/08 v1.4c longtable captions (AR)
   subfig.sty    2005/06/28 ver: 1.3 subfig package
+doc_diagrams.tex
  titling.sty    2009/09/04 v2.1d maketitle typesetting
 titlepage.tex
 datetime.sty    2015/03/20 v2.60 Date Time Package
 fmtcount.sty    2025/12/02 v3.12 Displaying the values of LaTeX counters (NT,VB
 ,NE)
- xkeyval.sty    2025/11/04 v2.10 package option processing (HA)
- xkeyval.tex    2014/12/03 v2.7a key=value parser (HA)
 fcprefix.sty    2012/09/28
 fcnumparser.sty    2017/06/15
 datetime-defaults.sty    2013/09/10
@@ -2250,19 +2796,75 @@ ai_volatility_options_cover.pdf    Graphic file (type pdf)
 prefaces/resumen.tex
  ts1pplj.fd    2004/09/06 font definitions for TS1/pplj.
 prefaces/abstract.tex
+../doc/mermaid-pdf/index/01.pdf
+../doc/mermaid-pdf/index/02.pdf
+../doc/mermaid-pdf/data/index/01.pdf
    t1fvm.fd    2004/09/07 scalable font definitions for T1/fvm.
+../doc/mermaid-pdf/data/raw-read/01.pdf
+../doc/mermaid-pdf/data/raw-read/02.pdf
+../doc/mermaid-pdf/data/merge-raw/01.pdf
+../doc/mermaid-pdf/data/merge-raw/02.pdf
+../doc/mermaid-pdf/data/product-split/01.pdf
+../doc/mermaid-pdf/data/product-split/02.pdf
+../doc/mermaid-pdf/data/underlying/01.pdf
+../doc/mermaid-pdf/data/underlying/02.pdf
+../doc/mermaid-pdf/data/volatility/01.pdf
+../doc/mermaid-pdf/data/volatility/02.pdf
+../doc/mermaid-pdf/data/index/02.pdf
+../doc/mermaid-pdf/models/features/01.pdf
+../doc/mermaid-pdf/models/features/02.pdf
+../doc/mermaid-pdf/models/families/01.pdf
+../doc/mermaid-pdf/models/families/02.pdf
+../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf
+../doc/mermaid-pdf/models/index/01.pdf
+../doc/mermaid-pdf/models/index/02.pdf
+../doc/mermaid-pdf/models/splits-kfolds/01.pdf
+../doc/mermaid-pdf/models/splits-kfolds/02.pdf
+../doc/mermaid-pdf/models/splits-kfolds/03.pdf
+../doc/mermaid-pdf/models/training/01.pdf
+../doc/mermaid-pdf/models/training/02.pdf
+../doc/mermaid-pdf/models/retraining-progressive/01.pdf
+../doc/mermaid-pdf/models/retraining-progressive/02.pdf
+../doc/mermaid-pdf/dashboard/index/01.pdf
+../doc/mermaid-pdf/dashboard/index/02.pdf
+../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf
+../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf
+../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf
+../doc/mermaid-pdf/dashboard/global-explainability/01.pdf
+../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf
+../doc/mermaid-pdf/dashboard/diagnosis/01.pdf
+../doc/mermaid-pdf/operations/api-deployment/01.pdf
+../doc/mermaid-pdf/operations/api-deployment/02.pdf
+../doc/mermaid-pdf/operations/api-deployment/03.pdf
+../doc/mermaid-pdf/repository/configuration/01.pdf
+../doc/mermaid-pdf/repository/configuration/02.pdf
+../doc/mermaid-pdf/repository/index/01.pdf
+../doc/mermaid-pdf/repository/index/02.pdf
+../doc/mermaid-pdf/repository/index/03.pdf
+../doc/mermaid-pdf/repository/src-packages/01.pdf
+../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf
+../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf
+../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf
+../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf
+../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf
+../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf
+../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf
+../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf
+../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf
+../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf
+../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf
     main.bbl
  ***********
 
  ) 
 Here is how much of TeX's memory you used:
- 44395 strings out of 467349
- 922567 string characters out of 5415641
- 1695684 words of memory out of 5000000
- 72531 multiletter control sequences out of 15000+600000
- 711204 words of font info for 182 fonts, out of 8000000 for 9000
+ 45803 strings out of 467349
+ 965871 string characters out of 5415641
+ 1717898 words of memory out of 5000000
+ 73795 multiletter control sequences out of 15000+600000
+ 730796 words of font info for 225 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,23n,124p,11207b,981s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,23n,135p,11207b,978s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
@@ -2276,10 +2878,10 @@ texmf-dist/fonts/type1/public/bera/fvmr8a.pfb></usr/local/texlive/2026/texmf-di
 st/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2026/texmf-dist/font
 s/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1
 /urw/palatino/uplri8a.pfb>
-Output written on main.pdf (33 pages, 234452 bytes).
+Output written on main.pdf (64 pages, 1054080 bytes).
 PDF statistics:
- 620 PDF objects out of 1000 (max. 8388607)
- 552 compressed objects within 6 object streams
- 144 named destinations out of 1000 (max. 500000)
- 18842 words of extra memory for PDF output out of 20736 (max. 10000000)
+ 1401 PDF objects out of 1440 (max. 8388607)
+ 1102 compressed objects within 12 object streams
+ 227 named destinations out of 1000 (max. 500000)
+ 33466 words of extra memory for PDF output out of 35830 (max. 10000000)
 
