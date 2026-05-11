@@ -1,0 +1,14 @@
+flowchart TD
+    A[(Market data por año)] --> B[Leer CCONTRACTS_C2]
+    A --> C[Leer TGENTRADES]
+    D[(ECB_EONIA.csv)] --> E[Construir tipos]
+    F[(ECB_STR.csv)] --> E
+    B --> G[Filtrar IBEX y vencimientos mensuales]
+    C --> H[Filtrar IBEX y vencimientos mensuales]
+    G --> I[(CCONTRACTS_C2.csv)]
+    H --> J[(TGENTRADES.csv)]
+    E --> K[(RATES_DATABASE.csv)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,D,F,I,J,K dataset;
+    class B,C,E,G,H process;

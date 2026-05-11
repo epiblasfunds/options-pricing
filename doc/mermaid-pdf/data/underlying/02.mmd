@@ -1,0 +1,14 @@
+flowchart TD
+    A[(Trade opción en t)] --> B[(Contrato futuro asociado)]
+    B --> C[(Trades históricos del futuro)]
+    C --> D{ExecDatetime futuro <= ExecDatetime opción}
+    D -->|sí| E[Candidato]
+    D -->|no| F[Descartar por futuro]
+    E --> G[Elegir candidato más reciente]
+    G --> H[(UnderlyingPrice)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef decisión fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#4a2a00;
+    class A,B,C,H dataset;
+    class E,F,G process;
+    class D decisión;

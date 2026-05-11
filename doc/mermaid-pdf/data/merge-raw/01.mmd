@@ -1,0 +1,14 @@
+flowchart TD
+    A[(TGENTRADES limpio)] --> B[Validar operaciones]
+    C[(CCONTRACTS_C2 limpio)] --> D[Validar contratos]
+    B --> E[Unión por contrato y año]
+    D --> E
+    E --> F[Imputar vencimientos faltantes]
+    F --> G[Imputar strikes faltantes]
+    G --> H[Crear fechas-hora]
+    H --> I[Calcular tiempo a vencimiento]
+    I --> J[(TRADE_IBEX_DB)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,C,J dataset;
+    class B,D,E,F,G,H,I process;

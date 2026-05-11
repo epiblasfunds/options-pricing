@@ -1,0 +1,9 @@
+flowchart LR
+    A[data/source_data] --> B[data/raw_data]
+    B --> C[data/merge_raw_data]
+    C --> D[data/product_split_data]
+    D --> E[data/underlying_data]
+    E --> F[data/volatility_data]
+    F --> G[data/training_data]
+    G --> H[trained_models]
+    H --> I[saved_models]

@@ -1,0 +1,9 @@
+flowchart LR
+    A[Features financieras] --> B[Batch normalization]
+    B --> C[Embedding denso]
+    C --> D[Tensorización]
+    D --> E[Contracción tensor-train]
+    E --> F[Capa densa posterior]
+    F --> G[Volatilidad predicha]
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E,F,G process;

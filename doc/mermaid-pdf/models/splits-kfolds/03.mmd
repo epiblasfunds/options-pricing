@@ -1,0 +1,12 @@
+flowchart TD
+    A[Train completo] --> B[Dividir en bloques temporales]
+    B --> C[Fold 1: ventana más temprana]
+    B --> D[Fold 2: ventana ampliada]
+    B --> E[Fold 3: ventana ampliada]
+    B --> F[Fold 4: ventana ampliada]
+    B --> G[Fold 5: train completo]
+    C --> H[Train fold / Val fold]
+    D --> H
+    E --> H
+    F --> H
+    G --> H

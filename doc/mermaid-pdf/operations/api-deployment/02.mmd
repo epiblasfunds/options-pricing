@@ -1,0 +1,6 @@
+flowchart LR
+    A[model_storage.backend] --> B{local o gcp}
+    B -->|local| C[Usar rutas del repositorio]
+    B -->|gcp| D[Descargar modelos y bundles a cache local]
+    C --> E[Runtime]
+    D --> E

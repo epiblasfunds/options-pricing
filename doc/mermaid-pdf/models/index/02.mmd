@@ -1,0 +1,8 @@
+flowchart LR
+    A[Datos ordenados por fecha] --> B[Train]
+    B --> C[Lag temporal]
+    C --> D[Validation/Test]
+    B --> E{Contrato compartido?}
+    D --> E
+    E -->|sí| F[Conservar contrato en un único split]
+    E -->|no| G[Split válido]

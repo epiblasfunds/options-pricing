@@ -1,0 +1,13 @@
+flowchart TD
+    A[Cliente] --> B[FastAPI]
+    B --> C[ModelStorage]
+    C -->|local| D[trained_models + saved_models]
+    C -->|gcp| E[Buckets GCS]
+    D --> F[Runtime modelo]
+    E --> F
+    F --> G[Predicción]
+    F --> H[SHAP local runtime]
+    F --> I[Vecinos]
+    G --> J[Respuesta JSON]
+    H --> J
+    I --> J

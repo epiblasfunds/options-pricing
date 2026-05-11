@@ -1,0 +1,17 @@
+flowchart TD
+    A[Modelo seleccionado] --> B[Ancla representativa]
+    B --> C[Surface Analysis]
+    B --> D[Feature Response Analysis]
+    C --> E[Heatmap]
+    C --> F[Superficie 3D]
+    C --> G[Smile]
+    C --> H[Term structure]
+    C --> I[Surface checks]
+    D --> J[ICE]
+    D --> K[ALE]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B data;
+    class C,D process;
+    class E,F,G,H,I,J,K plot;

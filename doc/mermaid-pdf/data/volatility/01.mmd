@@ -1,0 +1,14 @@
+flowchart TD
+    A[(OPTION_TRADES_UNDERLYING_DB)] --> B[Eliminar filas sin subyacente]
+    B --> C[Filtrar lag máximo]
+    C --> D[Validar coherencia temporal y contractual]
+    E[(RATES_DATABASE)] --> F[Calcular tipo compuesto]
+    D --> F
+    F --> G[Filtrar tipo de operación configurado]
+    G --> H[Resolver Black-76 inverso]
+    H --> I[Eliminar soluciones no válidas]
+    I --> J[(VOLATILITY_DB)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,E,J dataset;
+    class B,C,D,F,G,H,I process;

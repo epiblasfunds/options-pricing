@@ -1,0 +1,25 @@
+flowchart TD
+    A[(CCONTRACTS_C2: contratos)] --> B[Read Raw Step]
+    C[(TGENTRADES: operaciones)] --> B
+    D[(EONIA y €STR)] --> B
+    B --> E[(Contratos IBEX limpios)]
+    B --> F[(Trades IBEX limpios)]
+    B --> G[(Rates database)]
+    E --> H[Merge Raw Step]
+    F --> H
+    H --> I[(TRADE_IBEX_DB)]
+    I --> J[Product Split Step]
+    J --> K[(OPTIONS_TRADES_DB)]
+    J --> L[(FUTURES_TRADES_DB)]
+    J --> M[(OPTION_UNDERLYING_DB)]
+    K --> N[Underlying Step]
+    L --> N
+    M --> N
+    N --> O[(OPTION_TRADES_UNDERLYING_DB)]
+    O --> P[Volatility Step]
+    G --> P
+    P --> Q[(VOLATILITY_DB)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,C,D,E,F,G,I,K,L,M,O,Q dataset;
+    class B,H,J,N,P process;

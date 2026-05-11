@@ -1,0 +1,5 @@
+flowchart LR
+    A[backend=local] --> B[Directorios del repositorio]
+    C[backend=gcp] --> D[Descarga a cache local configurada]
+    B --> E[Dashboard/API runtime]
+    D --> E

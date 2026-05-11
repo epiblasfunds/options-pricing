@@ -1,0 +1,13 @@
+flowchart TD
+    A[StoredShapExplanation] --> B[values: matriz Phi]
+    A --> C[base_values: phi0]
+    A --> D[display_data: valores raw]
+    B --> E[Summary beeswarm]
+    B --> F[Importancia media absoluta]
+    B --> G[Dependence]
+    B --> H[Heatmap]
+    C --> I[Waterfall local]
+    classDef artifact fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    classDef plot fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D artifact;
+    class E,F,G,H,I plot;

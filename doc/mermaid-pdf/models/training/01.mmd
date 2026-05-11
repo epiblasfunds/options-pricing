@@ -1,0 +1,9 @@
+flowchart TD
+    A[Familia de modelo] --> B[Construir candidatos de hiperparámetros]
+    B --> C[Para cada candidato]
+    C --> D[Entrenar en k-folds temporales]
+    D --> E[Calcular métricas train y val]
+    E --> F[Agregar media y desviación]
+    F --> G[Calcular custom_error_1]
+    G --> H[Seleccionar mejor candidato]
+    H --> I[Guardar metadata de familia]

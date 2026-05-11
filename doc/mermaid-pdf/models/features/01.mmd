@@ -1,0 +1,17 @@
+flowchart TD
+    A[OptionType] --> H[isCall, isPut]
+    B[StrikePrice K] --> E[logMoneyness]
+    C[UnderlyingPrice F] --> E
+    D[TimeToExpiration días] --> F[TTEYears y sqrtTTEYears]
+    E --> G[Interacciones de moneyness]
+    F --> G
+    C --> I[Forward price]
+    D --> I
+    J[Rate r] --> I
+    I --> K[logForwardMoneyness]
+    E --> L[Feature frame final]
+    G --> L
+    F --> L
+    H --> L
+    K --> L
+    J --> L
