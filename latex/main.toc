@@ -2,53 +2,53 @@
 \babel@toc {spanish}{}\relax 
 \contentsline {chapter}{\numberline {1}\spacedlowsmallcaps {Introducción}}{6}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Planteamiento del problema}{6}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Relevancia financiera y profesional}{6}{section.1.2}%
-\contentsline {section}{\numberline {1.3}Antecedentes}{7}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Objetivos}{7}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Contribución del TFM}{8}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Estructura de la memoria}{8}{section.1.6}%
-\contentsline {chapter}{\numberline {2}\spacedlowsmallcaps {Marco Teórico}}{9}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Opciones, futuros y volatilidad implícita}{9}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Smile, moneyness y estructura temporal}{10}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Aprendizaje automático para volatilidad}{10}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Explicabilidad en modelos financieros}{11}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Infraestructura cloud y reproducibilidad}{11}{section.2.5}%
-\contentsline {section}{\numberline {2.6}Métricas de error, estabilidad y fidelidad}{12}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Gobierno de modelos y preguntas de validación}{13}{section.2.7}%
-\contentsline {chapter}{\numberline {3}\spacedlowsmallcaps {Metodología}}{14}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Diseño general del estudio}{14}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Datos y muestra analizada}{14}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Validaciones y tratamiento financiero}{17}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Variables y feature engineering}{18}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Familias de modelos}{22}{section.3.5}%
-\contentsline {section}{\numberline {3.6}Splits temporales y selección}{22}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Reentrenamiento y progressive ATM}{31}{section.3.7}%
-\contentsline {section}{\numberline {3.8}Construcción del dashboard}{31}{section.3.8}%
-\contentsline {section}{\numberline {3.9}API, almacenamiento y cloud}{34}{section.3.9}%
-\contentsline {section}{\numberline {3.10}Reproducibilidad y trazabilidad}{41}{section.3.10}%
-\contentsline {section}{\numberline {3.11}Arquitectura del repositorio}{41}{section.3.11}%
-\contentsline {section}{\numberline {3.12}Plan de validación funcional}{44}{section.3.12}%
-\contentsline {section}{\numberline {3.13}Riesgos metodológicos y controles}{44}{section.3.13}%
-\contentsline {chapter}{\numberline {4}\spacedlowsmallcaps {Resultados y Discusión}}{46}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Resultados}{46}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Comparativa general de modelos}{46}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Entrenamiento estándar frente a progressive ATM}{47}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}Selección del modelo final}{47}{subsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.1.4}Diagnóstico de rendimiento}{47}{subsection.4.1.4}%
-\contentsline {subsection}{\numberline {4.1.5}Behaviour And Surface}{48}{subsection.4.1.5}%
-\contentsline {subsection}{\numberline {4.1.6}Explicabilidad global}{49}{subsection.4.1.6}%
-\contentsline {subsection}{\numberline {4.1.7}Modelos equivalentes: árboles y regresión simbólica}{49}{subsection.4.1.7}%
-\contentsline {subsection}{\numberline {4.1.8}Explicabilidad local y soporte histórico}{50}{subsection.4.1.8}%
-\contentsline {section}{\numberline {4.2}Discusión}{50}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Lectura financiera}{50}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Lectura de IA y Data Science}{50}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Lectura de ingeniería y cloud}{51}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Limitaciones}{51}{subsection.4.2.4}%
-\contentsline {chapter}{\numberline {5}\spacedlowsmallcaps {Conclusiones}}{52}{chapter.5}%
+\contentsline {section}{\numberline {1.2}Relevancia financiera y profesional}{7}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Antecedentes}{8}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Objetivos}{9}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Contribución del TFM}{9}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Estructura de la memoria}{10}{section.1.6}%
+\contentsline {chapter}{\numberline {2}\spacedlowsmallcaps {Marco Teórico}}{12}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Opciones, futuros y volatilidad implícita}{12}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Smile, moneyness y estructura temporal}{13}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Aprendizaje automático para volatilidad}{14}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Explicabilidad en modelos financieros}{15}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Infraestructura cloud y reproducibilidad}{16}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Métricas de error, estabilidad y fidelidad}{17}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Gobierno de modelos y preguntas de validación}{18}{section.2.7}%
+\contentsline {chapter}{\numberline {3}\spacedlowsmallcaps {Metodología}}{20}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Diseño general del estudio}{20}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Datos y muestra analizada}{21}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Validaciones y tratamiento financiero}{26}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Variables y feature engineering}{26}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Familias de modelos}{31}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Splits temporales y selección}{33}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Reentrenamiento y progressive ATM}{34}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Construcción del dashboard}{38}{section.3.8}%
+\contentsline {section}{\numberline {3.9}API, almacenamiento y cloud}{38}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Reproducibilidad y trazabilidad}{46}{section.3.10}%
+\contentsline {section}{\numberline {3.11}Arquitectura del repositorio}{49}{section.3.11}%
+\contentsline {section}{\numberline {3.12}Plan de validación funcional}{51}{section.3.12}%
+\contentsline {section}{\numberline {3.13}Riesgos metodológicos y controles}{52}{section.3.13}%
+\contentsline {chapter}{\numberline {4}\spacedlowsmallcaps {Resultados y Discusión}}{54}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Resultados}{54}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Comparativa general de modelos}{54}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Entrenamiento estándar frente a progressive ATM}{55}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Selección del modelo final}{56}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Diagnóstico de rendimiento}{57}{subsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.1.5}Behaviour And Surface}{57}{subsection.4.1.5}%
+\contentsline {subsection}{\numberline {4.1.6}Explicabilidad global}{58}{subsection.4.1.6}%
+\contentsline {subsection}{\numberline {4.1.7}Modelos equivalentes: árboles y regresión simbólica}{59}{subsection.4.1.7}%
+\contentsline {subsection}{\numberline {4.1.8}Explicabilidad local y soporte histórico}{60}{subsection.4.1.8}%
+\contentsline {section}{\numberline {4.2}Discusión}{60}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Lectura financiera}{60}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Lectura de IA y Data Science}{61}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Lectura de ingeniería y cloud}{62}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Limitaciones}{62}{subsection.4.2.4}%
+\contentsline {chapter}{\numberline {5}\spacedlowsmallcaps {Conclusiones}}{63}{chapter.5}%
 \def \@chapapp {\appendixname }
-\contentsline {chapter}{\numberline {A}\spacedlowsmallcaps {Fundamentos de SHAP}}{54}{chapter.A}%
-\contentsline {chapter}{\numberline {B}\spacedlowsmallcaps {Curvas ICE}}{57}{chapter.B}%
-\contentsline {chapter}{\numberline {C}\spacedlowsmallcaps {Curvas ALE}}{58}{chapter.C}%
-\contentsline {chapter}{\numberline {D}\spacedlowsmallcaps {Árboles surrogate y regresión simbólica}}{60}{chapter.D}%
-\contentsline {chapter}{\numberline {E}\spacedlowsmallcaps {Entrenamiento progressive ATM}}{63}{chapter.E}%
+\contentsline {chapter}{\numberline {A}\spacedlowsmallcaps {Fundamentos de SHAP}}{65}{chapter.A}%
+\contentsline {chapter}{\numberline {B}\spacedlowsmallcaps {Curvas ICE}}{69}{chapter.B}%
+\contentsline {chapter}{\numberline {C}\spacedlowsmallcaps {Curvas ALE}}{71}{chapter.C}%
+\contentsline {chapter}{\numberline {D}\spacedlowsmallcaps {Árboles surrogate y regresión simbólica}}{74}{chapter.D}%
+\contentsline {chapter}{\numberline {E}\spacedlowsmallcaps {Entrenamiento progressive ATM}}{78}{chapter.E}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
