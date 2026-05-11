@@ -1,0 +1,7 @@
+flowchart TD
+    A[Split temporal inicial] --> B[Calcular contratos por split]
+    B --> C{Contrato aparece en dos splits?}
+    C -->|no| D[Conservar filas]
+    C -->|si| E[Elegir split ganador por volumetría y prioridad]
+    E --> F[Eliminar filas del otro split]
+    F --> G[Split sin contratos compartidos]

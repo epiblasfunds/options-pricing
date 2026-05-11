@@ -1,0 +1,13 @@
+flowchart LR
+    A[(EONIA)] --> B{Fecha < corte}
+    C[(€STR)] --> D{Fecha >= corte}
+    B --> E[EONIA - spread]
+    D --> F[€STR]
+    E --> G[(RATES_DATABASE)]
+    F --> G
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef decisión fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#4a2a00;
+    class A,C,G dataset;
+    class E,F process;
+    class B,D decisión;

@@ -1,0 +1,16 @@
+flowchart TD
+    A[Dataset sample o manual input] --> B[Construir muestra]
+    B --> C[Predicción]
+    C --> D[SHAP local waterfall]
+    B --> E[Vecinos en train]
+    E --> F[Tabla de vecinos]
+    E --> G[Mapa PCA 3D]
+    D --> H[Explicación local]
+    F --> H
+    G --> H
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,E data;
+    class D method;
+    class F,G,H plot;

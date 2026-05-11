@@ -1,0 +1,12 @@
+flowchart LR
+    A[Muestras reales] --> B[Seleccionar feature j]
+    B --> C[Construir grid por cuantiles]
+    C --> D[Sustituir j por cada valor]
+    D --> E[Predicción del modelo]
+    E --> F[Curvas individuales ICE]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,C data;
+    class B,D,E process;
+    class F plot;

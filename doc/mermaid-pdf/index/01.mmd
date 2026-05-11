@@ -1,0 +1,16 @@
+flowchart LR
+    A[Operaciones y contratos MEFF] --> B[ETL de datos]
+    C[Curvas EONIA / €STR] --> B
+    B --> D[(Base de volatilidad implícita)]
+    D --> E[Features financieras]
+    E --> F[Entrenamiento de familias]
+    F --> G[Modelo final]
+    G --> H[Artefactos explicables]
+    H --> I[Dashboard]
+    G --> J[API de predicción]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef service fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,C,D dataset;
+    class B,E,F,G,H process;
+    class I,J service;

@@ -1,0 +1,394 @@
+[
+  {
+    "source_markdown": "dashboard/behaviour/ale.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/behaviour/ale/01.mmd",
+    "pdf_relpath": "dashboard/behaviour/ale/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/behaviour/ice.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/behaviour/ice/01.mmd",
+    "pdf_relpath": "dashboard/behaviour/ice/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/behaviour/volatility-surfaces.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/behaviour/volatility-surfaces/01.mmd",
+    "pdf_relpath": "dashboard/behaviour/volatility-surfaces/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/behaviour-surface.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/behaviour-surface/01.mmd",
+    "pdf_relpath": "dashboard/behaviour-surface/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/diagnosis.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/diagnosis/01.mmd",
+    "pdf_relpath": "dashboard/diagnosis/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/shap-fundamentals.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/global/shap-fundamentals/01.mmd",
+    "pdf_relpath": "dashboard/global/shap-fundamentals/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/shap-visualizations.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/global/shap-visualizations/01.mmd",
+    "pdf_relpath": "dashboard/global/shap-visualizations/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/shap-visualizations.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/global/shap-visualizations/02.mmd",
+    "pdf_relpath": "dashboard/global/shap-visualizations/02.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/surrogate-trees.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/global/surrogate-trees/01.mmd",
+    "pdf_relpath": "dashboard/global/surrogate-trees/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/symbolic-regression.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/global/symbolic-regression/01.mmd",
+    "pdf_relpath": "dashboard/global/symbolic-regression/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global/symbolic-regression.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/global/symbolic-regression/02.mmd",
+    "pdf_relpath": "dashboard/global/symbolic-regression/02.pdf"
+  },
+  {
+    "source_markdown": "dashboard/global-explainability.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/global-explainability/01.mmd",
+    "pdf_relpath": "dashboard/global-explainability/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/index.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/index/01.mmd",
+    "pdf_relpath": "dashboard/index/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/index.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/index/02.mmd",
+    "pdf_relpath": "dashboard/index/02.pdf"
+  },
+  {
+    "source_markdown": "dashboard/model-to-dashboard.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/model-to-dashboard/01.mmd",
+    "pdf_relpath": "dashboard/model-to-dashboard/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/sample/local-shap-waterfall.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/sample/local-shap-waterfall/01.mmd",
+    "pdf_relpath": "dashboard/sample/local-shap-waterfall/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/sample/neighbours.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/sample/neighbours/01.mmd",
+    "pdf_relpath": "dashboard/sample/neighbours/01.pdf"
+  },
+  {
+    "source_markdown": "dashboard/sample/neighbours.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "dashboard/sample/neighbours/02.mmd",
+    "pdf_relpath": "dashboard/sample/neighbours/02.pdf"
+  },
+  {
+    "source_markdown": "dashboard/sample-explainability.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "dashboard/sample-explainability/01.mmd",
+    "pdf_relpath": "dashboard/sample-explainability/01.pdf"
+  },
+  {
+    "source_markdown": "data/index.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/index/01.mmd",
+    "pdf_relpath": "data/index/01.pdf"
+  },
+  {
+    "source_markdown": "data/index.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/index/02.mmd",
+    "pdf_relpath": "data/index/02.pdf"
+  },
+  {
+    "source_markdown": "data/merge-raw.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/merge-raw/01.mmd",
+    "pdf_relpath": "data/merge-raw/01.pdf"
+  },
+  {
+    "source_markdown": "data/merge-raw.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/merge-raw/02.mmd",
+    "pdf_relpath": "data/merge-raw/02.pdf"
+  },
+  {
+    "source_markdown": "data/product-split.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/product-split/01.mmd",
+    "pdf_relpath": "data/product-split/01.pdf"
+  },
+  {
+    "source_markdown": "data/product-split.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/product-split/02.mmd",
+    "pdf_relpath": "data/product-split/02.pdf"
+  },
+  {
+    "source_markdown": "data/raw-read.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/raw-read/01.mmd",
+    "pdf_relpath": "data/raw-read/01.pdf"
+  },
+  {
+    "source_markdown": "data/raw-read.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/raw-read/02.mmd",
+    "pdf_relpath": "data/raw-read/02.pdf"
+  },
+  {
+    "source_markdown": "data/underlying.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/underlying/01.mmd",
+    "pdf_relpath": "data/underlying/01.pdf"
+  },
+  {
+    "source_markdown": "data/underlying.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/underlying/02.mmd",
+    "pdf_relpath": "data/underlying/02.pdf"
+  },
+  {
+    "source_markdown": "data/volatility.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "data/volatility/01.mmd",
+    "pdf_relpath": "data/volatility/01.pdf"
+  },
+  {
+    "source_markdown": "data/volatility.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "data/volatility/02.mmd",
+    "pdf_relpath": "data/volatility/02.pdf"
+  },
+  {
+    "source_markdown": "index.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "index/01.mmd",
+    "pdf_relpath": "index/01.pdf"
+  },
+  {
+    "source_markdown": "index.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "index/02.mmd",
+    "pdf_relpath": "index/02.pdf"
+  },
+  {
+    "source_markdown": "models/families/quantum-inspired.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "models/families/quantum-inspired/01.mmd",
+    "pdf_relpath": "models/families/quantum-inspired/01.pdf"
+  },
+  {
+    "source_markdown": "models/families.md",
+    "diagram_index": 1,
+    "diagram_type": "classDiagram",
+    "mmd_relpath": "models/families/01.mmd",
+    "pdf_relpath": "models/families/01.pdf"
+  },
+  {
+    "source_markdown": "models/families.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/families/02.mmd",
+    "pdf_relpath": "models/families/02.pdf"
+  },
+  {
+    "source_markdown": "models/features.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/features/01.mmd",
+    "pdf_relpath": "models/features/01.pdf"
+  },
+  {
+    "source_markdown": "models/features.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "models/features/02.mmd",
+    "pdf_relpath": "models/features/02.pdf"
+  },
+  {
+    "source_markdown": "models/index.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/index/01.mmd",
+    "pdf_relpath": "models/index/01.pdf"
+  },
+  {
+    "source_markdown": "models/index.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "models/index/02.mmd",
+    "pdf_relpath": "models/index/02.pdf"
+  },
+  {
+    "source_markdown": "models/retraining-progressive.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/retraining-progressive/01.mmd",
+    "pdf_relpath": "models/retraining-progressive/01.pdf"
+  },
+  {
+    "source_markdown": "models/retraining-progressive.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "models/retraining-progressive/02.mmd",
+    "pdf_relpath": "models/retraining-progressive/02.pdf"
+  },
+  {
+    "source_markdown": "models/splits-kfolds.md",
+    "diagram_index": 1,
+    "diagram_type": "gantt",
+    "mmd_relpath": "models/splits-kfolds/01.mmd",
+    "pdf_relpath": "models/splits-kfolds/01.pdf"
+  },
+  {
+    "source_markdown": "models/splits-kfolds.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/splits-kfolds/02.mmd",
+    "pdf_relpath": "models/splits-kfolds/02.pdf"
+  },
+  {
+    "source_markdown": "models/splits-kfolds.md",
+    "diagram_index": 3,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/splits-kfolds/03.mmd",
+    "pdf_relpath": "models/splits-kfolds/03.pdf"
+  },
+  {
+    "source_markdown": "models/training.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "models/training/01.mmd",
+    "pdf_relpath": "models/training/01.pdf"
+  },
+  {
+    "source_markdown": "models/training.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "models/training/02.mmd",
+    "pdf_relpath": "models/training/02.pdf"
+  },
+  {
+    "source_markdown": "operations/api-deployment.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "operations/api-deployment/01.mmd",
+    "pdf_relpath": "operations/api-deployment/01.pdf"
+  },
+  {
+    "source_markdown": "operations/api-deployment.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "operations/api-deployment/02.mmd",
+    "pdf_relpath": "operations/api-deployment/02.pdf"
+  },
+  {
+    "source_markdown": "operations/api-deployment.md",
+    "diagram_index": 3,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "operations/api-deployment/03.mmd",
+    "pdf_relpath": "operations/api-deployment/03.pdf"
+  },
+  {
+    "source_markdown": "repository/configuration.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "repository/configuration/01.mmd",
+    "pdf_relpath": "repository/configuration/01.pdf"
+  },
+  {
+    "source_markdown": "repository/configuration.md",
+    "diagram_index": 2,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "repository/configuration/02.mmd",
+    "pdf_relpath": "repository/configuration/02.pdf"
+  },
+  {
+    "source_markdown": "repository/index.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "repository/index/01.mmd",
+    "pdf_relpath": "repository/index/01.pdf"
+  },
+  {
+    "source_markdown": "repository/index.md",
+    "diagram_index": 2,
+    "diagram_type": "sequenceDiagram",
+    "mmd_relpath": "repository/index/02.mmd",
+    "pdf_relpath": "repository/index/02.pdf"
+  },
+  {
+    "source_markdown": "repository/index.md",
+    "diagram_index": 3,
+    "diagram_type": "flowchart LR",
+    "mmd_relpath": "repository/index/03.mmd",
+    "pdf_relpath": "repository/index/03.pdf"
+  },
+  {
+    "source_markdown": "repository/src-packages.md",
+    "diagram_index": 1,
+    "diagram_type": "flowchart TD",
+    "mmd_relpath": "repository/src-packages/01.mmd",
+    "pdf_relpath": "repository/src-packages/01.pdf"
+  }
+]

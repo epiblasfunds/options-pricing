@@ -1,0 +1,11 @@
+flowchart TD
+    A[Familia] --> B[Espacio de búsqueda]
+    B --> C[Candidatos muestreados]
+    C --> D[K-folds temporales]
+    D --> E[Métricas train/validation]
+    E --> F[Custom error]
+    F --> G[Mejor configuración]
+    G --> H[Reentrenamiento]
+    H --> I[Bundle explicable]
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E,F,G,H,I process;

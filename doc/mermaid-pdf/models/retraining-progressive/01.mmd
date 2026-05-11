@@ -1,0 +1,10 @@
+flowchart TD
+    A["Metadata de mejor familia"] --> B["Recuperar mejores parámetros"]
+    B --> C{Fase}
+    C -->|train_val| D["Train vs Validation"]
+    C -->|final_test| E["TrainVal vs Test"]
+    D --> F["Métricas + custom_error_2"]
+    E --> G["Métricas finales + dispersión"]
+    G --> H["Guardar modelo final"]
+    H --> I["Construir bundle dashboard"]
+    I --> J["Subida opcional a GCP"]

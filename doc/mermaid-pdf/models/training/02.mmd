@@ -1,0 +1,9 @@
+flowchart LR
+    A[Train fold] --> B[partición interna de ajuste]
+    A --> C[partición interna de early stopping]
+    B --> D[Entrenamiento iterativo]
+    C --> D
+    D --> E{Mejora val_rmse?}
+    E -->|sí| F[Guardar mejor estado]
+    E -->|no durante paciencia| G[Parar]
+    F --> D

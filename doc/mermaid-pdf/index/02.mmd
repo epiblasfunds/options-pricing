@@ -1,0 +1,11 @@
+flowchart TD
+    S0[(Source data: contratos, trades, tipos)] --> S1[Read Raw Step]
+    S1 --> S2[Merge Raw Step]
+    S2 --> S3[Product Split Step]
+    S3 --> S4[Underlying Step]
+    S4 --> S5[Volatility Step]
+    S5 --> S6[(Training Data)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class S0,S6 dataset;
+    class S1,S2,S3,S4,S5 process;
