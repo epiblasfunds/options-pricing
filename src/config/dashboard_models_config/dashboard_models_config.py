@@ -54,6 +54,7 @@ class DashboardModelsConfig:
         self.symbolic_min_candidate_equations = int(
             settings_config["symbolic_min_candidate_equations"]
         )
+        self.symbolic_parsimony = float(settings_config.get("symbolic_parsimony", 1e-5))
         self.symbolic_maxsize = int(settings_config["symbolic_maxsize"])
         self.symbolic_maxdepth = int(settings_config["symbolic_maxdepth"])
         self.symbolic_timeout_seconds = int(settings_config["symbolic_timeout_seconds"])
