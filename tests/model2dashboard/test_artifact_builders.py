@@ -1,3 +1,4 @@
+from dataclasses import replace
 from types import SimpleNamespace
 
 import numpy as np
@@ -49,6 +50,65 @@ class _FakeRegressor:
         return self.equations_.loc[
             self.equations_["equation"] == self._best_equation
         ].iloc[0]
+
+
+class _FakePySRRegressor:
+    fit_rows = None
+    predict_rows = None
+    kwargs = None
+
+    def __init__(self, **kwargs) -> None:
+        type(self).kwargs = dict(kwargs)
+        self.model_selection = kwargs["model_selection"]
+        self.equations_ = pd.DataFrame(
+            [
+                {
+                    "complexity": 1,
+                    "loss": 0.0,
+                    "score": 1.0,
+                    "equation": "Rate",
+                }
+            ]
+        )
+
+    def fit(self, X, y, variable_names):
+        type(self).fit_rows = len(X)
+        self.variable_names = list(variable_names)
+        self.rate_position = self.variable_names.index("Rate")
+        return self
+
+    def predict(self, X):
+        type(self).predict_rows = len(X)
+        return X[:, self.rate_position]
+
+    def get_best(self) -> pd.Series:
+        return self.equations_.iloc[0]
+
+    def sympy(self):
+        return "Rate"
+
+    def latex(self, precision):
+        return "Rate"
+
+
+def _surrogate_frame(index) -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "OptionType": [
+                "C" if position % 2 == 0 else "P"
+                for position, _ in enumerate(index)
+            ],
+            "StrikePrice": [
+                9000.0 + 10.0 * position for position, _ in enumerate(index)
+            ],
+            "UnderlyingPrice": [
+                9050.0 + 8.0 * position for position, _ in enumerate(index)
+            ],
+            "TimeToExpiration": [10.0 + position for position, _ in enumerate(index)],
+            "Rate": [0.01 + 0.001 * position for position, _ in enumerate(index)],
+        },
+        index=index,
+    )
 
 
 def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
@@ -105,6 +165,93 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
 
     assert local_shap.index == [10, 11]
     assert local_shap.base_values.tolist() == [900.0, 900.0]
+
+
+def test_build_surrogate_tree_models_fit_full_train_and_validate_full_test(monkeypatch):
+    monkeypatch.setattr(
+        artifact_builders.config.dashboard_models_config,
+        "build_config",
+        replace(
+            artifact_builders.config.dashboard_models_config.build_config,
+            surrogate_depths=(2,),
+        ),
+    )
+    monkeypatch.setattr(
+        artifact_builders.config.dashboard_models_config,
+        "surrogate_min_samples_leaf",
+        1,
+    )
+    train_frame = _surrogate_frame([10, 11, 12, 13])
+    test_frame = _surrogate_frame([20, 21, 22])
+    train_predictions = pd.Series(
+        [0.11, 0.12, 0.13, 0.14],
+        index=train_frame.index,
+        name="PredictedVolatility",
+    )
+    test_predictions = pd.Series(
+        [0.21, 0.22, 0.23],
+        index=test_frame.index,
+        name="PredictedVolatility",
+    )
+
+    tree_models = artifact_builders.build_surrogate_tree_models(
+        runtime=SimpleNamespace(family_name="unit-test"),
+        train_reference_frame=train_frame,
+        train_predictions=train_predictions,
+        test_reference_frame=test_frame,
+        test_predictions=test_predictions,
+    )
+
+    tree_model = tree_models[2]
+    assert tree_model.model.tree_.n_node_samples[0] == len(train_frame)
+    assert len(tree_model.fidelity_frame) == len(test_frame)
+    assert tree_model.fidelity_frame["model_prediction"].tolist() == [
+        0.21,
+        0.22,
+        0.23,
+    ]
+    assert "full-train predictions" in tree_model.interpretation
+    assert "full-test predictions" in tree_model.interpretation
+
+
+def test_build_symbolic_regressor_model_fit_full_train_and_validate_full_test(
+    monkeypatch,
+):
+    monkeypatch.setattr(artifact_builders, "PySRRegressor", _FakePySRRegressor)
+    train_frame = _surrogate_frame([10, 11, 12, 13])
+    test_frame = _surrogate_frame([20, 21, 22])
+    train_predictions = pd.Series(
+        [0.11, 0.12, 0.13, 0.14],
+        index=train_frame.index,
+        name="PredictedVolatility",
+    )
+    test_predictions = pd.Series(
+        [0.21, 0.22, 0.23],
+        index=test_frame.index,
+        name="PredictedVolatility",
+    )
+
+    symbolic_model = artifact_builders.build_symbolic_regressor_model(
+        runtime=SimpleNamespace(family_name="unit-test"),
+        train_reference_frame=train_frame,
+        train_predictions=train_predictions,
+        test_reference_frame=test_frame,
+        test_predictions=test_predictions,
+    )
+
+    assert _FakePySRRegressor.fit_rows == len(train_frame)
+    assert _FakePySRRegressor.predict_rows == len(test_frame)
+    assert _FakePySRRegressor.kwargs["parsimony"] == (
+        artifact_builders.config.dashboard_models_config.symbolic_parsimony
+    )
+    assert len(symbolic_model.fidelity_frame) == len(test_frame)
+    assert symbolic_model.fidelity_frame["model_prediction"].tolist() == [
+        0.21,
+        0.22,
+        0.23,
+    ]
+    assert "full-train predictions" in symbolic_model.interpretation
+    assert "full-test predictions" in symbolic_model.interpretation
 
 
 def test_normalize_symbolic_equation_table_persists_at_least_five_candidates():

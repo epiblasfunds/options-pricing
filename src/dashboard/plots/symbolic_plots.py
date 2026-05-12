@@ -57,6 +57,59 @@ class _SymbolicLatexPrinter(LatexPrinter):
             return rf"{mantissa} \cdot 10^{{{int(exponent)}}}"
         return _format_decimal_or_scientific(value)
 
+    def _print_Mul(self, expr):
+        if not _contains_feature_product(expr):
+            return super()._print_Mul(expr)
+
+        from sympy.simplify import fraction
+
+        prefix = ""
+        if expr.could_extract_minus_sign():
+            expr = -expr
+            prefix = "- "
+
+        numerator, denominator = fraction(expr, exact=True)
+        if denominator is sympy.S.One:
+            return prefix + self._print_feature_product(numerator)
+        return (
+            prefix
+            + rf"\frac{{{self._print_mul_component(numerator)}}}"
+            + rf"{{{self._print_mul_component(denominator)}}}"
+        )
+
+    def _print_mul_component(self, expr):
+        if expr.is_Mul and _contains_feature_product(expr):
+            return self._print_feature_product(expr)
+        return self._print(expr)
+
+    def _print_feature_product(self, expr):
+        factors = (
+            expr.as_ordered_factors()
+            if self.order not in ("old", "none")
+            else list(expr.args)
+        )
+        parts = []
+        previous_is_feature = False
+        for index, factor in enumerate(factors):
+            factor_tex = self._print(factor)
+            if self._needs_mul_brackets(
+                factor,
+                first=(index == 0),
+                last=(index == len(factors) - 1),
+            ):
+                factor_tex = rf"\left({factor_tex}\right)"
+
+            current_is_feature = _is_feature_factor(factor)
+            if parts:
+                parts.append(
+                    r" \times "
+                    if previous_is_feature and current_is_feature
+                    else " "
+                )
+            parts.append(factor_tex)
+            previous_is_feature = current_is_feature
+        return "".join(parts)
+
 
 _TEXT_PRINTER = _SymbolicTextPrinter()
 _LATEX_PRINTER = _SymbolicLatexPrinter()
@@ -355,6 +408,23 @@ def _format_number_atom(number: sympy.Float):
     ):
         return sympy.Rational(fraction.numerator, fraction.denominator)
     return sympy.Float(f"{value:.2f}")
+
+
+def _contains_feature_product(expr) -> bool:
+    if not getattr(expr, "is_Mul", False):
+        return False
+    return (
+        sum(
+            1
+            for factor in expr.as_ordered_factors()
+            if _is_feature_factor(factor)
+        )
+        >= 2
+    )
+
+
+def _is_feature_factor(expr) -> bool:
+    return bool(getattr(expr, "free_symbols", ()))
 
 
 def _format_decimal_or_scientific(value: float) -> str:

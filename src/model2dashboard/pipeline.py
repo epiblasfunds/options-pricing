@@ -210,6 +210,7 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         "symbolic_metrics": (
             dict(symbolic_model.metrics) if symbolic_model is not None else {}
         ),
+        "symbolic_parsimony": config.dashboard_models_config.symbolic_parsimony,
         "symbolic_feature_names": (
             list(symbolic_model.used_feature_names)
             if symbolic_model is not None
@@ -222,6 +223,10 @@ def _metadata_payload(runtime, artifacts: dict, retrained_metadata_dir: Path) ->
         "data_source": "TrainingDataHandler.load_splitted_data()[-1]",
         "neighbor_reference_split": "train",
         "neighbor_reference_source": "TrainingDataHandler.load_splitted_data()[0]",
+        "surrogate_training_split": "train",
+        "surrogate_validation_split": "test",
+        "symbolic_training_split": "train",
+        "symbolic_validation_split": "test",
         "builder": "src.model2dashboard.run_pipeline",
     }
 
