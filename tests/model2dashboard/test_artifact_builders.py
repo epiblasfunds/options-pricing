@@ -1,3 +1,4 @@
+from dataclasses import replace
 from types import SimpleNamespace
 
 import numpy as np
@@ -168,9 +169,12 @@ def test_build_shap_artifacts_use_shared_background_base_value(monkeypatch):
 
 def test_build_surrogate_tree_models_fit_full_train_and_validate_full_test(monkeypatch):
     monkeypatch.setattr(
-        artifact_builders.config.dashboard_models_config.build_config,
-        "surrogate_depths",
-        [2],
+        artifact_builders.config.dashboard_models_config,
+        "build_config",
+        replace(
+            artifact_builders.config.dashboard_models_config.build_config,
+            surrogate_depths=(2,),
+        ),
     )
     monkeypatch.setattr(
         artifact_builders.config.dashboard_models_config,
