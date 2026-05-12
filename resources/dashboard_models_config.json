@@ -37,6 +37,7 @@
     "symbolic_topn": 48,
     "symbolic_ncycles_per_iteration": 1200,
     "symbolic_min_candidate_equations": 5,
+    "symbolic_parsimony": 0.000003,
     "symbolic_maxsize": 80,
     "symbolic_maxdepth": 24,
     "symbolic_timeout_seconds": 3600

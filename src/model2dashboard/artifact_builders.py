@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import shap
 import sympy
-from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
@@ -65,6 +64,10 @@ def build_dashboard_artifacts(
         name="PredictedVolatility",
     )
     dataset_frame = build_dashboard_dataset(raw_test_frame, predictions)
+    training_reference_predictions = training_reference_frame[
+        "PredictedVolatility"
+    ].astype("float64")
+    test_reference_predictions = dataset_frame["PredictedVolatility"].astype("float64")
     sample_indices = sample_frame(
         dataset_frame,
         max_rows=config.dashboard_models_config.build_config.sample_option_size,
@@ -110,15 +113,17 @@ def build_dashboard_artifacts(
         "behaviour_anchor_indices": behaviour_anchor_indices,
         "tree_models": build_surrogate_tree_models(
             runtime=runtime,
-            feature_frame=feature_frame,
-            predictions=predictions,
-            dataset_frame=dataset_frame,
+            train_reference_frame=training_reference_frame,
+            train_predictions=training_reference_predictions,
+            test_reference_frame=dataset_frame,
+            test_predictions=test_reference_predictions,
         ),
         "symbolic_model": build_symbolic_regressor_model(
             runtime=runtime,
-            feature_frame=feature_frame,
-            predictions=predictions,
-            dataset_frame=dataset_frame,
+            train_reference_frame=training_reference_frame,
+            train_predictions=training_reference_predictions,
+            test_reference_frame=dataset_frame,
+            test_predictions=test_reference_predictions,
         ),
         "global_shap": global_shap,
         "local_shap": local_shap,
@@ -389,32 +394,27 @@ def serialize_shap_result(
 def build_surrogate_tree_models(
     *,
     runtime: TrainingModelRuntime,
-    feature_frame: pd.DataFrame,
-    predictions: pd.Series,
-    dataset_frame: pd.DataFrame | None = None,
+    train_reference_frame: pd.DataFrame,
+    train_predictions: pd.Series,
+    test_reference_frame: pd.DataFrame,
+    test_predictions: pd.Series,
 ) -> dict[int, SurrogateTreeModel]:
-    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
-    explainability_frame = build_explainability_frame(
-        reference_frame,
+    train_explainability_frame = build_explainability_frame(
+        train_reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    test_explainability_frame = build_explainability_frame(
+        test_reference_frame,
         feature_names=EXPLAINABILITY_FEATURE_NAMES,
     )
     encoder = build_explainability_encoder(
-        explainability_frame,
+        train_explainability_frame,
         feature_names=EXPLAINABILITY_FEATURE_NAMES,
     )
-    transformed = encoder.encode_frame(explainability_frame)
-    sampled = sample_frame(
-        transformed,
-        max_rows=config.dashboard_models_config.surrogate_sample_size,
-        random_state=config.dashboard_models_config.random_state,
-    )
-    sampled_predictions = predictions.loc[sampled.index]
-    X_train, X_test, y_train, y_test = train_test_split(
-        sampled,
-        sampled_predictions,
-        test_size=0.2,
-        random_state=config.dashboard_models_config.random_state,
-    )
+    X_train = encoder.encode_frame(train_explainability_frame)
+    X_test = encoder.encode_frame(test_explainability_frame)
+    y_train = train_predictions.loc[X_train.index].astype("float64")
+    y_test = test_predictions.loc[X_test.index].astype("float64")
     tree_models: dict[int, SurrogateTreeModel] = {}
     for depth in config.dashboard_models_config.build_config.surrogate_depths:
         surrogate = DecisionTreeRegressor(
@@ -444,8 +444,9 @@ def build_surrogate_tree_models(
                 feature_names=EXPLAINABILITY_FEATURE_NAMES,
             ),
             interpretation=(
-                f"The surrogate approximates {runtime.family_name} on final-test "
-                f"predictions with RMSE {metrics['rmse']:.4f} at max depth {int(depth)}. "
+                f"The surrogate is fitted on full-train predictions and validated "
+                f"on full-test predictions for {runtime.family_name}, with RMSE "
+                f"{metrics['rmse']:.4f} at max depth {int(depth)}. "
                 f"The dominant decision logic is driven by "
                 f"{', '.join(top_features) or 'no features'}."
             ),
@@ -466,33 +467,28 @@ def build_surrogate_tree_models(
 def build_symbolic_regressor_model(
     *,
     runtime: TrainingModelRuntime,
-    feature_frame: pd.DataFrame,
-    predictions: pd.Series,
-    dataset_frame: pd.DataFrame | None = None,
+    train_reference_frame: pd.DataFrame,
+    train_predictions: pd.Series,
+    test_reference_frame: pd.DataFrame,
+    test_predictions: pd.Series,
 ) -> SymbolicRegressorModel:
-    reference_frame = dataset_frame if dataset_frame is not None else feature_frame
-    explainability_frame = build_explainability_frame(
-        reference_frame,
+    train_explainability_frame = build_explainability_frame(
+        train_reference_frame,
+        feature_names=EXPLAINABILITY_FEATURE_NAMES,
+    )
+    test_explainability_frame = build_explainability_frame(
+        test_reference_frame,
         feature_names=EXPLAINABILITY_FEATURE_NAMES,
     )
     encoder = build_explainability_encoder(
-        explainability_frame,
+        train_explainability_frame,
         feature_names=EXPLAINABILITY_FEATURE_NAMES,
     )
-    transformed = encoder.encode_frame(explainability_frame)
-    sampled = sample_frame(
-        transformed,
-        max_rows=config.dashboard_models_config.symbolic_sample_size,
-        random_state=config.dashboard_models_config.random_state + 5,
-    )
-    sampled_predictions = predictions.loc[sampled.index]
     selected_features = list(EXPLAINABILITY_FEATURE_NAMES)
-    X_train, X_test, y_train, y_test = train_test_split(
-        sampled.loc[:, selected_features],
-        sampled_predictions,
-        test_size=0.2,
-        random_state=config.dashboard_models_config.random_state,
-    )
+    X_train = encoder.encode_frame(train_explainability_frame).loc[:, selected_features]
+    X_test = encoder.encode_frame(test_explainability_frame).loc[:, selected_features]
+    y_train = train_predictions.loc[X_train.index].astype("float64")
+    y_test = test_predictions.loc[X_test.index].astype("float64")
     regressor = PySRRegressor(
         model_selection="best",
         binary_operators=["+", "-", "*", "/", "^"],
@@ -505,6 +501,7 @@ def build_symbolic_regressor_model(
         ncycles_per_iteration=(
             config.dashboard_models_config.symbolic_ncycles_per_iteration
         ),
+        parsimony=config.dashboard_models_config.symbolic_parsimony,
         maxsize=config.dashboard_models_config.symbolic_maxsize,
         maxdepth=config.dashboard_models_config.symbolic_maxdepth,
         timeout_in_seconds=config.dashboard_models_config.symbolic_timeout_seconds,
@@ -550,7 +547,8 @@ def build_symbolic_regressor_model(
         sympy_expression=str(sympy_expression),
         latex_expression=str(regressor.latex(precision=4)),
         interpretation=(
-            f"Symbolic PySR surrogate fitted on final-test predictions. "
+            f"Symbolic PySR surrogate fitted on full-train predictions and "
+            f"validated on full-test predictions. "
             f"It uses {', '.join(used_feature_names) or 'an intercept-like constant'} "
             f"and approximates {runtime.family_name} with RMSE {metrics['rmse']:.4f} "
             f"at complexity {int(best_equation['complexity'])}."

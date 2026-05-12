@@ -34,6 +34,21 @@ def test_format_symbolic_equation_latex_supports_fractions_and_scientific_notati
     assert r"3.3 \cdot 10^{-5} underlying" in formatted
 
 
+def test_format_symbolic_equation_latex_uses_times_between_feature_products():
+    expression = (
+        "Rate*StrikePrice + 2*StrikePrice*TimeToExpiration "
+        "+ Rate*UnderlyingPrice/3 + 3.30266851204e-5*StrikePrice"
+    )
+
+    formatted = format_symbolic_equation_latex(expression)
+
+    assert r"rate \times strike" in formatted
+    assert r"2 strike \times timeToExpiration" in formatted
+    assert r"\frac{rate \times underlying}{3}" in formatted
+    assert r"3.3 \cdot 10^{-5} strike" in formatted
+    assert r"3.3 \cdot 10^{-5} \times strike" not in formatted
+
+
 def test_symbolic_formula_aliases_use_feature_names_instead_of_positional_aliases():
     model = SymbolicRegressorModel(
         equation="OptionType + Rate + StrikePrice + TimeToExpiration + UnderlyingPrice",
