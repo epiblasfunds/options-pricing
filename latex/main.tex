@@ -101,9 +101,9 @@ manychapters,pdfspacing]{classicthesis}
 \section{Planteamiento del problema}
 \label{sec:planteamiento}
 
-La volatilidad implícita es una magnitud central en mercados de derivados. En una opción negociada, el precio observable resume expectativas, oferta y demanda, liquidez, microestructura y percepción de riesgo. Sin embargo, para comparar contratos con strikes y vencimientos distintos, los profesionales no suelen razonar únicamente en precios: transforman esos precios en volatilidades implícitas y analizan smiles, skews y estructuras temporales \citep{hull2022options,derman2016volatility}.
+La volatilidad implícita es un concepto central en mercados de derivados. En una opción negociada, el precio observable resume expectativas, oferta y demanda, liquidez, microestructura y percepción de riesgo. Sin embargo, para comparar contratos con strikes y vencimientos distintos, los profesionales no suelen razonar únicamente en precios: transforman esos precios en volatilidades implícitas y analizan smiles, skews y estructuras temporales \citep{hull2022options,derman2016volatility}.
 
-El problema de este trabajo surge de una tensión habitual en finanzas cuantitativas. Por un lado, los modelos de aprendizaje automático pueden aproximar relaciones no lineales entre strike, subyacente, vencimiento, tipo de interés y volatilidad. Por otro lado, en un entorno financiero no basta con obtener una predicción numéricamente competitiva. El modelo debe poder auditarse: hay que saber dónde falla, qué variables explican sus predicciones, si respeta patrones razonables de la superficie y si una predicción concreta está respaldada por datos históricos similares.
+El problema de este trabajo surge de una doble exigencia en finanzas cuantitativas. Por un lado, los modelos de aprendizaje automático pueden aproximar relaciones no lineales entre strike, subyacente, vencimiento, tipo de interés y volatilidad. Por otro lado, en un entorno financiero no basta con obtener una predicción numéricamente competitiva. El modelo debe poder auditarse: hay que saber dónde falla, qué variables explican sus predicciones, si respeta patrones razonables de la superficie y si una predicción concreta está respaldada por datos históricos similares.
 
 En este contexto, el proyecto construye modelos de volatilidad explicable, consultable y útil vía API. La explicabilidad se entiende en dos niveles. A nivel de ingeniería, sirve para detectar sesgos, errores de datos, incoherencias, discontinuidades y comportamientos no deseados. A nivel financiero y profesional, permite justificar decisiones ante revisiones internas, auditorías, model validation o análisis de riesgo.
 
@@ -112,16 +112,16 @@ En este contexto, el proyecto construye modelos de volatilidad explicable, consu
 \begin{itemize}
   \item Cómo transformar operaciones reales de mercado en una base de volatilidad implícita que sea consistente, trazable y reutilizable.
   \item Cómo aproximar la superficie \(\sigma(K,T)\) con modelos suficientemente flexibles sin introducir sesgos temporales o dependencias espurias.
-  \item Cómo exponer ese modelo de forma utilizable, de manera que no quede encerrado en notebooks o tablas estáticas.
-  \item Cómo saber cuándo una predicción es defendible y cuándo conviene tratarla con cautela porque está en una región poco soportada o mal explicada.
+  \item Cómo operacionalizar ese modelo de forma utilizable, de manera que no quede encerrado en notebooks o tablas estáticas.
+  \item Cómo saber cuándo una predicción es robusta y cuándo conviene tratarla con cautela porque está en una región poco soportada o mal explicada.
 \end{itemize}
 
-La memoria se construye alrededor de esa cadena completa. No se limita a entrenar un predictor, sino que conecta datos de mercado, inversión de Black-76, selección de familias, explicabilidad global y local, diagnóstico regional y despliegue. Ese enfoque es coherente con el tipo de uso que tendría el sistema en un entorno profesional: consulta repetida, revisión crítica y necesidad de justificar el resultado más allá de una métrica agregada.
+La memoria se construye alrededor de esa cadena completa. No se limita a entrenar un predictor, sino que conecta datos de mercado, inversión de Black-76, selección de familias, explicabilidad global y local, diagnóstico por zonas de la superficie y despliegue. Ese enfoque es coherente con el tipo de uso que tendría el sistema en un entorno profesional: consulta repetida, revisión crítica y necesidad de justificar el resultado más allá de una métrica agregada.
 
 \section{Relevancia financiera y profesional}
 \label{sec:relevancia}
 
-La volatilidad implícita condensa información de mercado y se utiliza en valoración, cobertura, gestión de riesgos y análisis de escenarios. En opciones sobre índices, la forma de la superficie de volatilidad puede reflejar demanda de protección, asimetría percibida, presión de liquidez o cambios de régimen. Un modelo que suaviza en exceso las alas, que comprime volatilidades extremas o que presenta saltos artificiales en vencimientos cortos puede producir señales engañosas aunque su RMSE agregado sea aceptable.
+La volatilidad implícita condensa información de mercado y se utiliza en valoración, cobertura, gestión de riesgos y análisis de escenarios. En opciones sobre índices, la forma de la superficie de volatilidad puede reflejar demanda de protección, asimetría percibida, presión de liquidez o cambios de régimen. Un modelo que suaviza en exceso los extremos de moneyness, que comprime volatilidades extremas o que presenta saltos artificiales en vencimientos cortos puede producir señales engañosas aunque su RMSE agregado sea aceptable.
 
 La literatura clásica de derivados establece que la volatilidad no debe interpretarse como un simple parámetro estadístico fijo, sino como una magnitud inferida del precio bajo un modelo de valoración \citep{black1976pricing,hull2022options}. La literatura específica sobre smile muestra que los mercados organizan la volatilidad en torno a moneyness y vencimiento, no solo en torno a niveles absolutos de strike \citep{derman2016volatility}. Por ello, el proyecto se diseña desde la geometría financiera de la superficie: el aprendizaje automático se usa para aproximar una función de volatilidad, pero la evaluación exige interpretar su forma.
 
@@ -187,7 +187,7 @@ La aportación académica se sitúa en la metodología de modelización y valida
   \item \textbf{Contribución de ingeniería:} dejar el modelo convertido en un paquete autocontenido consumible por dashboard y API, con almacenamiento reproducible y despliegue desacoplado.
 \end{itemize}
 
-Esa combinación es la que hace que el proyecto no sea sólo un ejercicio de entrenamiento de modelos. El valor añadido está en que cada capa técnica responde a una pregunta concreta y útil: cómo se construye la volatilidad, cómo se estima, cómo se valida, cómo se explica y cómo se sirve.
+Esa combinación es la que hace que el proyecto no sea sólo un ejercicio de entrenamiento de modelos. El valor añadido está en que cada capa técnica responde a una pregunta concreta y útil: cómo se construye la volatilidad, cómo se estima, cómo se valida, cómo se explica y cómo se despliega.
 
 \section{Estructura de la memoria}
 \label{sec:estructura}
@@ -242,7 +242,7 @@ P_{mercado}=P_{Black76}(F,K,T,r,\sigma_{imp}).
 \label{eq:iv-inversion}
 \end{equation}
 
-La ecuación \eqref{eq:iv-inversion} no se resuelve cerradamente en general; se obtiene mediante métodos numéricos. En el proyecto se emplea bisección dentro de límites configurados, descartando filas no resolubles o no finitas.
+La ecuación \eqref{eq:iv-inversion} no se puede resolver en forma cerrada en general; se obtiene mediante métodos numéricos. En el proyecto se emplea bisección dentro de límites configurados, descartando filas no resolubles o no finitas.
 
 \textbf{Para el proyecto, esta formulación tiene varias implicaciones directas.}
 
@@ -250,7 +250,7 @@ La ecuación \eqref{eq:iv-inversion} no se resuelve cerradamente en general; se 
   \item La calidad de la volatilidad implícita depende de la calidad del precio de opción y del emparejamiento con el futuro subyacente.
   \item El tiempo a vencimiento no es un mero metadato: entra de forma no lineal a través de \(\sqrt{T}\), por lo que errores en fechas o vencimientos contaminan la variable objetivo.
   \item El tipo de interés afecta tanto al descuento como a la construcción de variables derivadas basadas en el forward ajustado.
-  \item Calls y puts comparten el mismo concepto de volatilidad implícita, pero pueden vivir en regiones distintas de la superficie y, por tanto, inducir respuestas diferentes en el modelo.
+  \item Calls y puts comparten el mismo concepto de volatilidad implícita, pero pueden situarse en zonas distintas de la superficie y, por tanto, inducir respuestas diferentes en el modelo.
 \end{itemize}
 
 Por eso la memoria no trata la volatilidad implícita como una etiqueta estadística cualquiera. Antes de entrenar ningún modelo, la variable objetivo debe quedar bien definida desde el punto de vista financiero y bajo un procedimiento numérico reproducible.
@@ -281,7 +281,7 @@ La moneyness \(m\) indica la posición relativa del subyacente frente al strike.
 \label{eq:logmoneyness}
 \end{equation}
 
-es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica regiones a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}.
+es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}.
 
 \textbf{En la práctica, esta superficie se lee a través de varios patrones.}
 
@@ -320,8 +320,8 @@ La comparación no puede basarse solo en error medio. En datos financieros tempo
 \begin{itemize}
   \item \textbf{Capacidad de ajuste:} qué nivel de no linealidad e interacción puede capturar cada familia.
   \item \textbf{Estabilidad temporal:} cómo se comporta el modelo al cambiar de fold o al pasar de validation a test.
-  \item \textbf{Coste operativo:} si necesita escalado, early stopping, mayor presupuesto de entrenamiento o persistencia adicional.
-  \item \textbf{Interpretación posterior:} hasta qué punto requiere apoyarse en SHAP, surrogates, superficies o vecinos para ser defendible.
+  \item \textbf{Coste operativo:} si requiere escalado, early stopping, mayor coste computacional de entrenamiento o persistencia adicional.
+  \item \textbf{Interpretación posterior:} hasta qué punto requiere apoyarse en SHAP, modelos surrogate, superficies o vecinos para ser defendible.
 \end{itemize}
 
 Esa es la razón por la que el proyecto no enfrenta ``modelos buenos'' frente a ``modelos malos'', sino familias con perfiles distintos. La regresión lineal aporta una referencia interpretable, los árboles capturan relaciones tabulares robustas, el boosting ofrece flexibilidad adicional y las redes permiten explorar arquitecturas más expresivas.
@@ -338,14 +338,14 @@ SHAP descompone la predicción de un modelo en un valor base y contribuciones po
 \label{eq:shap-additive}
 \end{equation}
 
-donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los surrogates dan reglas aproximadas y los vecinos informan sobre soporte local.
+donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los modelos surrogate dan reglas aproximadas y los vecinos informan sobre soporte local.
 
 \textbf{La lógica de uso de cada técnica es la siguiente:}
 
 \begin{itemize}
   \item \textbf{SHAP:} qué variables empujan una predicción y qué drivers dominan globalmente el modelo.
   \item \textbf{ICE:} cómo cambia la salida del modelo cuando se mueve una variable para una observación concreta.
-  \item \textbf{ALE:} qué efecto medio local aparece en regiones observadas, reduciendo el problema de contrafactuales poco plausibles.
+  \item \textbf{ALE:} qué efecto medio local aparece en zonas observadas, mitigando el impacto de combinaciones contrafactuales poco plausibles.
   \item \textbf{Árboles surrogate y regresión simbólica:} si el comportamiento global del predictor puede resumirse mediante reglas o fórmulas más legibles.
   \item \textbf{Vecinos históricos:} si la observación explicada está respaldada por casos parecidos en la muestra de entrenamiento.
 \end{itemize}
@@ -363,7 +363,7 @@ Un modelo útil en un contexto profesional necesita más que un notebook. Debe p
   \item Persistir el modelo final junto con sus metadatos y, cuando aplica, su scaler.
   \item Generar un paquete de dashboard que pueda cargarse sin recalcular explicaciones costosas en cada arranque.
   \item Mantener desacoplados dashboard y API para poder desplegarlos y versionarlos por separado.
-  \item Permitir backend local y backend GCP sin cambiar el contrato funcional de las aplicaciones.
+  \item Permitir backend local y backend GCP sin cambiar la interfaz funcional de las aplicaciones.
   \item Conservar trazabilidad de configuración, rutas, versiones y recursos de infraestructura.
 \end{itemize}
 
@@ -375,7 +375,7 @@ La reproducibilidad, por tanto, no se limita a ``poder volver a entrenar''. Tamb
   \item \textbf{Capa de entrenamiento:} fija datos, parámetros, semillas y métricas para que el proceso pueda repetirse y compararse.
   \item \textbf{Capa de persistencia:} conserva modelo, scaler, metadatos y paquete explicativo como una unidad coherente.
   \item \textbf{Capa de servicio:} hace que API y dashboard lean exactamente la misma versión del modelo, sin reconstrucciones ad hoc.
-  \item \textbf{Capa de infraestructura:} permite mover el sistema entre backend local y GCP manteniendo el mismo contrato funcional.
+  \item \textbf{Capa de infraestructura:} permite mover el sistema entre backend local y GCP manteniendo la misma interfaz funcional.
 \end{itemize}
 
 Sin esa separación, el riesgo no sería sólo operativo. También aparecería un problema metodológico: cualquier conclusión obtenida en la memoria podría dejar de ser reproducible en cuanto la versión desplegada divergiera de la versión analizada. Por eso la infraestructura forma parte del diseño científico del trabajo y no sólo de su empaquetado técnico.
@@ -397,7 +397,7 @@ RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}.
 \label{eq:rmse}
 \end{equation}
 
-El RMSE es especialmente relevante en model validation porque amplifica errores extremos. En una superficie de volatilidad, esos errores pueden aparecer en vencimientos cortos, alas o regiones con menor liquidez. El coeficiente de determinación,
+El RMSE es especialmente relevante en model validation porque amplifica errores extremos. En una superficie de volatilidad, esos errores pueden aparecer en vencimientos cortos, extremos de moneyness o zonas con menor liquidez. El coeficiente de determinación,
 
 \begin{equation}
 R^2 = 1-\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{\sum_{i=1}^{n}(y_i-\bar{y})^2},
@@ -412,8 +412,8 @@ Junto a estas métricas frente a mercado, el dashboard usa métricas de fidelida
 
 \begin{itemize}
   \item \textbf{MAE:} cuánto se equivoca el modelo en promedio en unidades de volatilidad y con una lectura sencilla.
-  \item \textbf{RMSE:} cuánto pesan los errores extremos, especialmente relevantes en alas o vencimientos cortos.
-  \item \textbf{\(R^2\):} qué fracción de variabilidad consigue explicar el predictor sobre la muestra evaluada.
+  \item \textbf{RMSE:} cuánto pesan los errores extremos, especialmente relevantes en extremos de moneyness o vencimientos cortos.
+  \item \textbf{\(\mathbf{R}^2\):} qué fracción de variabilidad consigue explicar el predictor sobre la muestra evaluada.
   \item \textbf{Métricas de fidelidad:} qué parte del comportamiento del modelo principal pueden reproducir los modelos equivalentes.
 \end{itemize}
 
@@ -424,18 +424,18 @@ La memoria insiste en esta separación porque evita un error conceptual habitual
 
 En un entorno financiero, un modelo de volatilidad debería poder responder a preguntas de model validation. Algunas son cuantitativas: cuál es el error fuera de muestra, si existe gap entre entrenamiento y validación, si el error cambia por vencimiento o moneyness, y si el resultado es estable entre folds. Otras son cualitativas pero igualmente relevantes: si el modelo reacciona de forma razonable ante cambios de strike, si produce superficies suaves donde el mercado debería ser continuo, si una predicción manual se encuentra dentro de una región observada o si el predictor depende excesivamente de una variable que no debería dominar.
 
-El diseño del proyecto convierte esas preguntas en vistas concretas del dashboard. La pestaña de diagnóstico responde dónde falla. La pestaña de superficie responde cómo se comporta como función financiera. La explicabilidad global responde qué variables organizan las predicciones. La explicabilidad local responde por qué una muestra concreta obtiene un valor determinado y si existen observaciones históricas cercanas. Esta estructura facilita la defensa ante un tribunal porque alinea cada componente técnico con una pregunta profesional.
+El diseño del proyecto convierte esas preguntas en vistas concretas del dashboard. La pestaña de diagnóstico responde dónde falla. La pestaña de superficie responde cómo se comporta como función financiera. La explicabilidad global responde qué variables tienen mayor influencia en las predicciones del modelo. La explicabilidad local responde por qué una muestra concreta obtiene un valor determinado y si existen observaciones históricas cercanas. Esta estructura facilita la defensa ante un tribunal porque alinea cada componente técnico con una pregunta profesional.
 
 \textbf{En consecuencia, el gobierno del modelo se apoya en una lectura guiada.}
 
 \begin{itemize}
   \item Primero se revisa el \textbf{rendimiento agregado}: métricas, dispersión y comportamiento train/validation/test.
-  \item Después se analiza el \textbf{rendimiento regional}: error por moneyness, error por maturity y mapas de residuales.
+  \item Después se analiza el \textbf{rendimiento por tramos de moneyness y vencimiento}: error por moneyness, error por maturity y mapas de residuales.
   \item A continuación se inspecciona el \textbf{comportamiento funcional}: superficies, smiles, term structures, ICE y ALE.
-  \item Finalmente se revisa la \textbf{explicación causal aparente del modelo}: SHAP global, explicabilidad local, vecinos y modelos equivalentes.
+  \item Finalmente se revisa la \textbf{explicación del comportamiento del modelo}: SHAP global, explicabilidad local, vecinos y modelos explicativos equivalentes.
 \end{itemize}
 
-Esta secuencia evita que una única visualización monopolice la interpretación. En un entorno de derivados, la confianza en una predicción surge de la coherencia entre varias vistas, no de una sola gráfica llamativa o de una única métrica sintética.
+Esta secuencia evita que una única visualización condicione toda la interpretación. En un entorno de derivados, la confianza en una predicción surge de la coherencia entre varias vistas, no de una sola gráfica llamativa o de una única métrica sintética.
 
 \chapter{Metodología}
 \label{chap:metodologia}
@@ -489,21 +489,25 @@ Esta estructura es importante porque condiciona la credibilidad de los resultado
 
 El pipeline de datos transforma ficheros de contratos, operaciones y tipos en una base final de volatilidad implícita. La documentación MkDocs identifica tres fuentes principales: contratos, operaciones y series EONIA/\texteuro{}STR. Los contratos aportan información de código, strike y vencimiento; las operaciones aportan precio, cantidad, hora y contrato; los tipos permiten calcular el tipo compuesto aplicable hasta vencimiento.
 
-La cadena ETL se materializa por pasos, como muestran las Figuras~\ref{fig:doc-index-2} y~\ref{fig:doc-data-index-1}. Esta organización permite cachear salidas intermedias, validar contratos de datos y aislar responsabilidades: los \emph{StepLoaders} orquestan lectura, cache y validación, mientras que los builders construyen la salida material de cada paso.
+La cadena ETL se materializa por pasos, como muestran las Figuras~\ref{fig:doc-index-2} y~\ref{fig:doc-data-index-1}. Esta organización permite cachear salidas intermedias, validar contratos de datos y aislar responsabilidades: los \emph{StepLoaders} orquestan lectura, cache y validación, mientras que los \emph{builders} construyen la salida material de cada paso.
 
 \DiagramIndexTwo
 \DiagramDataIndexOne
 
-Los datos se filtran al dominio de opciones IBEX mensuales y futuros mensuales asociados. Las opciones semanales y contratos fuera de dominio se excluyen para mantener coherencia contractual. La salida final contiene fecha y hora de ejecución, código de opción, tipo call/put, precio negociado, strike, futuro subyacente, precio del subyacente, lag temporal, tiempo a vencimiento, tipo compuesto y volatilidad implícita.
+Los datos se filtran al dominio de opciones IBEX mensuales y futuros mensuales asociados. Las opciones semanales y contratos fuera de dominio se excluyen para mantener coherencia contractual. La salida final contiene fecha y hora de ejecución, código de opción, tipo call/put, precio negociado, strike, futuro subyacente, precio del subyacente, desfase temporal opción-subyacente (minutos), tiempo a vencimiento, tipo compuesto y volatilidad implícita.
 
-El primer paso, \texttt{Read Raw}, normaliza ficheros de mercado con o sin cabecera, elimina columnas auxiliares no pertenecientes al esquema final, convierte fechas, horas y numéricos, filtra prefijos IBEX y construye una serie homogénea de tipos. La base de tipos combina EONIA ajustado por el spread configurado antes de la fecha de corte y \texteuro{}STR desde esa fecha. El segundo paso, \texttt{Merge Raw}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo.
+El primer paso, \texttt{Read Raw Step}, normaliza ficheros de mercado con o sin cabecera, elimina columnas auxiliares no pertenecientes al esquema final, convierte fechas, horas y numéricos, filtra prefijos IBEX y construye una serie homogénea de tipos. La base de tipos combina EONIA ajustado por el spread configurado antes de la fecha de corte y \texteuro{}STR desde esa fecha. El segundo paso, \texttt{Merge Raw Step}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo.
 
 \DiagramDataRawReadOne
 \DiagramDataRawReadTwo
 \DiagramDataMergeRawOne
 \DiagramDataMergeRawTwo
 
-El tercer paso, \texttt{Product Split}, divide la base unificada en opciones, futuros y relación opción-futuro por vencimiento. El cuarto, \texttt{Underlying}, resuelve el precio de futuro subyacente mediante una unión temporal \emph{as-of}: para cada opción selecciona el último trade del futuro con hora menor o igual a la operación de la opción. Esta decisión evita lookahead dentro del propio ETL. El quinto, \texttt{Volatility}, filtra operaciones sin subyacente fiable o con lag excesivo, calcula el tipo compuesto hasta vencimiento y resuelve la volatilidad implícita por Black-76 inverso.
+El tercer paso, \texttt{Product Split Step}, divide la base unificada en opciones, futuros y relación opción-futuro por vencimiento. El cuarto, \texttt{Underlying Step}, resuelve el precio de futuro subyacente mediante una unión temporal \emph{as-of}: para cada opción selecciona el último trade del futuro con instante de ejecución menor o igual al de la opción. Esta decisión evita lookahead dentro del propio ETL. El quinto, \texttt{Volatility Step}, filtra operaciones sin subyacente fiable o con desfase temporal excesivo, calcula el tipo compuesto hasta vencimiento y resuelve la volatilidad implícita por Black-76 inverso.
+
+En este último paso se aplican reglas de calidad relevantes para evitar sesgos en entrenamiento: se excluyen filas sin subyacente válido, filas con desfase opción-subyacente superior al umbral configurado de 180 minutos, y filas cuya volatilidad implícita no puede resolverse de forma válida (por ejemplo, sin cambio de signo del solver o con soluciones no finitas). Estas decisiones son coherentes con el análisis exploratorio y con las validaciones financieras del pipeline.
+
+La justificación empírica de estos filtros se apoya en el análisis exploratorio documentado en \texttt{EDA.ipynb}. También conviene explicitar que los descartes se distribuyen a lo largo de varios pasos: \texttt{Read Raw Step} y \texttt{Merge Raw Step} limpian incoherencias de esquema y dominio; \texttt{Underlying Step} garantiza el emparejamiento temporal sin lookahead y construye el desfase opción-subyacente; y \texttt{Volatility Step} aplica los filtros finales de calidad financiera (incluido el umbral de 180 minutos y la resolubilidad del solver).
 
 \DiagramDataProductSplitOne
 \DiagramDataProductSplitTwo
@@ -516,6 +520,8 @@ El tercer paso, \texttt{Product Split}, divide la base unificada en opciones, fu
 \label{sec:validaciones-datos}
 
 El ETL aplica validaciones transversales: precios positivos, cantidades positivas, ausencia de claves duplicadas, control de missing values, vencimientos coherentes, strikes compatibles con el código de contrato y subyacente temporalmente anterior a la operación de la opción. Esta última condición es crítica para evitar utilizar información futura.
+
+Para evitar ambigüedades, en esta memoria se distinguen dos conceptos de lag: el desfase opción-subyacente del ETL (en minutos) y el lag temporal del split de entrenamiento (en número de fechas) usado más adelante en la validación de modelos.
 
 El cálculo de volatilidad implícita se realiza en el último paso. Se eliminan operaciones sin subyacente fiable, se calcula el tipo compuesto hasta vencimiento y se resuelve la ecuación \eqref{eq:iv-inversion}. Si no existe cambio de signo en el intervalo de búsqueda o la solución es no finita, la observación se marca como no resoluble y no alimenta el entrenamiento.
 
@@ -568,8 +574,8 @@ Familia & Papel metodológico \\
 \midrule
 Regresión lineal & Baseline interpretable para evaluar cuánto aporta la no linealidad. \\
 Random Forest & Modelo tabular robusto ante interacciones y no linealidades sin escalado. \\
-XGBoost & Boosting regularizado con early stopping y alta capacidad predictiva. \\
-Red neuronal secuencial & Aproximador flexible con escalado de variables numéricas. \\
+XGBoost & Boosting regularizado con early stopping interno y alta capacidad predictiva. \\
+Red neuronal secuencial & Aproximador flexible con escalado de variables numéricas y early stopping sobre validación interna. \\
 Quantum Inspired NN & Variante clásica de red neuronal con estructura tensorial inspirada en ideas cuánticas; se evalúa como arquitectura implementada, no como computación cuántica física. \\
 \bottomrule
 \end{tabular}
@@ -607,7 +613,9 @@ Esta regla es relevante porque una opción puede negociarse durante varios días
 \DiagramModelsSplitsKfoldsTwo
 \DiagramModelsSplitsKfoldsThree
 
-La búsqueda de hiperparámetros se realiza con k-folds temporales. Para cada candidato se calculan MAE, RMSE y \(R^2\) en train y validation. La selección usa una métrica compuesta:
+La búsqueda de hiperparámetros se realiza con k-folds temporales. Estos k-folds se construyen exclusivamente dentro del bloque de entrenamiento, de modo que validation y test externos quedan fuera del proceso de búsqueda. Para cada candidato se calculan MAE, RMSE y \(R^2\) en train y validation. La selección usa una métrica compuesta:
+
+En XGBoost y en redes neuronales, además, se usa un split interno temporal de \texttt{train} para early stopping. Este mecanismo regula el entrenamiento dentro de cada candidato, pero no reemplaza la validación temporal externa ni la evaluación final en test.
 
 \begin{equation}
 CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train}).
@@ -631,7 +639,9 @@ CE_2 = RMSE_{val}+\gamma \cdot CE_1+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
 
 con \(\gamma=0.25\) y \(\beta=0.75\) en la configuración actual.
 
-El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más ATM a alas, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar regiones más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el \autoref{app:progressive}.
+Es importante precisar que \(CE_2\) se utiliza para monitorizar consistencia en la fase train/validation. La evaluación definitiva de generalización del modelo se realiza siempre sobre el bloque test fuera de muestra.
+
+El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el \autoref{app:progressive}.
 
 \DiagramModelsRetrainingProgressiveOne
 \DiagramModelsRetrainingProgressiveTwo
@@ -639,7 +649,9 @@ El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\l
 \section{Construcción del dashboard}
 \label{sec:dashboard-metodo}
 
-El dashboard no entrena modelos. Consume paquetes autocontenidos generados desde modelos finales. Cada paquete contiene dataset con predicciones, residuales y error absoluto, muestras para explicabilidad local, anclas de superficies, SHAP global y local, árboles surrogate, regresor simbólico, vecinos, superficies, ICE, ALE y diagnóstico agregado. La conversión desde modelo final a ese paquete no modifica el predictor: carga el runtime, aplica el mismo feature engineering sobre train y test, calcula explicaciones y guarda una carpeta autocontenida en \texttt{src/dashboard/saved\_models/}.
+El dashboard no entrena modelos. Consume paquetes autocontenidos generados desde modelos finales. Cada paquete contiene dataset con predicciones, residuales y error absoluto, muestras para explicabilidad local, puntos de referencia de superficies, SHAP global y local, árboles surrogate, regresor simbólico, vecinos, superficies, ICE, ALE y diagnóstico agregado.
+
+La transformación de un modelo final a este paquete no modifica el predictor: carga el runtime, aplica el mismo feature engineering sobre train y test, calcula artefactos explicativos y persiste una carpeta autocontenida en \texttt{src/dashboard/saved\_models/}.
 
 La aplicación se estructura en cuatro pestañas, resumidas en la Tabla~\ref{tab:dashboard-tabs}. Esta organización responde a preguntas distintas y evita confundir error predictivo con explicación.
 
@@ -672,7 +684,7 @@ Diagnosis & ¿Dónde acierta y dónde falla el modelo en la superficie? \\
 \section{API, almacenamiento y cloud}
 \label{sec:api-cloud-metodo}
 
-La API se implementa con FastAPI. El código expone endpoints de salud, predicción y explicabilidad local:
+La API se implementa con FastAPI como un servicio \emph{ad hoc} independiente del dashboard. Puede servir cualquier modelo preparado bajo este flujo de entrenamiento, sin depender de la capa visual. El código expone endpoints de salud, predicción y explicabilidad local:
 
 \begin{itemize}[noitemsep]
   \item \texttt{/health}
@@ -684,12 +696,12 @@ La petición incluye modelo, tipo de opción, strike, subyacente, tiempo a venci
 
 La respuesta de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir.
 
-El backend de almacenamiento puede ser local o GCP. En GCP se usan Cloud Storage para modelos y paquetes de dashboard, un registro de imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo.
+El backend de almacenamiento puede ser local o GCP. En GCP se usan Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo.
 
 \textbf{Metodológicamente, esta capa cumple tres funciones.}
 
 \begin{itemize}
-  \item \textbf{Función de servicio:} exponer predicción y explicabilidad local con el mismo contrato de entrada que utiliza la interfaz visual.
+  \item \textbf{Función de servicio:} exponer predicción y explicabilidad local con la misma interfaz de entrada que utiliza la interfaz visual.
   \item \textbf{Función de consistencia:} asegurar que dashboard y API cargan exactamente el mismo modelo y el mismo paquete explicativo.
   \item \textbf{Función de despliegue:} separar imágenes, dependencias y escalado de API y dashboard para que cada servicio pueda evolucionar de forma independiente.
 \end{itemize}
@@ -714,18 +726,18 @@ Esta última idea es especialmente importante. La memoria no presenta dos sistem
 \section{Reproducibilidad y trazabilidad}
 \label{sec:reproducibilidad}
 
-La reproducibilidad se apoya en cuatro mecanismos: configuración JSON, enums de esquemas, salidas persistidas y tests. La configuración declara columnas, splits, métricas, progressive training, tamaños de muestra de dashboard, parámetros SHAP, vecinos y regresión simbólica. Los enums centralizan nombres de columnas y tipos de dominio. Las salidas persistidas guardan modelo, scaler cuando aplica, metadatos y paquete de dashboard. Los tests cubren utilidades de datos, modelos, dashboard, API y configuración.
+La reproducibilidad se apoya en cuatro mecanismos: configuración de entrenamiento y datos, enums de esquemas, salidas persistidas y tests. La configuración define columnas, splits temporales, lag entre bloques, métricas de selección, progressive training y parámetros de generación de explicaciones (muestras SHAP, vecinos y superficies). Los enums centralizan nombres de columnas y tipos de dominio. Las salidas persistidas guardan modelo, scaler cuando aplica, metadatos y paquete de dashboard. Los tests cubren utilidades de datos, modelos, dashboard, API y configuración.
 
 \textbf{Esa trazabilidad no es abstracta; está fijada en parámetros concretos.}
 
 \begin{itemize}
-  \item En \texttt{resources/volatility\_models\_config.json} se definen \texttt{train\_size}=0.85, \texttt{lag}=15, cinco folds temporales y las penalizaciones de \(CE_1\) y \(CE_2\).
-  \item En \texttt{resources/dashboard\_models\_config.json} se fija el coste de las explicaciones: \texttt{shap\_background\_size}=24, \texttt{shap\_explain\_size}=48, \texttt{neighbors\_k}=200 y \texttt{surface\_grid\_size}=24.
-  \item En \texttt{src/model2dashboard/features.py} se centralizan las entradas raw visibles y la reconstrucción del vector transformado para que entrenamiento, dashboard y API compartan la misma lógica.
-  \item En \texttt{src/model2dashboard/artifact\_builders.py} se generan con semilla controlada las muestras SHAP, anclas de comportamiento, vecinos, superficies, ICE y ALE.
+  \item El split temporal usa \texttt{train\_size}=0.85 y \texttt{lag}=15 (en fechas), con cinco folds temporales y penalizaciones \(CE_1\)/\(CE_2\) para selección y reentrenamiento.
+  \item El alcance de los artefactos explicativos se fija con \texttt{shap\_background\_size}=24, \texttt{shap\_explain\_size}=48, \texttt{neighbors\_k}=200 y \texttt{surface\_grid\_size}=24.
+  \item La reconstrucción de features se centraliza para que entrenamiento, dashboard y API compartan exactamente la misma transformación.
+  \item Los artefactos explicativos (muestras SHAP, puntos de referencia, vecinos, superficies, ICE y ALE) se generan con semilla controlada para conservar comparabilidad entre ejecuciones.
 \end{itemize}
 
-La consecuencia es clara: si cambia un schema, una ruta o una transformación, el cambio queda aislado y visible. Eso reduce el riesgo de divergencias silenciosas entre el análisis entrenado y la versión realmente servida.
+La consecuencia es clara: si cambia un schema, una ruta o una transformación, el cambio queda aislado y visible. Eso reduce el riesgo de inconsistencias no evidentes entre el modelo analizado y el modelo efectivamente servido.
 
 \DiagramRepositoryConfigurationOne
 \DiagramRepositoryConfigurationTwo
@@ -733,7 +745,7 @@ La consecuencia es clara: si cambia un schema, una ruta o una transformación, e
 \section{Arquitectura del repositorio}
 \label{sec:arquitectura-repo}
 
-La arquitectura del repositorio sigue una separación por responsabilidades. Esta decisión es relevante para reproducibilidad y defensa técnica: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio.
+La arquitectura del repositorio sigue una separación por funcionalidades. Esta decisión es relevante para reproducibilidad y defensa técnica: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio.
 
 \DiagramRepositoryIndexOne
 \DiagramRepositoryIndexTwo
@@ -764,16 +776,6 @@ Paquete o carpeta & Responsabilidad principal \\
 
 La Tabla~\ref{tab:arquitectura-repo} muestra que el dashboard no reentrena modelos y la API no reconstruye explicaciones desde cero salvo en casos de explicabilidad local manual. Esta separación reduce el acoplamiento y facilita detectar errores. Si una predicción de API no coincide con la vista del dashboard, el problema puede acotarse a carga del paquete autocontenido, transformación de features o versión de modelo.
 
-\textbf{La trayectoria lógica de ejecución ayuda a entender esa separación.}
-
-\begin{itemize}
-  \item \texttt{src/config} y \texttt{src/enums} fijan contratos de datos, nombres y parámetros.
-  \item \texttt{src/data\_management} produce \texttt{VOLATILITY\_DB} a partir de fuentes de mercado y tipos.
-  \item \texttt{src/volatility\_models} parte esa base, genera features, selecciona familias y persiste el modelo final.
-  \item \texttt{src/model2dashboard} toma ese modelo y genera un paquete consultable con predicciones, explicaciones y diagnósticos.
-  \item \texttt{src/dashboard} y \texttt{src/api} consumen el mismo paquete sin alterar el predictor entrenado.
-\end{itemize}
-
 Vista así, la arquitectura no es sólo una organización de carpetas. Es una forma de aislar responsabilidades, simplificar depuración y poder justificar cada paso del flujo de principio a fin.
 
 \section{Plan de validación funcional}
@@ -784,7 +786,7 @@ Además de la validación estadística, el proyecto requiere validación funcion
 \begin{enumerate}
   \item Validación de datos: esquemas, tipos, claves, precios, cantidades, vencimientos, strikes y subyacente temporalmente anterior.
   \item Validación de entrenamiento: splits temporales, exclusividad de contratos, métricas por fold, selección de hiperparámetros y persistencia de metadatos.
-  \item Validación del paquete autocontenido: correspondencia entre modelo, scaler, predicciones, residuos, SHAP, vecinos, superficies y surrogates.
+  \item Validación del paquete autocontenido: correspondencia entre modelo, scaler, predicciones, residuos, SHAP, vecinos, superficies y modelos surrogate.
   \item Validación de servicio: endpoints de salud, predicción, explicabilidad local, carga desde backend local o GCP y coherencia con dashboard.
 \end{enumerate}
 
@@ -802,7 +804,7 @@ La primera detecta errores de contrato o serialización. La segunda detecta inco
 \section{Riesgos metodológicos y controles}
 \label{sec:riesgos}
 
-Los principales riesgos metodológicos se anticipan desde el diseño. El primero es el lookahead bias, controlado mediante orden temporal y subyacentes anteriores a la opción. El segundo es data snooping, mitigado separando búsqueda de hiperparámetros, reentrenamiento y evaluación final. El tercero es memorización de contratos, tratado con exclusividad de contratos entre splits. El cuarto es extrapolación en regiones poco cubiertas, diagnosticada con vecinos históricos y heatmaps de error. El quinto es confundir explicabilidad del modelo con verdad de mercado; por ello los surrogates se presentan con métricas de fidelidad y los resultados se contrastan frente a residuales y superficies.
+Los principales riesgos metodológicos se anticipan desde el diseño. El primero es el lookahead bias, controlado mediante orden temporal y subyacentes anteriores a la opción. El segundo es data snooping, mitigado separando búsqueda de hiperparámetros, reentrenamiento y evaluación final. El tercero es memorización de contratos, tratado con exclusividad de contratos entre splits. El cuarto es extrapolación en zonas poco cubiertas, diagnosticada con vecinos históricos y heatmaps de error. El quinto es confundir explicabilidad del modelo con verdad de mercado; por ello los surrogates se presentan con métricas de fidelidad y los resultados se contrastan frente a residuales y superficies.
 
 La Tabla~\ref{tab:riesgos-controles} resume esta lógica.
 
@@ -894,7 +896,7 @@ Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
 \label{tab:progressive-segmentos}
 \end{table}
 
-El entrenamiento progressive ATM no produce una mejora universal. En Random Forest, que ya es el mejor modelo, el cambio es casi neutro; en XGBoost y en la red secuencial empeora el RMSE test; en Quantum Inspired sí actúa como regularizador útil. Esto encaja con la interpretación metodológica: ordenar por cercanía a ATM puede estabilizar arquitecturas iterativas más sensibles, pero también puede sesgar el aprendizaje si las alas contienen información necesaria para test. Por tanto, progressive ATM debe tratarse como variante experimental y no como decisión automática.
+El entrenamiento progressive ATM no produce una mejora universal. En Random Forest, que ya es el mejor modelo, el cambio es casi neutro; en XGBoost y en la red secuencial empeora el RMSE test; en Quantum Inspired sí actúa como regularizador útil. Esto encaja con la interpretación metodológica: ordenar por cercanía a ATM puede estabilizar arquitecturas iterativas más sensibles, pero también puede sesgar el aprendizaje si los extremos de moneyness contienen información necesaria para test. Por tanto, progressive ATM debe tratarse como variante experimental y no como decisión automática.
 
 \textbf{La evidencia sugiere una lectura por familias.}
 
@@ -948,7 +950,7 @@ Con ello, la elección deja de ser una simple foto de leaderboard. El Random For
 
 El diagnóstico debe interpretarse a partir del test. La desviación estándar de la volatilidad real es 0.193345 y la de las predicciones de Random Forest es 0.149458. Esta diferencia indica compresión parcial de la variabilidad: el modelo captura la estructura general, pero tiende a suavizar extremos. La desviación estándar residual es 0.085859, coherente con un RMSE de 0.088403.
 
-Las vistas del dashboard son necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si las alas o vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico regional cuando se consulten contratos poco líquidos o alejados de ATM.
+Las vistas del dashboard son necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
 
 \textbf{En la práctica, el diagnóstico debe responder tres preguntas consecutivas.}
 
@@ -958,14 +960,14 @@ Las vistas del dashboard son necesarias para localizar dónde aparece esa compre
   \item Si los fallos observados son compatibles con escasez de datos, con dificultades intrínsecas del problema o con una arquitectura demasiado rígida.
 \end{itemize}
 
-Este nivel de detalle es necesario porque dos modelos con RMSE parecido pueden implicar riesgos operativos muy distintos. Uno puede fallar de forma estable y moderada; otro puede acertar el promedio pero perder control justo en las regiones más delicadas para valoración o revisión manual.
+Este nivel de detalle es necesario porque dos modelos con RMSE parecido pueden implicar riesgos operativos muy distintos. Uno puede fallar de forma estable y moderada; otro puede acertar el promedio pero perder control justo en las zonas más delicadas para valoración o revisión manual.
 
 \subsection{Behaviour And Surface}
 \label{subsec:behaviour-results}
 
-El modelo final debe leerse como función financiera, no solo como tabla de errores. Las superficies generadas alrededor de anclas del test permiten inspeccionar \(\hat{\sigma}(m,T)\), smiles y estructuras temporales. Dado que Random Forest es un modelo por particiones, la revisión visual debe prestar especial atención a escalones locales: un bosque puede aproximar bien puntos observados y aun así producir transiciones menos suaves que un modelo paramétrico.
+El modelo final debe leerse como función financiera, no solo como tabla de errores. Las superficies generadas alrededor de puntos de referencia del test permiten inspeccionar \(\hat{\sigma}(m,T)\), smiles y estructuras temporales. Dado que Random Forest es un modelo por particiones, la revisión visual debe prestar especial atención a escalones locales: un bosque puede aproximar bien puntos observados y aun así producir transiciones menos suaves que un modelo paramétrico.
 
-La lectura recomendada es usar al menos tres anclas: una observación ATM líquida, una observación en alas y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
+La lectura recomendada es usar al menos tres puntos de referencia: una observación ATM líquida, una observación en extremos de moneyness y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
 
 \textbf{Una secuencia de lectura útil en esta pestaña es la siguiente:}
 
@@ -973,7 +975,7 @@ La lectura recomendada es usar al menos tres anclas: una observación ATM líqui
   \item fijar un ancla representativa y revisar primero el heatmap local;
   \item comprobar después la superficie 3D para detectar escalones o zonas artificialmente planas;
   \item descender a smile y term structure para ver si la geometría sigue siendo razonable en cortes financieros conocidos;
-  \item contrastar finalmente con ICE, ALE, vecinos y diagnóstico regional cuando aparezcan formas dudosas.
+  \item contrastar finalmente con ICE, ALE, vecinos y diagnóstico por zonas de la superficie cuando aparezcan formas dudosas.
 \end{itemize}
 
 Este orden es importante porque evita interpretar una gráfica aislada fuera de contexto. Un escalón puede ser inocuo si coincide con una zona bien soportada y de bajo error, o problemático si aparece en una región escasa y con extrapolación local.
@@ -983,7 +985,7 @@ Este orden es importante porque evita interpretar una gráfica aislada fuera de 
 
 La explicación global debe comprobar que los drivers principales son coherentes con la geometría de volatilidad: moneyness, vencimiento, subyacente, strike, tipo y tipo de opción. SHAP se calcula sobre variables raw visibles y el runtime reconstruye las features transformadas, por lo que una contribución de \texttt{StrikePrice} o \texttt{UnderlyingPrice} debe interpretarse en relación con moneyness y no como efecto causal aislado.
 
-La lectura correcta combina ranking, signo local y dependence plots. Si una variable domina el ranking pero tiene colores mezclados o contribuciones con mucha dispersión, el modelo está usando interacciones. Esa conclusión es razonable en opciones, porque strike, subyacente y vencimiento no son independientes. Si aparecen saltos en dependence plots, deben contrastarse con las superficies y con diagnóstico por regiones.
+La lectura correcta combina ranking, signo local y dependence plots. Si una variable domina el ranking pero tiene colores mezclados o contribuciones con mucha dispersión, el modelo está usando interacciones. Esa conclusión es razonable en opciones, porque strike, subyacente y vencimiento no son independientes. Si aparecen saltos en dependence plots, deben contrastarse con las superficies y con diagnóstico por zonas de la superficie.
 
 \textbf{Para que la lectura global sea sólida, conviene exigir tres coherencias a la vez.}
 
@@ -993,7 +995,7 @@ La lectura correcta combina ranking, signo local y dependence plots. Si una vari
   \item \textbf{Coherencia con error:} que un patrón llamativo en SHAP pueda contrastarse con residual heatmap, superficies y casos locales.
 \end{itemize}
 
-Si una variable parece importante pero esa importancia no se refleja ni en las superficies ni en la lectura regional del error, la conclusión debe tomarse con cautela. La explicabilidad global no sustituye al resto de vistas; las organiza.
+Si una variable parece importante pero esa importancia no se refleja ni en las superficies ni en la lectura por zonas del error, la conclusión debe tomarse con cautela. La explicabilidad global no sustituye al resto de vistas; las organiza.
 
 \subsection{Modelos equivalentes: árboles y regresión simbólica}
 \label{subsec:equivalent-results}
@@ -1022,7 +1024,7 @@ La fidelidad de los árboles es limitada: ni siquiera profundidades altas reprod
 \textbf{La lectura correcta de estos modelos equivalentes es prudente.}
 
 \begin{itemize}
-  \item Si la fidelidad es baja, las reglas o fórmulas sólo valen como resumen parcial y no como explicación sustitutiva del modelo principal.
+  \item Si la fidelidad es baja, las reglas o fórmulas sólo valen como resumen parcial y no como explicación suficiente del modelo principal.
   \item Si la fidelidad mejora con mucha complejidad, la conclusión útil no es que exista una explicación compacta, sino precisamente que el predictor no se deja comprimir bien.
   \item Si la fidelidad fuese alta con baja complejidad, entonces sí tendría sentido dar más peso a reglas o ecuaciones en la discusión global.
 \end{itemize}
@@ -1032,14 +1034,14 @@ La fidelidad de los árboles es limitada: ni siquiera profundidades altas reprod
 
 El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones.
 
-La interpretación profesional debe combinar ambas piezas. Si una muestra tiene waterfall coherente y vecinos cercanos con volatilidades similares, la explicación es sólida. Si el waterfall parece razonable pero los vecinos están lejos, el modelo puede estar extrapolando; en ese caso, la predicción debe revisarse con diagnóstico regional y superficie local.
+La interpretación profesional debe combinar ambas piezas. Si una muestra tiene waterfall coherente y vecinos cercanos con volatilidades similares, la explicación es sólida. Si el waterfall parece razonable pero los vecinos están lejos, el modelo puede estar extrapolando; en ese caso, la predicción debe revisarse con diagnóstico por zonas de la superficie y superficie local.
 
 \textbf{Como regla práctica, una explicación local es más defendible cuando se cumplen tres condiciones.}
 
 \begin{itemize}
   \item El signo y magnitud de las contribuciones SHAP son compatibles con la intuición financiera del caso.
   \item Los vecinos cercanos muestran contratos, moneyness y vencimientos realmente parecidos.
-  \item El error regional del modelo en esa zona no es anómalamente alto.
+  \item El error por zonas del modelo no es anómalamente alto en esa área.
 \end{itemize}
 
 Cuando falla alguna de esas tres condiciones, la lectura debe cambiar: la explicación sigue diciendo cómo razona el modelo, pero deja de ser una justificación sólida de que la predicción sea fiable en términos de mercado.
@@ -1052,17 +1054,17 @@ La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativ
 \subsection{Lectura financiera}
 \label{subsec:discusion-financiera}
 
-Financieramente, el proyecto trata la volatilidad como superficie y no como serie unidimensional. El buen RMSE agregado es relevante, pero el dato más importante para gestión de riesgos es dónde se produce el error. La compresión de volatilidades extremas sugiere que deben revisarse alas y vencimientos cortos con más cuidado. Este comportamiento es plausible en derivados: esas regiones suelen tener menos liquidez, más ruido de microestructura y mayor sensibilidad al desfase entre opción y futuro subyacente.
+Financieramente, el proyecto trata la volatilidad como superficie y no como serie unidimensional. El buen RMSE agregado es relevante, pero el dato más importante para gestión de riesgos es dónde se produce el error. La compresión de volatilidades extremas sugiere que deben revisarse los extremos de moneyness y los vencimientos cortos con más cuidado. Este comportamiento es plausible en derivados: esas zonas suelen tener menos liquidez, más ruido de microestructura y mayor sensibilidad al desfase entre opción y futuro subyacente.
 
 \begin{itemize}
-  \item El modelo final es útil para lectura agregada y consulta, pero no debe tratarse como sustituto ciego del juicio financiero en regiones extremas.
+  \item El modelo final es útil para lectura agregada y consulta, pero no debe tratarse como atajo automático del juicio financiero en zonas extremas.
   \item La geometría de la superficie sigue siendo el criterio principal de plausibilidad: smiles, term structures y suavidad local importan tanto como el error medio.
   \item La lectura de vecinos y soporte histórico es especialmente valiosa cuando se analiza un contrato poco líquido o lejano de ATM.
 \end{itemize}
 
 En otras palabras, el trabajo refuerza una idea clásica en derivados: el resultado útil no es un único número, sino una predicción situada dentro de una estructura de superficie, de un contexto de mercado y de una evidencia histórica comparable.
 
-También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, alas, vencimientos cortos y soporte local, y no sólo a tablas globales de error.
+También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no sólo a tablas globales de error.
 
 \subsection{Lectura de IA y Data Science}
 \label{subsec:discusion-ia}
@@ -1114,7 +1116,7 @@ La segunda conclusión es que la explicabilidad aporta valor en dos planos. En i
 
 La tercera conclusión es que la arquitectura de software condiciona la utilidad del modelo. Al separar ETL, entrenamiento, paquetes explicativos, API, dashboard y almacenamiento, el proyecto facilita reproducibilidad, mantenimiento y despliegue. Esta separación también reduce el riesgo de que las explicaciones se calculen sobre versiones distintas de las usadas en predicción.
 
-La cuarta conclusión es que progressive ATM no debe presentarse como mejora universal. En esta ejecución mejora la arquitectura Quantum Inspired, pero no al Random Forest final ni a XGBoost. Su utilidad depende de si estabiliza la zona ATM sin degradar alas ni vencimientos menos representados.
+La cuarta conclusión es que progressive ATM no debe presentarse como mejora universal. En esta ejecución mejora la arquitectura Quantum Inspired, pero no al Random Forest final ni a XGBoost. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados.
 
 Como líneas futuras, se proponen: ampliar el análisis con más ventanas temporales, incorporar métricas específicas por liquidez, explorar modelos con restricciones de suavidad financiera, automatizar validaciones de superficie más exigentes y reforzar el versionado de modelos y paquetes explicativos en cloud. También sería natural comparar la superficie aprendida con enfoques paramétricos clásicos o con modelos híbridos que impongan estructura financiera explícita.
 
@@ -1166,7 +1168,7 @@ El beeswarm muestra contribuciones individuales por feature; la importancia medi
   \item \textbf{Paso 1:} revisar el ranking global para identificar qué variables organiza el modelo con más intensidad.
   \item \textbf{Paso 2:} contrastar esas variables con dependence plots para ver si la relación es monótona, heterogénea o claramente interactiva.
   \item \textbf{Paso 3:} bajar a waterfalls locales cuando interese justificar un contrato concreto.
-  \item \textbf{Paso 4:} validar el contexto con vecinos y diagnóstico regional, especialmente si la muestra está en alas o en vencimientos cortos.
+  \item \textbf{Paso 4:} validar el contexto con vecinos y diagnóstico por zonas de la superficie, especialmente si la muestra está en extremos de moneyness o en vencimientos cortos.
 \end{itemize}
 
 Este anexo es importante porque evita dos errores frecuentes. El primero es leer SHAP como causalidad económica. El segundo es creer que una explicación local muy detallada equivale a una garantía de calidad de la predicción. SHAP explica cómo reparte el modelo la predicción; no demuestra que la relación aprendida sea una ley financiera.
@@ -1194,7 +1196,7 @@ PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n} f(z,x_{i,-j}).
 \label{eq:pdp}
 \end{equation}
 
-El promedio puede ocultar comportamientos opuestos entre observaciones. Además, ICE puede generar contrafactuales poco realistas, por ejemplo cambiar strike manteniendo fijo el resto hasta producir moneyness fuera de distribución. Por eso sus curvas deben leerse con vecinos, superficie local y diagnóstico regional.
+El promedio puede ocultar comportamientos opuestos entre observaciones. Además, ICE puede generar contrafactuales poco realistas, por ejemplo cambiar strike manteniendo fijo el resto hasta producir moneyness fuera de distribución. Por eso sus curvas deben leerse con vecinos, superficie local y diagnóstico por zonas de la superficie.
 
 \textbf{En la práctica, conviene usar ICE para responder preguntas muy concretas.}
 
@@ -1209,7 +1211,7 @@ El promedio puede ocultar comportamientos opuestos entre observaciones. Además,
 \begin{itemize}
   \item \textbf{Curvas casi paralelas:} el modelo usa la feature con una respuesta relativamente estable.
   \item \textbf{Curvas que se cruzan:} la relación depende claramente del contexto de otras variables.
-  \item \textbf{Dientes o escalones:} posible efecto de particiones del modelo, sparsidad local o regiones poco observadas.
+  \item \textbf{Dientes o escalones:} posible efecto de particiones del modelo, sparsidad local o zonas poco observadas.
 \end{itemize}
 
 Por tanto, ICE no se usa aquí como una figura decorativa. Se usa para revelar heterogeneidad que un promedio global escondería y para someter al modelo a una lectura funcional cercana a la intuición financiera del usuario.
@@ -1217,7 +1219,7 @@ Por tanto, ICE no se usa aquí como una figura decorativa. Se usa para revelar h
 \chapter{Curvas ALE}
 \label{app:ale}
 
-ALE, \emph{Accumulated Local Effects}, estima el efecto medio acumulado de una feature usando variaciones locales dentro de regiones observadas. Complementa a ICE porque resume un efecto agregado menos vulnerable a combinaciones contrafactuales irreales cuando las variables están correlacionadas.
+ALE, \emph{Accumulated Local Effects}, estima el efecto medio acumulado de una feature usando variaciones locales dentro de zonas observadas. Complementa a ICE porque resume un efecto agregado menos vulnerable a combinaciones contrafactuales irreales cuando las variables están correlacionadas.
 
 \begin{equation}
 ALE_j(z)=
@@ -1260,7 +1262,7 @@ En opciones, ALE es útil porque \texttt{StrikePrice} y \texttt{UnderlyingPrice}
 \textbf{ALE debe interpretarse como efecto relativo acumulado, no como nivel absoluto.}
 
 \begin{itemize}
-  \item Si la curva ALE crece de forma sostenida, esa feature empuja la predicción al alza en las regiones observadas.
+  \item Si la curva ALE crece de forma sostenida, esa feature empuja la predicción al alza en las zonas observadas.
   \item Si la curva es casi plana, el efecto medio local es débil o está compensado entre regímenes distintos.
   \item Si aparecen cambios bruscos, conviene comprobar si corresponden a bins con poca densidad o a comportamiento realmente no lineal del modelo.
 \end{itemize}
@@ -1272,7 +1274,7 @@ En opciones, ALE es útil porque \texttt{StrikePrice} y \texttt{UnderlyingPrice}
   \item ALE resume el efecto agregado dentro de zonas observadas y, por tanto, mejora la robustez de la lectura.
 \end{itemize}
 
-Si ambos apuntan en la misma dirección, la conclusión es más sólida. Si discrepan, el modelo probablemente está mezclando regímenes o usando interacciones que conviene revisar con superficies y diagnóstico por regiones.
+Si ambos apuntan en la misma dirección, la conclusión es más sólida. Si discrepan, el modelo probablemente está mezclando regímenes o usando interacciones que conviene revisar con superficies y diagnóstico por zonas de la superficie.
 
 \chapter{Árboles surrogate y regresión simbólica}
 \label{app:surrogates}
@@ -1315,7 +1317,7 @@ En el proyecto, los árboles se entrenan con \texttt{DecisionTreeRegressor} para
 \chapter{Entrenamiento progressive ATM}
 \label{app:progressive}
 
-El entrenamiento progressive ATM se desarrolló como estudio paralelo para intentar mejorar el aprendizaje de la superficie. Su hipótesis de partida es financiera: la región ATM suele ser más líquida y central para la formación del nivel de volatilidad, mientras que las alas pueden contener más ruido, menor frecuencia o mayor sensibilidad a microestructura.
+El entrenamiento progressive ATM se desarrolló como estudio paralelo para intentar mejorar el aprendizaje de la superficie. Su hipótesis de partida es financiera: la región ATM suele ser más líquida y central para la formación del nivel de volatilidad, mientras que los extremos de moneyness pueden contener más ruido, menor frecuencia o mayor sensibilidad a microestructura.
 
 El procedimiento ordena las observaciones por distancia a ATM:
 
@@ -1324,9 +1326,9 @@ d_{ATM}=|\log(F/K)|.
 \label{eq:dist-atm}
 \end{equation}
 
-Después divide el entrenamiento en segmentos. En la configuración actual se usan tres segmentos. Los modelos no iterativos reciben pesos mayores para regiones más ATM; los modelos iterativos entrenan de forma acumulativa, empezando por la zona central e incorporando progresivamente alas.
+Después divide el entrenamiento en segmentos. En la configuración actual se usan tres segmentos. Los modelos no iterativos reciben pesos mayores para tramos más cercanos al ATM; los modelos iterativos entrenan de forma acumulativa, empezando por la zona central e incorporando progresivamente tramos más alejados.
 
-Si hay \(S\) segmentos ordenados de ATM a alas, los pesos conceptuales decrecen con el segmento:
+Si hay \(S\) segmentos ordenados de ATM a tramos más alejados, los pesos conceptuales decrecen con el segmento:
 
 \begin{equation}
 w_s \propto S-s,
@@ -1341,7 +1343,7 @@ La diferencia por familia es relevante: regresión lineal y Random Forest usan p
 
 \begin{itemize}
   \item Hipótesis financiera: la zona ATM concentra parte relevante de la señal más líquida y estable.
-  \item Hipótesis algorítmica: algunas arquitecturas pueden beneficiarse de aprender primero esa región central antes de absorber alas más ruidosas.
+  \item Hipótesis algorítmica: algunas arquitecturas pueden beneficiarse de aprender primero esa región central antes de absorber tramos más alejados y ruidosos.
   \item Criterio de aceptación: sólo merece mantenerse si mejora test o si aporta una ventaja clara en suavidad y lectura de superficie sin degradar el resto.
 \end{itemize}
 
