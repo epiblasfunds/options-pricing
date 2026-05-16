@@ -187,6 +187,19 @@ La aportación académica se sitúa en la metodología de modelización y valida
   \item \textbf{Contribución de ingeniería:} dejar el modelo convertido en un paquete autocontenido consumible por dashboard y API, con almacenamiento reproducible y despliegue desacoplado.
 \end{itemize}
 
+\textbf{Desde el punto de vista de negocio en derivados, el valor aplicado se concreta en ocho usos directos:}
+
+\begin{itemize}
+  \item \textbf{Valoración de opciones ilíquidas o poco negociadas:} la predicción se apoya en estructura de superficie y soporte histórico de vecinos, no sólo en una cotización puntual.
+  \item \textbf{Interpolación y suavizado de superficies de volatilidad:} el dashboard permite revisar continuidad por moneyness y vencimiento y detectar escalones no deseados.
+  \item \textbf{Detección de precios anómalos o errores de mercado:} los residuales por zonas de superficie ayudan a localizar observaciones fuera de patrón.
+  \item \textbf{Validación independiente de modelos internos:} el pipeline puede usarse como contraste externo frente a pricers de mesa o librerías internas.
+  \item \textbf{Control de riesgos de mesa de derivados:} el error deja de leerse sólo en promedio y se monitoriza por tramos relevantes de moneyness y vencimiento.
+  \item \textbf{Explicación ante auditoría interna o model validation:} cada predicción puede justificarse con SHAP, curvas funcionales y evidencia de soporte histórico.
+  \item \textbf{Análisis de sensibilidad por moneyness y vencimiento:} superficies locales, ICE y ALE aportan lectura funcional de cómo reacciona el modelo.
+  \item \textbf{Soporte a decisiones de cobertura:} la lectura conjunta de smile, term structure y diagnóstico local ofrece contexto operativo para coberturas.
+\end{itemize}
+
 Esa combinación es la que hace que el proyecto no sea sólo un ejercicio de entrenamiento de modelos. El valor añadido está en que cada capa técnica responde a una pregunta concreta y útil: cómo se construye la volatilidad, cómo se estima, cómo se valida, cómo se explica y cómo se despliega.
 
 \section{Estructura de la memoria}
@@ -489,19 +502,74 @@ Esta estructura es importante porque condiciona la credibilidad de los resultado
 
 El pipeline de datos transforma ficheros de contratos, operaciones y tipos en una base final de volatilidad implícita. La documentación MkDocs identifica tres fuentes principales: contratos, operaciones y series EONIA/\texteuro{}STR. Los contratos aportan información de código, strike y vencimiento; las operaciones aportan precio, cantidad, hora y contrato; los tipos permiten calcular el tipo compuesto aplicable hasta vencimiento.
 
-La cadena ETL se materializa por pasos, como muestran las Figuras~\ref{fig:doc-index-2} y~\ref{fig:doc-data-index-1}. Esta organización permite cachear salidas intermedias, validar contratos de datos y aislar responsabilidades: los \emph{StepLoaders} orquestan lectura, cache y validación, mientras que los \emph{builders} construyen la salida material de cada paso.
+En el cálculo de tipos se asume una aproximación operativa: no se dispone de un calendario TARGET2 explícito dentro del pipeline, por lo que el conteo de días hábiles se implementa con \texttt{pd.bdate\_range} (días laborables estándar). La composición se aplica exactamente como en el código: se recorre cada día hábil del intervalo, se toma \(r_i\) (retrocediendo al último dato disponible si ese día no existe en la serie) y se multiplica
+\(1 + r_i n_i / 360\), con \(n_i=3\) cuando el día hábil es lunes y \(n_i=1\) en el resto. Después se anualiza como
+\((\prod_i(1+r_i n_i/360)-1)\cdot 360/d_c\).
 
-\DiagramIndexTwo
-\DiagramDataIndexOne
+La guía de referencia para la lógica de tipos compuestos es la del BCE para \texteuro{}STR:
+\url{https://www.ecb.europa.eu/stats/euro-short-term-rates/interest_rate_benchmarks/WG_euro_risk-free_rates/shared/pdf/ecb.Compounded_euro_short-term_rate_calculation_rules.en.pdf}. En esta memoria se documenta de forma explícita que la implementación actual reproduce la convención descrita en el código (incluido el peso 3 en lunes) y debe interpretarse como aproximación operativa mientras no se incorpore un calendario TARGET2 completo en la construcción de \texttt{Rate}.
+
+La cadena ETL se materializa por pasos, como muestran las Figuras~\ref{fig:doc-index-2} y~\ref{fig:doc-data-index-1-small}. Esta organización permite cachear salidas intermedias, validar contratos de datos y aislar responsabilidades: los \emph{StepLoaders} orquestan lectura, cache y validación, mientras que los \emph{builders} construyen la salida material de cada paso.
+
+La Figura~\ref{fig:loaders-builders-schema} resume esta separación entre clases \emph{loader} y clases \emph{builder}. El detalle extenso de las estructuras de datos que va produciendo cada etapa se recoge además en el \autoref{app:data-structures}, para no sobrecargar el cuerpo principal con un diagrama demasiado largo.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.62\textwidth,height=0.36\textheight,keepaspectratio]{../imgs/loaders_builders_schema.drawio.png}%
+\caption{\small Esquema de responsabilidades entre \emph{loaders} y \emph{builders} en el ETL.}
+\label{fig:loaders-builders-schema}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\textwidth,height=0.52\textheight,keepaspectratio]{../doc/mermaid-pdf/index/02.pdf}%
+\caption{Secuencia principal de procesado de datos.}
+\label{fig:doc-index-2}
+\end{figure}
+
+\DiagramDataIndexOneSmall
 
 Los datos se filtran al dominio de opciones IBEX mensuales y futuros mensuales asociados. Las opciones semanales y contratos fuera de dominio se excluyen para mantener coherencia contractual. La salida final contiene fecha y hora de ejecución, código de opción, tipo call/put, precio negociado, strike, futuro subyacente, precio del subyacente, desfase temporal opción-subyacente (minutos), tiempo a vencimiento, tipo compuesto y volatilidad implícita.
 
-El primer paso, \texttt{Read Raw Step}, normaliza ficheros de mercado con o sin cabecera, elimina columnas auxiliares no pertenecientes al esquema final, convierte fechas, horas y numéricos, filtra prefijos IBEX y construye una serie homogénea de tipos. La base de tipos combina EONIA ajustado por el spread configurado antes de la fecha de corte y \texteuro{}STR desde esa fecha. El segundo paso, \texttt{Merge Raw Step}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo.
+El primer paso, \texttt{Read Raw Step}, normaliza ficheros de mercado con o sin cabecera, elimina columnas auxiliares no pertenecientes al esquema final, convierte fechas, horas y numéricos, filtra prefijos IBEX y construye una serie homogénea de tipos. La base de tipos combina EONIA ajustado por el spread configurado antes de la fecha de corte y \texteuro{}STR desde esa fecha.
 
-\DiagramDataRawReadOne
-\DiagramDataRawReadTwo
-\DiagramDataMergeRawOne
-\DiagramDataMergeRawTwo
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/raw-read/01.pdf}%
+\caption{\small Lectura y normalizacion de datos fuente.}
+\label{fig:doc-data-raw-read-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/raw-read/02.pdf}%
+\caption{\small Construccion de la base homogenea de tipos.}
+\label{fig:doc-data-raw-read-2}
+\end{minipage}
+\end{figure}
+
+El segundo paso, \texttt{Merge Raw Step}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo.
+
+Las Figuras~\ref{fig:doc-data-raw-read-1}, \ref{fig:doc-data-raw-read-2}, \ref{fig:doc-data-merge-raw-1} y~\ref{fig:doc-data-merge-raw-2} resumen visualmente esta fase inicial de normalización y consolidación.
+
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/merge-raw/01.pdf}%
+\caption{\small Union de operaciones con informacion contractual.}
+\label{fig:doc-data-merge-raw-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/merge-raw/02.pdf}%
+\caption{\small Union por codigo de contrato y ano de sesion.}
+\label{fig:doc-data-merge-raw-2}
+\end{minipage}
+\end{figure}
 
 El tercer paso, \texttt{Product Split Step}, divide la base unificada en opciones, futuros y relación opción-futuro por vencimiento. El cuarto, \texttt{Underlying Step}, resuelve el precio de futuro subyacente mediante una unión temporal \emph{as-of}: para cada opción selecciona el último trade del futuro con instante de ejecución menor o igual al de la opción. Esta decisión evita lookahead dentro del propio ETL. El quinto, \texttt{Volatility Step}, filtra operaciones sin subyacente fiable o con desfase temporal excesivo, calcula el tipo compuesto hasta vencimiento y resuelve la volatilidad implícita por Black-76 inverso.
 
@@ -509,12 +577,56 @@ En este último paso se aplican reglas de calidad relevantes para evitar sesgos 
 
 La justificación empírica de estos filtros se apoya en el análisis exploratorio documentado en \texttt{EDA.ipynb}. También conviene explicitar que los descartes se distribuyen a lo largo de varios pasos: \texttt{Read Raw Step} y \texttt{Merge Raw Step} limpian incoherencias de esquema y dominio; \texttt{Underlying Step} garantiza el emparejamiento temporal sin lookahead y construye el desfase opción-subyacente; y \texttt{Volatility Step} aplica los filtros finales de calidad financiera (incluido el umbral de 180 minutos y la resolubilidad del solver).
 
-\DiagramDataProductSplitOne
-\DiagramDataProductSplitTwo
-\DiagramDataUnderlyingOne
-\DiagramDataUnderlyingTwo
-\DiagramDataVolatilityOne
-\DiagramDataVolatilityTwo
+Las Figuras~\ref{fig:doc-data-product-split-1}, \ref{fig:doc-data-product-split-2}, \ref{fig:doc-data-underlying-1}, \ref{fig:doc-data-underlying-2}, \ref{fig:doc-data-volatility-1} y~\ref{fig:doc-data-volatility-2} muestran esta segunda fase de separación por producto, asignación del subyacente y cálculo de la volatilidad implícita.
+
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/product-split/01.pdf}%
+\caption{\small Separacion de operaciones por producto.}
+\label{fig:doc-data-product-split-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/product-split/02.pdf}%
+\caption{\small Relacion opcion-futuro por vencimiento.}
+\label{fig:doc-data-product-split-2}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/data/underlying/01.pdf}%
+\caption{\small Asignacion de futuro subyacente a cada opcion.}
+\label{fig:doc-data-underlying-1}
+\end{figure}
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.34\textheight,keepaspectratio]{../doc/mermaid-pdf/data/underlying/02.pdf}%
+\caption{\small Seleccion temporal as-of del subyacente.}
+\label{fig:doc-data-underlying-2}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/volatility/01.pdf}%
+\caption{\small Calculo de volatilidad implicita.}
+\label{fig:doc-data-volatility-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/data/volatility/02.pdf}%
+\caption{\small Solver por biseccion de la volatilidad implicita.}
+\label{fig:doc-data-volatility-2}
+\end{minipage}
+\end{figure}
 
 \section{Validaciones y tratamiento financiero}
 \label{sec:validaciones-datos}
@@ -523,14 +635,21 @@ El ETL aplica validaciones transversales: precios positivos, cantidades positiva
 
 Para evitar ambigüedades, en esta memoria se distinguen dos conceptos de lag: el desfase opción-subyacente del ETL (en minutos) y el lag temporal del split de entrenamiento (en número de fechas) usado más adelante en la validación de modelos.
 
-El cálculo de volatilidad implícita se realiza en el último paso. Se eliminan operaciones sin subyacente fiable, se calcula el tipo compuesto hasta vencimiento y se resuelve la ecuación \eqref{eq:iv-inversion}. Si no existe cambio de signo en el intervalo de búsqueda o la solución es no finita, la observación se marca como no resoluble y no alimenta el entrenamiento.
+El cálculo de volatilidad implícita se realiza en el último paso. Se eliminan operaciones sin subyacente fiable, se calcula el tipo compuesto hasta vencimiento y se resuelve la ecuación \eqref{eq:iv-inversion}. Si no existe cambio de signo en el intervalo de búsqueda o la solución es no finita, la observación se marca como no resoluble y no alimenta el entrenamiento. La Figura~\ref{fig:doc-data-index-2} resume estas validaciones sobre el contrato y su interpretación.
 
-\DiagramDataIndexTwo
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.40\textheight,keepaspectratio]{../doc/mermaid-pdf/data/index/02.pdf}%
+\caption{\small Validacion e interpretacion del codigo de contrato.}
+\label{fig:doc-data-index-2}
+\end{figure}
 
 \section{Variables y feature engineering}
 \label{sec:variables}
 
 Las entradas raw visibles son \texttt{OptionType}, \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. Estas variables son suficientes para reconstruir el vector de entrenamiento y también son comprensibles para un usuario financiero que consulte la API.
+
+No se aplica una fase de selección de variables ex post (ni filtros automáticos de descarte por importancia) porque el foco metodológico es simular una operación directa con un conjunto de entradas financieras estable, reproducible y utilizable tal cual en API/dashboard. La comparación entre familias se hace, por diseño, sobre el mismo espacio de variables para aislar el efecto de la arquitectura y no de una poda específica de features.
 
 El vector transformado se diseña para representar la geometría de la superficie. La Tabla~\ref{tab:features} resume las variables derivadas.
 
@@ -555,10 +674,9 @@ Feature & Fórmula & Motivo \\
 \label{tab:features}
 \end{table}
 
-Esta elección evita que el modelo dependa de niveles absolutos de strike que pueden cambiar con el régimen de mercado. La moneyness permite comparar contratos negociados en momentos distintos del IBEX, mientras que el vencimiento y sus transformaciones capturan estructura temporal.
+Esta elección evita que el modelo dependa de niveles absolutos de strike que pueden cambiar con el régimen de mercado. La moneyness permite comparar contratos negociados en momentos distintos del IBEX, mientras que el vencimiento y sus transformaciones capturan estructura temporal. Las Figuras~\ref{fig:doc-models-features-1-small} y~\ref{fig:doc-models-features-2-small} muestran la construcción y motivación financiera de estas variables.
 
-\DiagramModelsFeaturesOne
-\DiagramModelsFeaturesTwo
+\DiagramModelsFeaturesSmallPair
 
 \section{Familias de modelos}
 \label{sec:familias}
@@ -583,7 +701,7 @@ Quantum Inspired NN & Variante clásica de red neuronal con estructura tensorial
 \label{tab:familias}
 \end{table}
 
-Todas las familias heredan una interfaz común: declaran parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas. Esta homogeneidad permite comparar un baseline lineal, modelos de árboles, boosting y arquitecturas neuronales con el mismo protocolo de selección. En la familia Quantum Inspired, el cálculo sigue siendo clásico: las features se proyectan a un embedding, se reordenan como tensor y se contraen mediante una capa tensor-train antes de una capa densa final.
+Todas las familias heredan una interfaz común: declaran parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas. Esta homogeneidad permite comparar un baseline lineal, modelos de árboles, boosting y arquitecturas neuronales con el mismo protocolo de selección. En la familia Quantum Inspired, el cálculo sigue siendo clásico: las features se proyectan a un embedding, se reordenan como tensor y se contraen mediante una capa tensor-train antes de una capa densa final. El concepto y su implementación práctica se detallan en el \autoref{app:quantum-inspired}.
 
 \textbf{La elección de familias responde a una lógica comparativa y no decorativa.}
 
@@ -594,24 +712,50 @@ Todas las familias heredan una interfaz común: declaran parámetros fijos, espa
   \item La variante \textbf{Quantum Inspired} introduce una hipótesis arquitectónica diferenciada manteniendo computación clásica, lo que permite valorar su aportación real frente a alternativas más estándar.
 \end{itemize}
 
-La interfaz común del repositorio hace además que la comparación sea metodológicamente limpia. Todas las familias pasan por los mismos splits temporales, las mismas métricas y el mismo proceso de reentrenamiento y conversión a paquete de dashboard. Eso evita que una familia ``gane'' por haber sido evaluada con un protocolo distinto del resto.
+La interfaz común del repositorio hace además que la comparación sea metodológicamente limpia. Todas las familias pasan por los mismos splits temporales, las mismas métricas y el mismo proceso de reentrenamiento y conversión a paquete de dashboard. Eso evita que una familia ``gane'' por haber sido evaluada con un protocolo distinto del resto. Las Figuras~\ref{fig:doc-models-families-1-small}, \ref{fig:doc-models-families-2-small} y~\ref{fig:doc-models-families-quantum-inspired-1} muestran la abstracción común, el protocolo de selección y la arquitectura Quantum Inspired.
 
-\DiagramModelsFamiliesOne
-\DiagramModelsFamiliesTwo
-\DiagramModelsFamiliesQuantumInspiredOne
+\DiagramModelsFamiliesSmallPair
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.80\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf}%
+\caption{\small Arquitectura Quantum Inspired clasica basada en tensor-train.}
+\label{fig:doc-models-families-quantum-inspired-1}
+\end{figure}
 
 \section{Splits temporales y selección}
 \label{sec:validacion}
 
 La validación sigue tres principios. Primero, el orden temporal se respeta: train precede a validation y test. Segundo, puede existir un lag de fechas entre bloques para reducir contaminación temporal. Tercero, se controla la exclusividad de contratos: si el mismo contrato aparece en más de un split, se conserva en un único bloque según volumetría y prioridad.
 
-Esta regla es relevante porque una opción puede negociarse durante varios días. Si un contrato aparece en entrenamiento y validación, el modelo podría aprender rasgos idiosincráticos del contrato y ofrecer una estimación optimista. Las Figuras~\ref{fig:doc-models-index-2}, \ref{fig:doc-models-splits-kfolds-1}, \ref{fig:doc-models-splits-kfolds-2} y~\ref{fig:doc-models-splits-kfolds-3} resumen la lógica temporal, la separación con lag y el control de contratos compartidos.
+Esta regla es relevante porque una opción puede negociarse durante varios días. Si un contrato aparece en entrenamiento y validación, el modelo podría aprender rasgos idiosincráticos del contrato y ofrecer una estimación optimista. Las Figuras~\ref{fig:doc-models-index-1}, \ref{fig:doc-models-index-2}, \ref{fig:doc-models-splits-kfolds-1-small}, \ref{fig:doc-models-splits-kfolds-2-small} y~\ref{fig:doc-models-splits-kfolds-3} resumen la lógica temporal, la separación con lag y el control de contratos compartidos.
 
-\DiagramModelsIndexOne
-\DiagramModelsIndexTwo
-\DiagramModelsSplitsKfoldsOne
-\DiagramModelsSplitsKfoldsTwo
-\DiagramModelsSplitsKfoldsThree
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/models/index/01.pdf}%
+\caption{\small Flujo de modelizacion de volatilidad.}
+\label{fig:doc-models-index-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/models/index/02.pdf}%
+\caption{\small Control temporal y exclusividad de contratos.}
+\label{fig:doc-models-index-2}
+\end{minipage}
+\end{figure}
+
+\DiagramModelsSplitsSmallPair
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.40\textheight,keepaspectratio]{../doc/mermaid-pdf/models/splits-kfolds/03.pdf}%
+\caption{\small Construccion de k-folds temporales.}
+\label{fig:doc-models-splits-kfolds-3}
+\end{figure}
 
 La búsqueda de hiperparámetros se realiza con k-folds temporales. Estos k-folds se construyen exclusivamente dentro del bloque de entrenamiento, de modo que validation y test externos quedan fuera del proceso de búsqueda. Para cada candidato se calculan MAE, RMSE y \(R^2\) en train y validation. La selección usa una métrica compuesta:
 
@@ -622,11 +766,11 @@ CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RM
 \label{eq:ce1}
 \end{equation}
 
-Esta métrica penaliza error de validación, inestabilidad entre folds y gap de sobreajuste. Según la configuración del repositorio, \(\alpha=0.25\) y \(\beta=0.75\).
+Esta métrica penaliza error de validación, inestabilidad entre folds y gap de sobreajuste. Según la configuración del repositorio, \(\alpha=0.25\) y \(\beta=0.75\). Las Figuras~\ref{fig:doc-models-training-1-small} y~\ref{fig:doc-models-training-2-small} resumen la búsqueda de hiperparámetros y el early stopping interno.
 
-\DiagramModelsTrainingOne
-\DiagramModelsTrainingTwo
+\DiagramModelsTrainingSmallPair
 
+\vspace{-0.3cm}
 \section{Reentrenamiento y progressive ATM}
 \label{sec:progressive-main}
 
@@ -641,10 +785,24 @@ con \(\gamma=0.25\) y \(\beta=0.75\) en la configuración actual.
 
 Es importante precisar que \(CE_2\) se utiliza para monitorizar consistencia en la fase train/validation. La evaluación definitiva de generalización del modelo se realiza siempre sobre el bloque test fuera de muestra.
 
-El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el \autoref{app:progressive}.
+El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el \autoref{app:progressive}. Las Figuras~\ref{fig:doc-models-retraining-progressive-1} y~\ref{fig:doc-models-retraining-progressive-2} muestran el reentrenamiento del mejor candidato y los segmentos ATM.
 
-\DiagramModelsRetrainingProgressiveOne
-\DiagramModelsRetrainingProgressiveTwo
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/models/retraining-progressive/01.pdf}%
+\caption{\small Reentrenamiento del mejor candidato.}
+\label{fig:doc-models-retraining-progressive-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/models/retraining-progressive/02.pdf}%
+\caption{\small Entrenamiento progressive ATM por segmentos.}
+\label{fig:doc-models-retraining-progressive-2}
+\end{minipage}
+\end{figure}
 
 \section{Construcción del dashboard}
 \label{sec:dashboard-metodo}
@@ -654,6 +812,8 @@ El dashboard no entrena modelos. Consume paquetes autocontenidos generados desde
 La transformación de un modelo final a este paquete no modifica el predictor: carga el runtime, aplica el mismo feature engineering sobre train y test, calcula artefactos explicativos y persiste una carpeta autocontenida en \texttt{src/dashboard/saved\_models/}.
 
 La aplicación se estructura en cuatro pestañas, resumidas en la Tabla~\ref{tab:dashboard-tabs}. Esta organización responde a preguntas distintas y evita confundir error predictivo con explicación.
+
+En particular, la lectura SHAP se divide en dos niveles complementarios: \textbf{SHAP global} en la pestaña \emph{Global Explainability} (drivers y patrones agregados) y \textbf{SHAP local} en la pestaña \emph{Sample Explainability}, donde se muestra el \emph{Local SHAP Waterfall} para justificar una predicción concreta.
 
 \begin{table}[htbp]
 \centering
@@ -672,14 +832,61 @@ Diagnosis & ¿Dónde acierta y dónde falla el modelo en la superficie? \\
 \label{tab:dashboard-tabs}
 \end{table}
 
-\DiagramDashboardIndexOne
-\DiagramDashboardIndexTwo
-\DiagramDashboardModelToDashboardOne
-\DiagramDashboardBehaviourSurfaceOne
-\DiagramDashboardBehaviourVolatilitySurfacesOne
-\DiagramDashboardGlobalExplainabilityOne
-\DiagramDashboardSampleExplainabilityOne
-\DiagramDashboardDiagnosisOne
+Las Figuras~\ref{fig:doc-dashboard-index-1-small}, \ref{fig:doc-dashboard-index-2-small} y~\ref{fig:doc-dashboard-model-to-dashboard-1} muestran las entradas precomputadas, la arquitectura del dashboard y la conversión del modelo final a paquete visualizable.
+
+\DiagramDashboardIndexSmallPair
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth,height=0.40\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf}%
+\caption{\small Conversion de modelo final a paquete visualizable.}
+\label{fig:doc-dashboard-model-to-dashboard-1}
+\end{figure}
+
+\vspace{-0.3cm}
+Las vistas del dashboard son necesarias para localizar dónde aparece esa compresón. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-diagnosis-1}, \ref{fig:doc-dashboard-global-explainability-1}, \ref{fig:doc-dashboard-sample-explainability-1} y~\ref{fig:doc-dashboard-behaviour-volatility-surfaces-1} muestran estos flujos y vistas; en particular, la vista local de \emph{Sample Explainability} es la puerta de entrada al \emph{Local SHAP Waterfall} y al contexto de vecinos históricos.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf}%
+\caption{\small Flujo de la pestana Behaviour And Surface.}
+\label{fig:doc-dashboard-behaviour-surface-1}
+\end{figure}
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/diagnosis/01.pdf}%
+\caption{\small Vistas de diagnostico del modelo final.}
+\label{fig:doc-dashboard-diagnosis-1}
+\end{figure}
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/global-explainability/01.pdf}%
+\caption{\small Flujo de la pestana Global Explainability.}
+\label{fig:doc-dashboard-global-explainability-1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf}%
+\caption{\small Flujo de la pestana Sample Explainability.}
+\label{fig:doc-dashboard-sample-explainability-1}
+\end{minipage}
+\end{figure}
+
+\vspace{-0.3cm}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.80\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf}%
+\caption{\small Construccion de superficies locales de volatilidad.}
+\label{fig:doc-dashboard-behaviour-volatility-surfaces-1}
+\end{figure}
 
 \section{API, almacenamiento y cloud}
 \label{sec:api-cloud-metodo}
@@ -696,7 +903,7 @@ La petición incluye modelo, tipo de opción, strike, subyacente, tiempo a venci
 
 La respuesta de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir.
 
-El backend de almacenamiento puede ser local o GCP. En GCP se usan Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo.
+El backend de almacenamiento puede ser local o GCP. En GCP se usan Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo. La Figura~\ref{fig:cloud-diagram-drawio} resume este esquema de despliegue.
 
 \textbf{Metodológicamente, esta capa cumple tres funciones.}
 
@@ -719,9 +926,14 @@ Esta separación se observa también en \texttt{src/api} y \texttt{src/dashboard
 
 Esta última idea es especialmente importante. La memoria no presenta dos sistemas paralelos, uno visual y otro programático, sino dos interfaces sobre la misma base modelística y explicativa. Eso reduce riesgo de inconsistencia y hace más defendible el uso profesional del conjunto.
 
-\DiagramOperationsApiDeploymentOne
-\DiagramOperationsApiDeploymentTwo
-\DiagramOperationsApiDeploymentThree
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.56\textheight,keepaspectratio]{../imgs/cloud_diagram.drawio.png}%
+\caption{\small Arquitectura cloud del sistema: almacenamiento, artefactos y servicios de API/dashboard.}
+\label{fig:cloud-diagram-drawio}
+\end{figure}
+
+La Figura~\ref{fig:cloud-diagram-drawio} también deja explícita la separación entre almacenamiento, artefactos de modelo y servicios desplegados.
 
 \section{Reproducibilidad y trazabilidad}
 \label{sec:reproducibilidad}
@@ -737,20 +949,34 @@ La reproducibilidad se apoya en cuatro mecanismos: configuración de entrenamien
   \item Los artefactos explicativos (muestras SHAP, puntos de referencia, vecinos, superficies, ICE y ALE) se generan con semilla controlada para conservar comparabilidad entre ejecuciones.
 \end{itemize}
 
-La consecuencia es clara: si cambia un schema, una ruta o una transformación, el cambio queda aislado y visible. Eso reduce el riesgo de inconsistencias no evidentes entre el modelo analizado y el modelo efectivamente servido.
+La consecuencia es clara: si cambia un schema, una ruta o una transformación, el cambio queda aislado y visible. Eso reduce el riesgo de inconsistencias no evidentes entre el modelo analizado y el modelo efectivamente servido. Las Figuras~\ref{fig:doc-repository-configuration-1-small} y~\ref{fig:doc-repository-configuration-2-small} muestran la configuración centralizada y los modos de carga local o GCP.
 
-\DiagramRepositoryConfigurationOne
-\DiagramRepositoryConfigurationTwo
+\DiagramRepositoryConfigSmallPair
 
 \section{Arquitectura del repositorio}
 \label{sec:arquitectura-repo}
 
-La arquitectura del repositorio sigue una separación por funcionalidades. Esta decisión es relevante para reproducibilidad y defensa técnica: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio.
+La arquitectura del repositorio sigue una separación por funcionalidades. Esta decisión es relevante para reproducibilidad y defensa técnica: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio. Las Figuras~\ref{fig:doc-repository-index-1-small}, \ref{fig:doc-repository-index-2}, \ref{fig:doc-repository-index-3} y~\ref{fig:doc-repository-src-packages-1} muestran la estructura lógica, la secuencia de ejecución, la cadena de salidas y las dependencias entre paquetes.
 
-\DiagramRepositoryIndexOne
-\DiagramRepositoryIndexTwo
-\DiagramRepositoryIndexThree
-\DiagramRepositorySrcPackagesOne
+\DiagramRepositoryIndexSmallTriple
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/repository/index/02.pdf}%
+\caption{\small Secuencia de ejecucion entre paquetes.}
+\label{fig:doc-repository-index-2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.18\textheight]{../doc/mermaid-pdf/repository/index/03.pdf}%
+\caption{\small Cadena de salidas persistidas del proyecto.}
+\label{fig:doc-repository-index-3}
+\vspace{0.15cm}
+\includegraphics[width=0.82\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/repository/src-packages/01.pdf}%
+\caption{\small Dependencias principales entre paquetes de src.}
+\label{fig:doc-repository-src-packages-1}
+\end{figure}
 
 \begin{table}[htbp]
 \centering
@@ -761,12 +987,16 @@ Paquete o carpeta & Responsabilidad principal \\
 \midrule
 \texttt{src/config} & Carga de configuración, rutas absolutas, logging y objetos de configuración por dominio. \\
 \texttt{src/enums} & Definición centralizada de columnas, tipos de contrato, tipos de opción y nombres de modelos. \\
+\texttt{src/exceptions} & Excepciones de dominio usadas en validaciones de datos y control de errores del ETL. \\
 \texttt{src/data\_management} & ETL de datos: loaders, builders, validaciones y utilidades de contrato. \\
 \texttt{src/volatility\_models} & Preparación de datos de entrenamiento, splits, k-folds, selección y reentrenamiento. \\
 \texttt{src/python\_models} & Abstracciones de familias de modelos y estructuras persistibles de dashboard. \\
 \texttt{src/model2dashboard} & Conversión de modelos finales en paquetes explicativos autocontenidos. \\
 \texttt{src/dashboard} & Aplicación Dash, servicios, callbacks, gráficos y utilidades de validación. \\
 \texttt{src/api} & API FastAPI para predicción y explicabilidad local. \\
+\texttt{resources} & Configuración declarativa (datos, modelos y cliente-servidor) consumida por el runtime. \\
+\texttt{dockerfiles} & Definiciones de imagen para API, dashboard, LaTeX y utilidades de documentación. \\
+\texttt{scripts} & Automatizaciones auxiliares de soporte operativo y generación de artefactos. \\
 \texttt{terraform} & Infraestructura cloud reproducible: buckets, registro de imágenes, Cloud Run e IAM. \\
 \bottomrule
 \end{tabular}
@@ -1066,6 +1296,19 @@ En otras palabras, el trabajo refuerza una idea clásica en derivados: el result
 
 También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no sólo a tablas globales de error.
 
+\textbf{Aportación frente a enfoques clásicos.}
+
+La comparación con enfoques clásicos debe plantearse como complementariedad y mejora operativa, no como sustitución automática. Los enfoques paramétricos (por ejemplo, parametrizaciones estáticas de superficie o ajustes locales ad hoc) aportan estructura financiera explícita y son valiosos para gobernanza. La propuesta de este TFM añade valor en escenarios donde esa estructura no basta por sí sola:
+
+\begin{itemize}
+  \item \textbf{Mayor flexibilidad empírica:} captura interacciones no lineales entre moneyness, vencimiento, subyacente y tipo con menor rigidez funcional.
+  \item \textbf{Mejor lectura por zonas:} añade diagnóstico de error por región de superficie, clave para contratos ilíquidos o extremos de moneyness.
+  \item \textbf{Capacidad de control y auditoría:} incorpora trazabilidad y explicaciones locales/globales en el mismo flujo de servicio.
+  \item \textbf{Validación cruzada de pricing:} permite contrastar salidas de modelos clásicos internos con una referencia empírica independiente.
+\end{itemize}
+
+En términos prácticos, la mejora no es sólo bajar una métrica agregada. La mejora principal es disponer de una \emph{superficie utilizable}: consultable, explicable y controlable en producción, especialmente en los casos donde las reglas clásicas requieren juicio manual intensivo.
+
 \subsection{Lectura de IA y Data Science}
 \label{subsec:discusion-ia}
 
@@ -1118,14 +1361,48 @@ La tercera conclusión es que la arquitectura de software condiciona la utilidad
 
 La cuarta conclusión es que progressive ATM no debe presentarse como mejora universal. En esta ejecución mejora la arquitectura Quantum Inspired, pero no al Random Forest final ni a XGBoost. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados.
 
+Desde la perspectiva financiera aplicada, la contribución diferencial frente a enfoques clásicos es doble. Primero, aporta una referencia empírica flexible para valoración y validación en zonas con menor liquidez o cobertura irregular. Segundo, incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que facilitan auditoría interna, model validation y soporte a decisiones de cobertura.
+
+Por ello, el avance del TFM no debe leerse sólo como una mejora de RMSE. Debe leerse como mejora de \textbf{capacidad operativa}: detectar anomalías, justificar decisiones, analizar sensibilidad por moneyness/vencimiento y usar el modelo como herramienta de control de riesgos de mesa.
+
 Como líneas futuras, se proponen: ampliar el análisis con más ventanas temporales, incorporar métricas específicas por liquidez, explorar modelos con restricciones de suavidad financiera, automatizar validaciones de superficie más exigentes y reforzar el versionado de modelos y paquetes explicativos en cloud. También sería natural comparar la superficie aprendida con enfoques paramétricos clásicos o con modelos híbridos que impongan estructura financiera explícita.
 
 \appendix
+
+\chapter{Esquema Detallado De Datos Y ETL}
+\label{app:data-structures}
+
+Este anexo reúne el detalle estructural de las tablas intermedias y finales generadas por el pipeline de datos. Su objetivo no es introducir lógica nueva, sino dejar trazabilidad precisa sobre qué base produce cada etapa del ETL y cómo se encadenan \texttt{Read Raw Step}, \texttt{Merge Raw Step}, \texttt{Product Split Step}, \texttt{Underlying Step} y \texttt{Volatility Step}.
+
+La Figura~\ref{fig:db-structure-details-1} muestra la fase de ingestión y consolidación inicial. La Figura~\ref{fig:db-structure-details-2} recoge la separación por producto y la construcción de la relación opción-subyacente. La Figura~\ref{fig:db-structure-details-3} resume los filtros finales y la construcción de \texttt{VOLATILITY\_DB}.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 2700 0 0},clip]{../imgs/databases_structure_details.drawio.png}%
+\caption{\small Detalle estructural del ETL (I): fuentes de entrada, normalización inicial y consolidación contractual.}
+\label{fig:db-structure-details-1}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 1100 0 1350},clip]{../imgs/databases_structure_details.drawio.png}%
+\caption{\small Detalle estructural del ETL (II): separación por producto y construcción de la relación opción-subyacente.}
+\label{fig:db-structure-details-2}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 0 0 2750},clip]{../imgs/databases_structure_details.drawio.png}%
+\caption{\small Detalle estructural del ETL (III): filtros previos y construcción final de \texttt{VOLATILITY\_DB}.}
+\label{fig:db-structure-details-3}
+\end{figure}
 
 \chapter{Fundamentos de SHAP}
 \label{app:shap}
 
 SHAP se basa en una lectura cooperativa de la contribución de variables a una predicción. Su ventaja práctica es que proporciona una descomposición aditiva como la de \eqref{eq:shap-additive}. En este proyecto se usa con un explicador de permutación para tratar de forma homogénea modelos heterogéneos. Esta decisión sacrifica eficiencia frente a explicadores especializados, pero aporta una semántica común entre familias.
+
+La Figura~\ref{fig:doc-dashboard-global-shap-fundamentals-1} resume este fundamento de descomposición aditiva.
 
 \DiagramDashboardGlobalShapFundamentalsOne
 
@@ -1152,7 +1429,7 @@ max\_evals = 2p+1.
 \label{eq:shap-evals}
 \end{equation}
 
-El fondo se toma de una muestra controlada por \texttt{shap\_background\_size}; las filas explicadas globalmente por \texttt{shap\_explain\_size}; y las filas locales por \texttt{sample\_option\_size}. Las explicaciones se calculan sobre variables raw visibles: \texttt{OptionType}, \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. Esta decisión mejora la lectura financiera, aunque internamente el runtime reconstruya \texttt{logMoneyness}, \texttt{sqrtTTEYears} y el resto de features derivadas mediante el encoder de explicabilidad.
+El fondo se toma de una muestra controlada por \texttt{shap\_background\_size}; las filas explicadas globalmente por \texttt{shap\_explain\_size}; y las filas locales por \texttt{sample\_option\_size}. Las explicaciones se calculan sobre variables raw visibles: \texttt{OptionType}, \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. Esta decisión mejora la lectura financiera, aunque internamente el runtime reconstruya \texttt{logMoneyness}, \texttt{sqrtTTEYears} y el resto de features derivadas mediante el encoder de explicabilidad. Las Figuras~\ref{fig:doc-dashboard-global-shap-visualizations-1}, \ref{fig:doc-dashboard-global-shap-visualizations-2}, \ref{fig:doc-dashboard-sample-local-shap-waterfall-1}, \ref{fig:doc-dashboard-sample-neighbours-1} y~\ref{fig:doc-dashboard-sample-neighbours-2} muestran estos artefactos globales y locales.
 
 \DiagramDashboardGlobalShapVisualizationsOne
 \DiagramDashboardGlobalShapVisualizationsTwo
@@ -1184,6 +1461,8 @@ ICE_i^{(j)}(z)=f(z,x_{i,-j}),
 \end{equation}
 
 donde \(x_{i,-j}\) representa todas las variables salvo la feature analizada. Cada línea ICE es una trayectoria individual de predicción.
+
+La Figura~\ref{fig:doc-dashboard-behaviour-ice-1} muestra el flujo de construcción de estas curvas.
 
 \DiagramDashboardBehaviourIceOne
 
@@ -1234,6 +1513,8 @@ E\left[
 
 La constante \(C\) centra la curva para que su media sea cero. Un valor ALE positivo no significa volatilidad positiva, sino efecto acumulado por encima del promedio de referencia.
 
+La Figura~\ref{fig:doc-dashboard-behaviour-ale-1} resume el cálculo por bins y su acumulación.
+
 \DiagramDashboardBehaviourAleOne
 
 La implementación por bins calcula bordes por cuantiles entre 0.05 y 0.95, con 13 puntos. Para cada intervalo \([l_k,u_k]\), selecciona observaciones \(I_k\), predice dos escenarios locales y calcula:
@@ -1276,6 +1557,81 @@ En opciones, ALE es útil porque \texttt{StrikePrice} y \texttt{UnderlyingPrice}
 
 Si ambos apuntan en la misma dirección, la conclusión es más sólida. Si discrepan, el modelo probablemente está mezclando regímenes o usando interacciones que conviene revisar con superficies y diagnóstico por zonas de la superficie.
 
+\chapter{Modelo Quantum Inspired}
+\label{app:quantum-inspired}
+
+Este anexo resume únicamente lo diferencial de la familia \emph{Quantum Inspired}. En este trabajo no implica computación cuántica real, sino una arquitectura \textbf{clásica} con factorización tensorial para modelar interacciones complejas de la superficie de volatilidad.
+
+\textbf{Implementación específica.}
+
+La lógica principal está en el archivo
+\path{src/python_models/volatility_models/volatility_model_family.py}.
+El anexo se apoya en dos piezas:
+
+\begin{itemize}
+  \item \textbf{\texttt{TensorTrainLayer}:} implementa la contracción tensor-train (validación de forma en \texttt{build} y contracción en \texttt{call}).
+  \item \textbf{\texttt{QuantumInspiredNNFamily}:} define cómo se tensoriza el embedding y cómo se integra la capa TT en el modelo final.
+\end{itemize}
+
+Las funciones realmente diferenciales son:
+
+\begin{itemize}
+  \item \texttt{\_get\_tt\_configurations}: fija \texttt{tensor\_dims}, \texttt{tt\_ranks} y \texttt{tt\_output\_dim}.
+  \item \texttt{instantiate\_model}: construye una cadena de seis pasos:
+  \texttt{Input}, embedding, \texttt{Reshape}, \texttt{TensorTrainLayer},
+  bloque denso y salida.
+\end{itemize}
+
+\textbf{Mecánica interna relevante (sin entrar en detalles genéricos de Keras).}
+
+En la implementación, \texttt{instantiate\_model} fija primero una configuración TT concreta (por ejemplo \([2,2,2,2]\) o \([2,2,3,3]\)), y de ahí deriva el tamaño del embedding como:
+
+\begin{equation}
+\texttt{embedding\_dim}=\prod_{k=1}^{d} n_k.
+\label{eq:qi-embedding-dim}
+\end{equation}
+
+Después, el flujo es estrictamente estructural: la capa densa de embedding produce un vector de tamaño \(\prod n_k\), \texttt{Reshape} lo convierte en un tensor de orden \(d\), y \texttt{TensorTrainLayer} aplica la contracción TT para generar \texttt{tt\_output\_dim} características comprimidas.
+
+\texttt{TensorTrainLayer} impone además restricciones que son propias del formalismo TT: valida que los rangos tengan longitud \(d+1\), que las fronteras sean \([1,\ldots,1]\), y construye núcleos con forma \((r_k, n_k, r_{k+1})\). Esto evita implementaciones ambiguas y asegura que la factorización usada sea coherente con la descomposición tensor-train estándar.
+
+\textbf{Diferencia frente a una red densa estándar.}
+
+Una red normal encadena capas densas con matrices completas de pesos. La variante Quantum Inspired impone estructura:
+
+\begin{itemize}
+  \item convierte el embedding en tensor multiíndice;
+  \item modela interacciones mediante núcleos TT con rangos internos controlados;
+  \item sustituye parte de la parametrización densa por una parametrización factorizada.
+\end{itemize}
+
+La diferencia práctica más importante es que en una red densa la complejidad crece por matrices completas entre capas, mientras que aquí queda gobernada por \texttt{tensor\_dims} y \texttt{tt\_ranks}. Por eso los rangos TT actúan como mando directo del compromiso entre capacidad de aproximación y regularización estructural.
+
+Además, en esta familia los hiperparámetros \texttt{tt\_configuration} no son decorativos: definen simultáneamente el orden tensorial, los rangos internos y la dimensión de salida TT. Por tanto, modificar esa configuración cambia de forma directa la clase funcional que el modelo puede representar.
+
+En forma simplificada:
+
+\begin{equation}
+z \rightarrow \mathcal{Z}(i_1,\dots,i_d),
+\qquad
+\hat{\sigma}(x)=f_{TT}(\mathcal{Z};\Theta_{TT}),
+\label{eq:qi-tensor-map}
+\end{equation}
+
+\begin{equation}
+f_{TT}(\mathcal{Z}) \approx
+\sum_{i_1,\dots,i_d} G_1[i_1]G_2[i_2]\cdots G_d[i_d]\,\mathcal{Z}(i_1,\dots,i_d),
+\label{eq:qi-tt}
+\end{equation}
+
+donde los rangos TT regulan el equilibrio entre capacidad e inducción de estructura.
+
+Esto es precisamente lo que justifica la etiqueta \emph{quantum inspired} en este TFM: se adopta una parametrización inspirada en redes tensoriales usadas en modelos cuánticos simulados clásicamente, pero toda la inferencia y el entrenamiento se realizan en hardware clásico y bajo el mismo protocolo de validación que el resto de familias.
+
+\textbf{Lectura práctica en este TFM.}
+
+La familia no gana al Random Forest en test, pero sí mejora cuando se combina con progressive ATM. Eso justifica su valor como hipótesis arquitectónica específica: aporta una vía alternativa para capturar estructura multivariable sin cambiar el protocolo de evaluación respecto a las demás familias.
+
 \chapter{Árboles surrogate y regresión simbólica}
 \label{app:surrogates}
 
@@ -1288,16 +1644,45 @@ Los modelos surrogate aproximan el comportamiento del modelo principal con una r
 
 La variable objetivo de \(h\) no es la volatilidad real, sino la predicción del modelo principal. Por tanto, la fidelidad mide capacidad de imitación, no precisión frente a mercado. Esta distinción es esencial para evitar una interpretación incorrecta en auditoría.
 
+La Figura~\ref{fig:doc-dashboard-global-surrogate-trees-1} muestra el flujo de entrenamiento y evaluación de árboles surrogate.
+
 \DiagramDashboardGlobalSurrogateTreesOne
 
 Los árboles surrogate ofrecen reglas por particiones. Profundidades bajas facilitan lectura, pero pueden perder fidelidad; profundidades altas imitan mejor, pero se vuelven menos explicables. El dashboard conserva varios niveles de profundidad para elegir el equilibrio adecuado.
 
-La regresión simbólica busca expresiones cerradas con operadores matemáticos. Su atractivo es producir fórmulas compactas que pueden discutirse financieramente. Su riesgo es doble: puede sobreajustar la predicción del modelo principal y puede proponer expresiones difíciles de justificar económicamente. Por ello se revisan conjuntamente error, complejidad y estabilidad de candidatos \citep{cranmer2023interpretable}.
+\textbf{Qué es la regresión simbólica en este contexto.}
+
+La regresión simbólica busca una expresión matemática explícita que aproxime al modelo principal:
+
+\begin{equation}
+\hat{\sigma}_{principal}(x) \approx h_{sym}(x),
+\label{eq:symbolic-surrogate}
+\end{equation}
+
+donde \(h_{sym}\) no se fija a priori (como una recta o un polinomio de grado cerrado), sino que se descubre mediante búsqueda sobre combinaciones de operadores. En términos de explicabilidad, su valor potencial es ofrecer una fórmula compacta y auditable en lugar de una caja negra.
+
+\textbf{Por qué es importante para explicabilidad.}
+
+Su interés no es solo estético. Si una expresión de complejidad moderada mantiene buena fidelidad, permite:
+
+\begin{itemize}
+  \item resumir el comportamiento global del modelo con una regla algebraica interpretable;
+  \item discutir dependencias funcionales de forma directa (signos, curvatura, términos dominantes);
+  \item complementar SHAP/ICE/ALE con una síntesis global más legible para revisión técnica.
+\end{itemize}
+
+Al mismo tiempo, hay que controlar dos riesgos: fórmulas aparentemente limpias pero con baja fidelidad, y fórmulas fieles pero económicamente poco defendibles. Por eso se revisan conjuntamente error, complejidad y estabilidad de candidatos \citep{cranmer2023interpretable}. Las Figuras~\ref{fig:doc-dashboard-global-symbolic-regression-1} y~\ref{fig:doc-dashboard-global-symbolic-regression-2} muestran esta búsqueda y su lectura conjunta.
 
 \DiagramDashboardGlobalSymbolicRegressionOne
 \DiagramDashboardGlobalSymbolicRegressionTwo
 
-En el proyecto, los árboles se entrenan con \texttt{DecisionTreeRegressor} para profundidades 2, 4, 8 y 16. La configuración usa \texttt{surrogate\_sample\_}\allowbreak\texttt{size}=12000 y \texttt{surrogate\_min\_samples\_}\allowbreak\texttt{leaf}=80. La regresión simbólica usa PySR con una muestra de 2500 observaciones, búsqueda evolutiva, operadores binarios \(+,-,\times,/,\wedge\), operadores unarios \texttt{square} y \texttt{cube}, límite de complejidad y timeout. En ambos casos, las métricas de fidelidad deben presentarse junto al error de mercado del modelo principal.
+\textbf{Cómo se ha implementado en este TFM.}
+
+En el proyecto, los árboles se entrenan con \texttt{DecisionTreeRegressor} para profundidades 2, 4, 8 y 16. La configuración usa \texttt{surrogate\_sample\_}\allowbreak\texttt{size}=12000 y \texttt{surrogate\_min\_samples\_}\allowbreak\texttt{leaf}=80.
+
+La regresión simbólica usa PySR con una muestra de 2500 observaciones, búsqueda evolutiva, operadores binarios \(+,-,\times,/,\wedge\), operadores unarios \texttt{square} y \texttt{cube}, límite de complejidad y timeout. La variable objetivo es siempre la predicción del modelo principal, no la volatilidad real observada.
+
+Esta distinción metodológica es clave: tanto en árboles surrogate como en regresión simbólica se evalúa \textbf{fidelidad de imitación} del modelo final, no capacidad de pricing frente a mercado.
 
 \textbf{Este anexo distingue dos tipos de legibilidad.}
 
@@ -1313,6 +1698,10 @@ En el proyecto, los árboles se entrenan con \texttt{DecisionTreeRegressor} para
   \item Si la fórmula simbólica logra buena fidelidad con complejidad moderada, aporta una síntesis especialmente valiosa.
   \item Si ambos fallan, la conclusión útil no es negativa, sino diagnóstica: el modelo principal necesita otras herramientas de explicación y no debe comprimirse artificialmente.
 \end{itemize}
+
+\textbf{Lectura práctica recomendada en la memoria.}
+
+En este trabajo, la regresión simbólica debe leerse como \emph{explicador complementario}: aporta valor cuando consigue fidelidad suficiente con complejidad controlada. Si no alcanza ese equilibrio, su papel sigue siendo útil como evidencia de que el modelo no se deja comprimir bien en una sola expresión y debe interpretarse con el conjunto SHAP + ICE/ALE + diagnóstico por superficie + vecinos.
 
 \chapter{Entrenamiento progressive ATM}
 \label{app:progressive}

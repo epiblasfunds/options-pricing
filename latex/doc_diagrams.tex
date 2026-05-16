@@ -10,6 +10,36 @@
 \end{figure}%
 }
 
+% Versión reducida para mejor integración
+\newcommand{\DocPdfDiagramSmall}[3]{%
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth,height=0.40\textheight,keepaspectratio]{#1}%
+\caption{\small #2}
+\label{#3}
+\end{figure}%
+}
+
+% Versión para dos diagramas lado a lado
+\newcommand{\DocPdfDiagramSideBySide}[6]{%
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{#1}%
+\caption{\small #2}
+\label{#3}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{#4}%
+\caption{\small #5}
+\label{#6}
+\end{minipage}
+\end{figure}%
+}
+
 \newcommand{\DiagramDashboardBehaviourAleOne}{%
 \DocPdfDiagram{../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf}{Construccion de curvas ALE por bins locales.}{fig:doc-dashboard-behaviour-ale-1}%
 }
@@ -233,4 +263,43 @@
 \newcommand{\DiagramRepositorySrcPackagesOne}{%
 \DocPdfDiagram{../doc/mermaid-pdf/repository/src-packages/01.pdf}{Dependencias principales entre paquetes de src.}{fig:doc-repository-src-packages-1}%
 }
+
+% Versiones compactas para mejor integración en la sección de metodología
+
+\newcommand{\DiagramDataIndexOneSmall}{%
+\DocPdfDiagramSmall{../doc/mermaid-pdf/data/index/01.pdf}{Pipeline completo de datos hasta VOLATILITY\_DB.}{fig:doc-data-index-1-small}%
+}
+
+\newcommand{\DiagramModelsFeaturesSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/features/01.pdf}{Construccion de features financieras.}{fig:doc-models-features-1-small}{../doc/mermaid-pdf/models/features/02.pdf}{Motivacion financiera de las features.}{fig:doc-models-features-2-small}%
+}
+
+\newcommand{\DiagramModelsFamiliesSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/families/01.pdf}{Abstraccion comun de familias de modelos.}{fig:doc-models-families-1-small}{../doc/mermaid-pdf/models/families/02.pdf}{Seleccion de modelos mediante k-folds temporales.}{fig:doc-models-families-2-small}%
+}
+
+\newcommand{\DiagramModelsSplitsSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/splits-kfolds/01.pdf}{Esquema conceptual de particiones temporales.}{fig:doc-models-splits-kfolds-1-small}{../doc/mermaid-pdf/models/splits-kfolds/02.pdf}{Control de contratos compartidos entre splits.}{fig:doc-models-splits-kfolds-2-small}%
+}
+
+\newcommand{\DiagramModelsTrainingSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/training/01.pdf}{Busqueda de hiperparametros por familia.}{fig:doc-models-training-1-small}{../doc/mermaid-pdf/models/training/02.pdf}{Early stopping con validacion interna.}{fig:doc-models-training-2-small}%
+}
+
+\newcommand{\DiagramDashboardIndexSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/dashboard/index/01.pdf}{Entradas precomputadas consumidas por el dashboard.}{fig:doc-dashboard-index-1-small}{../doc/mermaid-pdf/dashboard/index/02.pdf}{Arquitectura de servicios del dashboard.}{fig:doc-dashboard-index-2-small}%
+}
+
+\newcommand{\DiagramOperationsApiSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/operations/api-deployment/01.pdf}{API, almacenamiento y runtime comun.}{fig:doc-operations-api-deployment-1-small}{../doc/mermaid-pdf/operations/api-deployment/02.pdf}{Seleccion de backend local o GCP.}{fig:doc-operations-api-deployment-2-small}%
+}
+
+\newcommand{\DiagramRepositoryConfigSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/repository/configuration/01.pdf}{Configuracion centralizada del proyecto.}{fig:doc-repository-configuration-1-small}{../doc/mermaid-pdf/repository/configuration/02.pdf}{Carga local o GCP desde configuracion cliente-servidor.}{fig:doc-repository-configuration-2-small}%
+}
+
+\newcommand{\DiagramRepositoryIndexSmallTriple}{%
+\DocPdfDiagramSmall{../doc/mermaid-pdf/repository/index/01.pdf}{Estructura logica del repositorio.}{fig:doc-repository-index-1-small}%
+}
+
 
