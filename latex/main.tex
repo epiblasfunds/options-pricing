@@ -1223,6 +1223,45 @@ RMSE\(
 
 Este nivel de detalle es necesario porque dos modelos con RMSE parecido pueden implicar riesgos operativos muy distintos. Uno puede fallar de forma estable y moderada; otro puede acertar el promedio pero perder control justo en las zonas más delicadas para valoración o revisión manual.
 
+\subsubsection{Análisis del impacto del entrenamiento Progressive ATM}
+\label{subsubsec:atm-impact}
+
+El proyecto incluyó una variante experimental denominada Progressive ATM (o \emph{Entrenamiento Progresivo Ordenado por ATM}): un enfoque de currículum de aprendizaje que reordena cronológicamente el entrenamiento para presentar primero observaciones cercanas al ATM (moneyness bajo, $|\log(F/K)| < 0.05$), donde concentra la máxima liquidez y menor ruido, para después incorporar progresivamente observaciones hacia extremos de moneyness y vencimientos cortos. La motivación financiera es doble: (1) la zona ATM en opciones sobre índices suele ser la más líquida y menos afectada por sesgos de selección; (2) entrenar primero en datos menos ruidosos podría regularizar arquitecturas sensibles al orden de presentación, como redes neuronales secuenciales y modelos cuánticos inspirados.
+
+\textbf{Metodología de evaluación.} Se reentrenaron independientemente los cinco modelos de la familia de seleccionados bajo esta variante, conservando la validación cruzada 5-fold y los mismos hiperparámetros que en el entrenamiento estándar. Se compararon las métricas test de RMSE, MAE y $R^2$ entre ambas versiones (estándar vs.\ ATM) para cada familia. El análisis se complementó con inspección visual de residual heatmaps en el dashboard para verificar si la reordenación producía cambios en la distribución espacial del error (por moneyness y vencimiento).
+
+\textbf{Resultados observacionales en lo visualizado en el dashboard:}
+
+\begin{itemize}
+
+\item \textbf{Linear Regression (RMSE 0.1838 estándar $\to$ 0.1877 ATM).} El entrenamiento ATM no produce un modelo mejor. El incremento en RMSE de +0.0039 (+0.21\%), acompañado de deterioro en MAE (+0.0161) y reducción de $R^2$ (-0.0219), sugiere que el currículum de ATM no regulariza un modelo ya lineal e inflexible. El residual heatmap en versión ATM muestra mayor concentración relativa de error en bandas específicas de moneyness (entorno $0.95 < m < 1.05$), compatibles con un ajuste lineal que persevera en capturar curvatura local sin el beneficio de datos iniciales informativos. Este resultado es esperado: un modelo lineal no se beneficia de ordenamientos que privilegian información local, puesto que su hipótesis es global.
+
+\item \textbf{Random Forest (RMSE 0.0884 estándar $\to$ 0.0885 ATM).} El modelo más robusto permanece prácticamente invariante. El cambio $\Delta$RMSE $= +0.0001$ (0.01\%), $\Delta$MAE $= -0.0001$, y $\Delta R^2 = -0.0006$ son negligibles y dentro del ruido estocástico de validación cruzada. El residual heatmap ATM es indistinguible del estándar. Random Forest ya generaliza a través de bootstrapping y agregación de árboles profundos, generando capacidad de regularización inherente. El currículum ATM añade un factor extrínseco que no mejora esta capacidad, confirmando que los modelos ya óptimos no se benefician de reordenamientos de datos de entrenamiento.
+
+\item \textbf{XGBoost (RMSE 0.0917 estándar $\to$ 0.1136 ATM).} La variante ATM no produce un modelo mejor; al contrario, se observa una degradación clara. El incremento en RMSE de +0.0219 (+2.39\%), acompañado de $\Delta$MAE $= +0.0027$ y $\Delta R^2 = -0.1202$ (caída de 12 puntos porcentuales en varianza explicada), refleja un efecto perjudicial. El heatmap de diagnóstico ATM muestra intensificación de concentración roja (error absoluto alto) en bandas de vencimiento corto/mediano (0.05 a 0.25 años) y moneyness extrema. La hipótesis interpretativa es que XGBoost, al entrenarse primero en datos homogéneos y centrales (ATM), desarrolla un sesgo inicial hacia esa región. Cuando posteriormente observa datos extremos, su capacidad adaptativa (ya fijada en direcciones ATM) lucha por recalibrar, resultando en superficie menos flexible globalmente. Este efecto sugiere que el boosting secuencial es sensible al orden de entrada y puede sufrir de regularización excesiva en la primera fase.
+
+\item \textbf{Sequential NN (RMSE 0.1135 estándar $\to$ 0.0885 ATM).} La variante ATM produce un modelo mejor. La reducción en RMSE de -0.0250 (-22.03\%), manteniendo estable MAE, indica que el currículum de ATM efectivamente regulariza la red neuronal secuencial. El heatmap residual ATM es visiblemente más uniforme, sin concentraciones rojas en extremos como se observa en la versión estándar. La interpretación es directa: una red secuencial sin mecanismos de regularización explícita (dropout, batch-norm con configuración ATM) sufre de convergencia deficiente cuando enfrenta datos desordenados. El currículum ATM le permite aprender primero patrones estables en región de baja varianza, estableciendo pesos iniciales informados antes de adaptar a variabilidad creciente. Este hallazgo valida la hipótesis de motivación: arquitecturas iterativas sensibles pueden beneficiarse del currículum.
+
+\item \textbf{Quantum Inspired (RMSE 0.1430 estándar $\to$ 0.1174 ATM).} La variante ATM produce un modelo mejora substancial. La reducción en RMSE de -0.0256 (-17.90\%), junto con incremento dramático en $R^2$ de +0.1785 (pasando de 0.4528 a 0.6313, un aumento de 18 puntos porcentuales), revela que el modelo cuántico inspirado es altamente sensible al orden de entrenamiento. El heatmap ATM muestra reducción visible de concentración roja en extremos de moneyness y vencimiento. El modelo cuántico, basado en búsqueda variacional con inicialización aleatoria, es especialmente vulnerable a convergencia prematura en mínimos locales pobres. Entrenar primero en región ATM de bajo ruido permite al algoritmo establecer línea base de convergencia robusta, desde la cual la progresión hacia datos extremos se realiza de forma más estable. Este es el caso más dramático de regularización por currículum.
+
+\end{itemize}
+
+\textbf{Síntesis interpretativa del impacto ATM por arquitectura.} Los resultados revelan un patrón sistemático: la técnica Progressive ATM no produce un modelo mejor de forma universal, sino que su efectividad depende críticamente de la arquitectura subyacente.
+
+\begin{description}
+
+\item[Modelos ya óptimos (Random Forest, y en menor medida XGBoost base):] El currículum ATM no mejora; en XGBoost incluso resulta perjudicial. La razón es que estos modelos ya poseen mecanismos de regularización o agregación intrínsecos (bootstrap, boosting) que no se benefician de reordenamientos externos. Forzar un orden artificial puede introducir sesgo de inicialización que degrada capacidad global de la arquitectura, particularmente en modelos iterativos como boosting.
+
+\item[Modelos de baja capacidad o convergencia frágil (Sequential NN, Quantum Inspired):] El currículum ATM produce mejoras tangibles. Estos modelos carecen de regularización inherente y son sensibles a inicialización y orden de muestras. Entrenar primero en región ATM establece trayectoria de aprendizaje más robusta, evitando convergencia a mínimos pobres que es frecuente cuando se enfrentan datos heterogéneos desde el inicio.
+
+\item[Modelos lineales (Linear Regression):] El orden es irrelevante puesto que la hipótesis es global. No hay beneficio de regularización local.
+
+\end{description}
+
+\textbf{Implicación para la selección de modelo en producción.} Random Forest, bajo entrenamiento estándar (sin ATM), mantiene su posición como modelo seleccionado para la solución de producción. No solo logra las métricas más competitivas (RMSE 0.0884), sino que permanece robusto frente a variantes experimentales como ATM. Un modelo que no mejora con ATM es un indicador de que ya ha alcanzado un nivel de regularización apropiado: no es excesivamente sensible a ruidoen, y su capacidad de generalización es estable. Por el contrario, modelos que mejoran significativamente con ATM (Sequential NN, Quantum Inspired) sugieren que su arquitectura es intrínsecamente frágil y requeriría monitoreo cuidadoso en producción.
+
+\textbf{Conclusión sobre Progressive ATM.} La técnica debe considerarse una variante experimental de refinamiento, útil únicamente para arquitecturas específicas que sufren de convergencia deficiente o sensibilidad a orden de datos. No constituye una mejora universal del pipeline estándar, y en algunos casos (XGBoost, Linear Regression) resulta innecesaria o contraproducente. Su valor académico está en la validación de que modelos de baja capacidad intrínseca pueden beneficiarse de estrategias de currículum; su aplicación práctica debe limitarse a escenarios donde se identifique explícitamente convergencia frágil durante ajuste de hiperparámetros. Para la solución final presentada, el entrenamiento estándar (sin Progressive ATM) es preferible: es más simple, es reproducible, y produce el modelo más robusto.
+
 \subsection{Behaviour And Surface}
 \label{subsec:behaviour-results}
 
