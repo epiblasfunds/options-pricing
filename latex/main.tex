@@ -940,6 +940,8 @@ La Figura~\ref{fig:cloud-diagram-drawio} también deja explícita la separación
 
 La reproducibilidad se apoya en cuatro mecanismos: configuración de entrenamiento y datos, enums de esquemas, salidas persistidas y tests. La configuración define columnas, splits temporales, lag entre bloques, métricas de selección, progressive training y parámetros de generación de explicaciones (muestras SHAP, vecinos y superficies). Los enums centralizan nombres de columnas y tipos de dominio. Las salidas persistidas guardan modelo, scaler cuando aplica, metadatos y paquete de dashboard. Los tests cubren utilidades de datos, modelos, dashboard, API y configuración.
 
+Además, el desarrollo no se ha tratado como una secuencia aislada de notebooks, sino como un proyecto software versionado. El repositorio se ha trabajado en Git sobre GitHub, con ramas temáticas para funcionalidades y documentación, commits incrementales, sincronización remota mediante \texttt{pull}/\texttt{push} e integración posterior sobre ramas compartidas. Este marco permite discutir cada cambio con contexto técnico, aislar regresiones y mantener trazabilidad entre implementación, validación y versión desplegable. El \autoref{app:workflow-dev} recoge esta dimensión metodológica con más detalle.
+
 \textbf{Esa trazabilidad no es abstracta; está fijada en parámetros concretos.}
 
 \begin{itemize}
@@ -1007,6 +1009,8 @@ Paquete o carpeta & Responsabilidad principal \\
 La Tabla~\ref{tab:arquitectura-repo} muestra que el dashboard no reentrena modelos y la API no reconstruye explicaciones desde cero salvo en casos de explicabilidad local manual. Esta separación reduce el acoplamiento y facilita detectar errores. Si una predicción de API no coincide con la vista del dashboard, el problema puede acotarse a carga del paquete autocontenido, transformación de features o versión de modelo.
 
 Vista así, la arquitectura no es sólo una organización de carpetas. Es una forma de aislar responsabilidades, simplificar depuración y poder justificar cada paso del flujo de principio a fin.
+
+Desde esa misma lógica, la arquitectura se apoya en un flujo de trabajo de ingeniería más próximo al de un proyecto real que al de un experimento ad hoc: ramas de trabajo, commits trazables, validaciones antes de integrar y control explícito de cambios sobre código, configuración, documentación y despliegue.
 
 \section{Plan de validación funcional}
 \label{sec:validacion-funcional}
@@ -1396,6 +1400,19 @@ La Figura~\ref{fig:db-structure-details-1} muestra la fase de ingestión y conso
 \caption{\small Detalle estructural del ETL (III): filtros previos y construcción final de \texttt{VOLATILITY\_DB}.}
 \label{fig:db-structure-details-3}
 \end{figure}
+
+\chapter{Marco De Desarrollo Y Control De Cambios}
+\label{app:workflow-dev}
+
+Una parte relevante del valor metodológico del proyecto es que no se ha construido como un prototipo monolítico difícil de auditar, sino como un repositorio vivo gestionado con prácticas habituales de ingeniería. El trabajo se ha desarrollado sobre Git y GitHub, con ramas específicas para líneas funcionales distintas, integración progresiva y versionado explícito de código, configuración, documentación y artefactos asociados.
+
+Esta forma de trabajo aporta varias garantías prácticas. Primero, cada cambio queda ligado a un conjunto acotado de commits, lo que permite reconstruir por qué se modificó una validación, una ruta de datos, una configuración de entrenamiento o una pieza del dashboard. Segundo, la separación por ramas reduce el riesgo de mezclar cambios heterogéneos en una misma entrega: ETL, explainability, modelos, API, cloud o documentación pueden evolucionar de forma controlada antes de integrarse. Tercero, la sincronización con remoto y la integración posterior facilitan un flujo compatible con revisión mediante \emph{pull requests}, incluso cuando parte del trabajo se haya hecho en iteraciones rápidas de investigación aplicada.
+
+En este contexto, \texttt{commit}, \texttt{pull} y \texttt{push} no son sólo operaciones operativas. Funcionan como mecanismo de trazabilidad metodológica. Un resultado experimental pasa a ser defendible no únicamente porque produzca una métrica, sino porque puede asociarse a una versión concreta del pipeline, de la configuración y de los tests que la acompañan. Esto es especialmente importante en un proyecto que combina datos financieros, entrenamiento temporal, explicabilidad, dashboard, API e infraestructura cloud, ya que pequeños cambios en una parte pueden alterar silenciosamente el comportamiento de otra.
+
+Los tests y validaciones automatizadas refuerzan ese marco. El repositorio mantiene una batería de pruebas distribuida por dominios (datos, modelos, dashboard, API, configuración y utilidades) y se complementa con validaciones manuales guiadas sobre artefactos desplegables. En la práctica, esto aproxima el TFM al ciclo de vida de un proyecto real: desarrollar una mejora en una rama, verificar contratos y coherencia funcional, integrar el cambio y conservar una historia versionada que permita depuración, rollback conceptual y defensa técnica.
+
+Por tanto, el uso de Git y de un flujo de integración disciplinado no es un detalle accesorio de implementación. Forma parte de la metodología del trabajo: asegura reproducibilidad, facilita control de cambios, reduce regresiones y hace que el sistema final pueda justificarse no sólo por lo que predice, sino por cómo se ha construido, validado e integrado.
 
 \chapter{Fundamentos de SHAP}
 \label{app:shap}
