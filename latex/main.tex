@@ -1184,7 +1184,34 @@ Con ello, la elección deja de ser una simple foto de leaderboard. El Random For
 
 El diagnóstico debe interpretarse a partir del test. La desviación estándar de la volatilidad real es 0.193345 y la de las predicciones de Random Forest es 0.149458. Esta diferencia indica compresión parcial de la variabilidad: el modelo captura la estructura general, pero tiende a suavizar extremos. La desviación estándar residual es 0.085859, coherente con un RMSE de 0.088403.
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Xgboost.png}
+\end{minipage}
+\caption{\small Comparativa de la pestaña \emph{Diagnosis} en los dos finalistas: Random Forest (modelo seleccionado) y XGBoost.}
+\label{fig:dash-diagnosis-comparison}
+\end{figure}
+
 Las vistas del dashboard son necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
+
+La Figura~\ref{fig:dash-diagnosis-comparison} confirma lo anterior y permite además una lectura transversal de todas las capturas de diagnóstico: Random Forest y XGBoost concentran los mejores indicadores (
+RMSE\(
+0.0884
+\) y \(
+0.0917
+\), respectivamente), mientras que Sequential NN (
+\(0.1135\)
+), Quantum Inspired (
+\(0.1430\)
+) y, sobre todo, la regresión lineal (
+\(0.1838\)
+) muestran mayor pérdida de ajuste global. En paralelo, los \emph{Financial Warnings} son informativos: la regresión lineal no dispara alertas de discontinuidad local, pero lo hace a costa de mayor error agregado; en cambio, los modelos más expresivos mejoran ajuste pero pueden introducir saltos locales en smile o term-structure, especialmente en muestras no centrales.
 
 \textbf{En la práctica, el diagnóstico debe responder tres preguntas consecutivas.}
 
@@ -1201,7 +1228,23 @@ Este nivel de detalle es necesario porque dos modelos con RMSE parecido pueden i
 
 El modelo final debe leerse como función financiera, no solo como tabla de errores. Las superficies generadas alrededor de puntos de referencia del test permiten inspeccionar \(\hat{\sigma}(m,T)\), smiles y estructuras temporales. Dado que Random Forest es un modelo por particiones, la revisión visual debe prestar especial atención a escalones locales: un bosque puede aproximar bien puntos observados y aun así producir transiciones menos suaves que un modelo paramétrico.
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]{../imgs/dashboard/Behaviour And Surface - Random Forest I.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.27\textheight,keepaspectratio]{../imgs/dashboard/Behaviour And Surface - Xgboost I.png}
+\end{minipage}
+\caption{\small Contraste de \emph{Behaviour And Surface} para la misma muestra (ID 1406): Random Forest frente a XGBoost.}
+\label{fig:dash-behaviour-best-models-id1406}
+\end{figure}
+
 La lectura recomendada es usar al menos tres puntos de referencia: una observación ATM líquida, una observación en extremos de moneyness y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
+
+La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que Random Forest y XGBoost conservan una geometría muy próxima en la muestra comparada, lo que sugiere estabilidad funcional en lo visualizado en el dashboard, sin implicar por sí solo que el patrón deba repetirse en cualquier trade. En ambos aparecen avisos heurísticos de saltos locales, coherentes con arquitecturas de árboles, pero las curvas smile y term-structure mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fija). Al contrastar con Linear Regression en el resto de lo visualizado en dashboard, se observa un patrón compatible con mayor suavidad formal y menor capacidad para capturar variación efectiva fuera de la zona central.
 
 \textbf{Una secuencia de lectura útil en esta pestaña es la siguiente:}
 
@@ -1219,7 +1262,23 @@ Este orden es importante porque evita interpretar una gráfica aislada fuera de 
 
 La explicación global debe comprobar que los drivers principales son coherentes con la geometría de volatilidad: moneyness, vencimiento, subyacente, strike, tipo y tipo de opción. SHAP se calcula sobre variables raw visibles y el runtime reconstruye las features transformadas, por lo que una contribución de \texttt{StrikePrice} o \texttt{UnderlyingPrice} debe interpretarse en relación con moneyness y no como efecto causal aislado.
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Global Explainability - Random Forest I.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Global Explainability - Xgboost I.png}
+\end{minipage}
+\caption{\small SHAP global comparado en los dos modelos con mejor rendimiento fuera de muestra: Random Forest y XGBoost.}
+\label{fig:dash-global-shap-comparison}
+\end{figure}
+
 La lectura correcta combina ranking, signo local y dependence plots. Si una variable domina el ranking pero tiene colores mezclados o contribuciones con mucha dispersión, el modelo está usando interacciones. Esa conclusión es razonable en opciones, porque strike, subyacente y vencimiento no son independientes. Si aparecen saltos en dependence plots, deben contrastarse con las superficies y con diagnóstico por zonas de la superficie.
+
+En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la jerarquía global aparece estable: \texttt{Time To Expiration (days)} como driver principal y \texttt{Strike Price} como segundo, seguidas por \texttt{Underlying Price}; \texttt{Rate} y \texttt{Option Type} tienen peso menor. La Figura~\ref{fig:dash-global-shap-comparison} hace visible esta regularidad, que coincide con la lectura financiera esperada de superficie. El punto importante es que la consistencia entre modelos se observa en el orden de importancia, no necesariamente en la magnitud de impacto: Quantum Inspired y Sequential NN muestran dispersión SHAP más amplia para algunos rangos, coherente con su mayor sensibilidad local en otras pestañas.
 
 \textbf{Para que la lectura global sea sólida, conviene exigir tres coherencias a la vez.}
 
@@ -1233,6 +1292,38 @@ Si una variable parece importante pero esa importancia no se refleja ni en las s
 
 \subsection{Modelos equivalentes: árboles y regresión simbólica}
 \label{subsec:equivalent-results}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.25\textheight,keepaspectratio]{../imgs/dashboard/Global Explainability - Random Forest III.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.25\textheight,keepaspectratio]{../imgs/dashboard/Global Explainability - Xgboost III.png}
+\end{minipage}
+\caption{\small Contraste de árboles surrogate por profundidad en Random Forest y XGBoost.}
+\label{fig:dash-tree-depth-rf-vs-xgb}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Modelo & RMSE simbólico & MAE simbólico & \(R^2\) simbólico \\
+\midrule
+Regresión lineal & 0.0244 & 0.0135 & 0.7585 \\
+Quantum Inspired NN & inf & inf & inf \\
+Random Forest & 339.9547 & 3.5845 & -5,173,729.5872 \\
+Sequential NN & 0.0376 & 0.0316 & 0.8890 \\
+XGBoost & 0.0378 & 0.0219 & 0.9264 \\
+\bottomrule
+\end{tabular}
+\caption{Fidelidad de regresión simbólica reportada en dashboard por familia de modelo.}
+\label{tab:symbolic-fidelity-all-models}
+\end{table}
 
 Los modelos equivalentes explican el predictor, no la verdad de mercado. Para Random Forest, las métricas de fidelidad de árboles surrogate son:
 
@@ -1255,6 +1346,8 @@ Profundidad & RMSE fidelidad & MAE fidelidad & \(R^2\) fidelidad \\
 
 La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del bosque. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica generada para este paquete muestra métricas no utilizables para defensa del Random Forest, con RMSE de fidelidad extremadamente alto; por tanto, la memoria debe apoyarse en SHAP, ICE/ALE, superficies y vecinos para explicar el modelo final. La conclusión no debe forzarse: el predictor es bueno, pero no se resume bien en una fórmula compacta en esta ejecución.
 
+La Figura~\ref{fig:dash-tree-depth-rf-vs-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permite una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test. El mejor modelo por error de mercado (Random Forest) es precisamente uno de los menos compresibles simbólicamente en esta ejecución, mientras que XGBoost y Sequential NN admiten surrogates simbólicos más fieles.
+
 \textbf{La lectura correcta de estos modelos equivalentes es prudente.}
 
 \begin{itemize}
@@ -1268,7 +1361,37 @@ La fidelidad de los árboles es limitada: ni siquiera profundidades altas reprod
 
 El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones.
 
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{../imgs/dashboard/Sample Explainability - Random Forest I.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{../imgs/dashboard/Sample Explainability - Xgboost I.png}
+\end{minipage}
+\caption{\small Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 465): comparación Random Forest vs XGBoost.}
+\label{fig:dash-local-dataset-rf-xgb}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{../imgs/dashboard/Sample Explainability - Random Forest III.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{../imgs/dashboard/Sample Explainability - Xgboost III.png}
+\end{minipage}
+\caption{\small Explicabilidad local en modo \emph{manual input} (stress corto vencimiento): contraste de coherencia local y soporte histórico en ambos finalistas.}
+\label{fig:dash-local-manual-rf-xgb}
+\end{figure}
+
 La interpretación profesional debe combinar ambas piezas. Si una muestra tiene waterfall coherente y vecinos cercanos con volatilidades similares, la explicación es sólida. Si el waterfall parece razonable pero los vecinos están lejos, el modelo puede estar extrapolando; en ese caso, la predicción debe revisarse con diagnóstico por zonas de la superficie y superficie local.
+
+El contraste entre Figuras~\ref{fig:dash-local-dataset-rf-xgb} y~\ref{fig:dash-local-manual-rf-xgb} muestra una coherencia especialmente relevante para defensa técnica. En la muestra real (ID 465), Random Forest y XGBoost predicen prácticamente el mismo nivel (\(\sim 0.233\) y \(\sim 0.231\)), con waterfall de signo consistente: \texttt{Time To Expiration} aporta caída y \texttt{Underlying Price} compensa parcialmente al alza, en línea con su papel dominante en SHAP global. En el caso manual de vencimiento corto, ambos modelos reducen volatilidad prevista respecto al valor base y, al mismo tiempo, los vecinos aparecen a distancia alta (\(\sim 0.85\)), señalando un escenario de menor soporte histórico. Esta combinación (coherencia de mecanismo + menor densidad local) justifica usar la explicación local como guía de prudencia, no como validación automática de calidad de mercado.
 
 \textbf{Como regla práctica, una explicación local es más defendible cuando se cumplen tres condiciones.}
 
@@ -1279,6 +1402,43 @@ La interpretación profesional debe combinar ambas piezas. Si una muestra tiene 
 \end{itemize}
 
 Cuando falla alguna de esas tres condiciones, la lectura debe cambiar: la explicación sigue diciendo cómo razona el modelo, pero deja de ser una justificación sólida de que la predicción sea fiable en términos de mercado.
+
+\subsection{Síntesis comparativa por temática}
+\label{subsec:sintesis-tematica-modelos}
+
+Para cerrar la lectura de dashboard con una vista única y defendible, la Tabla~\ref{tab:sintesis-tematica-modelos} resume las conclusiones cualitativas por temática (filas) y por familia de modelo (columnas). Esta síntesis se apoya en las capturas de diagnóstico, comportamiento, explicabilidad global/local y modelos equivalentes revisadas en esta sección.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{p{0.24\textwidth}p{0.14\textwidth}p{0.14\textwidth}p{0.14\textwidth}p{0.14\textwidth}p{0.14\textwidth}}
+\toprule
+Temática & Reg. lineal & Random Forest & XGBoost & Sequential NN & Quantum Inspired \\
+\midrule
+Driver SHAP dominante & TTE (muy dominante) & TTE (estable) & TTE (estable) & TTE (estable) & TTE (estable) \\
+
+Segundo driver global & Strike (alto) & Strike (alto) & Strike (alto) & Strike (medio) & Strike (medio) \\
+
+Rendimiento diagnóstico test & Bajo & Alto (mejor) & Alto (2º) & Medio-bajo & Bajo \\
+
+Suavidad de superficie local & Alta (simple) & Media (escalones locales) & Media (escalones locales) & Media-baja & Media-baja \\
+
+Patrón smile/skew en ICE-ALE & Visible, menos rico & Visible y consistente & Visible y consistente & Visible, más inestable & Visible, más inestable \\
+
+Coherencia Global \textrightarrow{} Sample & Media & Alta & Alta & Media & Media \\
+
+Soporte histórico en casos manuales exigentes & N/A en muestra principal & Distancia alta en estrés corto T & Distancia alta en estrés corto T & N/A en muestra principal & N/A en muestra principal \\
+
+Compresibilidad en modelo equivalente (simbólico/árbol) & Alta (simple) & Muy baja (no compactable) & Media-alta & Media-alta & Muy baja/No utilizable \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Síntesis de conclusiones por temática y por familia de modelo a partir de lo visualizado en el dashboard. TTE: \texttt{Time To Expiration}.}
+\label{tab:sintesis-tematica-modelos}
+\end{table}
+
+Esta síntesis permite sostener dos mensajes, con alcance observacional sobre lo visualizado en el dashboard. Primero, la estructura explicativa principal aparece consistente entre familias: el vencimiento domina y el strike ocupa una posición secundaria relevante, coherente con la geometría de superficie. Segundo, las diferencias clave entre modelos no están tanto en qué variables miran, sino en cómo transforman esa información en estabilidad local, error por zonas y facilidad de explicación compacta. Para afirmar universalidad sobre todos los trades sería necesario un contraste estadístico adicional fuera de las muestras visualizadas.
 
 \section{Discusión}
 \label{sec:discusion}
