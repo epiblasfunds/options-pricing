@@ -41,19 +41,25 @@
 \contentsline {subsection}{\numberline {4.1.7}Modelos equivalentes: árboles y regresión simbólica}{54}{subsection.4.1.7}%
 \contentsline {subsection}{\numberline {4.1.8}Explicabilidad local y soporte histórico}{56}{subsection.4.1.8}%
 \contentsline {subsection}{\numberline {4.1.9}Síntesis comparativa por temática}{57}{subsection.4.1.9}%
-\contentsline {section}{\numberline {4.2}Discusión}{59}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Lectura financiera}{59}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Lectura de IA y Data Science}{60}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Lectura de ingeniería y cloud}{61}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Limitaciones}{61}{subsection.4.2.4}%
-\contentsline {chapter}{\numberline {5}\spacedlowsmallcaps {Conclusiones}}{62}{chapter.5}%
+\contentsline {section}{\numberline {4.2}Aplicaciones operativas y validación independiente}{59}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Validación independiente de modelos internos}{59}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Interpolación y suavizado: alcance real del enfoque}{59}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Detección de anomalías de precio y errores de mercado}{60}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Valoración de ilíquidas, control de mesa, auditoría y cobertura}{60}{subsection.4.2.4}%
+\contentsline {section}{\numberline {4.3}Discusión}{61}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Lectura financiera}{61}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Lectura de IA y Data Science}{62}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Lectura de ingeniería y cloud}{63}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Limitaciones}{63}{subsection.4.3.4}%
+\contentsline {chapter}{\numberline {5}\spacedlowsmallcaps {Conclusiones}}{64}{chapter.5}%
 \def \@chapapp {\appendixname }
-\contentsline {chapter}{\numberline {A}\spacedlowsmallcaps {Esquema Detallado De Datos Y ETL}}{64}{chapter.A}%
-\contentsline {chapter}{\numberline {B}\spacedlowsmallcaps {Marco De Desarrollo Y Control De Cambios}}{68}{chapter.B}%
-\contentsline {chapter}{\numberline {C}\spacedlowsmallcaps {Fundamentos de SHAP}}{70}{chapter.C}%
-\contentsline {chapter}{\numberline {D}\spacedlowsmallcaps {Curvas ICE}}{74}{chapter.D}%
-\contentsline {chapter}{\numberline {E}\spacedlowsmallcaps {Curvas ALE}}{76}{chapter.E}%
-\contentsline {chapter}{\numberline {F}\spacedlowsmallcaps {Modelo Quantum Inspired}}{79}{chapter.F}%
-\contentsline {chapter}{\numberline {G}\spacedlowsmallcaps {Árboles surrogate y regresión simbólica}}{82}{chapter.G}%
-\contentsline {chapter}{\numberline {H}\spacedlowsmallcaps {Entrenamiento progressive ATM}}{87}{chapter.H}%
+\contentsline {chapter}{\numberline {A}\spacedlowsmallcaps {Esquema Detallado De Datos Y ETL}}{66}{chapter.A}%
+\contentsline {chapter}{\numberline {B}\spacedlowsmallcaps {Marco De Desarrollo Y Control De Cambios}}{70}{chapter.B}%
+\contentsline {chapter}{\numberline {C}\spacedlowsmallcaps {Fundamentos de SHAP}}{72}{chapter.C}%
+\contentsline {chapter}{\numberline {D}\spacedlowsmallcaps {Curvas ICE}}{76}{chapter.D}%
+\contentsline {chapter}{\numberline {E}\spacedlowsmallcaps {Curvas ALE}}{78}{chapter.E}%
+\contentsline {chapter}{\numberline {F}\spacedlowsmallcaps {Modelo Quantum Inspired}}{81}{chapter.F}%
+\contentsline {chapter}{\numberline {G}\spacedlowsmallcaps {Árboles surrogate y regresión simbólica}}{84}{chapter.G}%
+\contentsline {chapter}{\numberline {H}\spacedlowsmallcaps {Entrenamiento progressive ATM}}{89}{chapter.H}%
+\contentsline {chapter}{\numberline {I}\spacedlowsmallcaps {Análisis de sensibilidad por moneyness y vencimiento}}{91}{chapter.I}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

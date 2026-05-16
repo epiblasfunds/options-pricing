@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  16 MAY 2026 18:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.10)  16 MAY 2026 19:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1937,476 +1937,476 @@ Package microtype Info: Character `029' is missing
 [6
 
 ]
-LaTeX Info: Redefining \. on input line 139.
-LaTeX Info: Redefining \% on input line 139.
+LaTeX Info: Redefining \. on input line 140.
+LaTeX Info: Redefining \% on input line 140.
  [7]
-LaTeX Info: Redefining \. on input line 162.
-LaTeX Info: Redefining \% on input line 162.
+LaTeX Info: Redefining \. on input line 164.
+LaTeX Info: Redefining \% on input line 164.
  [8]
-<../doc/mermaid-pdf/index/01.pdf, id=190, 602.25pt x 70.3428pt>
+<../doc/mermaid-pdf/index/01.pdf, id=205, 602.25pt x 70.3428pt>
 File: ../doc/mermaid-pdf/index/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/index/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/index/01.pdf  used on input line 17
-7.
+9.
 (pdftex.def)             Requested size: 452.98212pt x 52.9083pt.
-LaTeX Info: Redefining \. on input line 181.
-LaTeX Info: Redefining \% on input line 181.
+LaTeX Info: Redefining \. on input line 183.
+LaTeX Info: Redefining \% on input line 183.
  [9 <../doc/mermaid-pdf/index/01.pdf>]
-LaTeX Info: Redefining \. on input line 209.
-LaTeX Info: Redefining \% on input line 209.
+LaTeX Info: Redefining \. on input line 211.
+LaTeX Info: Redefining \% on input line 211.
  [10]
-LaTeX Info: Redefining \. on input line 220.
-LaTeX Info: Redefining \% on input line 220.
+LaTeX Info: Redefining \. on input line 222.
+LaTeX Info: Redefining \% on input line 222.
  [11]
 chapter 2.
 [12
 
 ]
-LaTeX Info: Redefining \. on input line 299.
-LaTeX Info: Redefining \% on input line 299.
+LaTeX Info: Redefining \. on input line 301.
+LaTeX Info: Redefining \% on input line 301.
  [13]
-LaTeX Info: Redefining \. on input line 335.
-LaTeX Info: Redefining \% on input line 335.
+LaTeX Info: Redefining \. on input line 337.
+LaTeX Info: Redefining \% on input line 337.
  [14]
-LaTeX Info: Redefining \. on input line 363.
-LaTeX Info: Redefining \% on input line 363.
+LaTeX Info: Redefining \. on input line 365.
+LaTeX Info: Redefining \% on input line 365.
  [15]
-LaTeX Info: Redefining \. on input line 391.
-LaTeX Info: Redefining \% on input line 391.
+LaTeX Info: Redefining \. on input line 393.
+LaTeX Info: Redefining \% on input line 393.
  [16]
-LaTeX Info: Redefining \. on input line 423.
-LaTeX Info: Redefining \% on input line 423.
+LaTeX Info: Redefining \. on input line 425.
+LaTeX Info: Redefining \% on input line 425.
  [17]
-LaTeX Info: Redefining \. on input line 447.
-LaTeX Info: Redefining \% on input line 447.
+LaTeX Info: Redefining \. on input line 449.
+LaTeX Info: Redefining \% on input line 449.
  [18]
-LaTeX Info: Redefining \. on input line 453.
-LaTeX Info: Redefining \% on input line 453.
+LaTeX Info: Redefining \. on input line 455.
+LaTeX Info: Redefining \% on input line 455.
  [19]
 chapter 3.
 [20
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+fvm on input line 50
-5.
+7.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/bera/t1fvm.fd
 File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 10.20007pt on input line 505.
+(Font)              scaled to size 10.20007pt on input line 507.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `fvm' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Underfull \hbox (badness 6428) in paragraph at lines 509--511
+Underfull \hbox (badness 6428) in paragraph at lines 511--513
 \T1/pplj/m/n/12 ra \TS1/pplj/m/n/12 ¿\T1/pplj/m/n/12 STR: [][]$\T1/fvm/m/n/12 h
 ttps : / / www . ecb . europa . eu / stats / euro-[]short-[]term-[]rates / inte
 rest _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--511
+Underfull \hbox (badness 10000) in paragraph at lines 511--513
 \T1/fvm/m/n/12 rate _ benchmarks / WG _ euro _ risk-[]free _ rates / shared / p
 df / ecb . Compounded _ euro _
  []
 
-<../imgs/loaders_builders_schema.drawio.png, id=306, 476.78125pt x 672.5125pt>
+<../imgs/loaders_builders_schema.drawio.png, id=321, 476.78125pt x 672.5125pt>
 File: ../imgs/loaders_builders_schema.drawio.png Graphic file (type png)
 <use ../imgs/loaders_builders_schema.drawio.png>
 Package pdftex.def Info: ../imgs/loaders_builders_schema.drawio.png  used on in
-put line 518.
+put line 520.
 (pdftex.def)             Requested size: 169.56044pt x 239.16946pt.
-LaTeX Info: Redefining \. on input line 521.
-LaTeX Info: Redefining \% on input line 521.
+LaTeX Info: Redefining \. on input line 523.
+LaTeX Info: Redefining \% on input line 523.
 [21]
-<../doc/mermaid-pdf/index/02.pdf, id=318, 186.6975pt x 594.30032pt>
+<../doc/mermaid-pdf/index/02.pdf, id=333, 186.6975pt x 594.30032pt>
 File: ../doc/mermaid-pdf/index/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/index/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/index/02.pdf  used on input line 52
-5.
+7.
 (pdftex.def)             Requested size: 108.53246pt x 345.48337pt.
-<../doc/mermaid-pdf/data/index/01.pdf, id=319, 602.25pt x 895.42526pt>
+<../doc/mermaid-pdf/data/index/01.pdf, id=334, 602.25pt x 895.42526pt>
 File: ../doc/mermaid-pdf/data/index/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/index/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/index/01.pdf  used on input li
-ne 530.
+ne 532.
 (pdftex.def)             Requested size: 178.73738pt x 265.74673pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/data/raw-read/01.pdf, id=320, 602.25pt x 310.27919pt>
+<../doc/mermaid-pdf/data/raw-read/01.pdf, id=335, 602.25pt x 310.27919pt>
 File: ../doc/mermaid-pdf/data/raw-read/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/raw-read/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/raw-read/01.pdf  used on input
- line 540.
+ line 542.
 (pdftex.def)             Requested size: 217.42552pt x 112.01762pt.
-<../doc/mermaid-pdf/data/raw-read/02.pdf, id=321, 575.2692pt x 322.32419pt>
+<../doc/mermaid-pdf/data/raw-read/02.pdf, id=336, 575.2692pt x 322.32419pt>
 File: ../doc/mermaid-pdf/data/raw-read/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/raw-read/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/raw-read/02.pdf  used on input
- line 547.
+ line 549.
 (pdftex.def)             Requested size: 217.41954pt x 121.8205pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/data/merge-raw/01.pdf, id=326, 378.45387pt x 692.5875pt>
+<../doc/mermaid-pdf/data/merge-raw/01.pdf, id=341, 378.45387pt x 692.5875pt>
 File: ../doc/mermaid-pdf/data/merge-raw/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/merge-raw/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/merge-raw/01.pdf  used on inpu
-t line 561.
+t line 563.
 (pdftex.def)             Requested size: 127.06146pt x 232.52815pt.
-<../doc/mermaid-pdf/data/merge-raw/02.pdf, id=327, 602.25pt x 186.6975pt>
+<../doc/mermaid-pdf/data/merge-raw/02.pdf, id=342, 602.25pt x 186.6975pt>
 File: ../doc/mermaid-pdf/data/merge-raw/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/merge-raw/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/merge-raw/02.pdf  used on inpu
-t line 568.
+t line 570.
 (pdftex.def)             Requested size: 217.42552pt x 67.4019pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 575.
-LaTeX Info: Redefining \% on input line 575.
+LaTeX Info: Redefining \. on input line 577.
+LaTeX Info: Redefining \% on input line 577.
 [22 <../imgs/loaders_builders_schema.drawio.png>]
-LaTeX Info: Redefining \. on input line 575.
-LaTeX Info: Redefining \% on input line 575.
+LaTeX Info: Redefining \. on input line 577.
+LaTeX Info: Redefining \% on input line 577.
  [23 <../doc/mermaid-pdf/index/02.pdf>]
-<../doc/mermaid-pdf/data/product-split/01.pdf, id=354, 349.305pt x 620.3175pt>
+<../doc/mermaid-pdf/data/product-split/01.pdf, id=369, 349.305pt x 620.3175pt>
 File: ../doc/mermaid-pdf/data/product-split/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/product-split/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/product-split/01.pdf  used on 
-input line 586.
+input line 588.
 (pdftex.def)             Requested size: 130.94107pt x 232.53331pt.
 
-Underfull \hbox (badness 2158) in paragraph at lines 587--587
+Underfull \hbox (badness 2158) in paragraph at lines 589--589
 [][]|\T1/pplj/m/n/10.95 Se-pa-ra-cion de ope-ra-cio-nes por
  []
 
-<../doc/mermaid-pdf/data/product-split/02.pdf, id=355, 593.3367pt x 228.855pt>
+<../doc/mermaid-pdf/data/product-split/02.pdf, id=370, 593.3367pt x 228.855pt>
 File: ../doc/mermaid-pdf/data/product-split/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/product-split/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/product-split/02.pdf  used on 
-input line 593.
+input line 595.
 (pdftex.def)             Requested size: 217.42166pt x 83.86137pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/data/underlying/01.pdf, id=356, 602.25pt x 126.4725pt>
+<../doc/mermaid-pdf/data/underlying/01.pdf, id=371, 602.25pt x 126.4725pt>
 File: ../doc/mermaid-pdf/data/underlying/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/underlying/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/underlying/01.pdf  used on inp
-ut line 601.
+ut line 603.
 (pdftex.def)             Requested size: 416.74759pt x 87.51698pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/data/underlying/02.pdf, id=357, 382.5492pt x 863.14468pt>
+<../doc/mermaid-pdf/data/underlying/02.pdf, id=372, 382.5492pt x 863.14468pt>
 File: ../doc/mermaid-pdf/data/underlying/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/underlying/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/underlying/02.pdf  used on inp
-ut line 609.
+ut line 611.
 (pdftex.def)             Requested size: 100.10837pt x 225.87425pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/data/volatility/01.pdf, id=358, 387.36719pt x 831.105pt>
+<../doc/mermaid-pdf/data/volatility/01.pdf, id=373, 387.36719pt x 831.105pt>
 File: ../doc/mermaid-pdf/data/volatility/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/volatility/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/volatility/01.pdf  used on inp
-ut line 618.
+ut line 620.
 (pdftex.def)             Requested size: 108.37932pt x 232.53026pt.
-<../doc/mermaid-pdf/data/volatility/02.pdf, id=359, 602.25pt x 173.68889pt>
+<../doc/mermaid-pdf/data/volatility/02.pdf, id=374, 602.25pt x 173.68889pt>
 File: ../doc/mermaid-pdf/data/volatility/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/volatility/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/volatility/02.pdf  used on inp
-ut line 625.
+ut line 627.
 (pdftex.def)             Requested size: 217.42552pt x 62.7055pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 635.
-LaTeX Info: Redefining \% on input line 635.
+LaTeX Info: Redefining \. on input line 637.
+LaTeX Info: Redefining \% on input line 637.
 [24 <../doc/mermaid-pdf/data/index/01.pdf>]
-LaTeX Info: Redefining \. on input line 639.
-LaTeX Info: Redefining \% on input line 639.
+LaTeX Info: Redefining \. on input line 641.
+LaTeX Info: Redefining \% on input line 641.
  [25 <../doc/mermaid-pdf/data/raw-read/01.pdf> <../doc/mermaid-pdf/data/raw-rea
 d/02.pdf> <../doc/mermaid-pdf/data/merge-raw/01.pdf> <../doc/mermaid-pdf/data/m
 erge-raw/02.pdf>]
-<../doc/mermaid-pdf/data/index/02.pdf, id=420, 602.25pt x 107.4414pt>
+<../doc/mermaid-pdf/data/index/02.pdf, id=435, 602.25pt x 107.4414pt>
 File: ../doc/mermaid-pdf/data/index/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/data/index/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/data/index/02.pdf  used on input li
-ne 642.
+ne 644.
 (pdftex.def)             Requested size: 385.04352pt x 68.69176pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 2671) in paragraph at lines 650--651
+Underfull \hbox (badness 2671) in paragraph at lines 652--653
 []\T1/pplj/m/n/12 Las en-tra-das raw vi-si-bles son \T1/fvm/m/n/12 OptionType\T
 1/pplj/m/n/12 , \T1/fvm/m/n/12 StrikePrice\T1/pplj/m/n/12 , \T1/fvm/m/n/12 Unde
 rlyingPrice\T1/pplj/m/n/12 ,
  []
 
-LaTeX Info: Redefining \. on input line 653.
-LaTeX Info: Redefining \% on input line 653.
+LaTeX Info: Redefining \. on input line 655.
+LaTeX Info: Redefining \% on input line 655.
 [26 <../doc/mermaid-pdf/data/product-split/01.pdf> <../doc/mermaid-pdf/data/pro
 duct-split/02.pdf> <../doc/mermaid-pdf/data/underlying/01.pdf>]
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.30756pt on input line 663.
-<../doc/mermaid-pdf/models/features/01.pdf, id=457, 602.25pt x 210.7875pt>
+(Font)              scaled to size 9.30756pt on input line 665.
+<../doc/mermaid-pdf/models/features/01.pdf, id=472, 602.25pt x 210.7875pt>
 File: ../doc/mermaid-pdf/models/features/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/features/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/features/01.pdf  used on inp
-ut line 679.
+ut line 681.
 (pdftex.def)             Requested size: 217.42552pt x 76.09894pt.
-<../doc/mermaid-pdf/models/features/02.pdf, id=458, 602.25pt x 346.4142pt>
+<../doc/mermaid-pdf/models/features/02.pdf, id=473, 602.25pt x 346.4142pt>
 File: ../doc/mermaid-pdf/models/features/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/features/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/features/02.pdf  used on inp
-ut line 679.
+ut line 681.
 (pdftex.def)             Requested size: 217.42552pt x 125.06316pt.
-LaTeX Info: Redefining \. on input line 679.
-LaTeX Info: Redefining \% on input line 679.
+LaTeX Info: Redefining \. on input line 681.
+LaTeX Info: Redefining \% on input line 681.
  [27 <../doc/mermaid-pdf/data/underlying/02.pdf>]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 1454) in paragraph at lines 696--696
+Underfull \hbox (badness 1454) in paragraph at lines 698--698
 []|\T1/pplj/m/n/10.95 Red neu-ro-nal se-cuen-
  []
 
-LaTeX Info: Redefining \. on input line 706.
-LaTeX Info: Redefining \% on input line 706.
+LaTeX Info: Redefining \. on input line 708.
+LaTeX Info: Redefining \% on input line 708.
 [28 <../doc/mermaid-pdf/data/volatility/01.pdf> <../doc/mermaid-pdf/data/volati
 lity/02.pdf> <../doc/mermaid-pdf/data/index/02.pdf>]
-LaTeX Info: Redefining \. on input line 716.
-LaTeX Info: Redefining \% on input line 716.
+LaTeX Info: Redefining \. on input line 718.
+LaTeX Info: Redefining \% on input line 718.
  [29 <../doc/mermaid-pdf/models/features/01.pdf> <../doc/mermaid-pdf/models/fea
 tures/02.pdf>]
-<../doc/mermaid-pdf/models/families/01.pdf, id=531, 602.25pt x 321.11969pt>
+<../doc/mermaid-pdf/models/families/01.pdf, id=546, 602.25pt x 321.11969pt>
 File: ../doc/mermaid-pdf/models/families/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/families/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/families/01.pdf  used on inp
-ut line 717.
+ut line 719.
 (pdftex.def)             Requested size: 217.42552pt x 115.93129pt.
-<../doc/mermaid-pdf/models/families/02.pdf, id=532, 219.70079pt x 691.62387pt>
+<../doc/mermaid-pdf/models/families/02.pdf, id=547, 219.70079pt x 691.62387pt>
 File: ../doc/mermaid-pdf/models/families/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/families/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/families/02.pdf  used on inp
-ut line 717.
+ut line 719.
 (pdftex.def)             Requested size: 73.86589pt x 232.53178pt.
-<../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf, id=533, 602.25pt x
+<../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf, id=548, 602.25pt x
  35.1714pt>
 File: ../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf Graphic file (
 type pdf)
 <use ../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/families/quantum-inspired/01
-.pdf  used on input line 722.
+.pdf  used on input line 724.
 (pdftex.def)             Requested size: 362.3912pt x 21.16364pt.
-<../doc/mermaid-pdf/models/index/01.pdf, id=539, 219.70079pt x 860.25388pt>
+<../doc/mermaid-pdf/models/index/01.pdf, id=554, 219.70079pt x 860.25388pt>
 File: ../doc/mermaid-pdf/models/index/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/index/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/index/01.pdf  used on input 
-line 738.
+line 740.
 (pdftex.def)             Requested size: 59.38704pt x 232.53418pt.
-<../doc/mermaid-pdf/models/index/02.pdf, id=540, 602.25pt x 111.29579pt>
+<../doc/mermaid-pdf/models/index/02.pdf, id=555, 602.25pt x 111.29579pt>
 File: ../doc/mermaid-pdf/models/index/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/index/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/index/02.pdf  used on input 
-line 745.
+line 747.
 (pdftex.def)             Requested size: 217.42552pt x 40.18022pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/models/splits-kfolds/01.pdf, id=541, 602.25pt x 159.71669pt
+<../doc/mermaid-pdf/models/splits-kfolds/01.pdf, id=556, 602.25pt x 159.71669pt
 >
 File: ../doc/mermaid-pdf/models/splits-kfolds/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/splits-kfolds/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/01.pdf  used o
-n input line 751.
+n input line 753.
 (pdftex.def)             Requested size: 217.42552pt x 57.66124pt.
-<../doc/mermaid-pdf/models/splits-kfolds/02.pdf, id=542, 393.38968pt x 715.7138
+<../doc/mermaid-pdf/models/splits-kfolds/02.pdf, id=557, 393.38968pt x 715.7138
 8pt>
 File: ../doc/mermaid-pdf/models/splits-kfolds/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/splits-kfolds/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/02.pdf  used o
-n input line 751.
+n input line 753.
 (pdftex.def)             Requested size: 127.8081pt x 232.5278pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/models/splits-kfolds/03.pdf, id=543, 602.25pt x 182.6022pt>
+<../doc/mermaid-pdf/models/splits-kfolds/03.pdf, id=558, 602.25pt x 182.6022pt>
 
 File: ../doc/mermaid-pdf/models/splits-kfolds/03.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/splits-kfolds/03.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/splits-kfolds/03.pdf  used o
-n input line 755.
+n input line 757.
 (pdftex.def)             Requested size: 385.04352pt x 116.7452pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 761.
-LaTeX Info: Redefining \% on input line 761.
+LaTeX Info: Redefining \. on input line 763.
+LaTeX Info: Redefining \% on input line 763.
 [30 <../doc/mermaid-pdf/models/families/01.pdf> <../doc/mermaid-pdf/models/fami
 lies/02.pdf> <../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf>]
-<../doc/mermaid-pdf/models/training/01.pdf, id=588, 219.70079pt x 800.02888pt>
+<../doc/mermaid-pdf/models/training/01.pdf, id=603, 219.70079pt x 800.02888pt>
 File: ../doc/mermaid-pdf/models/training/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/training/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/training/01.pdf  used on inp
-ut line 771.
+ut line 773.
 (pdftex.def)             Requested size: 63.85574pt x 232.52734pt.
-<../doc/mermaid-pdf/models/training/02.pdf, id=589, 602.25pt x 126.4725pt>
+<../doc/mermaid-pdf/models/training/02.pdf, id=604, 602.25pt x 126.4725pt>
 File: ../doc/mermaid-pdf/models/training/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/models/training/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/training/02.pdf  used on inp
-ut line 771.
+ut line 773.
 (pdftex.def)             Requested size: 217.42552pt x 45.65935pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 782.
-LaTeX Info: Redefining \% on input line 782.
+LaTeX Info: Redefining \. on input line 784.
+LaTeX Info: Redefining \% on input line 784.
 [31 <../doc/mermaid-pdf/models/index/01.pdf> <../doc/mermaid-pdf/models/index/0
 2.pdf>]
-<../doc/mermaid-pdf/models/retraining-progressive/01.pdf, id=616, 453.61469pt x
+<../doc/mermaid-pdf/models/retraining-progressive/01.pdf, id=631, 453.61469pt x
  730.64969pt>
 File: ../doc/mermaid-pdf/models/retraining-progressive/01.pdf Graphic file (typ
 e pdf)
 <use ../doc/mermaid-pdf/models/retraining-progressive/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/retraining-progressive/01.pd
-f  used on input line 794.
+f  used on input line 796.
 (pdftex.def)             Requested size: 144.36368pt x 232.53056pt.
-<../doc/mermaid-pdf/models/retraining-progressive/02.pdf, id=617, 602.25pt x 52
+<../doc/mermaid-pdf/models/retraining-progressive/02.pdf, id=632, 602.25pt x 52
 .2753pt>
 File: ../doc/mermaid-pdf/models/retraining-progressive/02.pdf Graphic file (typ
 e pdf)
 <use ../doc/mermaid-pdf/models/retraining-progressive/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/models/retraining-progressive/02.pd
-f  used on input line 801.
+f  used on input line 803.
 (pdftex.def)             Requested size: 217.42552pt x 18.87253pt.
-LaTeX Info: Redefining \. on input line 805.
-LaTeX Info: Redefining \% on input line 805.
+LaTeX Info: Redefining \. on input line 807.
+LaTeX Info: Redefining \% on input line 807.
  [32 <../doc/mermaid-pdf/models/splits-kfolds/01.pdf> <../doc/mermaid-pdf/model
 s/splits-kfolds/02.pdf> <../doc/mermaid-pdf/models/splits-kfolds/03.pdf>]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/index/01.pdf, id=679, 602.25pt x 123.5817pt>
+<../doc/mermaid-pdf/dashboard/index/01.pdf, id=694, 602.25pt x 123.5817pt>
 File: ../doc/mermaid-pdf/dashboard/index/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/dashboard/index/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/index/01.pdf  used on inp
-ut line 837.
+ut line 839.
 (pdftex.def)             Requested size: 217.42552pt x 44.6157pt.
 
-Underfull \hbox (badness 1796) in paragraph at lines 837--837
+Underfull \hbox (badness 1796) in paragraph at lines 839--839
 [][]|\T1/pplj/m/n/10.95 En-tra-das pre-compu-tadas con-su-
  []
 
-<../doc/mermaid-pdf/dashboard/index/02.pdf, id=680, 481.8pt x 535.03888pt>
+<../doc/mermaid-pdf/dashboard/index/02.pdf, id=695, 481.8pt x 535.03888pt>
 File: ../doc/mermaid-pdf/dashboard/index/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/dashboard/index/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/index/02.pdf  used on inp
-ut line 837.
+ut line 839.
 (pdftex.def)             Requested size: 209.3975pt x 232.53593pt.
 
-Underfull \hbox (badness 7540) in paragraph at lines 837--837
+Underfull \hbox (badness 7540) in paragraph at lines 839--839
 [][]|\T1/pplj/m/n/10.95 Ar-qui-tec-tu-ra de ser-vi-cios del
  []
 
-LaTeX Info: Redefining \. on input line 837.
-LaTeX Info: Redefining \% on input line 837.
+LaTeX Info: Redefining \. on input line 839.
+LaTeX Info: Redefining \% on input line 839.
 [33 <../doc/mermaid-pdf/models/training/01.pdf> <../doc/mermaid-pdf/models/trai
 ning/02.pdf>]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf, id=703, 602.25pt x 375
+<../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf, id=718, 602.25pt x 375
 .32219pt>
 File: ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf Graphic file (type
  pdf)
 <use ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf
-  used on input line 842.
+  used on input line 844.
 (pdftex.def)             Requested size: 385.04352pt x 239.95912pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf, id=709, 602.25pt x 201.
+<../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf, id=724, 602.25pt x 201.
 63329pt>
 File: ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf Graphic file (type 
 pdf)
 <use ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf 
- used on input line 852.
+ used on input line 854.
 (pdftex.def)             Requested size: 416.74759pt x 139.52707pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/diagnosis/01.pdf, id=710, 602.25pt x 103.3461pt>
+<../doc/mermaid-pdf/dashboard/diagnosis/01.pdf, id=725, 602.25pt x 103.3461pt>
 File: ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/diagnosis/01.pdf  used on
- input line 860.
+ input line 862.
 (pdftex.def)             Requested size: 416.74759pt x 71.51387pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/global-explainability/01.pdf, id=711, 602.25pt x 
+<../doc/mermaid-pdf/dashboard/global-explainability/01.pdf, id=726, 602.25pt x 
 176.5797pt>
 File: ../doc/mermaid-pdf/dashboard/global-explainability/01.pdf Graphic file (t
 ype pdf)
 <use ../doc/mermaid-pdf/dashboard/global-explainability/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global-explainability/01.
-pdf  used on input line 870.
+pdf  used on input line 872.
 (pdftex.def)             Requested size: 217.42552pt x 63.74915pt.
-<../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf, id=712, 536.96606pt
+<../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf, id=727, 536.96606pt
  x 396.52138pt>
 File: ../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf Graphic file (t
 ype pdf)
 <use ../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample-explainability/01.
-pdf  used on input line 877.
+pdf  used on input line 879.
 (pdftex.def)             Requested size: 217.4209pt x 160.55397pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf, id=713, 444
+<../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf, id=728, 444
 .70139pt x 510.94888pt>
 File: ../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf Graphic
  file (type pdf)
 <use ../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/volatility-surf
-aces/01.pdf  used on input line 886.
+aces/01.pdf  used on input line 888.
 (pdftex.def)             Requested size: 202.38695pt x 232.53668pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 895.
-LaTeX Info: Redefining \% on input line 895.
+LaTeX Info: Redefining \. on input line 897.
+LaTeX Info: Redefining \% on input line 897.
 [34 <../doc/mermaid-pdf/models/retraining-progressive/01.pdf> <../doc/mermaid-p
 df/models/retraining-progressive/02.pdf>]
-LaTeX Info: Redefining \. on input line 908.
-LaTeX Info: Redefining \% on input line 908.
+LaTeX Info: Redefining \. on input line 910.
+LaTeX Info: Redefining \% on input line 910.
  [35 <../doc/mermaid-pdf/dashboard/index/01.pdf> <../doc/mermaid-pdf/dashboard/
 index/02.pdf>]
-LaTeX Info: Redefining \. on input line 918.
-LaTeX Info: Redefining \% on input line 918.
+LaTeX Info: Redefining \. on input line 920.
+LaTeX Info: Redefining \% on input line 920.
  [36 <../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf> <../doc/mermaid-p
 df/dashboard/behaviour-surface/01.pdf>]
-<../imgs/cloud_diagram.drawio.png, id=784, 1763.58875pt x 867.24pt>
+<../imgs/cloud_diagram.drawio.png, id=799, 1763.58875pt x 867.24pt>
 File: ../imgs/cloud_diagram.drawio.png Graphic file (type png)
 <use ../imgs/cloud_diagram.drawio.png>
 Package pdftex.def Info: ../imgs/cloud_diagram.drawio.png  used on input line 9
-31.
+33.
 (pdftex.def)             Requested size: 434.84132pt x 213.83205pt.
 
-Underfull \hbox (badness 2057) in paragraph at lines 932--932
+Underfull \hbox (badness 2057) in paragraph at lines 934--934
 [][]|\T1/pplj/m/n/10.95 Ar-qui-tec-tu-ra cloud del sis-te-ma: al-ma-ce-na-mien-
 to, ar-te-fac-tos y ser-vi-cios de
  []
@@ -2414,662 +2414,685 @@ to, ar-te-fac-tos y ser-vi-cios de
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-LaTeX Info: Redefining \. on input line 942.
-LaTeX Info: Redefining \% on input line 942.
+LaTeX Info: Redefining \. on input line 944.
+LaTeX Info: Redefining \% on input line 944.
 [37 <../doc/mermaid-pdf/dashboard/diagnosis/01.pdf> <../doc/mermaid-pdf/dashboa
 rd/global-explainability/01.pdf> <../doc/mermaid-pdf/dashboard/sample-explainab
 ility/01.pdf>]
-LaTeX Info: Redefining \. on input line 952.
-LaTeX Info: Redefining \% on input line 952.
+LaTeX Info: Redefining \. on input line 954.
+LaTeX Info: Redefining \% on input line 954.
  [38 <../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf>]
-<../doc/mermaid-pdf/repository/configuration/01.pdf, id=837, 602.25pt x 137.553
+<../doc/mermaid-pdf/repository/configuration/01.pdf, id=852, 602.25pt x 137.553
 9pt>
 File: ../doc/mermaid-pdf/repository/configuration/01.pdf Graphic file (type pdf
 )
 <use ../doc/mermaid-pdf/repository/configuration/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/configuration/01.pdf  us
-ed on input line 956.
+ed on input line 958.
 (pdftex.def)             Requested size: 217.42552pt x 49.65997pt.
 
-Underfull \hbox (badness 6141) in paragraph at lines 956--956
+Underfull \hbox (badness 6141) in paragraph at lines 958--958
 [][]|\T1/pplj/m/n/10.95 Con-fi-gu-ra-cion cen-tra-li-za-da del
  []
 
-<../doc/mermaid-pdf/repository/configuration/02.pdf, id=838, 602.25pt x 176.579
+<../doc/mermaid-pdf/repository/configuration/02.pdf, id=853, 602.25pt x 176.579
 7pt>
 File: ../doc/mermaid-pdf/repository/configuration/02.pdf Graphic file (type pdf
 )
 <use ../doc/mermaid-pdf/repository/configuration/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/configuration/02.pdf  us
-ed on input line 956.
+ed on input line 958.
 (pdftex.def)             Requested size: 217.42552pt x 63.74915pt.
-<../doc/mermaid-pdf/repository/index/01.pdf, id=843, 602.25pt x 184.77031pt>
+<../doc/mermaid-pdf/repository/index/01.pdf, id=858, 602.25pt x 184.77031pt>
 File: ../doc/mermaid-pdf/repository/index/01.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/repository/index/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/01.pdf  used on in
-put line 963.
+put line 965.
 (pdftex.def)             Requested size: 407.68666pt x 125.07826pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/repository/index/02.pdf, id=844, 602.25pt x 215.84639pt>
+<../doc/mermaid-pdf/repository/index/02.pdf, id=859, 602.25pt x 215.84639pt>
 File: ../doc/mermaid-pdf/repository/index/02.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/repository/index/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/02.pdf  used on in
-put line 967.
+put line 969.
 (pdftex.def)             Requested size: 416.74759pt x 149.36232pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<../doc/mermaid-pdf/repository/index/03.pdf, id=845, 602.25pt x 31.0761pt>
+<../doc/mermaid-pdf/repository/index/03.pdf, id=860, 602.25pt x 31.0761pt>
 File: ../doc/mermaid-pdf/repository/index/03.pdf Graphic file (type pdf)
 <use ../doc/mermaid-pdf/repository/index/03.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/index/03.pdf  used on in
-put line 974.
+put line 976.
 (pdftex.def)             Requested size: 430.33897pt x 119.60391pt.
-<../doc/mermaid-pdf/repository/src-packages/01.pdf, id=846, 602.25pt x 340.3917
+<../doc/mermaid-pdf/repository/src-packages/01.pdf, id=861, 602.25pt x 340.3917
 pt>
 File: ../doc/mermaid-pdf/repository/src-packages/01.pdf Graphic file (type pdf)
 
 <use ../doc/mermaid-pdf/repository/src-packages/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/repository/src-packages/01.pdf  use
-d on input line 978.
+d on input line 980.
 (pdftex.def)             Requested size: 352.64105pt x 199.31271pt.
-LaTeX Info: Redefining \. on input line 1010.
-LaTeX Info: Redefining \% on input line 1010.
+LaTeX Info: Redefining \. on input line 1012.
+LaTeX Info: Redefining \% on input line 1012.
 [39 <../imgs/cloud_diagram.drawio.png> <../doc/mermaid-pdf/repository/configura
 tion/01.pdf> <../doc/mermaid-pdf/repository/configuration/02.pdf>]
-LaTeX Info: Redefining \. on input line 1010.
-LaTeX Info: Redefining \% on input line 1010.
+LaTeX Info: Redefining \. on input line 1012.
+LaTeX Info: Redefining \% on input line 1012.
  [40]
-LaTeX Info: Redefining \. on input line 1021.
-LaTeX Info: Redefining \% on input line 1021.
+LaTeX Info: Redefining \. on input line 1023.
+LaTeX Info: Redefining \% on input line 1023.
 
 [41 <../doc/mermaid-pdf/repository/index/01.pdf> <../doc/mermaid-pdf/repository
 /index/02.pdf>]
-LaTeX Info: Redefining \. on input line 1021.
-LaTeX Info: Redefining \% on input line 1021.
+LaTeX Info: Redefining \. on input line 1023.
+LaTeX Info: Redefining \% on input line 1023.
  [42 <../doc/mermaid-pdf/repository/index/03.pdf> <../doc/mermaid-pdf/repositor
 y/src-packages/01.pdf>]
-LaTeX Info: Redefining \. on input line 1065.
-LaTeX Info: Redefining \% on input line 1065.
+LaTeX Info: Redefining \. on input line 1067.
+LaTeX Info: Redefining \% on input line 1067.
  [43]
-LaTeX Info: Redefining \. on input line 1066.
-LaTeX Info: Redefining \% on input line 1066.
+LaTeX Info: Redefining \. on input line 1068.
+LaTeX Info: Redefining \% on input line 1068.
  [44]
 chapter 4.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 1080.
+(Font)              scaled to size 5.21004pt on input line 1082.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 1080.
+(Font)              scaled to size 5.21004pt on input line 1082.
 [45
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 1128--1128
+Underfull \hbox (badness 10000) in paragraph at lines 1130--1130
 []|\T1/pplj/m/n/10.95 Red neu-ro-nal se-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1128--1128
+Underfull \hbox (badness 10000) in paragraph at lines 1130--1130
 []|\T1/pplj/m/n/10.95 Quantum Ins-pi-red
  []
 
-LaTeX Info: Redefining \. on input line 1141.
-LaTeX Info: Redefining \% on input line 1141.
+LaTeX Info: Redefining \. on input line 1143.
+LaTeX Info: Redefining \% on input line 1143.
 [46]
-Underfull \hbox (badness 10000) in paragraph at lines 1158--1159
+Underfull \hbox (badness 10000) in paragraph at lines 1160--1161
 []|$\OT1/pplx/m/n/10.95 500$ \T1/pplj/m/n/10.95 ár-bo-les, pro-fun-di-dad má-xi
 -ma $\OT1/pplx/m/n/10.95 8$\T1/pplj/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1158--1159
+Underfull \hbox (badness 10000) in paragraph at lines 1160--1161
 \T1/fvm/m/n/10.95 min_samples_leaf\T1/pplj/m/n/10.95 =10, \T1/fvm/m/n/10.95 max
 _features\T1/pplj/m/n/10.95 =0.5,
  []
 
-LaTeX Info: Redefining \. on input line 1178.
-LaTeX Info: Redefining \% on input line 1178.
+LaTeX Info: Redefining \. on input line 1180.
+LaTeX Info: Redefining \% on input line 1180.
 [47]
-<../imgs/dashboard/Diagnosis - Random Forest.png, id=952, 633.36626pt x 444.159
+<../imgs/dashboard/Diagnosis - Random Forest.png, id=967, 633.36626pt x 444.159
 38pt>
 File: ../imgs/dashboard/Diagnosis - Random Forest.png Graphic file (type png)
 <use ../imgs/dashboard/Diagnosis - Random Forest.png>
 Package pdftex.def Info: ../imgs/dashboard/Diagnosis - Random Forest.png  used 
-on input line 1191.
+on input line 1193.
 (pdftex.def)             Requested size: 221.95212pt x 155.64787pt.
-<../imgs/dashboard/Diagnosis - Xgboost.png, id=953, 634.37pt x 446.16687pt>
+<../imgs/dashboard/Diagnosis - Xgboost.png, id=968, 634.37pt x 446.16687pt>
 File: ../imgs/dashboard/Diagnosis - Xgboost.png Graphic file (type png)
 <use ../imgs/dashboard/Diagnosis - Xgboost.png>
 Package pdftex.def Info: ../imgs/dashboard/Diagnosis - Xgboost.png  used on inp
-ut line 1195.
+ut line 1197.
 (pdftex.def)             Requested size: 221.95538pt x 156.10628pt.
-LaTeX Info: Redefining \. on input line 1215.
-LaTeX Info: Redefining \% on input line 1215.
+LaTeX Info: Redefining \. on input line 1217.
+LaTeX Info: Redefining \% on input line 1217.
  [48 <../imgs/dashboard/Diagnosis - Random Forest.png> <../imgs/dashboard/Diagn
 osis - Xgboost.png>]
-LaTeX Info: Redefining \. on input line 1238.
-LaTeX Info: Redefining \% on input line 1238.
+LaTeX Info: Redefining \. on input line 1240.
+LaTeX Info: Redefining \% on input line 1240.
  [49]
-LaTeX Info: Redefining \. on input line 1246.
-LaTeX Info: Redefining \% on input line 1246.
+LaTeX Info: Redefining \. on input line 1248.
+LaTeX Info: Redefining \% on input line 1248.
  [50]
-Overfull \hbox (15.78099pt too wide) in paragraph at lines 1253--1254
+Overfull \hbox (15.78099pt too wide) in paragraph at lines 1255--1256
 []
  []
 
 
-Overfull \hbox (120.44507pt too wide) in paragraph at lines 1255--1256
+Overfull \hbox (120.44507pt too wide) in paragraph at lines 1257--1258
 []
  []
 
-LaTeX Info: Redefining \. on input line 1264.
-LaTeX Info: Redefining \% on input line 1264.
+LaTeX Info: Redefining \. on input line 1266.
+LaTeX Info: Redefining \% on input line 1266.
 [51]
-<../imgs/dashboard/Behaviour And Surface - Random Forest I.png, id=978, 629.351
+<../imgs/dashboard/Behaviour And Surface - Random Forest I.png, id=993, 629.351
 26pt x 439.14063pt>
 File: ../imgs/dashboard/Behaviour And Surface - Random Forest I.png Graphic fil
 e (type png)
 <use ../imgs/dashboard/Behaviour And Surface - Random Forest I.png>
 Package pdftex.def Info: ../imgs/dashboard/Behaviour And Surface - Random Fores
-t I.png  used on input line 1274.
+t I.png  used on input line 1276.
 (pdftex.def)             Requested size: 221.95677pt x 154.87415pt.
-<../imgs/dashboard/Behaviour And Surface - Xgboost I.png, id=979, 628.3475pt x 
+<../imgs/dashboard/Behaviour And Surface - Xgboost I.png, id=994, 628.3475pt x 
 437.13312pt>
 File: ../imgs/dashboard/Behaviour And Surface - Xgboost I.png Graphic file (typ
 e png)
 <use ../imgs/dashboard/Behaviour And Surface - Xgboost I.png>
 Package pdftex.def Info: ../imgs/dashboard/Behaviour And Surface - Xgboost I.pn
-g  used on input line 1278.
+g  used on input line 1280.
 (pdftex.def)             Requested size: 221.95753pt x 154.41293pt.
-LaTeX Info: Redefining \. on input line 1287.
-LaTeX Info: Redefining \% on input line 1287.
+LaTeX Info: Redefining \. on input line 1289.
+LaTeX Info: Redefining \% on input line 1289.
  [52 <../imgs/dashboard/Behaviour And Surface - Random Forest I.png> <../imgs/d
 ashboard/Behaviour And Surface - Xgboost I.png>]
-<../imgs/dashboard/Global Explainability - Random Forest I.png, id=988, 632.362
-5pt x 423.08063pt>
+<../imgs/dashboard/Global Explainability - Random Forest I.png, id=1003, 632.36
+25pt x 423.08063pt>
 File: ../imgs/dashboard/Global Explainability - Random Forest I.png Graphic fil
 e (type png)
 <use ../imgs/dashboard/Global Explainability - Random Forest I.png>
 Package pdftex.def Info: ../imgs/dashboard/Global Explainability - Random Fores
-t I.png  used on input line 1308.
+t I.png  used on input line 1310.
 (pdftex.def)             Requested size: 221.94772pt x 148.49359pt.
-<../imgs/dashboard/Global Explainability - Xgboost I.png, id=989, 633.36626pt x
- 422.07687pt>
+<../imgs/dashboard/Global Explainability - Xgboost I.png, id=1004, 633.36626pt 
+x 422.07687pt>
 File: ../imgs/dashboard/Global Explainability - Xgboost I.png Graphic file (typ
 e png)
 <use ../imgs/dashboard/Global Explainability - Xgboost I.png>
 Package pdftex.def Info: ../imgs/dashboard/Global Explainability - Xgboost I.pn
-g  used on input line 1312.
+g  used on input line 1314.
 (pdftex.def)             Requested size: 221.95212pt x 147.90944pt.
-LaTeX Info: Redefining \. on input line 1319.
-LaTeX Info: Redefining \% on input line 1319.
+LaTeX Info: Redefining \. on input line 1321.
+LaTeX Info: Redefining \% on input line 1321.
  [53 <../imgs/dashboard/Global Explainability - Random Forest I.png> <../imgs/d
 ashboard/Global Explainability - Xgboost I.png>]
-<../imgs/dashboard/Global Explainability - Random Forest III.png, id=998, 630.8
-5687pt x 378.91562pt>
+<../imgs/dashboard/Global Explainability - Random Forest III.png, id=1013, 630.
+85687pt x 378.91562pt>
 File: ../imgs/dashboard/Global Explainability - Random Forest III.png Graphic f
 ile (type png)
 <use ../imgs/dashboard/Global Explainability - Random Forest III.png>
 Package pdftex.def Info: ../imgs/dashboard/Global Explainability - Random Fores
-t III.png  used on input line 1339.
+t III.png  used on input line 1341.
 (pdftex.def)             Requested size: 221.95834pt x 133.31625pt.
-<../imgs/dashboard/Global Explainability - Xgboost III.png, id=999, 631.35875pt
- x 378.91562pt>
+<../imgs/dashboard/Global Explainability - Xgboost III.png, id=1014, 631.35875p
+t x 378.91562pt>
 File: ../imgs/dashboard/Global Explainability - Xgboost III.png Graphic file (t
 ype png)
 <use ../imgs/dashboard/Global Explainability - Xgboost III.png>
 Package pdftex.def Info: ../imgs/dashboard/Global Explainability - Xgboost III.
-png  used on input line 1343.
+png  used on input line 1345.
 (pdftex.def)             Requested size: 221.95187pt x 133.2064pt.
-LaTeX Info: Redefining \. on input line 1384.
-LaTeX Info: Redefining \% on input line 1384.
+LaTeX Info: Redefining \. on input line 1386.
+LaTeX Info: Redefining \% on input line 1386.
  [54 <../imgs/dashboard/Global Explainability - Random Forest III.png> <../imgs
 /dashboard/Global Explainability - Xgboost III.png>]
-LaTeX Info: Redefining \. on input line 1395.
-LaTeX Info: Redefining \% on input line 1395.
+LaTeX Info: Redefining \. on input line 1397.
+LaTeX Info: Redefining \% on input line 1397.
 
 [55]
-<../imgs/dashboard/Sample Explainability - Random Forest I.png, id=1017, 630.35
+<../imgs/dashboard/Sample Explainability - Random Forest I.png, id=1032, 630.35
 5pt x 376.40625pt>
 File: ../imgs/dashboard/Sample Explainability - Random Forest I.png Graphic fil
 e (type png)
 <use ../imgs/dashboard/Sample Explainability - Random Forest I.png>
 Package pdftex.def Info: ../imgs/dashboard/Sample Explainability - Random Fores
-t I.png  used on input line 1407.
+t I.png  used on input line 1409.
 (pdftex.def)             Requested size: 221.9549pt x 132.53676pt.
-<../imgs/dashboard/Sample Explainability - Xgboost I.png, id=1018, 630.355pt x 
+<../imgs/dashboard/Sample Explainability - Xgboost I.png, id=1033, 630.355pt x 
 376.40625pt>
 File: ../imgs/dashboard/Sample Explainability - Xgboost I.png Graphic file (typ
 e png)
 <use ../imgs/dashboard/Sample Explainability - Xgboost I.png>
 Package pdftex.def Info: ../imgs/dashboard/Sample Explainability - Xgboost I.pn
-g  used on input line 1411.
+g  used on input line 1413.
 (pdftex.def)             Requested size: 221.9549pt x 132.53676pt.
-<../imgs/dashboard/Sample Explainability - Random Forest III.png, id=1019, 633.
+<../imgs/dashboard/Sample Explainability - Random Forest III.png, id=1034, 633.
 36626pt x 433.62pt>
 File: ../imgs/dashboard/Sample Explainability - Random Forest III.png Graphic f
 ile (type png)
 <use ../imgs/dashboard/Sample Explainability - Random Forest III.png>
 Package pdftex.def Info: ../imgs/dashboard/Sample Explainability - Random Fores
-t III.png  used on input line 1421.
+t III.png  used on input line 1423.
 (pdftex.def)             Requested size: 221.95212pt x 151.95453pt.
-<../imgs/dashboard/Sample Explainability - Xgboost III.png, id=1020, 631.86063p
+<../imgs/dashboard/Sample Explainability - Xgboost III.png, id=1035, 631.86063p
 t x 432.11438pt>
 File: ../imgs/dashboard/Sample Explainability - Xgboost III.png Graphic file (t
 ype png)
 <use ../imgs/dashboard/Sample Explainability - Xgboost III.png>
 Package pdftex.def Info: ../imgs/dashboard/Sample Explainability - Xgboost III.
-png  used on input line 1425.
+png  used on input line 1427.
 (pdftex.def)             Requested size: 221.95476pt x 151.78955pt.
-LaTeX Info: Redefining \. on input line 1432.
-LaTeX Info: Redefining \% on input line 1432.
+LaTeX Info: Redefining \. on input line 1434.
+LaTeX Info: Redefining \% on input line 1434.
  [56 <../imgs/dashboard/Sample Explainability - Random Forest I.png> <../imgs/d
 ashboard/Sample Explainability - Xgboost I.png> <../imgs/dashboard/Sample Expla
 inability - Random Forest III.png> <../imgs/dashboard/Sample Explainability - X
 gboost III.png>]
-Underfull \hbox (badness 1603) in paragraph at lines 1456--1456
+Underfull \hbox (badness 1603) in paragraph at lines 1458--1458
 []|\T1/pplj/m/n/10.95 Random Fo-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1456--1456
+Underfull \hbox (badness 10000) in paragraph at lines 1458--1458
 []|\T1/pplj/m/n/10.95 Sequential
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1456--1457
+Underfull \hbox (badness 10000) in paragraph at lines 1458--1459
 []|\T1/pplj/m/n/10.95 Quantum
  []
 
 
-Underfull \hbox (badness 4582) in paragraph at lines 1458--1458
+Underfull \hbox (badness 4582) in paragraph at lines 1460--1460
 []|\T1/pplj/m/n/10.95 Driver SHAP do-mi-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1458--1458
+Underfull \hbox (badness 10000) in paragraph at lines 1460--1460
 []|\T1/pplj/m/n/10.95 TTE (muy
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1460--1460
+Underfull \hbox (badness 10000) in paragraph at lines 1462--1462
 []|\T1/pplj/m/n/10.95 Strike (me-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1460--1461
+Underfull \hbox (badness 10000) in paragraph at lines 1462--1463
 []|\T1/pplj/m/n/10.95 Strike (me-
  []
 
 
-Underfull \hbox (badness 1248) in paragraph at lines 1464--1464
+Underfull \hbox (badness 1248) in paragraph at lines 1466--1466
 []|\T1/pplj/m/n/10.95 Suavidad de su-per-fi-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1464--1464
+Underfull \hbox (badness 10000) in paragraph at lines 1466--1466
 []|\T1/pplj/m/n/10.95 Media (es-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1464--1464
+Underfull \hbox (badness 10000) in paragraph at lines 1466--1466
 \T1/pplj/m/n/10.95 ca-lo-nes
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1464--1464
+Underfull \hbox (badness 10000) in paragraph at lines 1466--1466
 []|\T1/pplj/m/n/10.95 Media (es-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1464--1464
+Underfull \hbox (badness 10000) in paragraph at lines 1466--1466
 \T1/pplj/m/n/10.95 ca-lo-nes
  []
 
 
-Underfull \hbox (badness 7081) in paragraph at lines 1466--1466
+Underfull \hbox (badness 7081) in paragraph at lines 1468--1468
 []|\T1/pplj/m/n/10.95 Visible, me-
  []
 
 
-Underfull \hbox (badness 1661) in paragraph at lines 1466--1466
+Underfull \hbox (badness 1661) in paragraph at lines 1468--1468
 []|\T1/pplj/m/n/10.95 Visible, más
  []
 
 
-Underfull \hbox (badness 1661) in paragraph at lines 1466--1467
+Underfull \hbox (badness 1661) in paragraph at lines 1468--1469
 []|\T1/pplj/m/n/10.95 Visible, más
  []
 
 LaTeX Info: Symbol \textrightarrow not provided by
             font family pplj in TS1 encoding.
-            Default family used instead on input line 1468.
+            Default family used instead on input line 1470.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
-Underfull \hbox (badness 2343) in paragraph at lines 1470--1470
+Underfull \hbox (badness 2343) in paragraph at lines 1472--1472
 []|\T1/pplj/m/n/10.95 Soporte his-tó-ri-co en
  []
 
 
-Underfull \hbox (badness 5036) in paragraph at lines 1470--1470
+Underfull \hbox (badness 5036) in paragraph at lines 1472--1472
 \T1/pplj/m/n/10.95 ca-sos ma-nua-les exi-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1470
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
 []|\T1/pplj/m/n/10.95 N/A en
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1470
-\T1/pplj/m/n/10.95 mues-tra
- []
-
-
-Underfull \hbox (badness 1286) in paragraph at lines 1470--1470
-[]|\T1/pplj/m/n/10.95 Distancia al-
- []
-
-
-Underfull \hbox (badness 1194) in paragraph at lines 1470--1470
-\T1/pplj/m/n/10.95 ta en es-trés
- []
-
-
-Underfull \hbox (badness 1286) in paragraph at lines 1470--1470
-[]|\T1/pplj/m/n/10.95 Distancia al-
- []
-
-
-Underfull \hbox (badness 1194) in paragraph at lines 1470--1470
-\T1/pplj/m/n/10.95 ta en es-trés
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1470
-[]|\T1/pplj/m/n/10.95 N/A en
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1470
-\T1/pplj/m/n/10.95 mues-tra
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1471
-[]|\T1/pplj/m/n/10.95 N/A en
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1470--1471
-\T1/pplj/m/n/10.95 mues-tra
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
+\T1/pplj/m/n/10.95 mues-tra
+ []
+
+
+Underfull \hbox (badness 1286) in paragraph at lines 1472--1472
+[]|\T1/pplj/m/n/10.95 Distancia al-
+ []
+
+
+Underfull \hbox (badness 1194) in paragraph at lines 1472--1472
+\T1/pplj/m/n/10.95 ta en es-trés
+ []
+
+
+Underfull \hbox (badness 1286) in paragraph at lines 1472--1472
+[]|\T1/pplj/m/n/10.95 Distancia al-
+ []
+
+
+Underfull \hbox (badness 1194) in paragraph at lines 1472--1472
+\T1/pplj/m/n/10.95 ta en es-trés
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
+[]|\T1/pplj/m/n/10.95 N/A en
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
+\T1/pplj/m/n/10.95 mues-tra
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+[]|\T1/pplj/m/n/10.95 N/A en
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+\T1/pplj/m/n/10.95 mues-tra
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1474
 []|\T1/pplj/m/n/10.95 Compresibilidad en
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1474
 \T1/pplj/m/n/10.95 mo-de-lo equi-va-len-te
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1472--1472
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1474
 []|\T1/pplj/m/n/10.95 Muy ba-ja
  []
 
 
-Underfull \hbox (badness 2158) in paragraph at lines 1472--1472
+Underfull \hbox (badness 2158) in paragraph at lines 1474--1474
 \T1/pplj/m/n/10.95 (no com-pac-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1475
 []|\T1/pplj/m/n/10.95 Muy ba-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1472--1473
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1475
 \T1/pplj/m/n/10.95 ja/No uti-li-
  []
 
-LaTeX Info: Redefining \. on input line 1486.
-LaTeX Info: Redefining \% on input line 1486.
+LaTeX Info: Redefining \. on input line 1488.
+LaTeX Info: Redefining \% on input line 1488.
 [57]
-LaTeX Info: Redefining \. on input line 1486.
-LaTeX Info: Redefining \% on input line 1486.
+LaTeX Info: Redefining \. on input line 1488.
+LaTeX Info: Redefining \% on input line 1488.
  [58{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.e
 nc}]
-LaTeX Info: Redefining \. on input line 1507.
-LaTeX Info: Redefining \% on input line 1507.
+LaTeX Info: Redefining \. on input line 1509.
+LaTeX Info: Redefining \% on input line 1509.
  [59]
-LaTeX Info: Redefining \. on input line 1532.
-LaTeX Info: Redefining \% on input line 1532.
+LaTeX Info: Redefining \. on input line 1534.
+LaTeX Info: Redefining \% on input line 1534.
  [60]
-LaTeX Info: Redefining \. on input line 1554.
-LaTeX Info: Redefining \% on input line 1554.
+LaTeX Info: Redefining \. on input line 1555.
+LaTeX Info: Redefining \% on input line 1555.
  [61]
+LaTeX Info: Redefining \. on input line 1580.
+LaTeX Info: Redefining \% on input line 1580.
+ [62]
+LaTeX Info: Redefining \. on input line 1602.
+LaTeX Info: Redefining \% on input line 1602.
+ [63]
 chapter 5.
-[62
+[64
 
 ]
-LaTeX Info: Redefining \. on input line 1575.
-LaTeX Info: Redefining \% on input line 1575.
- [63]
+LaTeX Info: Redefining \. on input line 1625.
+LaTeX Info: Redefining \% on input line 1625.
+ [65]
 chapter A.
-<../imgs/databases_structure_details.drawio.png, id=1069, 1177.39874pt x 3859.4
+<../imgs/databases_structure_details.drawio.png, id=1094, 1177.39874pt x 3859.4
 1875pt>
 File: ../imgs/databases_structure_details.drawio.png Graphic file (type png)
 <use ../imgs/databases_structure_details.drawio.png>
 Package pdftex.def Info: ../imgs/databases_structure_details.drawio.png  used o
-n input line 1584.
+n input line 1634.
 (pdftex.def)             Requested size: 434.8582pt x 424.47552pt.
 File: ../imgs/databases_structure_details.drawio.png Graphic file (type png)
 <use ../imgs/databases_structure_details.drawio.png>
 Package pdftex.def Info: ../imgs/databases_structure_details.drawio.png  used o
-n input line 1591.
+n input line 1641.
 (pdftex.def)             Requested size: 434.8582pt x 517.15652pt.
 File: ../imgs/databases_structure_details.drawio.png Graphic file (type png)
 <use ../imgs/databases_structure_details.drawio.png>
 Package pdftex.def Info: ../imgs/databases_structure_details.drawio.png  used o
-n input line 1598.
+n input line 1648.
 (pdftex.def)             Requested size: 434.8582pt x 405.93932pt.
 
-Underfull \hbox (badness 3168) in paragraph at lines 1599--1599
+Underfull \hbox (badness 3168) in paragraph at lines 1649--1649
 [][]|\T1/pplj/m/n/10.95 De-ta-lle es-truc-tu-ral del ETL (III): fil-tros pre-vi
 os y cons-truc-ción fi-nal de
  []
 
-[64
+[66
 
 ]
-LaTeX Info: Redefining \. on input line 1603.
-LaTeX Info: Redefining \% on input line 1603.
- [65 <../imgs/databases_structure_details.drawio.png>]
-LaTeX Info: Redefining \. on input line 1603.
-LaTeX Info: Redefining \% on input line 1603.
- [66]
-LaTeX Info: Redefining \. on input line 1603.
-LaTeX Info: Redefining \% on input line 1603.
- [67]
-chapter B.
-[68
-
-]
-LaTeX Info: Redefining \. on input line 1616.
-LaTeX Info: Redefining \% on input line 1616.
+LaTeX Info: Redefining \. on input line 1653.
+LaTeX Info: Redefining \% on input line 1653.
+ [67 <../imgs/databases_structure_details.drawio.png>]
+LaTeX Info: Redefining \. on input line 1653.
+LaTeX Info: Redefining \% on input line 1653.
+ [68]
+LaTeX Info: Redefining \. on input line 1653.
+LaTeX Info: Redefining \% on input line 1653.
  [69]
+chapter B.
+[70
+
+]
+LaTeX Info: Redefining \. on input line 1666.
+LaTeX Info: Redefining \% on input line 1666.
+ [71]
 chapter C.
-<../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf, id=1107, 602.25p
+<../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf, id=1133, 602.25p
 t x 117.3183pt>
 File: ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf Graphic file
  (type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-fundamentals/
-01.pdf  used on input line 1623.
+01.pdf  used on input line 1673.
 (pdftex.def)             Requested size: 452.98212pt x 88.2409pt.
-[70
+[72
 
  <../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf>]
-Underfull \hbox (badness 2103) in paragraph at lines 1648--1649
+Underfull \hbox (badness 2103) in paragraph at lines 1698--1699
 []\T1/pplj/m/n/12 El fon-do se to-ma de una mues-tra con-tro-la-da por \T1/fvm/
 m/n/12 shap_background_size\T1/pplj/m/n/12 ;
  []
 
-<../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf, id=1129, 602.2
+<../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf, id=1154, 602.2
 5pt x 141.6492pt>
 File: ../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf Graphic fi
 le (type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-visualization
-s/01.pdf  used on input line 1650.
+s/01.pdf  used on input line 1700.
 (pdftex.def)             Requested size: 452.98212pt x 106.54137pt.
-<../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf, id=1130, 602.2
+<../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf, id=1155, 602.2
 5pt x 42.1575pt>
 File: ../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf Graphic fi
 le (type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/shap-visualization
-s/02.pdf  used on input line 1651.
+s/02.pdf  used on input line 1701.
 (pdftex.def)             Requested size: 452.98212pt x 31.70872pt.
-<../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf, id=1131, 602.
+<../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf, id=1156, 602.
 25pt x 41.1939pt>
 File: ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf Graphic f
 ile (type pdf)
 <use ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/local-shap-waterfa
-ll/01.pdf  used on input line 1652.
+ll/01.pdf  used on input line 1702.
 (pdftex.def)             Requested size: 452.98212pt x 30.98395pt.
-<../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf, id=1132, 426.63388pt x 
+<../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf, id=1157, 426.63388pt x 
 456.74638pt>
 File: ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf Graphic file (type 
 pdf)
 <use ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf 
- used on input line 1653.
+ used on input line 1703.
 (pdftex.def)             Requested size: 446.83304pt x 478.37125pt.
-<../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf, id=1133, 551.1792pt x 1
+<../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf, id=1158, 551.1792pt x 1
 43.5764pt>
 File: ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf Graphic file (type 
 pdf)
 <use ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf 
- used on input line 1654.
+ used on input line 1704.
 (pdftex.def)             Requested size: 452.97911pt x 117.99629pt.
-LaTeX Info: Redefining \. on input line 1663.
-LaTeX Info: Redefining \% on input line 1663.
-[71 <../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf> <../doc/me
+LaTeX Info: Redefining \. on input line 1713.
+LaTeX Info: Redefining \% on input line 1713.
+[73 <../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf> <../doc/me
 rmaid-pdf/dashboard/global/shap-visualizations/02.pdf> <../doc/mermaid-pdf/dash
 board/sample/local-shap-waterfall/01.pdf>]
-LaTeX Info: Redefining \. on input line 1663.
-LaTeX Info: Redefining \% on input line 1663.
- [72 <../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf> <../doc/mermaid-pd
+LaTeX Info: Redefining \. on input line 1713.
+LaTeX Info: Redefining \% on input line 1713.
+ [74 <../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf> <../doc/mermaid-pd
 f/dashboard/sample/neighbours/02.pdf>]
-LaTeX Info: Redefining \. on input line 1669.
-LaTeX Info: Redefining \% on input line 1669.
- [73]
+LaTeX Info: Redefining \. on input line 1719.
+LaTeX Info: Redefining \% on input line 1719.
+ [75]
 chapter D.
-<../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf, id=1199, 602.25pt x 45.2892
+<../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf, id=1224, 602.25pt x 45.2892
 pt>
 File: ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf Graphic file (type pdf)
 
 <use ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf  use
-d on input line 1683.
+d on input line 1733.
 (pdftex.def)             Requested size: 452.98212pt x 34.06424pt.
-[74
+[76
 
  <../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf>]
-LaTeX Info: Redefining \. on input line 1714.
-LaTeX Info: Redefining \% on input line 1714.
- [75]
+LaTeX Info: Redefining \. on input line 1764.
+LaTeX Info: Redefining \% on input line 1764.
+ [77]
 chapter E.
-<../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf, id=1221, 219.70079pt x 631.
+<../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf, id=1247, 219.70079pt x 631.
 39888pt>
 File: ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf Graphic file (type pdf)
 
 <use ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf  use
-d on input line 1734.
+d on input line 1784.
 (pdftex.def)             Requested size: 166.45135pt x 478.36517pt.
-[76
+[78
 
 ]
-LaTeX Info: Redefining \. on input line 1759.
-LaTeX Info: Redefining \% on input line 1759.
- [77 <../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf>]
-LaTeX Info: Redefining \. on input line 1776.
-LaTeX Info: Redefining \% on input line 1776.
- [78]
+LaTeX Info: Redefining \. on input line 1809.
+LaTeX Info: Redefining \% on input line 1809.
+ [79 <../doc/mermaid-pdf/dashboard/behaviour/ale/01.pdf>]
+LaTeX Info: Redefining \. on input line 1826.
+LaTeX Info: Redefining \% on input line 1826.
+ [80]
 chapter F.
 LaTeX Font Info:    Font shape `T1/fvm/b/n' will be
-(Font)              scaled to size 10.20007pt on input line 1788.
-[79
+(Font)              scaled to size 10.20007pt on input line 1838.
+[81
 
 ]
-LaTeX Info: Redefining \. on input line 1850.
-LaTeX Info: Redefining \% on input line 1850.
- [80]
-LaTeX Info: Redefining \. on input line 1851.
-LaTeX Info: Redefining \% on input line 1851.
- [81]
+LaTeX Info: Redefining \. on input line 1900.
+LaTeX Info: Redefining \% on input line 1900.
+ [82]
+LaTeX Info: Redefining \. on input line 1901.
+LaTeX Info: Redefining \% on input line 1901.
+ [83]
 chapter G.
-<../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf, id=1268, 415.5525p
+<../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf, id=1293, 415.5525p
 t x 745.82639pt>
 File: ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf Graphic file (
 type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01
-.pdf  used on input line 1865.
+.pdf  used on input line 1915.
 (pdftex.def)             Requested size: 266.52336pt x 478.3515pt.
-[82
+[84
 
 ]
-LaTeX Info: Redefining \. on input line 1885.
-LaTeX Info: Redefining \% on input line 1885.
- [83 <../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf>]
-<../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf, id=1293, 415.5
+LaTeX Info: Redefining \. on input line 1935.
+LaTeX Info: Redefining \% on input line 1935.
+ [85 <../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf>]
+<../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf, id=1319, 415.5
 525pt x 721.73637pt>
 File: ../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf Graphic fi
 le (type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/symbolic-regressio
-n/01.pdf  used on input line 1892.
+n/01.pdf  used on input line 1942.
 (pdftex.def)             Requested size: 275.41953pt x 478.3518pt.
-<../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf, id=1294, 602.2
+<../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf, id=1320, 602.2
 5pt x 56.1297pt>
 File: ../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf Graphic fi
 le (type pdf)
 <use ../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf>
 Package pdftex.def Info: ../doc/mermaid-pdf/dashboard/global/symbolic-regressio
-n/02.pdf  used on input line 1893.
+n/02.pdf  used on input line 1943.
 (pdftex.def)             Requested size: 452.98212pt x 42.21791pt.
-LaTeX Info: Redefining \. on input line 1920.
-LaTeX Info: Redefining \% on input line 1920.
- [84]
-LaTeX Info: Redefining \. on input line 1920.
-LaTeX Info: Redefining \% on input line 1920.
-
-[85 <../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf> <../doc/me
-rmaid-pdf/dashboard/global/symbolic-regression/02.pdf>]
-LaTeX Info: Redefining \. on input line 1922.
-LaTeX Info: Redefining \% on input line 1922.
+LaTeX Info: Redefining \. on input line 1970.
+LaTeX Info: Redefining \% on input line 1970.
  [86]
+LaTeX Info: Redefining \. on input line 1970.
+LaTeX Info: Redefining \% on input line 1970.
+
+[87 <../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf> <../doc/me
+rmaid-pdf/dashboard/global/symbolic-regression/02.pdf>]
+LaTeX Info: Redefining \. on input line 1972.
+LaTeX Info: Redefining \% on input line 1972.
+ [88]
 chapter H.
-[87
+[89
+
+]
+LaTeX Info: Redefining \. on input line 2015.
+LaTeX Info: Redefining \% on input line 2015.
+ [90]
+chapter I.
+File: ../imgs/dashboard/Diagnosis - Random Forest.png Graphic file (type png)
+<use ../imgs/dashboard/Diagnosis - Random Forest.png>
+Package pdftex.def Info: ../imgs/dashboard/Diagnosis - Random Forest.png  used 
+on input line 2024.
+(pdftex.def)             Requested size: 221.95212pt x 155.64787pt.
+File: ../imgs/dashboard/Diagnosis - Xgboost.png Graphic file (type png)
+<use ../imgs/dashboard/Diagnosis - Xgboost.png>
+Package pdftex.def Info: ../imgs/dashboard/Diagnosis - Xgboost.png  used on inp
+ut line 2028.
+(pdftex.def)             Requested size: 221.95538pt x 156.10628pt.
+[91
 
 ] (./main.bbl
 LaTeX Info: Redefining \. on input line 1.
 LaTeX Info: Redefining \% on input line 1.
- [88]) [89
+ [92]) [93
 
 ]
-runsystem(latexminted cleantemp  --timestamp 20260516184540Z FAD58DE7366495DB46
+runsystem(latexminted cleantemp  --timestamp 20260516192353Z FAD58DE7366495DB46
 50CFEFAC2FCD61)...executed safely (allowed).
 
  (./main.aux
@@ -3353,18 +3376,20 @@ RS)
 ../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf
 ../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf
 ../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf
+../imgs/dashboard/Diagnosis - Random Forest.png
+../imgs/dashboard/Diagnosis - Xgboost.png
     main.bbl
  ***********
 
  ) 
 Here is how much of TeX's memory you used:
- 46169 strings out of 467349
- 976676 string characters out of 5415641
+ 46197 strings out of 467349
+ 977132 string characters out of 5415641
  1729224 words of memory out of 5000000
- 74108 multiletter control sequences out of 15000+600000
+ 74125 multiletter control sequences out of 15000+600000
  739448 words of font info for 245 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 108i,23n,133p,11207b,978s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 108i,23n,136p,11207b,978s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
@@ -3381,10 +3406,10 @@ ublic/cm-super/sfrm1095.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/urw
 /palatino/uplb8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/urw/palati
 no/uplr8a.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/urw/palatino/uplr
 i8a.pfb>
-Output written on main.pdf (89 pages, 2576547 bytes).
+Output written on main.pdf (93 pages, 2586258 bytes).
 PDF statistics:
- 1639 PDF objects out of 1728 (max. 8388607)
- 1284 compressed objects within 13 object streams
- 266 named destinations out of 1000 (max. 500000)
- 42280 words of extra memory for PDF output out of 42996 (max. 10000000)
+ 1697 PDF objects out of 1728 (max. 8388607)
+ 1337 compressed objects within 14 object streams
+ 277 named destinations out of 1000 (max. 500000)
+ 42328 words of extra memory for PDF output out of 42996 (max. 10000000)
 

@@ -118,6 +118,8 @@ En este contexto, el proyecto construye modelos de volatilidad explicable, consu
 
 La memoria se construye alrededor de esa cadena completa. No se limita a entrenar un predictor, sino que conecta datos de mercado, inversión de Black-76, selección de familias, explicabilidad global y local, diagnóstico por zonas de la superficie y despliegue. Ese enfoque es coherente con el tipo de uso que tendría el sistema en un entorno profesional: consulta repetida, revisión crítica y necesidad de justificar el resultado más allá de una métrica agregada.
 
+Estas cuatro preguntas se responden de forma progresiva en el \autoref{chap:metodologia} (construcción y validación del pipeline), en el \autoref{chap:resultados} (evidencia empírica y lectura operativa) y en el \autoref{chap:conclusiones} (síntesis final y alcance práctico).
+
 \section{Relevancia financiera y profesional}
 \label{sec:relevancia}
 
@@ -1479,6 +1481,52 @@ Compresibilidad en modelo equivalente (simbólico/árbol) & Alta (simple) & Muy 
 
 Esta síntesis permite sostener dos mensajes, con alcance observacional sobre lo visualizado en el dashboard. Primero, la estructura explicativa principal aparece consistente entre familias: el vencimiento domina y el strike ocupa una posición secundaria relevante, coherente con la geometría de superficie. Segundo, las diferencias clave entre modelos no están tanto en qué variables miran, sino en cómo transforman esa información en estabilidad local, error por zonas y facilidad de explicación compacta. Para afirmar universalidad sobre todos los trades sería necesario un contraste estadístico adicional fuera de las muestras visualizadas.
 
+\section{Aplicaciones operativas y validación independiente}
+\label{sec:aplicaciones-operativas}
+
+Este apartado conecta los resultados del dashboard con usos profesionales concretos en valoración, control de riesgos y gobierno de modelos. El objetivo no es extrapolar más allá de la evidencia disponible, sino traducir lo observado en reglas de uso defendibles para un entorno de mesa y model validation. El detalle visual de sensibilidad por regiones se amplía en el Anexo~\ref{app:sensibilidad-moneyness-vencimiento}.
+
+\subsection{Validación independiente de modelos internos}
+\label{subsec:validacion-independiente}
+
+El modelo final puede utilizarse como referencia independiente para contrastar superficies internas de valoración. En la práctica, la validación no se limita a comparar un único precio, sino que contrasta consistencia por regiones de moneyness y vencimiento. Un desacople localizado entre el pricer interno y la referencia empírica puede señalar problemas de parametrización, de datos de entrada o de régimen de mercado no recogido por el enfoque clásico.
+
+\begin{itemize}
+  \item \textbf{Nivel agregado:} contraste de RMSE/MAE y de dispersión global frente a un benchmark interno.
+  \item \textbf{Nivel por superficie:} contraste de residual heatmap y cajas de error por moneyness/vencimiento para detectar discrepancias localizadas.
+  \item \textbf{Nivel de caso:} uso de SHAP local y vecinos para justificar por qué una diferencia concreta es esperable o requiere revisión.
+\end{itemize}
+
+Este enfoque es especialmente útil cuando el área de validación necesita una segunda opinión cuantitativa que no comparta la misma familia paramétrica que el modelo interno de producción.
+
+\subsection{Interpolación y suavizado: alcance real del enfoque}
+\label{subsec:interpolacion-suavizado-alcance}
+
+Conviene precisar el alcance metodológico. En este trabajo no se impone una interpolación paramétrica cerrada de la superficie (por ejemplo, una sola fórmula global calibrada ex ante). La superficie se aprende de forma empírica a partir de observaciones de mercado mediante modelos supervisados. Por tanto, la ``interpolación'' se produce de forma implícita a través de la función aprendida $\hat{\sigma}(m,T,\dots)$ y se evalúa visualmente con las vistas de \emph{Behaviour And Surface} y \emph{Diagnosis}.
+
+La suavidad no se da por supuesta: se verifica. Si aparecen escalones locales o concentraciones de error en zonas concretas, el resultado se interpreta como limitación del modelo en esa región, no como propiedad financiera del mercado. Esta distinción es clave para no confundir capacidad predictiva local con una estructura de superficie económicamente robusta.
+
+\subsection{Detección de anomalías de precio y errores de mercado}
+\label{subsec:anomalias-precio-mercado}
+
+La detección de anomalías se construye en dos capas complementarias. La primera está en el ETL, con controles de calidad (precios y cantidades válidas, coherencia temporal opción-subyacente, resolución numérica estable de volatilidad implícita). La segunda está en diagnóstico ex post, donde los residuales por zona de superficie permiten localizar trades atípicos en extremos de moneyness o vencimientos cortos.
+
+En términos operativos, una anomalía no se define sólo por error alto puntual, sino por contexto: error alto junto con baja densidad de vecinos, geometría local inestable o incoherencia entre explicación local y patrón global. Esta lectura reduce falsos positivos y mejora la utilidad del modelo como filtro de revisión manual.
+
+\subsection{Valoración de ilíquidas, control de mesa, auditoría y cobertura}
+\label{subsec:uso-operativo-derivados}
+
+Las aplicaciones más exigentes se apoyan en la misma secuencia de lectura: diagnóstico por zonas, contraste funcional de superficie y justificación local. Con ese flujo, el modelo aporta soporte en cuatro frentes conectados:
+
+\begin{itemize}
+  \item \textbf{Valoración de opciones ilíquidas o poco negociadas:} cuando no hay suficiente señal transaccional directa, la predicción basada en superficie y vecinos históricos ofrece una referencia empírica utilizable, con cautela reforzada en extremos.
+  \item \textbf{Control de riesgos de mesa de derivados:} la lectura por moneyness y vencimiento permite identificar dónde el error puede contaminar griegas, escenarios o límites de riesgo más que la media global.
+  \item \textbf{Explicación ante auditoría interna/model validation:} SHAP global/local, trazabilidad de pipeline y evidencias por superficie permiten defender decisiones de modelo con base reproducible.
+  \item \textbf{Soporte a decisiones de cobertura:} la geometría smile/term-structure más el diagnóstico local aportan contexto para priorizar coberturas en zonas de mayor sensibilidad o menor soporte histórico.
+\end{itemize}
+
+La conclusión práctica es que el modelo no sustituye el juicio de mercado, pero sí mejora su calidad: convierte decisiones difíciles en decisiones mejor informadas, trazables y auditables.
+
 \section{Discusión}
 \label{sec:discusion}
 
@@ -1497,7 +1545,7 @@ Financieramente, el proyecto trata la volatilidad como superficie y no como seri
 
 En otras palabras, el trabajo refuerza una idea clásica en derivados: el resultado útil no es un único número, sino una predicción situada dentro de una estructura de superficie, de un contexto de mercado y de una evidencia histórica comparable.
 
-También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no sólo a tablas globales de error.
+También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no sólo a tablas globales de error. Esta lectura aplicada se concreta en la Sección~\ref{sec:aplicaciones-operativas} y se refuerza con el anexo de sensibilidad por regiones de superficie.
 
 \textbf{Aportación frente a enfoques clásicos.}
 
@@ -1565,6 +1613,8 @@ La tercera conclusión es que la arquitectura de software condiciona la utilidad
 La cuarta conclusión es que progressive ATM no debe presentarse como mejora universal. En esta ejecución mejora la arquitectura Quantum Inspired, pero no al Random Forest final ni a XGBoost. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados.
 
 Desde la perspectiva financiera aplicada, la contribución diferencial frente a enfoques clásicos es doble. Primero, aporta una referencia empírica flexible para valoración y validación en zonas con menor liquidez o cobertura irregular. Segundo, incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que facilitan auditoría interna, model validation y soporte a decisiones de cobertura.
+
+Con ello, queda cubierta la dimensión operativa solicitada por tutoría: valoración de ilíquidas, detección de anomalías, validación independiente, control de riesgos, soporte de cobertura y análisis de sensibilidad por moneyness/vencimiento, con trazabilidad explícita en resultados, discusión y anexo.
 
 Por ello, el avance del TFM no debe leerse sólo como una mejora de RMSE. Debe leerse como mejora de \textbf{capacidad operativa}: detectar anomalías, justificar decisiones, analizar sensibilidad por moneyness/vencimiento y usar el modelo como herramienta de control de riesgos de mesa.
 
@@ -1961,6 +2011,37 @@ La diferencia por familia es relevante: regresión lineal y Random Forest usan p
 \end{itemize}
 
 Eso obliga a una conclusión metodológica sobria: progressive ATM es una estrategia interesante para explorar, no una mejora universal ni una receta que deba imponerse a todas las familias.
+
+\chapter{Análisis de sensibilidad por moneyness y vencimiento}
+\label{app:sensibilidad-moneyness-vencimiento}
+
+Este anexo desarrolla, en formato operativo, la sensibilidad del error por regiones de superficie. Se apoya en las vistas de \emph{Diagnosis}, donde se integran tres gráficos clave: \emph{Residual Heatmap}, \emph{Error by Maturity} y \emph{Error by Moneyness}. El objetivo es localizar zonas de mayor fragilidad para valoración y control de riesgos, no solo reportar un error promedio. Funciona como ampliación técnica de la Sección~\ref{sec:aplicaciones-operativas}.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Xgboost.png}
+\end{minipage}
+\caption{\small Análisis de sensibilidad por moneyness y vencimiento en los dos finalistas. Cada vista de \emph{Diagnosis} integra el residual heatmap y las descomposiciones de error por maturity y por moneyness.}
+\label{fig:app-sensitivity-rf-xgb}
+\end{figure}
+
+La Figura~\ref{fig:app-sensitivity-rf-xgb} permite una lectura directa por capas. Primero, el \emph{Residual Heatmap} identifica si la concentración de error se desplaza hacia extremos de moneyness o hacia tramos de vencimiento concretos. Segundo, \emph{Error by Maturity} resume si los vencimientos cortos, medios o largos concentran más desviación. Tercero, \emph{Error by Moneyness} separa el desempeño entre regiones ITM, ATM y OTM.
+
+Esta lectura es especialmente útil para mesa de derivados y tesorería porque conecta calidad predictiva con decisiones operativas. Si una zona presenta error estructuralmente mayor, esa zona requiere mayor prudencia en valoración, contraste adicional con modelos internos y monitorización reforzada de cobertura. En cambio, zonas con error bajo y patrón estable son candidatas a uso más sistemático del modelo como referencia de apoyo.
+
+\textbf{Regla de uso recomendada en producción:}
+
+\begin{itemize}
+  \item usar la métrica agregada para seleccionar familia de modelo;
+  \item usar la sensibilidad por moneyness/vencimiento para gobernar el uso real por tipo de contrato;
+  \item elevar a revisión manual los casos con error local alto y soporte histórico bajo.
+\end{itemize}
 
 \bibliographystyle{plainnat}
 \bibliography{research}
