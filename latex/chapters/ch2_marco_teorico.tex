@@ -120,7 +120,7 @@ SHAP descompone la predicción de un modelo en un valor base y contribuciones po
 
 \begin{equation}
 \hat{\sigma}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x),
-\label{eq:shap-additive}
+\label{eq:shap-additive_}
 \end{equation}
 
 donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los modelos surrogate dan reglas aproximadas y los vecinos informan sobre soporte local.
