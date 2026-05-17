@@ -586,6 +586,7 @@ class Trainer:
         phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
         upload_to_gcp: bool = True,
         progressive_training=False,
+        force_reload: bool = False,
     ):
         suffix = "_retrained_progressive" if progressive_training else ""
         base_family_name = self.model_family.get_family_name()
@@ -602,7 +603,7 @@ class Trainer:
             / f"{family_name}_{phase_suffix}_retrained_metadata.json"
         )
 
-        can_use_retrained_cache = is_train_val and retrained_metadata_path.exists()
+        can_use_retrained_cache = (not force_reload) and retrained_metadata_path.exists()
 
         if can_use_retrained_cache:
             with open(retrained_metadata_path, "r", encoding="utf-8") as f:
