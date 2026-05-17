@@ -919,8 +919,6 @@ Si ambos apuntan en la misma dirección, la conclusión es más sólida. Si disc
 \chapter{Modelo Quantum Inspired}
 \label{app:quantum-inspired}
 
-\textit{F1. Marco conceptual del enfoque.}
-
 Este anexo describe la arquitectura \emph{Quantum Inspired}, una red neuronal clásica que adopta un paradigma distinto al de matrices densas: utiliza una \textbf{factorización tensorial} inspirada en redes tensoriales usadas en física cuántica simulada clásicamente. La idea central es convertir el espacio de características embebidas en un tensor multidimensional y descomponerlo en una cadena de núcleos pequeños interconectados.
 
 Esta estrategia es apropiada para sistemas con muchos grados de libertad (como la superficie de volatilidad) porque combina compresión estructural, regularización implícita y una lectura más trazable de cómo se propagan dependencias entre variables.
@@ -970,8 +968,6 @@ Este reshape no es un mero cambio de vista: es el pivote conceptual que permite 
 La importancia radica en que \textbf{genera un objeto de altísima dimensionalidad implícita}. Si por ejemplo \((n_1, n_2, n_3, n_4) = (2,2,2,2)\), entonces $\prod n_k = 16$ componentes se reinterpretan como un tensor de \(2^4 = 16\) entradas. La contracción TT que viene después explotará esta estructura multidimensional para comprimir ese espacio de manera exponencial.
 
 \section{El núcleo Quantum Inspired: Descomposición Tensor-Train}
-
-\subsection{Concepto fundamental de la factorización Tensor-Train (F3.1)}
 
 La descomposición tensor-train (TT) es una forma estructurada de representar un tensor multidimensional mediante un producto de matrices pequeñas encadenadas. Para un tensor $\mathcal{Z}(i_1, \ldots, i_d)$, la descomposición TT escribe:
 
