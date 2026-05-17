@@ -4,7 +4,7 @@
 \section{Diseño general del estudio}
 \label{sec:diseno}
 
-El estudio tiene carácter empírico y aplicado. Parte de datos de mercado, construye una variable objetivo financiera mediante inversión de Black-76, entrena modelos de regresión y evalúa tanto rendimiento predictivo como coherencia explicativa. La Figura~\ref{fig:metodologia-general} resume el flujo metodológico. La ampliación de trazabilidad estructural del ETL se recoge en el \autoref{app:data-structures} y la de ingeniería de desarrollo y despliegue en el \autoref{app:workflow-dev}.
+El estudio tiene carácter empírico y aplicado. Parte de datos de mercado, construye una variable objetivo financiera mediante inversión de Black-76, entrena modelos de regresión y evalúa tanto rendimiento predictivo como coherencia explicativa. La Figura~\ref{fig:metodologia-general} resume el flujo metodológico. La ampliación de trazabilidad estructural del ETL se recoge en el apéndice \ref{app:data-structures} y la de ingeniería de desarrollo y despliegue en el apéndice \ref{app:workflow-dev}.
 
 \begin{figure}[htbp]
 \centering
@@ -102,7 +102,7 @@ de datos y aislar responsabilidades: los \emph{StepLoaders} orquestan
 lectura, cache y validación, mientras que los \emph{builders} construyen
 la salida material de cada paso.
 
-La Figura~\ref{fig:loaders-builders-schema} resume esta separación entre clases \emph{loader} y clases \emph{builder}. El detalle extenso de las estructuras de datos que va produciendo cada etapa se recoge además en el \autoref{app:data-structures}, para no sobrecargar el cuerpo principal con un diagrama demasiado largo.
+La Figura~\ref{fig:loaders-builders-schema} resume esta separación entre clases \emph{loader} y clases \emph{builder}. El detalle extenso de las estructuras de datos que va produciendo cada etapa se recoge además en el apéndice \ref{app:data-structures}, para no sobrecargar el cuerpo principal con un diagrama demasiado largo.
 
 \begin{wrapfigure}{l}{0.48\textwidth}
 \centering
@@ -335,7 +335,7 @@ Quantum Inspired NN & Variante clásica de red neuronal con estructura tensorial
 \label{tab:familias}
 \end{table}
 
-Todas las familias heredan una interfaz común: declaran parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas. Esta homogeneidad permite comparar un baseline lineal, modelos de árboles, boosting y arquitecturas neuronales con el mismo protocolo de selección. En la familia Quantum Inspired, el cálculo sigue siendo clásico: las features se proyectan a un embedding, se reordenan como tensor y se contraen mediante una capa tensor-train antes de una capa densa final. El concepto y su implementación práctica se detallan en el \autoref{app:quantum-inspired}.
+Todas las familias heredan una interfaz común: declaran parámetros fijos, espacio de búsqueda, instanciación, entrenamiento, persistencia y número de configuraciones exploradas. Esta homogeneidad permite comparar un baseline lineal, modelos de árboles, boosting y arquitecturas neuronales con el mismo protocolo de selección. En la familia Quantum Inspired, el cálculo sigue siendo clásico: las features se proyectan a un embedding, se reordenan como tensor y se contraen mediante una capa tensor-train antes de una capa densa final. El concepto y su implementación práctica se detallan en el apéndice \ref{app:quantum-inspired}.
 
 La elección de familias responde a una lógica comparativa.
 
@@ -444,7 +444,7 @@ con \(\gamma=0.25\) y \(\beta=0.75\) en la configuración actual.
 
 Es importante precisar que \(CE_2\) se utiliza para monitorizar consistencia en la fase train/validation. La evaluación definitiva de generalización del modelo se realiza siempre sobre el bloque test fuera de muestra.
 
-El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el \autoref{app:progressive}. Las Figuras~\ref{fig:doc-models-retraining-progressive-1} y~\ref{fig:doc-models-retraining-progressive-2} muestran el reentrenamiento del mejor candidato y los segmentos ATM.
+El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el apéndice \ref{app:progressive}. Las Figuras~\ref{fig:doc-models-retraining-progressive-1} y~\ref{fig:doc-models-retraining-progressive-2} muestran el reentrenamiento del mejor candidato y los segmentos ATM.
 
 
 
@@ -462,7 +462,7 @@ El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\l
 \section{Construcción del dashboard}
 \label{sec:dashboard-metodo}
 
-El dashboard no entrena modelos. Consume paquetes autocontenidos generados desde modelos finales (ver Figura ~\ref{fig:doc-dashboard-model-to-dashboard-1}). Cada paquete contiene dataset con predicciones, residuales y error absoluto, muestras para explicabilidad local, puntos de referencia de superficies, SHAP global y local, árboles surrogate, regresor simbólico, vecinos, superficies, ICE, ALE y diagnóstico agregado. La base teórica y operativa de SHAP, ALE y regresión simbólica se desarrolla respectivamente en los \autoref{app:shap}, \autoref{app:ale} y \autoref{app:symbolic-regression}.
+El dashboard no entrena modelos. Consume paquetes autocontenidos generados desde modelos finales (ver Figura ~\ref{fig:doc-dashboard-model-to-dashboard-1}). Cada paquete contiene dataset con predicciones, residuales y error absoluto, muestras para explicabilidad local, puntos de referencia de superficies, SHAP global y local, árboles surrogate, regresor simbólico, vecinos, superficies, ICE, ALE y diagnóstico agregado. La base teórica y operativa de SHAP, ALE y regresión simbólica se desarrolla respectivamente en los apéndice \ref{app:shap}, apéndice \ref{app:ale} y apéndice \ref{app:symbolic-regression}.
 
 \begin{figure}[h]
     \centering
@@ -475,7 +475,7 @@ La transformación de un modelo final a este paquete no modifica el predictor: c
 
 La aplicación se estructura en cuatro pestañas, resumidas en la Tabla~\ref{tab:dashboard-tabs}. Esta organización responde a preguntas distintas y evita confundir error predictivo con explicación.
 
-En particular, la lectura SHAP se divide en dos niveles complementarios: \textbf{SHAP global} en la pestaña \emph{Global Explainability} (drivers y patrones agregados) y \textbf{SHAP local} en la pestaña \emph{Sample Explainability}, donde se muestra el \emph{Local SHAP Waterfall} para justificar una predicción concreta. La formalización de ambas lecturas se recoge en el \autoref{app:shap}.
+En particular, la lectura SHAP se divide en dos niveles complementarios: \textbf{SHAP global} en la pestaña \emph{Global Explainability} (drivers y patrones agregados) y \textbf{SHAP local} en la pestaña \emph{Sample Explainability}, donde se muestra el \emph{Local SHAP Waterfall} para justificar una predicción concreta. La formalización de ambas lecturas se recoge en el apéndice \ref{app:shap}.
 
 \begin{table}[htbp]
 \centering
@@ -554,7 +554,7 @@ La API se implementa con FastAPI como un servicio \emph{ad hoc} independiente de
 
 La petición incluye modelo, tipo de opción, strike, subyacente, tiempo a vencimiento, tipo de interés y, opcionalmente, código de contrato y volatilidad real.
 
-La respuesta de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir. La operativa de workflows, automatización y despliegue reproducible que soporta esta separación se desarrolla con más detalle en el \autoref{app:workflow-dev}.
+La respuesta de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir. La operativa de workflows, automatización y despliegue reproducible que soporta esta separación se desarrolla con más detalle en el apéndice \ref{app:workflow-dev}.
 
 
 
@@ -628,9 +628,9 @@ La Tabla~\ref{tab:arquitectura-repo} muestra que el dashboard no reentrena model
 
 Vista así, la arquitectura no es sólo una organización de carpetas. Es una forma de aislar responsabilidades, simplificar depuración y poder justificar cada paso del flujo de principio a fin.
 
-Desde esa misma lógica, la arquitectura se apoya en un flujo de trabajo de ingeniería más próximo al de un proyecto real que al de un experimento ad hoc: ramas de trabajo, commits trazables, validaciones antes de integrar y control explícito de cambios sobre código, configuración, documentación y despliegue. Esa capa metodológica de desarrollo, validación y despliegue se amplía en el \autoref{app:workflow-dev}.
+Desde esa misma lógica, la arquitectura se apoya en un flujo de trabajo de ingeniería más próximo al de un proyecto real que al de un experimento ad hoc: ramas de trabajo, commits trazables, validaciones antes de integrar y control explícito de cambios sobre código, configuración, documentación y despliegue. Esa capa metodológica de desarrollo, validación y despliegue se amplía en el apéndice \ref{app:workflow-dev}.
 
-Todos estos paquetes están cubiertos por más del 80\% en cobertura de tests unitarios, haciendo que las funcionalidades sean robustas para futuras evoluciones del código, haciéndolo más escalables. A esta escalabilidad ayuda también el checkeo de formato Flake8. Para obligar a respetar tanto el formato Flake8 como el paso de los tests, se han desarrollado workflows de GitHub para que GitHub actions ejecute en pipelines para comprobar ambas condiciones, tal como se resume de forma específica en el \autoref{app:workflow-dev}.
+Todos estos paquetes están cubiertos por más del 80\% en cobertura de tests unitarios, haciendo que las funcionalidades sean robustas para futuras evoluciones del código, haciéndolo más escalables. A esta escalabilidad ayuda también el checkeo de formato Flake8. Para obligar a respetar tanto el formato Flake8 como el paso de los tests, se han desarrollado workflows de GitHub para que GitHub actions ejecute en pipelines para comprobar ambas condiciones, tal como se resume de forma específica en el apéndice \ref{app:workflow-dev}.
 
 
 \section{Riesgos metodológicos y controles}

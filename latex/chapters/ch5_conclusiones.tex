@@ -4,25 +4,25 @@
 
 Este proyecto desarrolla una cadena integral para estimar volatilidad implícita en opciones del IBEX y convertir el resultado en un sistema explicable y operable. El trabajo parte de datos de mercado, construye una base de volatilidad mediante inversión de Black-76, entrena familias de modelos bajo validación temporal y genera explicaciones y diagnósticos. Ese recorrido queda documentado de forma principal en el \autoref{chap:metodologia} y se evalúa empíricamente en el \autoref{chap:resultados}.
 
-La primera conclusión es que la calidad de un modelo de volatilidad no puede evaluarse solo con métricas agregadas. En derivados, la forma de la superficie, el comportamiento por moneyness y vencimiento y la localización del error son elementos centrales. Por ello el dashboard no se plantea como una capa estética, sino como parte del mecanismo de validación. Esta lectura por regiones se desarrolla de forma específica en el \autoref{app:sensibilidad-moneyness-vencimiento}.
+La primera conclusión es que la calidad de un modelo de volatilidad no puede evaluarse solo con métricas agregadas. En derivados, la forma de la superficie, el comportamiento por moneyness y vencimiento y la localización del error son elementos centrales. Por ello el dashboard no se plantea como una capa estética, sino como parte del mecanismo de validación. Esta lectura por regiones se desarrolla de forma específica en el apéndice \ref{app:sensibilidad-moneyness-vencimiento}.
 
-La segunda conclusión es que la explicabilidad aporta valor en dos planos. En ingeniería, ayuda a detectar fallos, fugas, sesgos y discontinuidades. En finanzas, permite justificar predicciones y analizar si el modelo se comporta de forma compatible con intuición económica y revisión profesional. Los desarrollos técnicos que sostienen esa capa explicativa aparecen en los \autoref{app:shap}, \autoref{app:ale} y \autoref{app:symbolic-regression}.
+La segunda conclusión es que la explicabilidad aporta valor en dos planos. En ingeniería, ayuda a detectar fallos, fugas, sesgos y discontinuidades. En finanzas, permite justificar predicciones y analizar si el modelo se comporta de forma compatible con intuición económica y revisión profesional. Los desarrollos técnicos que sostienen esa capa explicativa aparecen en los apéndice \ref{app:shap}, apéndice \ref{app:ale} y apéndice \ref{app:symbolic-regression}.
 
-La tercera conclusión es que la arquitectura de software condiciona la utilidad del modelo. Al separar ETL, entrenamiento, paquetes explicativos, API, dashboard y almacenamiento, el proyecto facilita reproducibilidad, mantenimiento y despliegue. Esta separación también reduce el riesgo de que las explicaciones se calculen sobre versiones distintas de las usadas en predicción. La estructura del ETL se detalla en el \autoref{app:data-structures} y la metodología de desarrollo, validación y despliegue en el \autoref{app:workflow-dev}.
+La tercera conclusión es que la arquitectura de software condiciona la utilidad del modelo. Al separar ETL, entrenamiento, paquetes explicativos, API, dashboard y almacenamiento, el proyecto facilita reproducibilidad, mantenimiento y despliegue. Esta separación también reduce el riesgo de que las explicaciones se calculen sobre versiones distintas de las usadas en predicción. La estructura del ETL se detalla en el apéndice \ref{app:data-structures} y la metodología de desarrollo, validación y despliegue en el apéndice \ref{app:workflow-dev}.
 
-La cuarta conclusión es que un entrenamiento progresivo ATM (entrenar en un inicio con datos más ATM y conforme avance el entrenamiento ir incorporando datos menos ATM) no debe presentarse como mejora universal. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados, como se desarrolla en el \autoref{app:progressive}.
+La cuarta conclusión es que un entrenamiento progresivo ATM (entrenar en un inicio con datos más ATM y conforme avance el entrenamiento ir incorporando datos menos ATM) no debe presentarse como mejora universal. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados, como se desarrolla en el apéndice \ref{app:progressive}.
 
 Desde la perspectiva financiera aplicada, la contribución diferencial frente a enfoques clásicos es doble. 
 \begin{enumerate}
     \item Aporta una referencia empírica flexible para valoración y validación en zonas con menor liquidez o cobertura irregular. 
-    \item Incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que permiten trasladar el modelo a situaciones operativas reconocibles: contrastar precios internos, revisar anomalías, priorizar coberturas y leer el riesgo por regiones de moneyness y vencimiento. Los desarrollos técnicos correspondientes se amplían en los \autoref{app:shap}, \autoref{app:ale} y \autoref{app:sensibilidad-moneyness-vencimiento}.
+    \item Incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que permiten trasladar el modelo a situaciones operativas reconocibles: contrastar precios internos, revisar anomalías, priorizar coberturas y leer el riesgo por regiones de moneyness y vencimiento. Los desarrollos técnicos correspondientes se amplían en los apéndice \ref{app:shap}, apéndice \ref{app:ale} y apéndice \ref{app:sensibilidad-moneyness-vencimiento}.
 \end{enumerate}
 
 El trabajo es a su vez una herramienta de apoyo a valoración, validación independiente y control de riesgos, con una trazabilidad explícita entre resultados, discusión y desarrollo anexo.
 
 Por ello, el avance de este trabajo no debe leerse sólo como una mejora de RMSE. Debe leerse como mejora de \textbf{capacidad operativa}: detectar anomalías, justificar decisiones, analizar sensibilidad por moneyness/vencimiento y usar el modelo como herramienta de control de riesgos de mesa.
 
-\subsection{Líneas Futuras}
+\subsection*{Líneas Futuras}
 Las líneas futuras planteadas:
 \begin{itemize}
     \item Complementar la explicabilidad ya incorporada con técnicas no incluidas en este trabajo, como Integrated Gradients o LIME, para contrastar mejor la lectura local.
