@@ -1,0 +1,255 @@
+
+\chapter{Fundamentos de SHAP}
+\label{app:shap}
+
+SHAP, acrónimo de \emph{SHapley Additive exPlanations}, es una metodología de explicabilidad basada en los valores de Shapley de la teoría de juegos cooperativos. Su objetivo es asignar a cada variable de entrada una contribución numérica a una predicción concreta del modelo. En lugar de interpretar el modelo de forma global mediante sus parámetros internos, SHAP interpreta localmente una predicción como la suma de un valor base y una serie de aportaciones individuales asociadas a las variables explicativas.
+
+La idea central es considerar una predicción del modelo como el resultado de una ``coalición'' de variables. Algunas variables están presentes y aportan información; otras se consideran ausentes y su efecto se sustituye por una referencia esperada. El problema consiste entonces en repartir de forma justa la diferencia entre la predicción concreta y el valor medio de referencia entre las variables que intervienen en la predicción.
+
+\section{Modelo aditivo de explicación}
+
+SHAP pertenece a la familia de métodos de explicación aditiva. Para una observación \(x\), la predicción del modelo \(f(x)\) se aproxima o descompone como
+
+\begin{equation}
+f(x) =
+\phi_0 + \sum_{j=1}^{p} \phi_j(x),
+\label{eq:shap-additive}
+\end{equation}
+
+donde \(p\) es el número de variables explicativas, \(\phi_0\) representa el valor base de la predicción y \(\phi_j(x)\) es la contribución atribuida a la variable \(j\) para la observación \(x\). En muchas aplicaciones, \(\phi_0\) se interpreta como el valor esperado del modelo sobre una distribución de referencia:
+
+\begin{equation}
+\phi_0 = \mathbb{E}[f(X)].
+\label{eq:shap-base-value}
+\end{equation}
+
+Por tanto, cada valor SHAP mide cuánto desplaza una variable la predicción respecto a ese valor base. Si \(\phi_j(x) > 0\), la variable \(j\) empuja la predicción por encima de la referencia. Si \(\phi_j(x) < 0\), la empuja por debajo. La suma de todas las contribuciones reconstruye la predicción del modelo para la observación analizada.
+
+En el contexto de este proyecto, donde el objetivo es explicar predicciones de volatilidad implícita, la lectura natural es la siguiente: el valor base representa una volatilidad de referencia estimada por el modelo, mientras que cada valor SHAP indica cuánto contribuyen variables como el precio del subyacente, el strike, el tiempo a vencimiento o el tipo de interés a desplazar la predicción final hacia arriba o hacia abajo.
+
+\section{Valores de Shapley}
+
+El fundamento matemático de SHAP procede de los valores de Shapley. En teoría de juegos cooperativos, se considera un conjunto de jugadores \(N = \{1,\ldots,p\}\) y una función de valor \(v(S)\), que asigna a cada subconjunto de jugadores \(S \subseteq N\) el valor que obtiene esa coalición. El objetivo es repartir el valor total \(v(N)\) entre los jugadores de forma coherente con su contribución marginal media.
+
+Trasladado a explicabilidad de modelos, los jugadores son las variables del modelo y la función \(v(S)\) mide el valor esperado de la predicción cuando se conoce únicamente el subconjunto de variables \(S\). Para una variable \(j\), su valor de Shapley se define como
+
+\begin{equation}
+\phi_j =
+\sum_{S \subseteq N \setminus \{j\}}
+\frac{|S|!(p-|S|-1)!}{p!}
+\left[
+v(S \cup \{j\}) - v(S)
+\right].
+\label{eq:shapley}
+\end{equation}
+
+El término
+
+\begin{equation}
+v(S \cup \{j\}) - v(S)
+\label{eq:shap-marginal-contribution}
+\end{equation}
+
+representa la contribución marginal de la variable \(j\) cuando se añade a una coalición \(S\) que todavía no la contiene. Como esta contribución puede depender fuertemente de qué otras variables estén ya presentes, el valor de Shapley no toma una única contribución marginal, sino una media ponderada sobre todos los subconjuntos posibles.
+
+El peso
+
+\begin{equation}
+\frac{|S|!(p-|S|-1)!}{p!}
+\label{eq:shapley-weight}
+\end{equation}
+
+tiene una interpretación combinatoria. Representa la proporción de órdenes posibles de entrada de las variables en los que el subconjunto \(S\) aparece antes que la variable \(j\). De esta forma, el valor de Shapley puede entenderse como la contribución marginal esperada de una variable cuando las variables se incorporan al modelo en todos los órdenes posibles.
+
+Esta construcción evita depender de un único orden arbitrario de incorporación de variables. Por ejemplo, en un modelo financiero, el efecto atribuido al \emph{strike} puede depender de si el precio del subyacente ya se ha considerado o no. SHAP promedia estas situaciones y asigna a cada variable una contribución que tiene en cuenta todas las posibles coaliciones.
+
+\section{Función de valor en explicabilidad de modelos}
+
+Para aplicar los valores de Shapley a modelos predictivos es necesario definir la función de valor \(v(S)\). Una formulación habitual consiste en definir
+
+\begin{equation}
+v(S) =
+\mathbb{E}
+\left[
+f(X) \mid X_S = x_S
+\right],
+\label{eq:shap-value-function}
+\end{equation}
+
+donde \(X_S\) representa el subconjunto de variables incluidas en \(S\), y \(x_S\) son los valores observados de esas variables para la instancia que se quiere explicar.
+
+Esta expresión indica que, cuando sólo se conocen las variables de \(S\), la predicción se calcula como el valor esperado del modelo condicionando a que esas variables toman los valores observados. Las variables que no pertenecen a \(S\) se integran o sustituyen mediante una distribución de referencia.
+
+En la práctica, esta definición plantea una dificultad importante: no siempre es sencillo estimar la distribución condicional de las variables ausentes. Por ello, diferentes explicadores SHAP utilizan aproximaciones distintas. Algunos métodos asumen independencia entre variables, otros usan muestras de fondo, otros aprovechan la estructura interna del modelo, como ocurre con árboles de decisión, y otros estiman las contribuciones mediante permutaciones.
+
+Esta elección no es un detalle menor. Cuando las variables están correlacionadas, la forma de tratar las variables ausentes afecta a la atribución final. Por ejemplo, en opciones financieras, variables como el precio del subyacente, el strike y el moneyness no son independientes en sentido económico. Por tanto, los valores SHAP deben interpretarse como atribuciones del modelo bajo una definición concreta de ausencia de variables, no como efectos causales puros.
+
+\section{Propiedades de los valores SHAP}
+
+Una de las razones por las que SHAP es ampliamente utilizado es que hereda propiedades teóricas deseables de los valores de Shapley. Entre las más relevantes destacan la eficiencia, la simetría, la nulidad y la aditividad.
+
+La propiedad de eficiencia establece que la suma de las contribuciones asignadas a las variables coincide con la diferencia entre la predicción de la observación y el valor base:
+
+\begin{equation}
+\sum_{j=1}^{p} \phi_j(x)
+=
+f(x) - \phi_0.
+\label{eq:shap-efficiency}
+\end{equation}
+
+Equivalentemente,
+
+\begin{equation}
+f(x)
+=
+\phi_0 + \sum_{j=1}^{p} \phi_j(x).
+\label{eq:shap-local-accuracy}
+\end{equation}
+
+Esta propiedad también se conoce en el contexto de SHAP como \emph{local accuracy}. Garantiza que la explicación local no sólo ordena variables por importancia, sino que reconstruye numéricamente la predicción explicada.
+
+La propiedad de simetría indica que si dos variables aportan exactamente lo mismo a todas las coaliciones posibles, entonces deben recibir la misma contribución. Formalmente, si para dos variables \(i\) y \(j\) se cumple que
+
+\begin{equation}
+v(S \cup \{i\}) = v(S \cup \{j\})
+\quad
+\text{para todo }
+S \subseteq N \setminus \{i,j\},
+\label{eq:shap-symmetry}
+\end{equation}
+
+entonces
+
+\begin{equation}
+\phi_i = \phi_j.
+\end{equation}
+
+La propiedad de nulidad establece que una variable que no cambia el valor de ninguna coalición debe recibir contribución cero. Si
+
+\begin{equation}
+v(S \cup \{j\}) = v(S)
+\quad
+\text{para todo }
+S \subseteq N \setminus \{j\},
+\label{eq:shap-null-player}
+\end{equation}
+
+entonces
+
+\begin{equation}
+\phi_j = 0.
+\end{equation}
+
+Finalmente, la propiedad de aditividad indica que si una función de valor puede escribirse como suma de dos funciones,
+
+\begin{equation}
+v(S) = v_1(S) + v_2(S),
+\label{eq:shap-additivity-property}
+\end{equation}
+
+entonces los valores de Shapley asociados también se suman:
+
+\begin{equation}
+\phi_j(v) = \phi_j(v_1) + \phi_j(v_2).
+\label{eq:shap-additivity-values}
+\end{equation}
+
+Estas propiedades hacen que SHAP proporcione una asignación consistente de contribuciones bajo el marco matemático elegido. No obstante, la consistencia formal de la atribución no debe confundirse con causalidad económica ni con validación del modelo.
+
+\section{Interpretación local y global}
+
+SHAP es, en primer lugar, una técnica de explicación local. Para una observación concreta \(x_i\), produce un vector de contribuciones
+
+\begin{equation}
+\phi(x_i)
+=
+\left(
+\phi_1(x_i),
+\ldots,
+\phi_p(x_i)
+\right),
+\label{eq:shap-vector}
+\end{equation}
+
+que explica cómo se pasa del valor base \(\phi_0\) a la predicción individual \(f(x_i)\). Esta lectura es especialmente útil cuando se quiere justificar por qué un contrato concreto recibe una determinada predicción de volatilidad.
+
+A partir de las explicaciones locales también pueden construirse medidas globales. Una medida habitual de importancia global de la variable \(j\) es la media del valor absoluto de sus contribuciones SHAP sobre un conjunto de observaciones:
+
+\begin{equation}
+I_j =
+\frac{1}{n}
+\sum_{i=1}^{n}
+|\phi_j(x_i)|.
+\label{eq:shap-global-importance}
+\end{equation}
+
+Esta magnitud no indica si una variable aumenta o reduce la predicción en promedio, sino cuánto contribuye, en valor absoluto, a modificar las predicciones del modelo. Por ello, debe interpretarse como una medida de intensidad explicativa, no como un coeficiente de regresión ni como una elasticidad financiera.
+
+Además, el signo y la magnitud de \(\phi_j(x_i)\) pueden variar entre observaciones. Una misma variable puede aumentar la predicción en una zona del espacio de datos y reducirla en otra. Esta característica resulta especialmente relevante en modelos no lineales, donde el efecto aprendido por el modelo puede depender del nivel de moneyness, del vencimiento o de la región de mercado considerada.
+
+\section{Aproximación mediante permutaciones}
+
+El cálculo exacto de los valores de Shapley requiere evaluar todos los subconjuntos posibles de variables. Como existen \(2^p\) subconjuntos, el coste computacional crece exponencialmente con el número de variables. Para modelos con muchas variables o predicciones costosas, el cálculo exacto puede ser inviable.
+
+Una forma de aproximar los valores SHAP consiste en estimar las contribuciones marginales mediante permutaciones. En lugar de enumerar explícitamente todos los subconjuntos, se generan distintos órdenes de entrada de las variables. Para cada permutación, se mide cuánto cambia la predicción al incorporar una variable después de las que la preceden en ese orden. Promediando estas contribuciones marginales sobre varias permutaciones, se obtiene una estimación del valor de Shapley.
+
+Sea \(\pi\) una permutación de las variables y sea \(P_j^\pi\) el conjunto de variables que aparecen antes que \(j\) en dicha permutación. La contribución marginal de \(j\) bajo el orden \(\pi\) puede escribirse como
+
+\begin{equation}
+\Delta_j^\pi
+=
+v(P_j^\pi \cup \{j\})
+-
+v(P_j^\pi).
+\label{eq:shap-permutation-marginal}
+\end{equation}
+
+El valor de Shapley puede interpretarse entonces como la esperanza de esta contribución marginal sobre todas las permutaciones posibles:
+
+\begin{equation}
+\phi_j
+=
+\mathbb{E}_{\pi}
+\left[
+\Delta_j^\pi
+\right].
+\label{eq:shap-permutation-expectation}
+\end{equation}
+
+En la práctica, esta esperanza se aproxima usando un número finito de permutaciones. Esta aproximación tiene la ventaja de ser independiente de la familia del modelo, por lo que puede aplicarse de forma homogénea a redes neuronales, modelos de árboles, regresiones u otros estimadores. Su principal inconveniente es que puede ser más costosa computacionalmente que explicadores especializados diseñados para una arquitectura concreta.
+
+En este proyecto se utiliza un explicador de permutación mediante \texttt{shap.Explainer(..., algorithm="permutation")}. Esta decisión prioriza una semántica común entre modelos heterogéneos frente a la eficiencia máxima que podría obtenerse con explicadores específicos. El presupuesto mínimo de evaluaciones por observación depende del número de variables \(p\), y en la implementación empleada se controla mediante el parámetro
+
+\begin{equation}
+max\_evals \geq 2p+1.
+\label{eq:shap-evals}
+\end{equation}
+
+\section{Variables de fondo y valor base}
+
+El cálculo de SHAP requiere una referencia frente a la cual medir las contribuciones. Esta referencia se construye mediante un conjunto de fondo o \emph{background dataset}. Dicho conjunto representa la distribución de datos que el explicador utiliza para sustituir o integrar las variables ausentes.
+
+El valor base \(\phi_0\) depende de esta distribución de fondo. Por ello, cambiar el conjunto de referencia puede cambiar las explicaciones, incluso si el modelo predictivo no cambia. En términos prácticos, explicar una predicción respecto a una muestra representativa de todo el mercado no es necesariamente equivalente a explicarla respecto a una muestra restringida a opciones de corto vencimiento o a una región concreta de moneyness.
+
+En este proyecto, el conjunto de fondo se controla mediante el parámetro \texttt{shap\_background\_size}. Las observaciones usadas para generar explicaciones globales se controlan mediante \texttt{shap\_explain\_size}, mientras que las explicaciones locales de contratos concretos se calculan sobre muestras seleccionadas mediante \texttt{sample\_option\_size}. Esta parametrización permite equilibrar coste computacional, estabilidad de las explicaciones y representatividad de la muestra explicada.
+
+\section{Limitaciones interpretativas}
+
+Aunque SHAP proporciona una descomposición matemáticamente rigurosa de la predicción del modelo, su interpretación debe hacerse con cautela.
+
+En primer lugar, SHAP no identifica causalidad. Un valor SHAP positivo para una variable indica que, bajo el modelo entrenado y la definición de referencia utilizada, esa variable contribuye a elevar la predicción respecto al valor base. No implica que modificar causalmente esa variable produciría necesariamente el mismo cambio en el mercado real.
+
+En segundo lugar, SHAP explica el comportamiento del modelo, no la verdad del fenómeno financiero subyacente. Si el modelo ha aprendido relaciones espurias, sesgos de muestra o patrones inestables, SHAP puede describir esas relaciones con precisión sin que por ello sean económicamente válidas.
+
+En tercer lugar, las correlaciones entre variables pueden afectar a la atribución. En problemas financieros, muchas variables no son independientes: el strike, el precio del subyacente, el moneyness y el tiempo a vencimiento pueden presentar dependencias estructurales. Por tanto, la asignación de contribuciones debe entenderse dentro de la aproximación concreta utilizada por el explicador.
+
+Finalmente, una explicación local detallada no equivale a una garantía de calidad predictiva. Un gráfico SHAP puede mostrar de forma clara cómo el modelo reparte una predicción entre variables, pero no demuestra que la predicción sea precisa. La explicabilidad debe combinarse con métricas de error, validación temporal, análisis de robustez y conocimiento financiero del producto.
+
+\section{Uso en este proyecto}
+
+En este trabajo, SHAP se utiliza para explicar modelos de predicción de volatilidad implícita desde dos perspectivas complementarias. A nivel local, permite analizar por qué el modelo asigna una determinada volatilidad a un contrato concreto. A nivel global, permite identificar qué variables concentran mayor intensidad explicativa en el conjunto de observaciones analizadas.
+
+Las explicaciones se calculan sobre variables visibles financieramente interpretables, como \texttt{OptionType}, \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. Aunque el modelo pueda utilizar transformaciones internas o variables derivadas, la capa de explicabilidad reconstruye las entradas necesarias para mantener una lectura coherente desde el punto de vista financiero.
+
+Los artefactos visuales del dashboard, como gráficos \emph{beeswarm}, rankings de importancia media absoluta, \emph{dependence plots}, \emph{heatmaps} y gráficos \emph{waterfall}, son distintas formas de representar la misma estructura matemática: la descomposición de una predicción en un valor base y un conjunto de contribuciones aditivas. Así, SHAP no se utiliza como sustituto de la validación del modelo, sino como herramienta complementaria para auditar su comportamiento y mejorar la trazabilidad de sus predicciones.
+

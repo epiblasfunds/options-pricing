@@ -42,7 +42,16 @@ services:
     volumes:
       - ..:/repo
     working_dir: /repo/latex
-    command: ["latexmk", "-pdf", "main.tex"]
+    command:
+      [
+        "latexmk",
+        "-pdf",
+        "-shell-escape",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-f",
+        "main.tex",
+      ]
 
   clean-latex:
     build:
