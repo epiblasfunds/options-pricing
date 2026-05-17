@@ -251,7 +251,7 @@ El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje aut
 \chapter{Resultados y Discusión}
 \label{chap:resultados}
 
-La comparación final muestra que la solución estándar basada en Random Forest ofrece un comportamiento fuera de muestra sólido. En el conjunto de test obtiene \(RMSE=0.088403\), \(MAE=0.054366\) y \(R^2=0.790941\). La lectura de resultados se organiza en tres planos: rendimiento predictivo, impacto del entrenamiento progressive ATM y capacidad de explicación del modelo de referencia mediante dashboard.
+La comparación final muestra que la solución estándar basada en Random Forest ofrece un comportamiento en test sólido. En el conjunto de test obtiene \(RMSE=0.088403\), \(MAE=0.054366\) y \(R^2=0.790941\). La lectura de resultados se organiza en tres planos: rendimiento predictivo, impacto del entrenamiento progressive ATM y capacidad de explicación del modelo de referencia mediante dashboard.
 
 \section{Resultados}
 \label{sec:resultados}
@@ -289,7 +289,7 @@ La Tabla~\ref{tab:resultados-modelos} muestra que las familias de árboles domin
 \begin{itemize}
   \item El problema parece premiar modelos tabulares capaces de capturar interacciones no lineales sin requerir un ajuste tan delicado como el de las redes.
   \item La diferencia entre Random Forest y XGBoost es pequeña en valor absoluto, pero suficiente para inclinar la selección final hacia el bosque.
-  \item Las arquitecturas más complejas no aportan automáticamente mejor generalización, lo que refuerza la necesidad de validar fuera de muestra y no por intuición tecnológica.
+  \item Las arquitecturas más complejas no aportan automáticamente mejor generalización, lo que refuerza la necesidad de validar en test y no por intuición tecnológica.
 \end{itemize}
 
 Por tanto, el resultado agregado ya sugiere una lectura metodológica útil: en esta base de volatilidad implícita, la ventaja no proviene de la familia más sofisticada en abstracto, sino de la que mejor equilibra flexibilidad, robustez y estabilidad temporal.
@@ -344,7 +344,7 @@ Hiperparámetros principales & \(500\) árboles, profundidad máxima \(8\), \tex
 RMSE test & 0.088403 \\
 MAE test & 0.054366 \\
 \(R^2\) test & 0.790941 \\
-Argumento principal & Buen equilibrio entre error fuera de muestra, estabilidad temporal y facilidad de uso en el paquete explicativo. \\
+Argumento principal & Buen equilibrio entre error en test, estabilidad temporal y facilidad de uso en el paquete explicativo. \\
 Riesgo principal detectado & Predicciones menos dispersas que la volatilidad real: \(\sigma_{\hat{y},test}=0.149458\) frente a \(\sigma_{y,test}=0.193345\). \\
 \bottomrule
 \end{tabular}
@@ -352,7 +352,7 @@ Riesgo principal detectado & Predicciones menos dispersas que la volatilidad rea
 \label{tab:modelo-final}
 \end{table}
 
-Más allá del RMSE, la comparación en train/validation muestra una generalización consistente: \(RMSE_{train}=0.071027\), \(RMSE_{val}=0.071080\) y \(R^2_{val}=0.653348\). XGBoost tiene el CE\(_2\) más bajo en train/validation, pero su test queda por detrás. La lectura práctica prioriza rendimiento fuera de muestra, estabilidad razonable y menor degradación al pasar de validación a test.
+Más allá del RMSE, la comparación en train/validation muestra una generalización consistente: \(RMSE_{train}=0.071027\), \(RMSE_{val}=0.071080\) y \(R^2_{val}=0.653348\). XGBoost tiene el CE\(_2\) más bajo en train/validation, pero su test queda por detrás. La lectura práctica prioriza rendimiento en test, estabilidad razonable y menor degradación al pasar de validación a test.
 
 \textbf{La selección final combina criterios cuantitativos y operativos.}
 
@@ -443,7 +443,7 @@ El proyecto incluyó una variante experimental denominada Progressive ATM (o \em
 
 \end{description}
 
-\textbf{Implicación práctica.} Random Forest, bajo entrenamiento estándar (sin ATM), funciona como referencia de trabajo para la solución de producción. No solo logra métricas fuera de muestra sólidas (RMSE 0.0884), sino que permanece robusto frente a variantes experimentales como ATM. Un modelo que no mejora con ATM suele indicar que ya ha alcanzado un nivel de regularización apropiado: no es excesivamente sensible a ruido y su capacidad de generalización es estable. Por el contrario, modelos que mejoran significativamente con ATM (Sequential NN, Quantum Inspired) sugieren que su arquitectura es más sensible al orden de entrenamiento y requeriría un seguimiento cuidadoso.
+\textbf{Implicación práctica.} Random Forest, bajo entrenamiento estándar (sin ATM), funciona como referencia de trabajo para la solución de producción. No solo logra métricas en test sólidas (RMSE 0.0884), sino que permanece robusto frente a variantes experimentales como ATM. Un modelo que no mejora con ATM suele indicar que ya ha alcanzado un nivel de regularización apropiado: no es excesivamente sensible a ruido y su capacidad de generalización es estable. Por el contrario, modelos que mejoran significativamente con ATM (Sequential NN, Quantum Inspired) sugieren que su arquitectura es más sensible al orden de entrenamiento y requeriría un seguimiento cuidadoso.
 
 \textbf{Conclusión sobre Progressive ATM.} La técnica debe considerarse una variante experimental de refinamiento, útil únicamente para arquitecturas específicas que sufren de convergencia deficiente o sensibilidad al orden de los datos. No constituye una mejora universal del pipeline estándar, y en algunos casos (XGBoost, Linear Regression) resulta innecesaria o contraproducente. Su valor académico está en mostrar que modelos de baja capacidad intrínseca pueden beneficiarse de estrategias de currículum; su aplicación práctica debe limitarse a escenarios donde se identifique explícitamente convergencia frágil durante el ajuste de hiperparámetros. En esta ejecución, el entrenamiento estándar ofrece la base más simple y reproducible.
 
@@ -496,7 +496,7 @@ La explicación global debe comprobar que los drivers principales son coherentes
 \centering
 \includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Global Explainability - Xgboost I.png}
 \end{minipage}
-\caption{\small SHAP global comparado en los dos modelos con mejor rendimiento fuera de muestra: Random Forest y XGBoost.}
+\caption{\small SHAP global comparado en los dos modelos con mejor rendimiento en test: Random Forest y XGBoost.}
 \label{fig:dash-global-shap-comparison}
 \end{figure}
 
@@ -713,7 +713,7 @@ La conclusión práctica es que el modelo no sustituye el juicio de mercado, per
 \section{Discusión}
 \label{sec:discusion}
 
-La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativamente con matices. Sí es posible construir un modelo útil y consultable para volatilidad implícita de opciones del IBEX; el Random Forest seleccionado ofrece buen error fuera de muestra. El matiz es que la explicación no puede descansar en un único resumen global: la fidelidad de modelos equivalentes simples es limitada, y la defensa técnica debe combinar SHAP, superficies, ICE/ALE, vecinos y diagnóstico.
+La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativamente con matices. Sí es posible construir un modelo útil y consultable para volatilidad implícita de opciones del IBEX; el Random Forest seleccionado ofrece buen error en test. El matiz es que la explicación no puede descansar en un único resumen global: la fidelidad de modelos equivalentes simples es limitada, y la defensa técnica debe combinar SHAP, superficies, ICE/ALE, vecinos y diagnóstico.
 
 \subsection{Lectura financiera}
 \label{subsec:discusion-financiera}
