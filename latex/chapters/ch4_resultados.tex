@@ -60,7 +60,7 @@ La evidencia sugiere una lectura por familias.
   \item En \textbf{Quantum Inspired}, la mejora apunta a que la estrategia sí puede actuar como regularizador estructural cuando la arquitectura es más sensible al orden de aprendizaje.
 \end{itemize}
 
-La conclusión práctica es sobria: progressive ATM es útil como hipótesis de trabajo y como herramienta de análisis, pero su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
+La conclusión práctica es sobria: progressive ATM es útil como hipótesis de trabajo y como herramienta de análisis, pero su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el \autoref{app:progressive}.
 
 \subsection{Modelo de referencia}
 \label{subsec:modelo-final}
@@ -68,7 +68,7 @@ La conclusión práctica es sobria: progressive ATM es útil como hipótesis de 
 El modelo de referencia es el XGBoost:
 \begin{itemize}
     \item Desempeño en test muy notable quedando muy cercano al mejor desempeño entre todas las familias.
-    \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R2=0.9264$
+    \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R2=0.9264$. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el \autoref{app:symbolic-regression}.
 \end{itemize}
 
 \subsection{Diagnóstico de rendimiento}
@@ -136,7 +136,7 @@ La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smi
 \subsection{Explicabilidad global}
 \label{subsec:global-results}
 
-La explicación global debe comprobar que los drivers principales son coherentes con la geometría de volatilidad: moneyness, vencimiento, subyacente, strike, tipo y tipo de opción. SHAP se calcula sobre variables raw visibles y el runtime reconstruye las features transformadas, por lo que una contribución de \texttt{StrikePrice} o \texttt{UnderlyingPrice} debe interpretarse en relación con moneyness y no como efecto causal aislado.
+La explicación global debe comprobar que los drivers principales son coherentes con la geometría de volatilidad: moneyness, vencimiento, subyacente, strike, tipo y tipo de opción. SHAP se calcula sobre variables raw visibles y el runtime reconstruye las features transformadas, por lo que una contribución de \texttt{StrikePrice} o \texttt{UnderlyingPrice} debe interpretarse en relación con moneyness y no como efecto causal aislado. La base formal de esta descomposición y sus limitaciones interpretativas se desarrollan en el \autoref{app:shap}.
 
 \begin{figure}[htbp]
 \centering
@@ -188,7 +188,7 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
     \label{tab:symbolic-fidelity-all-models}
 \end{table}
 
-Los modelos equivalentes explican el predictor, no la verdad de mercado. 
+Los modelos equivalentes explican el predictor, no la verdad de mercado. La regresión simbólica debe leerse aquí exactamente en ese sentido de surrogate y fidelidad, como se detalla en el \autoref{app:symbolic-regression}. 
 
 La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del XGBoost. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica (ver Tabla \ref{tab:surrogate-rf}) generada para este paquete muestra métricas no utilizables para defensa del Random Forest ni del Quantum Inspired NN, con RMSE de fidelidad extremadamente alto; por tanto, el modelo más fiable que obtenemos es el XGBoost.
 
@@ -233,7 +233,7 @@ La Figura~\ref{fig:dash-tree-depth-xgb}, junto con la Tabla~\ref{tab:surrogate-r
 \label{fig:dash-local-dataset-rf-xgb_2}
 \end{figure}
 
-El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones.
+El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones. La lógica matemática de SHAP y la semántica de valor base y contribuciones locales se desarrollan en el \autoref{app:shap}.
 
 
 
@@ -276,14 +276,14 @@ Este enfoque es especialmente útil cuando el área de validación necesita una 
 \subsection{Interpolación y suavizado: alcance real del enfoque}
 \label{subsec:interpolacion-suavizado-alcance}
 
-La superficie se aprende de forma empírica a partir de observaciones de mercado mediante modelos supervisados. Por tanto, la ``interpolación'' se produce de forma implícita a través de la función aprendida $\hat{\sigma}(m,T,\dots)$ y se evalúa visualmente con las vistas de \emph{Behaviour And Surface} y \emph{Diagnosis}.
+La superficie se aprende de forma empírica a partir de observaciones de mercado mediante modelos supervisados. Por tanto, la ``interpolación'' se produce de forma implícita a través de la función aprendida $\hat{\sigma}(m,T,\dots)$ y se evalúa visualmente con las vistas de \emph{Behaviour And Surface} y \emph{Diagnosis}. El desglose más específico de sensibilidad por regiones de moneyness y vencimiento se recoge en el \autoref{app:sensibilidad-moneyness-vencimiento}.
 
 La suavidad no se da por supuesta: se verifica. Si aparecen escalones locales o concentraciones de error en zonas concretas, el resultado se interpreta como limitación del modelo en esa región, no como propiedad financiera del mercado. Esta distinción es clave para no confundir capacidad predictiva local con una estructura de superficie económicamente robusta.
 
 \subsection{Detección de anomalías de precio y errores de mercado}
 \label{subsec:anomalias-precio-mercado}
 
-La detección de anomalías se construye en dos capas complementarias. La primera está en el ETL, con controles de calidad (precios y cantidades válidas, coherencia temporal opción-subyacente, resolución numérica estable de volatilidad implícita). La segunda está en diagnóstico posterior, donde los residuales por zona de superficie permiten localizar trades atípicos en extremos de moneyness o vencimientos cortos.
+La detección de anomalías se construye en dos capas complementarias. La primera está en el ETL, con controles de calidad (precios y cantidades válidas, coherencia temporal opción-subyacente, resolución numérica estable de volatilidad implícita). La segunda está en diagnóstico posterior, donde los residuales por zona de superficie permiten localizar trades atípicos en extremos de moneyness o vencimientos cortos. El detalle estructural del ETL está desarrollado en el \autoref{app:data-structures} y la lectura regional del error en el \autoref{app:sensibilidad-moneyness-vencimiento}.
 
 En términos operativos, una anomalía no se define sólo por error alto puntual, sino por contexto: error alto junto con baja densidad de vecinos, geometría local inestable o incoherencia entre explicación local y patrón global. Esta lectura mejora la utilidad del modelo como filtro de revisión manual.
 
@@ -303,7 +303,7 @@ Las aplicaciones más exigentes se apoyan en la misma secuencia de lectura: diag
 \section{Discusión}
 \label{sec:discusion}
 
-La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativamente con matices. Sí es posible construir un modelo útil y consultable para volatilidad implícita de opciones del IBEX. El matiz es que la explicación no puede descansar en un único resumen global: la fidelidad de modelos equivalentes simples es limitada, y la defensa técnica debe combinar SHAP, superficies, ICE/ALE, vecinos y diagnóstico.
+La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativamente con matices. Sí es posible construir un modelo útil y consultable para volatilidad implícita de opciones del IBEX. El matiz es que la explicación no puede descansar en un único resumen global: la fidelidad de modelos equivalentes simples es limitada, y la defensa técnica debe combinar SHAP, superficies, ICE/ALE, vecinos y diagnóstico. Los fundamentos de SHAP, ALE y regresión simbólica que sostienen esta lectura se amplían en los \autoref{app:shap}, \autoref{app:ale} y \autoref{app:symbolic-regression}.
 
 \subsection{Lectura financiera}
 \label{subsec:discusion-financiera}

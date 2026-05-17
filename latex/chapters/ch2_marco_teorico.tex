@@ -105,7 +105,7 @@ donde \(X\) contiene variables financieras observables y transformadas. La liter
   \item Random Forest, basado en agregación de árboles para capturar interacciones no lineales \citep{breiman2001random}.
   \item XGBoost, como boosting regularizado con early stopping y buen rendimiento en datos tabulares \citep{chen2016xgboost}.
   \item Redes neuronales densas, como aproximadores flexibles de funciones no lineales \citep{hornik1989multilayer}.
-  \item Una red neuronal clásica \emph{quantum inspired}, que introduce una estructura tensorial inspirada en ideas de representación compacta y redes tensoriales para aprendizaje supervisado \citep{stoudenmire2016supervised,novikov2015tensorizing}. No se presenta como computación cuántica real, sino como una variante arquitectónica implementada en código.
+  \item Una red neuronal clásica \emph{quantum inspired}, que introduce una estructura tensorial inspirada en ideas de representación compacta y redes tensoriales para aprendizaje supervisado \citep{stoudenmire2016supervised,novikov2015tensorizing}. No se presenta como computación cuántica real, sino como una variante arquitectónica implementada en código. Su desarrollo conceptual y arquitectónico se amplía en el \autoref{app:quantum-inspired}.
 \end{itemize}
 
 La comparación no puede basarse solo en error medio. En datos financieros temporales, una evaluación mal planteada puede introducir fuga de información. Por ello se emplean splits temporales, control de contratos compartidos y k-folds temporales, tal como se desarrolla en el \autoref{sec:validacion}.
@@ -123,7 +123,7 @@ SHAP descompone la predicción de un modelo en un valor base y contribuciones po
 \label{eq:shap-additive_}
 \end{equation}
 
-donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los modelos surrogate dan reglas aproximadas y los vecinos informan sobre soporte local.
+donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los modelos surrogate dan reglas aproximadas y los vecinos informan sobre soporte local. Los fundamentos formales de SHAP se desarrollan en el \autoref{app:shap}, el detalle operativo de ALE en el \autoref{app:ale} y la lectura de la regresión simbólica como surrogate en el \autoref{app:symbolic-regression}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
