@@ -108,7 +108,7 @@ manychapters,pdfspacing]{classicthesis}
 
 La volatilidad implícita es un concepto central en mercados de derivados. En una opción negociada, el precio observable resume expectativas, oferta y demanda, liquidez, microestructura y percepción de riesgo. Sin embargo, para comparar contratos con strikes y vencimientos distintos, los profesionales no suelen razonar únicamente en precios: transforman esos precios en volatilidades implícitas y analizan smiles, skews y estructuras temporales \citep{hull2022options,derman2016volatility}.
 
-El problema de este trabajo surge de una doble exigencia en finanzas cuantitativas. Por un lado, los modelos de aprendizaje automático pueden aproximar relaciones no lineales entre strike, subyacente, vencimiento, tipo de interés y volatilidad. Por otro lado, en un entorno financiero no basta con obtener una predicción numéricamente competitiva. El modelo debe poder auditarse: hay que saber dónde falla, qué variables explican sus predicciones, si respeta patrones razonables de la superficie y si una predicción concreta está respaldada por datos históricos similares.
+El problema de este trabajo surge de una doble exigencia en finanzas cuantitativas. Por un lado, los modelos de aprendizaje automático pueden aproximar relaciones no lineales entre strike, subyacente, vencimiento, tipo de interés y volatilidad. Por otro lado, en un entorno financiero no basta con obtener una predicción numéricamente competitiva. El modelo debe poder auditarse: hay que saber dónde falla, qué variables explican sus predicciones, si respeta patrones razonables de la superficie y si una predicción concreta está respaldada por datos históricos similares. Esta exigencia es coherente con la literatura reciente sobre explicabilidad y gobierno de modelos en finanzas, que enfatiza transparencia, interpretabilidad, documentación y revisión independiente cuando se usan modelos complejos en procesos críticos \citep{solaimani2025beyond,perezcruz2025managing}.
 
 En este contexto, el proyecto construye modelos de volatilidad explicable, consultable y útil vía API. La explicabilidad se entiende en dos niveles. A nivel de ingeniería, sirve para detectar sesgos, errores de datos, incoherencias, discontinuidades y comportamientos no deseados. A nivel financiero y profesional, permite justificar decisiones ante revisiones internas, auditorías, model validation o análisis de riesgo.
 
@@ -146,7 +146,7 @@ Desde esa perspectiva, un buen resultado no es únicamente ``predecir bien''. Ta
 \section{Antecedentes}
 \label{sec:antecedentes}
 
-La valoración de opciones sobre futuros se apoya tradicionalmente en Black-76 \citep{black1976pricing}. En ese marco, el precio de una opción europea depende del futuro subyacente, el strike, el vencimiento, el tipo de interés y la volatilidad. Cuando el precio de mercado se observa, la volatilidad implícita se obtiene resolviendo numéricamente la ecuación inversa.
+La valoración de opciones sobre futuros se apoya tradicionalmente en Black-76 \citep{black1976pricing}. En ese marco, el precio de una opción europea depende del futuro subyacente, el strike, el vencimiento, el tipo de interés y la volatilidad. Cuando el precio de mercado se observa, la volatilidad implícita se obtiene resolviendo numéricamente la ecuación inversa. En la literatura reciente, las redes neuronales se han utilizado tanto para acelerar la valoración y el cálculo de volatilidades implícitas \citep{liu2019pricing} como para estudiar movimientos de la superficie de volatilidad en función de moneyness, vencimiento y entorno de volatilidad \citep{cao2019neural}.
 
 En paralelo, el uso de modelos de aprendizaje automático para superficies financieras responde a la necesidad de capturar no linealidades, interacciones y patrones empíricos que no quedan completamente descritos por modelos paramétricos simples. Sin embargo, la adopción profesional de modelos flexibles exige herramientas de interpretación. SHAP proporciona una semántica aditiva para atribuir predicciones a variables \citep{lundberg2017unified}; ICE y ALE ayudan a estudiar respuestas funcionales \citep{goldstein2015peeking,apley2020visualizing}; los árboles surrogate y la regresión simbólica aproximan modelos complejos mediante objetos interpretables \citep{cranmer2023interpretable}.
 
@@ -257,28 +257,16 @@ El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje aut
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\input{chapters/ch5_conclusiones}
 
 
-\chapter{Conclusiones}
-\label{chap:conclusiones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Este TFM desarrolla una cadena integral para estimar volatilidad implícita en opciones del IBEX y convertir el resultado en un sistema explicable y operable. El trabajo parte de datos de mercado, construye una base de volatilidad mediante inversión de Black-76, entrena familias de modelos bajo validación temporal y genera explicaciones y diagnósticos. En test, el enfoque planteado muestra que es posible alcanzar niveles de desempeño del orden de \(RMSE=0.088403\), \(MAE=0.054366\) y \(R^2=0.790941\).
 
-La primera conclusión es que la calidad de un modelo de volatilidad no puede evaluarse solo con métricas agregadas. En derivados, la forma de la superficie, el comportamiento por moneyness y vencimiento y la localización del error son elementos centrales. Por ello el dashboard no se plantea como una capa estética, sino como parte del mecanismo de validación. En test, la volatilidad predicha presenta menos dispersión que la volatilidad observada: la desviación estándar de las predicciones es inferior a la de la serie real. Eso significa que el modelo reproduce bien la estructura central de la superficie, pero suaviza parte de la amplitud de los extremos, por lo que su lectura debe acompañarse de diagnóstico por zonas cuando se consulte fuera del núcleo más líquido.
-
-La segunda conclusión es que la explicabilidad aporta valor en dos planos. En ingeniería, ayuda a detectar fallos, fugas, sesgos y discontinuidades. En finanzas, permite justificar predicciones y analizar si el modelo se comporta de forma compatible con intuición económica y revisión profesional.
-
-La tercera conclusión es que la arquitectura de software condiciona la utilidad del modelo. Al separar ETL, entrenamiento, paquetes explicativos, API, dashboard y almacenamiento, el proyecto facilita reproducibilidad, mantenimiento y despliegue. Esta separación también reduce el riesgo de que las explicaciones se calculen sobre versiones distintas de las usadas en predicción.
-
-La cuarta conclusión es que progressive ATM no debe presentarse como mejora universal. En esta ejecución mejora la arquitectura Quantum Inspired, pero no al Random Forest final ni a XGBoost. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados.
-
-Desde la perspectiva financiera aplicada, la contribución diferencial frente a enfoques clásicos es doble. Primero, aporta una referencia empírica flexible para valoración y validación en zonas con menor liquidez o cobertura irregular. Segundo, incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que permiten trasladar el modelo a situaciones operativas reconocibles: contrastar precios internos, revisar anomalías, priorizar coberturas y leer el riesgo por regiones de moneyness y vencimiento.
-
-Esa dimensión aplicada no aparece como un añadido posterior, sino como una consecuencia directa de la forma en que se han unido datos, validación, explicabilidad y servicio. Por eso el trabajo puede leerse también como una herramienta de apoyo a valoración, validación independiente y control de riesgos, con una trazabilidad explícita entre resultados, discusión y desarrollo anexo.
-
-Por ello, el avance del TFM no debe leerse sólo como una mejora de RMSE. Debe leerse como mejora de \textbf{capacidad operativa}: detectar anomalías, justificar decisiones, analizar sensibilidad por moneyness/vencimiento y usar el modelo como herramienta de control de riesgos de mesa.
-
-Como líneas futuras, se proponen: complementar la explicabilidad ya incorporada con técnicas no incluidas en este trabajo, como Integrated Gradients o LIME, para contrastar mejor la lectura local; explorar modelos secuenciales como CNN 1D, LSTM o GRU si la muestra se reformula como ventanas temporales por contrato; y comparar el enfoque actual con modelos híbridos que impongan estructura financiera explícita sin perder flexibilidad empírica.
 
 \appendix
 

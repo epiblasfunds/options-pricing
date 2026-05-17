@@ -1,0 +1,31 @@
+
+\chapter{Conclusiones}
+\label{chap:conclusiones}
+
+Este TFM desarrolla una cadena integral para estimar volatilidad implícita en opciones del IBEX y convertir el resultado en un sistema explicable y operable. El trabajo parte de datos de mercado, construye una base de volatilidad mediante inversión de Black-76, entrena familias de modelos bajo validación temporal y genera explicaciones y diagnósticos.
+
+La primera conclusión es que la calidad de un modelo de volatilidad no puede evaluarse solo con métricas agregadas. En derivados, la forma de la superficie, el comportamiento por moneyness y vencimiento y la localización del error son elementos centrales. Por ello el dashboard no se plantea como una capa estética, sino como parte del mecanismo de validación.
+
+La segunda conclusión es que la explicabilidad aporta valor en dos planos. En ingeniería, ayuda a detectar fallos, fugas, sesgos y discontinuidades. En finanzas, permite justificar predicciones y analizar si el modelo se comporta de forma compatible con intuición económica y revisión profesional.
+
+La tercera conclusión es que la arquitectura de software condiciona la utilidad del modelo. Al separar ETL, entrenamiento, paquetes explicativos, API, dashboard y almacenamiento, el proyecto facilita reproducibilidad, mantenimiento y despliegue. Esta separación también reduce el riesgo de que las explicaciones se calculen sobre versiones distintas de las usadas en predicción.
+
+La cuarta conclusión es que un entrenamiento progresivo ATM (entrenar en un inicio con datos más ATM y conforme avance el entrenamiento ir incorporando datos menos ATM).  no debe presentarse como mejora universal. Su utilidad depende de si estabiliza la zona ATM sin degradar los extremos de moneyness ni los vencimientos menos representados.
+
+Desde la perspectiva financiera aplicada, la contribución diferencial frente a enfoques clásicos es doble. 
+\begin{enumerate}
+    \item Aporta una referencia empírica flexible para valoración y validación en zonas con menor liquidez o cobertura irregular. 
+    \item Incorpora mecanismos de explicación y control (SHAP, ICE/ALE, vecinos y diagnóstico por superficie) que permiten trasladar el modelo a situaciones operativas reconocibles: contrastar precios internos, revisar anomalías, priorizar coberturas y leer el riesgo por regiones de moneyness y vencimiento.
+\end{enumerate}
+
+El trabajo es a su vez una herramienta de apoyo a valoración, validación independiente y control de riesgos, con una trazabilidad explícita entre resultados, discusión y desarrollo anexo.
+
+Por ello, el avance de este trabajo no debe leerse sólo como una mejora de RMSE. Debe leerse como mejora de \textbf{capacidad operativa}: detectar anomalías, justificar decisiones, analizar sensibilidad por moneyness/vencimiento y usar el modelo como herramienta de control de riesgos de mesa.
+
+\subsection{Líneas Futuras}
+Las líneas futuras planteadas:
+\begin{itemize}
+    \item Complementar la explicabilidad ya incorporada con técnicas no incluidas en este trabajo, como Integrated Gradients o LIME, para contrastar mejor la lectura local.
+    \item Explorar modelos secuenciales como CNN 1D, LSTM o GRU si la muestra se reformula como ventanas temporales por contrato.
+    \item Comparar el enfoque actual con modelos híbridos que impongan estructura financiera explícita sin perder flexibilidad empírica.
+\end{itemize}

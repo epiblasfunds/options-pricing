@@ -76,7 +76,7 @@ La moneyness \(m\) indica la posición relativa del subyacente frente al strike.
 \label{eq:logmoneyness}
 \end{equation}
 
-es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}.
+es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}. Trabajos más recientes muestran además que los movimientos de la superficie pueden modelarse explícitamente a partir del retorno del subyacente, la moneyness y la vida restante mediante redes neuronales \citep{cao2019neural}.
 
 \textbf{En la práctica, esta superficie se lee a través de varios patrones.}
 
@@ -98,7 +98,7 @@ El problema de modelización se formula como una regresión supervisada:
 \label{eq:modelo-general}
 \end{equation}
 
-donde \(X\) contiene variables financieras observables y transformadas. El proyecto compara familias con diferentes niveles de flexibilidad:
+donde \(X\) contiene variables financieras observables y transformadas. La literatura reciente ha explorado redes neuronales no solo para aproximar precios de opciones, sino también para acelerar el cálculo de volatilidades implícitas y tareas de calibración asociadas \citep{liu2019pricing}. El proyecto compara familias con diferentes niveles de flexibilidad:
 
 \begin{itemize}
   \item Regresión lineal, como baseline interpretable y control de complejidad.
@@ -114,7 +114,7 @@ La comparación no puede basarse solo en error medio. En datos financieros tempo
 \section{Explicabilidad en modelos financieros}
 \label{sec:xai}
 
-La explicabilidad cumple una función técnica y una función de gobierno de modelos. Técnicamente, permite detectar variables dominantes, discontinuidades, extrapolaciones y errores locales. Profesionalmente, facilita responder por qué una predicción se considera razonable y en qué condiciones no debería confiarse en ella.
+La explicabilidad cumple una función técnica y una función de gobierno de modelos. Técnicamente, permite detectar variables dominantes, discontinuidades, extrapolaciones y errores locales. Profesionalmente, facilita responder por qué una predicción se considera razonable y en qué condiciones no debería confiarse en ella. En el ámbito financiero, esta necesidad se ha reforzado con trabajos recientes que estructuran la explicabilidad alrededor de transparencia, interpretabilidad y accountability, y que además la conectan con documentación, validación y revisión independiente \citep{solaimani2025beyond,perezcruz2025managing}.
 
 SHAP descompone la predicción de un modelo en un valor base y contribuciones por variable:
 
