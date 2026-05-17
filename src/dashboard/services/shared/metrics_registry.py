@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
+import numpy as np
 import pandas as pd
 
 
@@ -45,8 +46,21 @@ class MetricsRegistry:
         y_pred: pd.Series,
         metric_names: list[str] | tuple[str, ...],
     ) -> dict[str, float]:
-        aligned_true = pd.Series(y_true).astype(float).reset_index(drop=True)
-        aligned_pred = pd.Series(y_pred).astype(float).reset_index(drop=True)
+        aligned = pd.DataFrame(
+            {
+                "y_true": pd.Series(y_true).astype(float).reset_index(drop=True),
+                "y_pred": pd.Series(y_pred).astype(float).reset_index(drop=True),
+            }
+        )
+        finite_mask = np.isfinite(aligned["y_true"]) & np.isfinite(aligned["y_pred"])
+        aligned = aligned.loc[finite_mask].reset_index(drop=True)
+        aligned_true = aligned["y_true"]
+        aligned_pred = aligned["y_pred"]
+        if aligned.empty:
+            return {
+                definition.name: float("nan")
+                for definition in self.resolve(metric_names)
+            }
         return {
             definition.name: definition.compute(aligned_true, aligned_pred)
             for definition in self.resolve(metric_names)
