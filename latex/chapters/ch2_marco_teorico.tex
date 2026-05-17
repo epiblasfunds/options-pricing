@@ -105,7 +105,7 @@ donde \(X\) contiene variables financieras observables y transformadas. La liter
   \item Random Forest, basado en agregación de árboles para capturar interacciones no lineales \citep{breiman2001random}.
   \item XGBoost, como boosting regularizado con early stopping y buen rendimiento en datos tabulares \citep{chen2016xgboost}.
   \item Redes neuronales densas, como aproximadores flexibles de funciones no lineales \citep{hornik1989multilayer}.
-  \item Una red neuronal clásica \emph{quantum inspired}, que introduce una estructura tensorial inspirada en ideas de representación compacta. No se presenta como computación cuántica real, sino como una variante arquitectónica implementada en código.
+  \item Una red neuronal clásica \emph{quantum inspired}, que introduce una estructura tensorial inspirada en ideas de representación compacta y redes tensoriales para aprendizaje supervisado \citep{stoudenmire2016supervised,novikov2015tensorizing}. No se presenta como computación cuántica real, sino como una variante arquitectónica implementada en código.
 \end{itemize}
 
 La comparación no puede basarse solo en error medio. En datos financieros temporales, una evaluación mal planteada puede introducir fuga de información. Por ello se emplean splits temporales, control de contratos compartidos y k-folds temporales, tal como se desarrolla en el \autoref{sec:validacion}.
