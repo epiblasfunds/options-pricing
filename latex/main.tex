@@ -273,29 +273,41 @@ El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje aut
 \chapter{Esquema Detallado De Datos Y ETL}
 \label{app:data-structures}
 
-Este apéndice reúne el detalle estructural de las tablas intermedias y finales generadas por el pipeline de datos. Su objetivo no es introducir lógica nueva, sino dejar trazabilidad precisa sobre qué base produce cada etapa del ETL y cómo se encadenan \texttt{Read Raw Step}, \texttt{Merge Raw Step}, \texttt{Product Split Step}, \texttt{Underlying Step} y \texttt{Volatility Step}.
-
-La Figura~\ref{fig:db-structure-details-1} muestra la fase de ingestión y consolidación inicial. La Figura~\ref{fig:db-structure-details-2} recoge la separación por producto y la construcción de la relación opción-subyacente. La Figura~\ref{fig:db-structure-details-3} resume los filtros finales y la construcción de \texttt{VOLATILITY\_DB}.
+Este apéndice reúne el detalle estructural de las tablas intermedias y finales generadas por el pipeline de datos. Su objetivo no es introducir lógica nueva, sino dejar trazabilidad precisa sobre qué base crea cada etapa del ETL y cuál es el detalle de sus campos en \texttt{Read Raw Step}, \texttt{Merge Raw Step}, \texttt{Product Split Step}, \texttt{Underlying Step} y \texttt{Volatility Step}; las Figuras~\ref{fig:db-structure-details-read-raw} a~\ref{fig:db-structure-details-volatility} presentan, por etapa, la base generada y la estructura de sus campos.
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 2700 0 0},clip]{../imgs/databases_structure_details.drawio.png}%
-\caption{\small Detalle estructural del ETL (I): fuentes de entrada, normalización inicial y consolidación contractual.}
-\label{fig:db-structure-details-1}
+\includegraphics[width=0.98\textwidth,height=0.90\textheight,keepaspectratio]{../imgs/Read_Raw_step.drawio.png}%
+\caption{\small Detalle estructural del ETL: \texttt{Read Raw Step}.}
+\label{fig:db-structure-details-read-raw}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 1100 0 1350},clip]{../imgs/databases_structure_details.drawio.png}%
-\caption{\small Detalle estructural del ETL (II): separación por producto y construcción de la relación opción-subyacente.}
-\label{fig:db-structure-details-2}
+\includegraphics[width=0.98\textwidth,height=0.90\textheight,keepaspectratio]{../imgs/Merge_Raw_step.drawio.png}%
+\caption{\small Detalle estructural del ETL: \texttt{Merge Raw Step}.}
+\label{fig:db-structure-details-merge-raw}
 \end{figure}
 
 \begin{figure}[p]
 \centering
-\includegraphics[width=0.96\textwidth,height=0.92\textheight,keepaspectratio,trim={0 0 0 2750},clip]{../imgs/databases_structure_details.drawio.png}%
-\caption{\small Detalle estructural del ETL (III): filtros previos y construcción final de \texttt{VOLATILITY\_DB}.}
-\label{fig:db-structure-details-3}
+\includegraphics[width=0.98\textwidth,height=0.90\textheight,keepaspectratio]{../imgs/Product_Split_step.drawio.png}%
+\caption{\small Detalle estructural del ETL: \texttt{Product Split Step}.}
+\label{fig:db-structure-details-product-split}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth,height=0.90\textheight,keepaspectratio]{../imgs/Underlying_step.drawio.png}%
+\caption{\small Detalle estructural del ETL: \texttt{Underlying Step}.}
+\label{fig:db-structure-details-underlying}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth,height=0.90\textheight,keepaspectratio]{../imgs/Volatility_step.drawio.png}%
+\caption{\small Detalle estructural del ETL: \texttt{Volatility Step}.}
+\label{fig:db-structure-details-volatility}
 \end{figure}
 
 
