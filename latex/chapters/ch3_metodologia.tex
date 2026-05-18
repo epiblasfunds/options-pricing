@@ -544,7 +544,7 @@ Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-
 \section{API, almacenamiento y cloud}
 \label{sec:api-cloud-metodo}
 
-La API se implementa con FastAPI como un servicio \emph{ad hoc} independiente del dashboard. Puede servir cualquier modelo preparado bajo este flujo de entrenamiento, sin depender de la capa visual. El código expone endpoints de salud, predicción y explicabilidad local:
+La API se implementa con FastAPI como un servicio \emph{ad hoc} independiente del dashboard. Puede servir cualquier modelo preparado bajo este flujo de entrenamiento, sin depender de la capa visual. En el despliegue objetivo de este trabajo, tanto la API como el dashboard se ejecutan sobre la plataforma Google Cloud Platform (GCP), concretamente en servicios de Cloud Run. El código expone endpoints de salud, predicción y explicabilidad local:
 
 \begin{itemize}[noitemsep]
   \item \texttt{/health}
@@ -566,7 +566,7 @@ La respuesta de predicción incluye el modelo, la volatilidad estimada y la entr
 \end{figure}
 
 
-El backend de almacenamiento puede ser local o GCP. En GCP se usan Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo. La Figura~\ref{fig:cloud-diagram-drawio} resume este esquema de despliegue, dejando explícita la separación entre almacenamiento, artefactos de modelo y servicios desplegados.
+El backend de almacenamiento puede ser local o GCP. En el entorno de despliegue del proyecto se utiliza GCP: Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo. La Figura~\ref{fig:cloud-diagram-drawio} resume este esquema de despliegue, dejando explícita la separación entre almacenamiento, artefactos de modelo y servicios desplegados.
 
 
 \section{reproducibilidad}
