@@ -218,7 +218,7 @@ El valor de Shapley puede interpretarse entonces como la esperanza de esta contr
 
 En la práctica, esta esperanza se aproxima usando un número finito de permutaciones. Esta aproximación tiene la ventaja de ser independiente de la familia del modelo, por lo que puede aplicarse de forma homogénea a redes neuronales, modelos de árboles, regresiones u otros estimadores. Su principal inconveniente es que puede ser más costosa computacionalmente que explicadores especializados diseñados para una arquitectura concreta.
 
-En este proyecto se utiliza un explicador de permutación mediante \texttt{shap.Explainer(..., algorithm="permutation")}. Esta decisión prioriza una semántica común entre modelos heterogéneos frente a la eficiencia máxima que podría obtenerse con explicadores específicos. El presupuesto mínimo de evaluaciones por observación depende del número de variables \(p\), y en la implementación empleada se controla mediante el parámetro
+En este proyecto se utiliza un explicador de permutación mediante \texttt{shap.Explainer( ..., algorithm="permutation")}. Esta decisión prioriza una semántica común entre modelos heterogéneos frente a la eficiencia máxima que podría obtenerse con explicadores específicos. El presupuesto mínimo de evaluaciones por observación depende del número de variables \(p\), y en la implementación empleada se controla mediante el parámetro
 
 \begin{equation}
 max\_evals \geq 2p+1.
@@ -247,7 +247,7 @@ Finalmente, una explicación local detallada no equivale a una garantía de cali
 
 \section{Uso en este proyecto}
 
-En este trabajo, SHAP se utiliza para explicar modelos de predicción de volatilidad implícita desde dos perspectivas complementarias. A nivel local, permite analizar por qué el modelo asigna una determinada volatilidad a un contrato concreto. A nivel global, permite identificar qué variables concentran mayor intensidad explicativa en el conjunto de observaciones analizadas.
+En este trabajo, SHAP se utiliza para explicar modelos de predicción de volatilidad implícita desde dos perspectivas complementarias. A nivel local, permite analizar por qué el modelo asigna una determinada volatilidad a un trade concreto. A nivel global, permite identificar qué variables concentran mayor intensidad explicativa en el conjunto de observaciones analizadas.
 
 Las explicaciones se calculan sobre variables visibles financieramente interpretables, como \texttt{OptionType}, \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. Aunque el modelo pueda utilizar transformaciones internas o variables derivadas, la capa de explicabilidad reconstruye las entradas necesarias para mantener una lectura coherente desde el punto de vista financiero.
 
