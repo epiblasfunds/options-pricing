@@ -581,7 +581,7 @@ La respuesta de predicción incluye el modelo, la volatilidad estimada y la entr
 El backend de almacenamiento puede ser local o GCP. En el entorno de despliegue del proyecto se utiliza GCP: Cloud Storage para modelos y paquetes de dashboard, Artifact Registry para imágenes de contenedor, Cloud Run para API y dashboard, e IAM para permisos. Terraform define los recursos y permite reproducir la infraestructura. La parte crítica es mantener sincronizados modelo, scaler, metadatos y paquete explicativo; por eso el reentrenamiento final dispara su construcción después de guardar el modelo. La Figura~\ref{fig:cloud-diagram-drawio} resume este esquema de despliegue, dejando explícita la separación entre almacenamiento, artefactos de modelo y servicios desplegados.
 
 
-\section{reproducibilidad}
+\section{Reproducibilidad}
 \label{sec:reproducibilidad}
 El trabajo se ha realizado siguiendo todos los pasos descritos en este documento. De la misma manera, siguiendo todos los pasos descritos en este documento junto con los notebooks de ayuda del repositorio y la  \href{https://epiblasfunds.github.io/options-pricing/}{documentación de github} (\href{https://epiblasfunds.github.io/options-pricing/}{epiblasfunds.github.io/options-pricing/}) es posible reproducir el trabajo si contamos con los datos fuente necesarios.
 
