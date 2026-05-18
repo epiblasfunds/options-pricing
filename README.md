@@ -1,6 +1,4 @@
-# options-pricing
-
-Project for implied volatility modeling in options.
+# AI for option pricing: explainable volatility models
 
 The main reference for this repository is the published documentation:
 [https://epiblasfunds.github.io/options-pricing/](https://epiblasfunds.github.io/options-pricing/)
@@ -24,19 +22,11 @@ Install the requirements file that matches your use case:
 - `src/api/requirements.txt`: FastAPI service.
 - `src/dashboard/requirements.txt`: Dash dashboard.
 
-Example setup:
+Setup:
 
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-On Windows:
-
-```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
