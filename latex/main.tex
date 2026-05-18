@@ -400,9 +400,9 @@ La arquitectura transforma un vector de entrada en una predicción escalar de vo
 
 \subsection{Normalización e Embedding denso}
 
-Sea $n_{\text{in}}$ el número de variables de entrada (en este proyecto, típicamente 5). La primera operación es una normalización por lote con transformación $n_{\text{in}} \rightarrow n_{\text{in}}$, que centra y escala cada mini-lote durante entrenamiento.
+Sea $n_{\text{in}}$ el número de variables de entrada. La primera operación es una normalización por lote con transformación $n_{\text{in}} \rightarrow n_{\text{in}}$, que centra y escala cada mini-lote durante entrenamiento.
 
-Después, el embedding denso aplica la transformación $n_{\text{in}} \rightarrow \prod_{k=1}^{d} n_k$, donde $d$ es el orden del tensor y $n_k$ es la dimensión del modo $k$ del tensor objetivo. Esta proyección es crítica porque:
+Después, el embedding denso aplica la transformación $n_{\text{in}} \rightarrow \prod_{k=1}^{d} n_k$, donde $d$ es el orden del tensor y $n_k$ es la dimensión del eje $k$ del tensor objetivo. Esta proyección es crítica porque:
 
 \begin{itemize}
   \item \textbf{Captura relaciones no lineales:} modela interacciones entre variables desde el inicio.
@@ -417,7 +417,7 @@ El embedding se parametriza mediante:
 \end{equation}
 donde $\mathbf{x} \in \mathbb{R}^{n_{\text{in}}}$ es el vector de entrada y $\sigma_{\text{emb}}$ es la activación Swish. El resultado es $\mathbf{z} \in \mathbb{R}^{\prod n_k}$.
 
-Se utiliza Swish en embedding y post-TT porque suele mantener un flujo de gradientes más estable que alternativas más abruptas.
+Se utiliza Swish en embedding porque suele mantener un flujo de gradientes más estable que alternativas más abruptas.
 
 \subsection{Reshape a tensor de alta dimensionalidad}
 
@@ -443,14 +443,14 @@ La descomposición tensor-train (TT) es una forma estructurada de representar un
 
 donde cada $G_k$ es un tensor de orden 3 con forma $(r_{k-1}, n_k, r_k)$:
 \begin{itemize}
-  \item $n_k$ es la dimensión física del modo $k$ (derivada de $\mathcal{Z}$).
+  \item $n_k$ es la dimensión del eje $k$ del tensor (determinada por la forma de $\mathcal{Z}$).
   \item $r_{k-1}$ y $r_k$ son los \textbf{rangos tensoriales} internos que conectan el núcleo $k-1$ con el $k$.
   \item Los rangos en las fronteras son forzados a 1: $r_0 = r_d = 1$, asegurando que el producto final es un escalar (o en nuestro caso, una componente de salida).
 \end{itemize}
 
 Para dejar el esquema claro desde el inicio: \textbf{cada salida TT tiene su propia cadena de núcleos}. Si la capa TT produce $m_{\text{out}}$ salidas, existen $m_{\text{out}}$ cadenas independientes, todas aplicadas sobre el mismo tensor de entrada.
 
-Cada núcleo $G_k$ puede pensarse como una célula local que captura cómo el modo $k$ interactúa con sus vecinos a través de los rangos. El encadenamiento de núcleos es el \textbf{contact chain} (cadena de contacto), mecanismo por el cual la información y las dependencias se propagan de un extremo del tensor al otro.
+Cada núcleo $G_k$ puede pensarse como una célula local que captura cómo la información asociada al eje $k$ interactúa con sus vecinos a través de los rangos. El encadenamiento de núcleos es el \textbf{contact chain} (cadena de contacto), mecanismo por el cual la información y las dependencias se propagan de un extremo del tensor al otro.
 
 \subsection{La cadena de contacto (Contact Chain) y propagación de dependencias}
 
@@ -470,8 +470,8 @@ En código, cada núcleo para un output dado es creado como:
 
 \begin{minted}{python}
 # Para cada salida out_idx in range(output_dim):
-#   Para cada nucleo k in range(len(input_dims)):
-#     Crear un núcleo con forma (r_k, n_k, r_{k+1})
+#   Para cada eje k del tensor de entrada:
+#     Crear el núcleo con forma (r_k, n_k, r_{k+1})
 tt_core = self.add_weight(
   name=f"tt_core_{out_idx}_{core_idx}",
     shape=(
@@ -484,7 +484,7 @@ tt_core = self.add_weight(
 )
 \end{minted}
 
-Sobre inicialización, en esta familia se usa principalmente \textbf{Glorot Uniform} (y opcionalmente \textbf{He Uniform} en variantes). El objetivo en ambos casos es arrancar con una escala de pesos compatible con entrenamiento estable en las primeras épocas.
+Sobre inicialización, en el código actual los \textbf{núcleos TT} se inicializan con \textbf{Glorot Uniform}. El hiperparámetro \texttt{kernel\_initializer} (\texttt{glorot\_uniform}/\texttt{he\_uniform}) se aplica a las capas densas de embedding y post-TT, no a los núcleos de \texttt{TensorTrainLayer}. En todos los casos, el objetivo es arrancar con una escala de pesos compatible con entrenamiento estable en las primeras épocas.
 
 \subsection{Contracción: cómo se produce una salida TT}
 
@@ -496,9 +496,9 @@ G_1[i_1] \cdot G_2[i_2] \cdot \ldots \cdot G_d[i_d] \cdot \mathcal{Z}(i_1, \ldot
 \label{eq:qi-contraction}
 \end{equation}
 
-Conceptualmente, la operación itera a través de los núcleos, contrayendo índices de modo con el tensor de entrada y propagando información a través de los rangos internos. Lo crucial es que esta contracción se realiza para \emph{cada} output: si hay $m_{\text{out}}$ salidas, existen $m_{\text{out}}$ cadenas independientes de núcleos, cada una contraída separadamente. Todas comparten la misma entrada $\mathcal{Z}$, pero aprenden distintos patrones de interacción.
+Conceptualmente, la operación itera a través de los núcleos, contrayendo los índices de cada eje del tensor de entrada y propagando información a través de los rangos internos. Lo crucial es que esta contracción se realiza para \emph{cada} output: si hay $m_{\text{out}}$ salidas, existen $m_{\text{out}}$ cadenas independientes de núcleos, cada una contraída separadamente. Todas comparten la misma entrada $\mathcal{Z}$, pero aprenden distintos patrones de interacción.
 
-En la ecuación~\ref{eq:qi-contraction}, $i_k$ recorre los índices del modo $k$, $G_k[i_k]$ es la ``rebanada'' del núcleo $k$ para ese índice, y el producto encadenado acumula la interacción entre modos y rangos internos.
+En la ecuación~\ref{eq:qi-contraction}, $i_k$ recorre los índices del eje $k$, $G_k[i_k]$ es el bloque del núcleo $k$ asociado a ese índice, y el producto encadenado acumula la interacción entre ejes y rangos internos.
 
 \subsection{Ejemplo concreto: relación entre dimensiones de entrada, rangos y salidas}
 
@@ -506,11 +506,13 @@ Supongamos:
 \begin{itemize}
   \item Input original: $n_{\text{in}} = 5$ características (precio subyacente, strike, vencimiento, tasa, tipo).
   \item Tensor target: $(n_1, n_2, n_3, n_4) = (2, 2, 2, 2)$, así $\prod n_k = 16$.
-  \item Embedding: capa densa $5 \to 16$ (con activación Swish).
+  \item Embedding: capa densa $5 \to 16$.
   \item Reshape: los 16 componentes se organizan como tensor $2 \times 2 \times 2 \times 2$.
   \item Rangos TT: $(r_0, r_1, r_2, r_3, r_4) = (1, 2, 2, 2, 1)$.
   \item Salidas TT: $m_{\text{out}} = 8$ (especificado en configuración).
 \end{itemize}
+
+Aquí conviene distinguir dos magnitudes distintas: el valor $16 = \prod n_k$ describe el tamaño del \textbf{tensor de entrada} que recibe la capa TT, mientras que $m_{\text{out}} = 8$ describe el número de \textbf{cadenas TT independientes} y, por tanto, el número de características de salida producidas por la capa.
 
 Para cada una de las 8 salidas:
 \begin{itemize}
@@ -522,7 +524,7 @@ Para cada una de las 8 salidas:
 
 Total de parámetros por cadena: $(1 \times 2 \times 2) + (2 \times 2 \times 2) + (2 \times 2 \times 2) + (2 \times 2 \times 1) = 4 + 8 + 8 + 4 = 24$ elementos.
 
-Con 8 salidas: $8 \times 24 = 192$ parámetros en la capa TT, más los 80 parámetros del embedding ($5 \times 16$) y los bias. Esto es compacto en comparación con una red densa equivalente.
+Como la implementación crea \textbf{una cadena completa por cada salida} (no una única TT-matrix factorizando simultáneamente entrada y salida), el total en la capa TT es $8 \times 24 = 192$ parámetros. En el embedding, si contamos pesos y sesgo, son $5 \times 16 + 16 = 96$ parámetros. Esto sigue siendo compacto frente a una alternativa densa equivalente.
 
 Se utiliza \textbf{Swish} como activación post-TT y en el embedding por su suavidad y por mantener un entrenamiento estable.
 
@@ -532,18 +534,20 @@ Tras la contracción TT, tenemos $m_{\text{out}}$ características aprendidas. E
 
 Esta última etapa ejecuta:
 \begin{equation}
-\hat{\sigma}(\mathbf{x}) = \mathbf{W}_{\text{out}} \cdot \text{Swish}(\mathbf{W}_{\text{post}} \cdot \mathbf{c}_{\text{TT}} + \mathbf{b}_{\text{post}}) + b_{\text{out}},
+\hat{\sigma}(\mathbf{x}) = \mathbf{W}_{\text{out}} \cdot \phi(\mathbf{W}_{\text{post}} \cdot \mathbf{c}_{\text{TT}} + \mathbf{b}_{\text{post}}) + b_{\text{out}},
 \label{eq:qi-final-output}
 \end{equation}
 donde $\mathbf{c}_{\text{TT}}$ son las $m_{\text{out}}$ salidas de la contracción TT.
 
-Lectura rápida de los términos: $\mathbf{W}_{\text{post}}$ y $\mathbf{b}_{\text{post}}$ definen la proyección densa intermedia, Swish introduce no linealidad suave, y $\mathbf{W}_{\text{out}}, b_{\text{out}}$ realizan la proyección final al escalar $\hat{\sigma}(\mathbf{x})$.
+Lectura rápida de los términos: $\mathbf{W}_{\text{post}}$ y $\mathbf{b}_{\text{post}}$ definen la proyección densa intermedia, $\phi(\cdot)$ representa la función de activación de ese bloque (en la configuración base se usa Swish), y $\mathbf{W}_{\text{out}}, b_{\text{out}}$ realizan la proyección final al escalar $\hat{\sigma}(\mathbf{x})$.
 
 El Dropout es una regularización estocástica que desactiva aleatoriamente algunas neuronas durante entrenamiento, reduciendo co-adaptación y mejorando generalización.
 
 \section{Justificación del enfoque Quantum Inspired}
 
 La etiqueta ``quantum inspired'' se refiere a que adoptamos paradigmas de redes tensoriales originarios de la simulación clásica de sistemas cuánticos. En física cuántica, un estado multiqubit se describe mediante un tensor exponencialmente grande (en principio, $2^N$ componentes para $N$ qubits). Para computación tratable se usan descomposiciones tensoriales como tensor-train (conocida como \emph{matrix product state}) que comprimen esa representación en productos de matrices pequeñas. Esta misma intuición de representación compacta y aprendizaje supervisado con redes tensoriales se ha formalizado en literatura de referencia para ML clásico \citep{stoudenmire2016supervised,novikov2015tensorizing}.
+
+La conexión con lo ``quantum'' está en la \textbf{estructura matemática} (red tensorial tipo MPS/TT), no en el hardware ni en el algoritmo de entrenamiento: aquí no hay qubits ni circuitos cuánticos, sino optimización clásica por gradiente sobre una parametrización inspirada en esas descomposiciones.
 
 Aquí hacemos lo análogo en contexto clásico (predicción de volatilidad): reconocemos que aunque los datos sugieren un espacio de altísima dimensionalidad, es potencialmente compresible mediante factorización. Los grados de libertad del sistema (strike, vencimiento, subyacente, tasas) no son independientes; están acoplados por dinámicas de mercado. Capturar esa estructura acoplada mediante núcleos tensoriales es más eficiente que parametrización densa.
 
@@ -559,15 +563,16 @@ Una red secuencial convencional con capas densas tendría el siguiente flujo:
   \item Input (5 dimensiones) $\to$ Dense (32 unidades) $\to$ Dense (24 unidades) $\to$ Output (1 dimensión).
 \end{itemize}
 
-Cálculo de parámetros: $(5 \times 32) + (32 \times 24) + (24 \times 1) + \text{biases} \approx 160 + 768 + 24 + 81 = 1033$ parámetros.
+Cálculo de parámetros (incluyendo bias):
+$(5 \times 32 + 32) + (32 \times 24 + 24) + (24 \times 1 + 1) = 192 + 792 + 25 = 1009$ parámetros.
 
 La arquitectura Quantum Inspired, con la misma aproximación de complejidad computacional:
 
 \begin{itemize}
-  \item Embedding: $5 \to 16$ (80 parámetros).
-  \item Tensor-Train (8 salidas, estructura $(2,2,2,2)$, rangos $(1,2,2,2,1)$): $\approx 192$ parámetros.
-  \item Post-TT Dense: $8 \to 32 \to 1$ $\approx 320$ parámetros.
-  \item Total: $\approx 600$ parámetros.
+  \item Embedding: $5 \to 16$ ($5 \times 16 + 16 = 96$ parámetros).
+  \item Tensor-Train (8 cadenas de salida, cada una con estructura $(2,2,2,2)$ y rangos $(1,2,2,2,1)$): $8 \times 24 = 192$ parámetros.
+  \item Post-TT Dense: $8 \to 32 \to 1$: $(8 \times 32 + 32) + (32 \times 1 + 1) = 288 + 33 = 321$ parámetros.
+  \item Total (sin BatchNorm): $96 + 192 + 321 = 609$ parámetros.
 \end{itemize}
 
 Con configuraciones similares de capacidad, el modelo TT es más compacto. Pero la ventaja no es solo la compresión de parámetros: es la \textbf{estructura inductiva} que impone la factorización tensorial. Mientras que una red densa puede representar cualquier función (dada suficiente capacidad), también puede aprender cualquier ruido. La factorización TT, al obligar a factorizar el espacio latente, \textbf{induce un sesgo inductivo} hacia soluciones que exhiben estructura de rango bajo, lo cual es a menudo una propiedad de sistemas complejos.
