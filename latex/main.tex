@@ -212,7 +212,7 @@ Esa combinación es la que hace que el proyecto no sea sólo un ejercicio de ent
 \section{Estructura de la memoria}
 \label{sec:estructura}
 
-El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje automático, explicabilidad e infraestructura. El \autoref{chap:metodologia} describe la construcción de datos, variables, modelos, validación, dashboard, API y cloud. El \autoref{chap:resultados} analiza las métricas persistidas y la lectura que debe hacerse desde las vistas del dashboard. El \autoref{chap:conclusiones} resume conclusiones y líneas futuras. Los anexos desarrollan con mayor profundidad la estructura de datos y ETL (apéndice \ref{app:data-structures}), la metodología de desarrollo y despliegue (apéndice \ref{app:workflow-dev}), SHAP (apéndice \ref{app:shap}), ALE (apéndice \ref{app:ale}), el modelo Quantum Inspired (apéndice \ref{app:quantum-inspired}), la regresión simbólica (apéndice \ref{app:symbolic-regression}), el entrenamiento progressive ATM (apéndice \ref{app:progressive}) y el análisis de sensibilidad por moneyness y vencimiento (apéndice \ref{app:sensibilidad-moneyness-vencimiento}).
+El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje automático, explicabilidad e infraestructura. El \autoref{chap:metodologia} describe la construcción de datos, variables, modelos, validación, dashboard, API y cloud. El \autoref{chap:resultados} analiza las métricas persistidas y la lectura que debe hacerse desde las vistas del dashboard. El \autoref{chap:conclusiones} resume conclusiones y líneas futuras. Los apéndices desarrollan con mayor profundidad la estructura de datos y ETL (apéndice \ref{app:data-structures}), la metodología de desarrollo y despliegue (apéndice \ref{app:workflow-dev}), SHAP (apéndice \ref{app:shap}), ALE (apéndice \ref{app:ale}), el modelo Quantum Inspired (apéndice \ref{app:quantum-inspired}), la regresión simbólica (apéndice \ref{app:symbolic-regression}), el entrenamiento progressive ATM (apéndice \ref{app:progressive}) y el análisis de sensibilidad por moneyness y vencimiento (apéndice \ref{app:sensibilidad-moneyness-vencimiento}).
 
 \textbf{El orden de lectura responde al flujo real del proyecto.}
 
@@ -221,7 +221,7 @@ El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje aut
   \item En el \textbf{Marco Teórico} se fijan las piezas conceptuales necesarias para interpretar Black-76, smiles, familias de modelos, métricas y gobierno de modelos.
   \item En la \textbf{Metodología} se documenta la implementación efectiva: ETL, features, validación temporal, reentrenamiento, generación del paquete de dashboard y despliegue.
   \item En \textbf{Resultados y Discusión} se conectan métricas, superficies, explicaciones y limitaciones con una lectura financiera y técnica unificada.
-  \item En los \textbf{Anexos} se amplían los mecanismos de explicabilidad y entrenamiento para que la memoria principal conserve foco sin perder profundidad técnica.
+  \item En los \textbf{Apéndices} se amplían los mecanismos de explicabilidad y entrenamiento para que la memoria principal conserve foco sin perder profundidad técnica.
 \end{enumerate}
 
 
@@ -273,7 +273,7 @@ El \autoref{chap:marco} presenta los fundamentos financieros, de aprendizaje aut
 \chapter{Esquema Detallado De Datos Y ETL}
 \label{app:data-structures}
 
-Este anexo reúne el detalle estructural de las tablas intermedias y finales generadas por el pipeline de datos. Su objetivo no es introducir lógica nueva, sino dejar trazabilidad precisa sobre qué base produce cada etapa del ETL y cómo se encadenan \texttt{Read Raw Step}, \texttt{Merge Raw Step}, \texttt{Product Split Step}, \texttt{Underlying Step} y \texttt{Volatility Step}.
+Este apéndice reúne el detalle estructural de las tablas intermedias y finales generadas por el pipeline de datos. Su objetivo no es introducir lógica nueva, sino dejar trazabilidad precisa sobre qué base produce cada etapa del ETL y cómo se encadenan \texttt{Read Raw Step}, \texttt{Merge Raw Step}, \texttt{Product Split Step}, \texttt{Underlying Step} y \texttt{Volatility Step}.
 
 La Figura~\ref{fig:db-structure-details-1} muestra la fase de ingestión y consolidación inicial. La Figura~\ref{fig:db-structure-details-2} recoge la separación por producto y la construcción de la relación opción-subyacente. La Figura~\ref{fig:db-structure-details-3} resume los filtros finales y la construcción de \texttt{VOLATILITY\_DB}.
 
@@ -384,7 +384,7 @@ Si ambos apuntan en la misma dirección, la conclusión es más sólida. Si disc
 \chapter{Modelo Quantum Inspired}
 \label{app:quantum-inspired}
 
-Este anexo describe la arquitectura \emph{Quantum Inspired}, una red neuronal clásica que adopta un paradigma distinto al de matrices densas: utiliza una \textbf{factorización tensorial} inspirada en redes tensoriales usadas en física cuántica simulada clásicamente. La idea central es convertir el espacio de características embebidas en un tensor multidimensional y descomponerlo en una cadena de núcleos pequeños interconectados.
+Este apéndice describe la arquitectura \emph{Quantum Inspired}, una red neuronal clásica que adopta un paradigma distinto al de matrices densas: utiliza una \textbf{factorización tensorial} inspirada en redes tensoriales usadas en física cuántica simulada clásicamente. La idea central es convertir el espacio de características embebidas en un tensor multidimensional y descomponerlo en una cadena de núcleos pequeños interconectados.
 
 Esta estrategia es apropiada para sistemas con muchos grados de libertad (como la superficie de volatilidad) porque combina compresión estructural, regularización implícita y una lectura más trazable de cómo se propagan dependencias entre variables.
 
