@@ -68,12 +68,12 @@ El pipeline de datos transforma ficheros de contratos, operaciones y tipos en un
 
 \end{wrapfigure}
 
-En el cálculo de tipos se asume una aproximación operativa: no se dispone de un calendario TARGET2 explícito dentro del pipeline, por lo que el conteo de días hábiles se implementa con \texttt{pd.bdate\_range} (días laborables estándar). La composición se aplica exactamente como en el código: se recorre cada día hábil del intervalo, se toma \(r_i\) (retrocediendo al último dato disponible si ese día no existe en la serie) y se multiplica
+En el cálculo de tipos se asume una aproximación operativa: no se dispone de un calendario TARGET2 explícito dentro del pipeline, por lo que el conteo de días hábiles se implementa con \texttt{pd.bdate\_range} (días laborables estándar). La composición se define mediante una regla explícita: se recorre cada día hábil del intervalo, se toma \(r_i\) (retrocediendo al último dato disponible si ese día no existe en la serie) y se multiplica
 \(1 + r_i n_i / 360\), con \(n_i=3\) cuando el día hábil es lunes y \(n_i=1\) en el resto. Después se anualiza como
 $$\left(\prod_i\left(1+\frac{r_i n_i}{360}\right)-1\right)\cdot \frac{360}{d_c}.$$
 
 La guía de referencia para la lógica de tipos compuestos es la del BCE para \texteuro{}STR:
-\url{https://www.ecb.europa.eu/stats/euro-short-term-rates/interest_rate_benchmarks/WG_euro_risk-free_rates/shared/pdf/ecb.Compounded_euro_short-term_rate_calculation_rules.en.pdf}. En esta memoria se documenta de forma explícita que la implementación actual reproduce la convención descrita en el código (incluido el peso 3 en lunes) y debe interpretarse como aproximación operativa mientras no se incorpore un calendario TARGET2 completo en la construcción de \texttt{Rate}.
+\url{https://www.ecb.europa.eu/stats/euro-short-term-rates/interest_rate_benchmarks/WG_euro_risk-free_rates/shared/pdf/ecb.Compounded_euro_short-term_rate_calculation_rules.en.pdf}. En esta memoria se documenta de forma explícita que la implementación actual reproduce la convención aquí especificada (incluido el peso 3 en lunes) y debe interpretarse como aproximación operativa mientras no se incorpore un calendario TARGET2 completo en la construcción de \texttt{Rate}.
 
 
 
@@ -163,7 +163,7 @@ El \textbf{primer paso}, \texttt{Read Raw Step}, normaliza ficheros de mercado c
 \end{figure}
 
 
-El \textbf{segundo paso}, \texttt{Merge Raw Step}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo. Las Figuras~\ref{fig:doc-data-merge-raw-1} y~\ref{fig:doc-data-merge-raw-2} resumen visualmente esta fase.
+El \textbf{segundo paso}, \texttt{Merge Raw Step}, une operaciones y contratos por \texttt{ContractCode} y año de sesión, imputa vencimientos con la regla del tercer viernes e imputa strikes desde el tramo configurado del código cuando la fuente no lo trae completo. Las Figuras ~\ref{fig:doc-data-merge-raw-2} y~\ref{fig:doc-data-merge-raw-1} resumen visualmente esta fase.
 
 
 \begin{figure}[!htbp]
@@ -190,7 +190,7 @@ El \textbf{segundo paso}, \texttt{Merge Raw Step}, une operaciones y contratos p
 
 El \textbf{tercer paso}, \texttt{Product Split Step}, divide la base unificada en opciones, futuros y relación opción-futuro por vencimiento. 
 
-\textbf{El cuarto}, \texttt{Underlying Step}, garantiza el emparejamiento temporal sin lookahead y resuelve el precio de futuro subyacente mediante una unión temporal \emph{as-of}: para cada opción selecciona el último trade del futuro con instante de ejecución menor o igual al de la opción. Esta decisión evita lookahead dentro del propio ETL. 
+\textbf{El cuarto}, \texttt{Underlying Step}, garantiza el emparejamiento temporal sin lookahead y resuelve el precio de futuro subyacente mediante una unión temporal \emph{as-of}: para cada opción selecciona el último trade del futuro con instante de ejecución menor o igual al de la opción. Esta decisión evita lookahead dentro del propio ETL, como se ilustra en la Figura~\ref{fig:doc-data-underlying-1}.
 
 
 
@@ -384,7 +384,7 @@ La validación sigue tres principios.
 
 
 
-Esta última regla es relevante porque una opción puede negociarse durante varios días. Si un contrato aparece en entrenamiento y validación, el modelo podría aprender rasgos idiosincráticos del contrato y ofrecer una estimación optimista. Las Figuras \ref{fig:doc-models-index-2}, \ref{fig:doc-models-splits-kfolds-1-small}, \ref{fig:doc-models-splits-kfolds-2-small} y~\ref{fig:doc-models-splits-kfolds-3} resumen la lógica temporal, la separación con lag y el control de contratos compartidos.
+Esta última regla es relevante porque una opción puede negociarse durante varios días. Si un contrato aparece en entrenamiento y validación, el modelo podría aprender rasgos idiosincráticos del contrato y ofrecer una estimación optimista. Las Figuras \ref{fig:doc-models-splits-kfolds-1-small}, \ref{fig:doc-models-splits-kfolds-2-small}, \ref{fig:doc-models-index-2} y~\ref{fig:doc-models-splits-kfolds-3} resumen la lógica temporal, la separación con lag y el control de contratos compartidos.
 
 
 La búsqueda de hiperparámetros se realiza con k-folds temporales. Estos k-folds se construyen exclusivamente dentro del bloque de entrenamiento, de modo que validation y test externos quedan fuera del proceso de búsqueda. Para cada candidato se calculan MAE, RMSE y \(R^2\) en train y validation. 
@@ -444,7 +444,7 @@ con \(\gamma=0.25\) y \(\beta=0.75\) en la configuración actual.
 
 Es importante precisar que \(CE_2\) se utiliza para monitorizar consistencia en la fase train/validation. La evaluación definitiva de generalización del modelo se realiza siempre sobre el bloque test fuera de muestra.
 
-El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el apéndice \ref{app:progressive}. Las Figuras~\ref{fig:doc-models-retraining-progressive-1} y~\ref{fig:doc-models-retraining-progressive-2} muestran el reentrenamiento del mejor candidato y los segmentos ATM.
+El proyecto incluye una variante progressive ATM. Ordena observaciones por \(|\log(F/K)|\), de más cercano al ATM a más alejado, y divide el entrenamiento en segmentos. La idea financiera es aprender primero la zona central, habitualmente más líquida y estable, y después incorporar zonas más alejadas. En modelos no iterativos se implementa mediante pesos; en XGBoost y redes se implementa mediante fases acumulativas. Por su carácter experimental, esta variante se menciona aquí y se desarrolla en el apéndice \ref{app:progressive}. Las Figuras~\ref{fig:doc-models-retraining-progressive-2} y~\ref{fig:doc-models-retraining-progressive-1} muestran el reentrenamiento del mejor candidato y los segmentos ATM.
 
 
 
@@ -494,11 +494,9 @@ Diagnosis & ¿Dónde acierta y dónde falla el modelo en la superficie? \\
 \label{tab:dashboard-tabs}
 \end{table}
 
+La pestaña \emph{Diagnosis} contiene vistas necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo.
 
-
-Las vistas del dashboard son necesarias para localizar dónde aparece esa compresón. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo.
-
-Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-diagnosis-1}, \ref{fig:doc-dashboard-global-explainability-1}, \ref{fig:doc-dashboard-sample-explainability-1} y~\ref{fig:doc-dashboard-behaviour-volatility-surfaces-1} muestran estos flujos y vistas; en particular, la vista local de \emph{Sample Explainability} es la puerta de entrada al \emph{Local SHAP Waterfall} y al contexto de vecinos históricos.
+Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-global-explainability-1}, \ref{fig:doc-dashboard-sample-explainability-1}, \ref{fig:doc-dashboard-diagnosis-1} y~\ref{fig:doc-dashboard-behaviour-volatility-surfaces-1} muestran estos flujos y vistas; en particular, la vista local de \emph{Sample Explainability} es la puerta de entrada al \emph{Local SHAP Waterfall} y al contexto de vecinos históricos.
 
 \begin{figure}[h]
 \centering
@@ -531,7 +529,6 @@ Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-
 \caption{\small Vistas de diagnóstico del modelo final.}
 \label{fig:doc-dashboard-diagnosis-1}
 \end{figure}
-
 
 \vspace{-0.3cm}
 \begin{figure}[h]
@@ -571,7 +568,7 @@ El backend de almacenamiento puede ser local o GCP. En el entorno de despliegue 
 
 \section{reproducibilidad}
 \label{sec:reproducibilidad}
-El trabajo se ha realizado siguiendo todos los pasos descritos en este documento. De la misma manera, siguiendo todos los pasos descritos en este documento junto con los notebooks de ayuda del repositorio y la  \href{https://epiblasfunds.github.io/options-pricing/}{documentación de github} (\href{https://epiblasfunds.github.io/options-pricing/}{epiblasfunds.github.io/options-pricing/}) es posible reproducir el trabajo si contamos con los datos fuentes necesarios (sino, estos datos pueden ser mockeados).
+El trabajo se ha realizado siguiendo todos los pasos descritos en este documento. De la misma manera, siguiendo todos los pasos descritos en este documento junto con los notebooks de ayuda del repositorio y la  \href{https://epiblasfunds.github.io/options-pricing/}{documentación de github} (\href{https://epiblasfunds.github.io/options-pricing/}{epiblasfunds.github.io/options-pricing/}) es posible reproducir el trabajo si contamos con los datos fuentes necesarios.
 
 Lo necesario para reproducir el estudio es llevar a cabo los procesos de:
 \begin{enumerate}
@@ -606,7 +603,7 @@ La arquitectura del repositorio sigue una separación por funcionalidades: cada 
 Paquete o carpeta & Responsabilidad principal \\
 \midrule
 \texttt{src/config} & Carga de configuración, rutas absolutas, logging y objetos de configuración por dominio. \\
-\texttt{src/enums} & Definición centralizada de columnas, tipos de contrato, tipos de opción y nombres de modelos. \\
+\texttt{src/enums} & Definición centralizada de columnas, tipos de contrato y tipos de opción. \\
 \texttt{src/exceptions} & Excepciones de dominio usadas en validaciones de datos y control de errores del ETL. \\
 \texttt{src/data\_management} & ETL de datos: loaders, builders, validaciones y utilidades de contrato. \\
 \texttt{src/volatility\_models} & Preparación de datos de entrenamiento, splits, k-folds, selección y reentrenamiento. \\
