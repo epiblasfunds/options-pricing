@@ -767,6 +767,9 @@ class Trainer:
 
 
 def _run_model2dashboard_pipeline(family_name: str):
+    _project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..")
+    )
     try:
         subprocess.run(
             [
@@ -777,6 +780,7 @@ def _run_model2dashboard_pipeline(family_name: str):
                 family_name,
             ],
             check=True,
+            cwd=_project_root,
         )
         logger.info(
             "model2dashboard pipeline for family '%s' completed successfully.",
