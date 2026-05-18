@@ -82,23 +82,25 @@ El modelo de referencia es el XGBoost:
 \label{fig:dash-diagnosis-comparison}
 \end{figure}
 
-Las vistas del dashboard son necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
+Las vistas del dashboard son necesarias para localizar dónde se concentra el error. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
+
+La Figura~\ref{fig:dash-diagnosis-comparison} sintetiza este diagnóstico y permite verificar visualmente si existe compresión hacia la media en los extremos de la superficie.
 
 
 
 \subsubsection{Análisis del impacto del entrenamiento Progressive ATM}
 \label{subsubsec:atm-impact}
 
-El proyecto incluyó una variante experimental denominada Progressive ATM (o \emph{Entrenamiento Progresivo Ordenado por ATM}): un enfoque de aprendizaje que reordena cronológicamente el entrenamiento para presentar primero observaciones cercanas al ATM (moneyness bajo, $|\log(F/K)| < 0.05$), donde concentra la máxima liquidez y menor ruido, para después incorporar progresivamente observaciones hacia extremos de moneyness y vencimientos cortos. La motivación financiera es doble:
+El proyecto incluyó una variante experimental denominada Progressive ATM (o \emph{Entrenamiento Progresivo Ordenado por ATM}): un enfoque de aprendizaje que reordena cronológicamente el entrenamiento para presentar primero observaciones cercanas al ATM (moneyness bajo, $|\log(F/K)| < 0.05$), donde se concentra la máxima liquidez y menor ruido, para después incorporar progresivamente observaciones hacia extremos de moneyness y vencimientos cortos. La motivación financiera es doble:
 \begin{enumerate}
     \item La zona ATM en opciones sobre índices suele ser la más líquida y menos afectada por sesgos de selección.
-    \item entrenar primero en datos menos ruidosos podría regularizar arquitecturas sensibles al orden de presentación, como redes neuronales secuenciales y modelos cuánticos inspirados.
+    \item Entrenar primero en datos menos ruidosos podría regularizar arquitecturas sensibles al orden de presentación, como redes neuronales secuenciales y modelos cuánticos inspirados.
 \end{enumerate}
 
-Complementar lectura con el Apéndice \ref{app:progressive}.
+Esta lectura se complementa con el Apéndice \ref{app:progressive}.
 
 
-\textbf{Metodología de evaluación.} Se reentrenaron independientemente los cinco modelos de la familia de seleccionados bajo esta variante, conservando la validación cruzada 5-fold y los mismos hiperparámetros que en el entrenamiento estándar. Se compararon las métricas test de RMSE, MAE y $R^2$ entre ambas versiones (estándar vs.\ ATM) para cada familia. El análisis se complementó con inspección visual de residual heatmaps en el dashboard para verificar si la reordenación producía cambios en la distribución espacial del error (por moneyness y vencimiento).
+\textbf{Metodología de evaluación.} Se reentrenaron independientemente los cinco modelos de las familias seleccionadas bajo esta variante, conservando la validación cruzada 5-fold y los mismos hiperparámetros que en el entrenamiento estándar. Se compararon las métricas test de RMSE, MAE y $R^2$ entre ambas versiones (estándar vs.\ ATM) para cada familia. El análisis se complementó con inspección visual de residual heatmaps en el dashboard para verificar si la reordenación producía cambios en la distribución espacial del error (por moneyness y vencimiento).
 
 
 \textbf{Síntesis interpretativa del impacto ATM por arquitectura.} Los resultados revelan un patrón sistemático: la técnica Progressive ATM no produce un modelo mejor de forma universal, sino que su efectividad depende críticamente de la arquitectura subyacente.
@@ -129,7 +131,7 @@ El modelo final debe leerse como función financiera, no solo como tabla de erro
 
 La lectura recomendada es usar al menos tres puntos de referencia: una observación ATM líquida, una observación en extremos de moneyness y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
 
-La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smile y term-structure de XGBoost mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fijo)
+La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smile y term-structure de XGBoost mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fijo).
 
 
 
@@ -193,7 +195,7 @@ Los modelos equivalentes explican el predictor, no la verdad de mercado. La regr
 La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del XGBoost. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica (ver Tabla \ref{tab:surrogate-rf}) generada para este paquete muestra métricas no utilizables para defensa del Random Forest ni del Quantum Inspired NN, con RMSE de fidelidad extremadamente alto; por tanto, el modelo más fiable que obtenemos es el XGBoost.
 
 
-La Figura~\ref{fig:dash-tree-depth-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permite una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
+La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permiten una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
 
 
 
@@ -235,6 +237,8 @@ La Figura~\ref{fig:dash-tree-depth-xgb}, junto con la Tabla~\ref{tab:surrogate-r
 
 El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones. La lógica matemática de SHAP y la semántica de valor base y contribuciones locales se desarrollan en el apéndice \ref{app:shap}.
 
+Las Figuras~\ref{fig:dash-local-dataset-rf-xgb} y~\ref{fig:dash-local-dataset-rf-xgb_2} recogen esta lectura en modo \emph{dataset} para la misma observación, separando la explicación local y el contexto de soporte histórico.
+
 
 
 \begin{figure}[!htbp]
@@ -245,6 +249,8 @@ El análisis local debe seleccionar una muestra representativa y una muestra pro
 \end{figure}
 
 La interpretación profesional debe combinar ambas piezas. Si una muestra tiene waterfall coherente y vecinos cercanos con volatilidades similares, la explicación es sólida. Si el waterfall parece razonable pero los vecinos están lejos, el modelo puede estar extrapolando; en ese caso, la predicción debe revisarse con diagnóstico por zonas de la superficie y superficie local. Así una explicación local es más defendible cuando se cumplen tres condiciones:
+
+La Figura~\ref{fig:dash-local-manual-rf-xgb} ilustra este contraste en modo \emph{manual input} bajo un escenario de estrés en vencimiento corto.
 
 \begin{itemize}
   \item El signo y magnitud de las contribuciones SHAP son compatibles con la intuición financiera del caso.
@@ -285,7 +291,7 @@ La suavidad no se da por supuesta: se verifica. Si aparecen escalones locales o 
 
 La detección de anomalías se construye en dos capas complementarias. La primera está en el ETL, con controles de calidad (precios y cantidades válidas, coherencia temporal opción-subyacente, resolución numérica estable de volatilidad implícita). La segunda está en diagnóstico posterior, donde los residuales por zona de superficie permiten localizar trades atípicos en extremos de moneyness o vencimientos cortos. El detalle estructural del ETL está desarrollado en el apéndice \ref{app:data-structures} y la lectura regional del error en el apéndice \ref{app:sensibilidad-moneyness-vencimiento}.
 
-En términos operativos, una anomalía no se define sólo por error alto puntual, sino por contexto: error alto junto con baja densidad de vecinos, geometría local inestable o incoherencia entre explicación local y patrón global. Esta lectura mejora la utilidad del modelo como filtro de revisión manual.
+En términos operativos, una anomalía no se define solo por error alto puntual, sino por contexto: error alto junto con baja densidad de vecinos, geometría local inestable o incoherencia entre explicación local y patrón global. Esta lectura mejora la utilidad del modelo como filtro de revisión manual.
 
 \subsection{Valoración de ilíquidas, control de mesa de negociación, auditoría y cobertura}
 \label{subsec:uso-operativo-derivados}
@@ -318,7 +324,7 @@ Financieramente, el proyecto trata la volatilidad como superficie y no como seri
 
 En otras palabras, el trabajo refuerza una idea clásica en derivados: el resultado útil no es un único número, sino una predicción situada dentro de una estructura de superficie, de un contexto de mercado y de una evidencia histórica comparable.
 
-También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es sólo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no sólo a tablas globales de error. Esta lectura aplicada se concreta en la Sección~\ref{sec:aplicaciones-operativas} y se refuerza con el apéndice de sensibilidad por regiones de superficie (\ref{app:sensibilidad-moneyness-vencimiento}).
+También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es solo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no solo a tablas globales de error. Esta lectura aplicada se concreta en la Sección~\ref{sec:aplicaciones-operativas} y se refuerza con el apéndice de sensibilidad por regiones de superficie (\ref{app:sensibilidad-moneyness-vencimiento}).
 
 \subsubsection*{Aportación frente a enfoques clásicos.}
 

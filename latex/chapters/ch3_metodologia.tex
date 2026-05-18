@@ -32,13 +32,13 @@ El estudio tiene carácter empírico y aplicado. Parte de datos de mercado, cons
 \label{fig:metodologia-general}
 \end{figure}
 
-El flujo no es lineal sólo en apariencia. Cada bloque deja salidas persistidas y comprobables que sirven de entrada al siguiente, de modo que la metodología puede auditarse por etapas. Primero se consolida la base financiera; después se fija un espacio de variables coherente con la superficie; a continuación se comparan familias bajo un protocolo temporal común; y, por último, se transforma el modelo seleccionado en un sistema consultable. Este diseño responde a cuatro principios metodológicos.
+El flujo no es lineal solo en apariencia. Cada bloque deja salidas persistidas y comprobables que sirven de entrada al siguiente, de modo que la metodología puede auditarse por etapas. Primero se consolida la base financiera; después se fija un espacio de variables coherente con la superficie; a continuación se comparan familias bajo un protocolo temporal común; y, por último, se transforma el modelo seleccionado en un sistema consultable. Este diseño responde a cuatro principios metodológicos.
 
 \begin{itemize}
   \item \textbf{Separación de responsabilidades:} ETL, modelización, explicabilidad y servicio no se mezclan en un único bloque opaco.
   \item \textbf{Trazabilidad de extremo a extremo:} cada predicción puede rastrearse hasta datos, configuración y versión de modelo.
   \item \textbf{Comparabilidad entre familias:} todas las alternativas compiten bajo las mismas reglas de split, métricas y reentrenamiento.
-  \item \textbf{Lectura profesional del resultado:} el producto final no es sólo una tabla de métricas, sino un modelo interpretable y servible.
+  \item \textbf{Lectura profesional del resultado:} el producto final no es solo una tabla de métricas, sino un modelo interpretable y servible.
 \end{itemize}
 
 Esta estructura es importante porque condiciona la credibilidad de los resultados. Si el entrenamiento fuese correcto pero las explicaciones o el servicio no reutilizasen exactamente la misma lógica de features, la calidad del sistema quedaría comprometida aunque las métricas numéricas fueran buenas.
@@ -258,7 +258,7 @@ El cálculo de volatilidad implícita se realiza en el último paso. Se eliminan
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.40\textheight,keepaspectratio]{../doc/mermaid-pdf/data/index/02.pdf}%
-\caption{\small Validacion e interpretacion del codigo de contrato.}
+\caption{\small Validación e interpretación del código de contrato.}
 \label{fig:doc-data-index-2}
 \end{figure}
 
@@ -298,14 +298,14 @@ Esta elección evita que el modelo dependa de niveles absolutos de strike que pu
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{../doc/mermaid-pdf/models/features/01.pdf}
-\caption{\small Construccion de features financieras.}
+\caption{\small Construcción de features financieras.}
 \label{fig:doc-models-features-1-small}
 \end{figure}
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.6\linewidth]{../doc/mermaid-pdf/models/features/02.pdf}
-\caption{\small Motivacion financiera de las features.}
+\caption{\small Motivación financiera de las features.}
 \label{fig:doc-models-features-2-small}
 \end{figure}
 
@@ -342,7 +342,7 @@ La elección de familias responde a una lógica comparativa.
 \begin{itemize}
   \item La \textbf{regresión lineal} fija una referencia interpretable y permite medir cuánto valor añade la no linealidad una vez creadas las features correctas.
   \item \textbf{Random Forest} y \textbf{XGBoost} representan dos formas distintas de explotar interacciones tabulares complejas sin exigir el mismo tipo de preprocesado que las redes.
-  \item Las \textbf{redes neuronales} sirven para comprobar si una arquitectura más flexible mejora realmente el problema o sólo incrementa el coste y la complejidad de explicación.
+  \item Las \textbf{redes neuronales} sirven para comprobar si una arquitectura más flexible mejora realmente el problema o solo incrementa el coste y la complejidad de explicación.
   \item La variante \textbf{Quantum Inspired} introduce una hipótesis arquitectónica diferenciada manteniendo computación clásica, lo que permite valorar su aportación real frente a alternativas más estándar.
 \end{itemize}
 
@@ -415,7 +415,7 @@ Esta métrica penaliza error de validación, inestabilidad entre folds y gap de 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth,height=0.40\textheight,keepaspectratio]{../doc/mermaid-pdf/models/splits-kfolds/03.pdf}%
-\caption{\small Construccion de k-folds temporales.}
+\caption{\small Construcción de k-folds temporales.}
 \label{fig:doc-models-splits-kfolds-3}
 \end{figure}
 
@@ -494,8 +494,6 @@ Diagnosis & ¿Dónde acierta y dónde falla el modelo en la superficie? \\
 \label{tab:dashboard-tabs}
 \end{table}
 
-La pestaña \emph{Diagnosis} contiene vistas necesarias para localizar dónde aparece esa compresión. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo.
-
 Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-global-explainability-1}, \ref{fig:doc-dashboard-sample-explainability-1}, \ref{fig:doc-dashboard-diagnosis-1} y~\ref{fig:doc-dashboard-behaviour-volatility-surfaces-1} muestran estos flujos y vistas; en particular, la vista local de \emph{Sample Explainability} es la puerta de entrada al \emph{Local SHAP Waterfall} y al contexto de vecinos históricos.
 
 \begin{figure}[h]
@@ -568,7 +566,7 @@ El backend de almacenamiento puede ser local o GCP. En el entorno de despliegue 
 
 \section{reproducibilidad}
 \label{sec:reproducibilidad}
-El trabajo se ha realizado siguiendo todos los pasos descritos en este documento. De la misma manera, siguiendo todos los pasos descritos en este documento junto con los notebooks de ayuda del repositorio y la  \href{https://epiblasfunds.github.io/options-pricing/}{documentación de github} (\href{https://epiblasfunds.github.io/options-pricing/}{epiblasfunds.github.io/options-pricing/}) es posible reproducir el trabajo si contamos con los datos fuentes necesarios.
+El trabajo se ha realizado siguiendo todos los pasos descritos en este documento. De la misma manera, siguiendo todos los pasos descritos en este documento junto con los notebooks de ayuda del repositorio y la  \href{https://epiblasfunds.github.io/options-pricing/}{documentación de github} (\href{https://epiblasfunds.github.io/options-pricing/}{epiblasfunds.github.io/options-pricing/}) es posible reproducir el trabajo si contamos con los datos fuente necesarios.
 
 Lo necesario para reproducir el estudio es llevar a cabo los procesos de:
 \begin{enumerate}
@@ -592,7 +590,7 @@ Es importante remarcar que aunque la configuración sea la misma es posible que 
 \end{figure}
 
 
-La arquitectura del repositorio sigue una separación por funcionalidades: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio. La Figura~\ref{fig:doc-repository-index-2} muestran la secuencia de ejecución, la cadena de salidas y las dependencias entre paquetes.
+La arquitectura del repositorio sigue una separación por funcionalidades: cada paquete tiene un cometido identificable y las salidas persistidas pasan de una etapa a otra sin mezclar entrenamiento, explicación y servicio. La Figura~\ref{fig:doc-repository-index-2} muestra la secuencia de ejecución, la cadena de salidas y las dependencias entre paquetes.
 
 
 \begin{table}[htbp]
@@ -623,11 +621,11 @@ Paquete o carpeta & Responsabilidad principal \\
 
 La Tabla~\ref{tab:arquitectura-repo} muestra que el dashboard no reentrena modelos y la API no reconstruye explicaciones desde cero salvo en casos de explicabilidad local manual. Esta separación reduce el acoplamiento y facilita detectar errores. Si una predicción de API no coincide con la vista del dashboard, el problema puede acotarse a carga del paquete autocontenido, transformación de features o versión de modelo.
 
-Vista así, la arquitectura no es sólo una organización de carpetas. Es una forma de aislar responsabilidades, simplificar depuración y poder justificar cada paso del flujo de principio a fin.
+Vista así, la arquitectura no es solo una organización de carpetas. Es una forma de aislar responsabilidades, simplificar depuración y poder justificar cada paso del flujo de principio a fin.
 
 Desde esa misma lógica, la arquitectura se apoya en un flujo de trabajo de ingeniería más próximo al de un proyecto real que al de un experimento ad hoc: ramas de trabajo, commits trazables, validaciones antes de integrar y control explícito de cambios sobre código, configuración, documentación y despliegue. Esa capa metodológica de desarrollo, validación y despliegue se amplía en el apéndice \ref{app:workflow-dev}.
 
-Todos estos paquetes están cubiertos por más del 80\% en cobertura de tests unitarios, haciendo que las funcionalidades sean robustas para futuras evoluciones del código, haciéndolo más escalables. A esta escalabilidad ayuda también el checkeo de formato Flake8. Para obligar a respetar tanto el formato Flake8 como el paso de los tests, se han desarrollado workflows de GitHub para que GitHub actions ejecute en pipelines para comprobar ambas condiciones, tal como se resume de forma específica en el apéndice \ref{app:workflow-dev}.
+Todos estos paquetes están cubiertos por más del 80\% en cobertura de tests unitarios, haciendo que las funcionalidades sean robustas para futuras evoluciones del código, haciéndolo más escalable. A esta escalabilidad ayuda también el checkeo de formato Flake8. Para obligar a respetar tanto el formato Flake8 como el paso de los tests, se han desarrollado workflows de GitHub para que GitHub Actions ejecute en pipelines para comprobar ambas condiciones, tal como se resume de forma específica en el apéndice \ref{app:workflow-dev}.
 
 
 \section{Riesgos metodológicos y controles}

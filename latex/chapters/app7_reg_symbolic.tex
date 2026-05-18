@@ -59,7 +59,7 @@ g_3(x) = c_1 x_1^2 + c_2 x_3,
 
 donde \(c\), \(c_1\) y \(c_2\) son constantes que también deben estimarse.
 
-Este espacio de búsqueda es mucho más amplio que el de una regresión tradicional. No sólo hay que encontrar los valores de los coeficientes, sino también decidir qué variables aparecen, qué operadores se usan, cómo se combinan y cuál es la profundidad o complejidad de la expresión. Por ello, la regresión simbólica suele formularse como un problema de optimización sobre estructuras.
+Este espacio de búsqueda es mucho más amplio que el de una regresión tradicional. No solo hay que encontrar los valores de los coeficientes, sino también decidir qué variables aparecen, qué operadores se usan, cómo se combinan y cuál es la profundidad o complejidad de la expresión. Por ello, la regresión simbólica suele formularse como un problema de optimización sobre estructuras.
 
 Una forma habitual de representar las fórmulas candidatas es mediante árboles de expresión. En un árbol de expresión, las hojas representan variables o constantes, y los nodos internos representan operadores. Por ejemplo, la expresión
 
@@ -297,7 +297,7 @@ La ecuación simbólica final debe interpretarse como una aproximación analíti
 
 Por ejemplo, si la ecuación utiliza principalmente el tiempo a vencimiento y el strike, puede interpretarse que el sustituto simbólico ha identificado esas variables como suficientes para reproducir una parte relevante del comportamiento del modelo. Si aparecen interacciones multiplicativas o cocientes entre variables, puede existir una relación no lineal aprendida por el modelo que merece ser analizada financieramente. Sin embargo, estas lecturas deben hacerse con prudencia: la presencia de una variable en la fórmula no demuestra causalidad, y la ausencia de una variable no implica necesariamente irrelevancia económica.
 
-También es importante considerar la estabilidad de la expresión. La regresión simbólica puede encontrar fórmulas matemáticamente válidas pero sensibles a pequeñas variaciones de entrada, especialmente si incluyen divisiones, potencias o combinaciones de alto grado. Por ello, las ecuaciones deben evaluarse no sólo por su métrica agregada, sino también por su comportamiento en distintas regiones de la superficie de volatilidad, especialmente en vencimientos cortos, extremos de moneyness o zonas con menor densidad de observaciones.
+También es importante considerar la estabilidad de la expresión. La regresión simbólica puede encontrar fórmulas matemáticamente válidas pero sensibles a pequeñas variaciones de entrada, especialmente si incluyen divisiones, potencias o combinaciones de alto grado. Por ello, las ecuaciones deben evaluarse no solo por su métrica agregada, sino también por su comportamiento en distintas regiones de la superficie de volatilidad, especialmente en vencimientos cortos, extremos de moneyness o zonas con menor densidad de observaciones.
 
 \section{Limitaciones}
 
@@ -315,7 +315,7 @@ Finalmente, las expresiones simbólicas deben interpretarse dentro del dominio o
 
 Dentro del sistema de explicabilidad desarrollado, la regresión simbólica cumple una función complementaria a otras técnicas. Mientras que SHAP ofrece atribuciones locales y agregaciones globales de importancia, la regresión simbólica intenta condensar el comportamiento del modelo en una fórmula explícita. Esta fórmula puede ayudar a detectar patrones aprendidos, dependencias no lineales, interacciones entre variables y posibles simplificaciones del modelo original.
 
-Su valor metodológico no está en afirmar que la ecuación descubierta sea una nueva ley cerrada de volatilidad implícita, sino en proporcionar una herramienta adicional para auditar modelos complejos. Si una expresión relativamente simple reproduce con alta fidelidad las predicciones de un modelo, entonces parte del comportamiento del modelo puede resumirse de forma transparente. Si, por el contrario, sólo expresiones muy complejas alcanzan una fidelidad aceptable, esto sugiere que el modelo base está utilizando relaciones más difíciles de condensar en una fórmula interpretable.
+Su valor metodológico no está en afirmar que la ecuación descubierta sea una nueva ley cerrada de volatilidad implícita, sino en proporcionar una herramienta adicional para auditar modelos complejos. Si una expresión relativamente simple reproduce con alta fidelidad las predicciones de un modelo, entonces parte del comportamiento del modelo puede resumirse de forma transparente. Si, por el contrario, solo expresiones muy complejas alcanzan una fidelidad aceptable, esto sugiere que el modelo base está utilizando relaciones más difíciles de condensar en una fórmula interpretable.
 
 Por tanto, la regresión simbólica se incorpora en este proyecto como una técnica de explicabilidad global basada en modelos sustitutos. Su objetivo es mejorar la trazabilidad y la comprensión del modelo de volatilidad, manteniendo siempre la distinción entre fidelidad al modelo, precisión frente al mercado e interpretabilidad financiera.
 

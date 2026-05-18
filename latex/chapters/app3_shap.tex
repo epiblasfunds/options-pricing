@@ -78,7 +78,7 @@ f(X) \mid X_S = x_S
 
 donde \(X_S\) representa el subconjunto de variables incluidas en \(S\), y \(x_S\) son los valores observados de esas variables para la instancia que se quiere explicar.
 
-Esta expresión indica que, cuando sólo se conocen las variables de \(S\), la predicción se calcula como el valor esperado del modelo condicionando a que esas variables toman los valores observados. Las variables que no pertenecen a \(S\) se integran o sustituyen mediante una distribución de referencia.
+Esta expresión indica que, cuando solo se conocen las variables de \(S\), la predicción se calcula como el valor esperado del modelo condicionando a que esas variables toman los valores observados. Las variables que no pertenecen a \(S\) se integran o sustituyen mediante una distribución de referencia.
 
 En la práctica, esta definición plantea una dificultad importante: no siempre es sencillo estimar la distribución condicional de las variables ausentes. Por ello, diferentes explicadores SHAP utilizan aproximaciones distintas. Algunos métodos asumen independencia entre variables, otros usan muestras de fondo, otros aprovechan la estructura interna del modelo, como ocurre con árboles de decisión, y otros estiman las contribuciones mediante permutaciones.
 
@@ -106,7 +106,7 @@ f(x)
 \label{eq:shap-local-accuracy}
 \end{equation}
 
-Esta propiedad también se conoce en el contexto de SHAP como \emph{local accuracy}. Garantiza que la explicación local no sólo ordena variables por importancia, sino que reconstruye numéricamente la predicción explicada.
+Esta propiedad también se conoce en el contexto de SHAP como \emph{local accuracy}. Garantiza que la explicación local no solo ordena variables por importancia, sino que reconstruye numéricamente la predicción explicada.
 
 La propiedad de simetría indica que si dos variables aportan exactamente lo mismo a todas las coaliciones posibles, entonces deben recibir la misma contribución. Formalmente, si para dos variables \(i\) y \(j\) se cumple que
 
