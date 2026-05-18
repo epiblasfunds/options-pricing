@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as follows."
+title: "options-pricing"
+type: software
+license: "Apache-2.0"
+authors:
+  - family-names: "Gallego Lopez"
+    given-names: "Pedro"
+  - family-names: "Recuero Cordobes"
+    given-names: "Daniel"
+repository-code: "https://github.com/epiblasfunds/options-pricing"
+url: "https://github.com/epiblasfunds/options-pricing"
+abstract: "Repository for implied volatility modeling and explainability in options."
+preferred-citation:
+  type: report
+  title: "AI for option pricing: explainable volatility models"
+  authors:
+    - family-names: "Gallego Lopez"
+      given-names: "Pedro"
+    - family-names: "Recuero Cordobes"
+      given-names: "Daniel"
+  institution: "Instituto BME"
+  year: 2026
+  language: "es"
