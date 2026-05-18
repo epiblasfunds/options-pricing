@@ -1,0 +1,100 @@
+\chapter{Curvas ALE}
+\label{app:ale}
+
+Las curvas ALE, del inglés \emph{Accumulated Local Effects}, son una herramienta de explicabilidad utilizada para estudiar el efecto medio de una variable sobre la predicción de un modelo. En este trabajo se emplean para analizar cómo cambia la volatilidad implícita predicha cuando varían determinadas características financieras, como el precio de ejercicio, el precio del subyacente, el tiempo hasta vencimiento o el tipo de interés.
+
+La formulación de ALE sigue la propuesta de \citet{apley2020visualizing}, y su uso se interpreta como una técnica de explicabilidad global basada en efectos locales acumulados, especialmente adecuada cuando las variables predictoras presentan dependencia estadística.
+
+La motivación de ALE es similar a la de otras técnicas de análisis de sensibilidad: se quiere entender qué papel desempeña cada variable en la predicción del modelo. Sin embargo, ALE lo hace de forma especialmente útil cuando las variables explicativas están correlacionadas.
+
+A diferencia de los gráficos PDP, que evalúan una variable sobre una rejilla global y promedian las predicciones resultantes, ALE calcula efectos locales dentro de regiones donde existen observaciones reales. Esto reduce el riesgo de evaluar el modelo en combinaciones artificiales poco representativas del conjunto de entrenamiento. Por tanto, ALE no elimina completamente el problema de las correlaciones entre variables, pero proporciona una estimación más prudente del efecto medio de una variable en zonas con soporte de datos.
+
+Formalmente, sea \(f\) el modelo entrenado y sea \(X_j\) la variable que se quiere analizar. La curva ALE de la variable \(j\) se define como el efecto local medio acumulado:
+
+\begin{equation}
+ALE_j(z)=
+\int_{z_0}^{z}
+E\left[
+\frac{\partial f(X)}{\partial X_j}
+\mid X_j=s
+\right]ds
+-C.
+\label{eq:ale}
+\end{equation}
+
+Esta expresión puede interpretarse en dos pasos. Primero, se estima cómo cambia localmente la predicción del modelo cuando cambia ligeramente la variable \(X_j\), condicionando a que dicha variable tome valores cercanos a \(s\). Después, esos efectos locales se acumulan desde un punto inicial \(z_0\) hasta el valor \(z\). La constante \(C\) centra la curva, normalmente para que su media sea cero. Por ello, un valor ALE positivo no significa que la volatilidad predicha sea positiva, sino que el efecto acumulado de esa variable en esa zona está por encima de su nivel medio de referencia.
+
+\section*{Construcción por intervalos}
+
+En la práctica, el modelo no se deriva analíticamente ni se calcula la integral anterior de forma exacta. En su lugar, se utiliza una aproximación por intervalos, o \emph{bins}. Para cada variable analizada, se divide su distribución observada en varios intervalos y se mide cuánto cambia la predicción al pasar del borde inferior al borde superior de cada intervalo.
+
+Sea \(K\) el número de intervalos y sea \([l_k,u_k]\) el intervalo \(k\)-ésimo. Se define \(I_k\) como el conjunto de observaciones cuyo valor de la variable \(j\) cae dentro de dicho intervalo:
+
+\begin{equation}
+I_k =
+\left\{
+i : x_{ij} \in [l_k,u_k]
+\right\}.
+\end{equation}
+
+Para cada observación \(i \in I_k\), se crean dos versiones contrafactuales locales. En la primera, la variable \(j\) se sustituye por el borde inferior \(l_k\); en la segunda, se sustituye por el borde superior \(u_k\). El resto de variables se mantiene igual. La diferencia entre ambas predicciones aproxima el efecto local de moverse dentro de ese intervalo:
+
+\begin{equation}
+f(u_k,x_{i,-j})-f(l_k,x_{i,-j}).
+\end{equation}
+
+Promediando esta diferencia sobre todas las observaciones del intervalo se obtiene el incremento local medio del bin:
+
+\begin{equation}
+\Delta_k =
+\frac{1}{|I_k|}
+\sum_{i \in I_k}
+\left[
+f(u_k,x_{i,-j})-f(l_k,x_{i,-j})
+\right].
+\label{eq:ale-delta}
+\end{equation}
+
+El valor \(\Delta_k\) indica si, dentro de ese intervalo observado, pasar del borde inferior al borde superior tiende a aumentar o disminuir la predicción del modelo. Si \(\Delta_k > 0\), el modelo predice, en promedio, una mayor volatilidad al avanzar dentro del intervalo. Si \(\Delta_k < 0\), el efecto local medio es descendente. Si \(\Delta_k\) es cercano a cero, el modelo apenas modifica su predicción en esa región.
+
+Una vez calculados los incrementos locales, se acumulan de forma secuencial:
+
+\begin{equation}
+ALE^u_k=\sum_{r \leq k}\Delta_r,
+\label{eq:ale-uncentered}
+\end{equation}
+
+donde \(ALE^u_k\) representa el efecto acumulado sin centrar hasta el intervalo \(k\). Finalmente, la curva se centra restando la media de los valores acumulados:
+
+\begin{equation}
+ALE_k = ALE^u_k - \frac{1}{K}\sum_{r=1}^K ALE^u_r.
+\label{eq:ale-center}
+\end{equation}
+
+Este centrado hace que la curva tenga interpretación relativa. El nivel cero no representa volatilidad cero ni ausencia absoluta de efecto. Representa el nivel medio de referencia del efecto acumulado de la variable. Por tanto, lo importante no es únicamente si la curva está por encima o por debajo de cero, sino su forma, su pendiente y los cambios de pendiente entre regiones.
+
+\section*{Implementación en el proyecto}
+
+En el dashboard de este trabajo, las curvas ALE se calculan mediante la función \texttt{build\_ale\_frame}. Para cada variable de análisis, la implementación toma la distribución observada en el conjunto de datos y construye bordes por cuantiles entre 0.05 y 0.95. En la configuración utilizada se emplean 13 puntos, lo que genera intervalos internos sobre los que se calculan los efectos locales.
+
+El uso de cuantiles tiene una ventaja importante: concentra los intervalos en zonas donde realmente existen observaciones. En vez de dividir el rango de la variable de forma equiespaciada, lo cual podría producir intervalos con muy pocos datos en regiones extremas, los cuantiles distribuyen mejor las observaciones entre los bins. Esto resulta especialmente relevante en datos financieros, donde algunas zonas de la superficie de volatilidad pueden estar mucho más pobladas que otras.
+
+\section*{Interpretación de la curva}
+
+La curva ALE se interpreta como un efecto acumulado relativo. Una curva creciente indica que, al aumentar la variable, el modelo tiende a incrementar la volatilidad predicha en las regiones observadas. Una curva decreciente indica el efecto contrario. Una curva aproximadamente plana sugiere que la variable tiene poco efecto marginal medio en las zonas analizadas. Una curva curvada indica que el efecto no es constante: puede ser fuerte en unas regiones y débil en otras.
+
+También conviene prestar atención a tramos irregulares. Cambios bruscos, oscilaciones o dientes pueden deberse a ruido, escasez de observaciones en ciertos bins, sensibilidad excesiva del modelo o cambios reales en la relación aprendida. Por ello, una curva ALE no debe interpretarse únicamente como una verdad estructural del mercado, sino como una descripción del comportamiento del modelo entrenado sobre las regiones representadas en los datos.
+
+\section*{Relación con ICE y PDP}
+
+ALE, ICE y PDP responden a preguntas relacionadas, pero no equivalentes. ICE muestra cómo cambia la predicción para observaciones individuales cuando se modifica una variable. PDP promedia predicciones contrafactuales globales. ALE, en cambio, estima efectos locales medios dentro de regiones observadas y después los acumula.
+
+Esta diferencia es importante. Si las variables estuvieran poco correlacionadas y el modelo tuviera efectos relativamente homogéneos, PDP y ALE podrían ofrecer conclusiones parecidas. Sin embargo, cuando existen correlaciones fuertes o regiones poco pobladas, PDP puede evaluar combinaciones poco plausibles. Por ejemplo, podría combinar un determinado vencimiento, strike y subyacente de una forma que apenas aparece en el mercado observado. ALE reduce este problema porque compara valores cercanos dentro de intervalos donde sí hay observaciones.
+
+Respecto a ICE, ALE ofrece una lectura más agregada. Si las curvas ICE son muy heterogéneas pero la curva ALE es casi plana, puede significar que existen efectos locales opuestos que se compensan al promediar. Si ICE y ALE apuntan en la misma dirección, la evidencia sobre el efecto de la variable es más estable. Por tanto, en este trabajo ambas herramientas se interpretan de forma complementaria: ICE permite detectar heterogeneidad individual y ALE resume el efecto medio acumulado en zonas observadas.
+
+\section*{Limitaciones}
+
+Aunque ALE es más robusto que PDP frente a combinaciones contrafactuales irreales, no elimina todas las dificultades. En primer lugar, sigue siendo una técnica agregada. Al promediar efectos locales dentro de cada intervalo, puede ocultar diferencias entre subgrupos de observaciones. En segundo lugar, la forma de la curva depende del número de bins y de la distribución de los datos. Pocos intervalos pueden suavizar demasiado el efecto; demasiados intervalos pueden introducir ruido.
+
+En resumen, las curvas ALE permiten estudiar el efecto medio acumulado de una variable sobre la volatilidad implícita predicha, utilizando variaciones locales en regiones observadas. Su principal ventaja es que ofrecen una alternativa más prudente que PDP cuando las variables financieras están correlacionadas. Su principal limitación es que siguen siendo una herramienta agregada y descriptiva del modelo. En este trabajo se utilizan como complemento de ICE, superficies de volatilidad y análisis local para obtener una visión más completa del comportamiento aprendido por los modelos de pricing.

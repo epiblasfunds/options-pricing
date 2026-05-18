@@ -1,0 +1,74 @@
+\chapter{Curvas ICE}
+\label{app:ice}
+
+Las curvas ICE, del inglés \emph{Individual Conditional Expectation}, son una herramienta de explicabilidad utilizada para estudiar cómo cambia la predicción de un modelo cuando se modifica una variable concreta y se mantienen fijas todas las demás. En este trabajo se emplean para analizar el comportamiento del modelo de volatilidad implícita ante cambios contrafactuales en variables financieras relevantes como el precio de ejercicio, el precio del subyacente, el tiempo hasta vencimiento o el tipo de interés.
+
+La idea fundamental es sencilla: se toma una observación real del conjunto de datos, se modifica únicamente una de sus variables y se vuelve a evaluar el modelo. Repitiendo este proceso para varios valores de dicha variable se obtiene una curva individual de respuesta. A diferencia de otras técnicas globales, ICE no resume directamente el efecto medio de una variable, sino que muestra la trayectoria de predicción para cada observación por separado. Esto resulta especialmente útil en modelos de volatilidad, donde el efecto de una variable puede depender fuertemente del contexto del contrato: tipo de opción, vencimiento, nivel del subyacente, strike relativo o zona de la superficie de volatilidad.
+
+Las curvas ICE fueron propuestas por \citet{goldstein2015ice} como una extensión individualizada de los gráficos de dependencia parcial, y se han consolidado como una técnica habitual de interpretabilidad agnóstica al modelo \citep{molnar2022iml}.
+
+Formalmente, sea \(f\) el modelo entrenado de predicción de volatilidad, sea \(x_i\) una observación del conjunto de datos y sea \(j\) la variable que se quiere analizar. Denotamos por \(x_{i,-j}\) al conjunto de variables de la observación \(i\) salvo la variable \(j\). Para un valor contrafactual \(z\), la curva ICE de la observación \(i\) respecto a la variable \(j\) se define como:
+
+\begin{equation}
+ICE_i^{(j)}(z)=f(z,x_{i,-j}).
+\label{eq:ice}
+\end{equation}
+
+Esta expresión representa la predicción que produciría el modelo si la observación \(i\) mantuviera todas sus características originales excepto la variable \(j\), que se sustituye por el valor \(z\). Al evaluar la ecuación anterior sobre una rejilla de valores \(z_1,\ldots,z_m\), se obtiene una curva:
+
+\begin{equation}
+\left\{
+f(z_1,x_{i,-j}),
+f(z_2,x_{i,-j}),
+\ldots,
+f(z_m,x_{i,-j})
+\right\}.
+\end{equation}
+
+Cada curva ICE responde por tanto a una pregunta contrafactual: \emph{qué habría predicho el modelo para este contrato concreto si solo cambiara una determinada variable}. En el contexto de opciones, por ejemplo, una curva ICE para \texttt{StrikePrice} muestra cómo cambiaría la volatilidad predicha para un contrato dado si se evaluara ese mismo contrato bajo distintos precios de ejercicio, manteniendo fijos el resto de atributos usados por el modelo.
+
+La Figura~\ref{fig:doc-dashboard-behaviour-ice-1} resume el flujo de construcción de estas curvas en el dashboard.
+
+\DiagramDashboardBehaviourIceOne
+
+\section*{Construcción de las curvas en el proyecto}
+
+En el dashboard desarrollado en este trabajo, las curvas ICE se construyen mediante la función \texttt{build\_ice\_frame}. El procedimiento seguido puede resumirse en los siguientes pasos:
+
+\begin{enumerate}
+    \item Se selecciona una muestra de observaciones reales del conjunto de datos usado por el dashboard. Para evitar una visualización excesivamente densa, el número máximo de curvas individuales está controlado por el parámetro \texttt{ice\_sample\_size}, fijado en este proyecto a 24.
+
+    \item Para cada variable analizada se construye una rejilla de valores. En lugar de usar una rejilla equiespaciada entre el mínimo y el máximo, se utilizan cuantiles de la distribución observada. Esto concentra los puntos de evaluación en zonas donde existen datos reales y reduce, aunque no elimina, el riesgo de evaluar escenarios extremadamente alejados de la muestra.
+
+    \item Para cada observación seleccionada y para cada valor de la rejilla, se crea una copia contrafactual de la observación sustituyendo únicamente la variable analizada. El resto de variables permanece constante.
+
+    \item El modelo vuelve a predecir la volatilidad implícita sobre cada una de estas observaciones contrafactuales.
+
+    \item Finalmente se guarda una tabla con la variable analizada, el identificador de la muestra, el valor contrafactual y la predicción obtenida. Esta tabla es la que permite representar una curva por observación.
+\end{enumerate}
+
+En la configuración utilizada, cada curva se evalúa sobre \texttt{curve\_points}=25 puntos. Las variables incluidas en el análisis ICE son \texttt{StrikePrice}, \texttt{UnderlyingPrice}, \texttt{TimeToExpiration} y \texttt{Rate}. La elección de estas variables responde a su interpretación financiera directa: el strike y el subyacente determinan la moneyness de la opción; el tiempo hasta vencimiento condiciona la estructura temporal de la volatilidad; y el tipo de interés afecta al valor teórico de la opción y, de forma indirecta, a la volatilidad implícita estimada.
+
+\section*{Interpretación de las curvas ICE}
+
+La lectura de una curva ICE debe hacerse de forma individual y comparativa. Individualmente, la pendiente de una curva indica cómo reacciona la predicción del modelo para una observación concreta al modificar la variable analizada. Comparativamente, la forma conjunta de todas las curvas permite identificar si el modelo responde de manera homogénea o heterogénea en distintas regiones del espacio de datos.
+
+Si las curvas son aproximadamente paralelas, el modelo está aplicando un efecto similar de la variable analizada sobre la mayoría de observaciones. En ese caso, la variable tiene una influencia relativamente estable y poco dependiente del contexto. Por ejemplo, si las curvas ICE de \texttt{Rate} fueran casi paralelas y con pendiente suave, esto sugeriría que el modelo incorpora el efecto del tipo de interés de manera parecida para distintos contratos.
+
+Si, por el contrario, las curvas tienen pendientes muy distintas, se cruzan o muestran comportamientos opuestos, existe heterogeneidad en la respuesta del modelo. Esta heterogeneidad suele ser una señal de interacción entre variables. En opciones financieras, esto es esperable. El efecto de aumentar el \texttt{StrikePrice} no puede interpretarse de forma aislada, porque depende del nivel del \texttt{UnderlyingPrice}; conjuntamente ambas variables determinan si la opción está dentro, fuera o cerca del dinero. Por tanto, una fuerte divergencia en las curvas ICE de \texttt{StrikePrice} puede indicar que el modelo está capturando efectos asociados a la moneyness, aunque esta no aparezca explícitamente como variable analizada.
+
+\section*{Relación entre ICE y PDP}
+
+Las curvas ICE están estrechamente relacionadas con los \emph{Partial Dependence Plots} o PDP. Mientras que ICE muestra una curva por observación, el PDP promedia todas esas curvas para obtener un efecto medio global de la variable analizada:
+
+\begin{equation}
+PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n} f(z,x_{i,-j}).
+\label{eq:pdp}
+\end{equation}
+
+Por tanto, un PDP puede entenderse como el promedio vertical de las curvas ICE en cada valor \(z\). Esta agregación facilita una lectura global, pero también puede ocultar comportamientos relevantes. Si para algunas observaciones la predicción aumenta al incrementar una variable y para otras disminuye, el promedio puede resultar casi plano. En ese caso, el PDP sugeriría erróneamente que la variable tiene poco efecto, cuando en realidad el modelo presenta efectos locales fuertes pero de signo contrario.
+
+Esta diferencia es relevante en este trabajo porque la volatilidad implícita no depende de las variables de forma puramente aditiva. La relación entre strike, subyacente y vencimiento suele ser no lineal y estar condicionada por la zona de la superficie de volatilidad. Por ello, las curvas ICE aportan una visión más detallada que el promedio global: permiten comprobar si el efecto aprendido por el modelo es estable o si depende del tipo de contrato analizado.
+
+\section*{Resumen}
+Las curvas ICE permiten inspeccionar cómo responde el modelo de volatilidad ante cambios controlados en variables financieras relevantes. Su principal ventaja es que revelan heterogeneidad e interacciones que pueden quedar ocultas en promedios globales como el PDP. Su principal riesgo es la generación de escenarios contrafactuales poco plausibles. Por ello, en este trabajo se utilizan como una herramienta de diagnóstico visual y explicabilidad local-global, siempre interpretadas junto con el soporte de datos y el comportamiento observado en la superficie de volatilidad.
