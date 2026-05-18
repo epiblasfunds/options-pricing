@@ -69,14 +69,14 @@ m=\frac{F}{K}.
 \label{eq:moneyness}
 \end{equation}
 
-La moneyness \(m\) indica la posición relativa del subyacente frente al strike. Su transformación logarítmica,
+El moneyness \(m\) indica la posición relativa del subyacente frente al strike. Su transformación logarítmica,
 
 \begin{equation}
 \ell=\log(F/K),
 \label{eq:logmoneyness}
 \end{equation}
 
-es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}. Trabajos más recientes muestran además que los movimientos de la superficie pueden modelarse explícitamente a partir del retorno del subyacente, la moneyness y la vida restante mediante redes neuronales \citep{cao2019neural}.
+es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}. Trabajos más recientes muestran además que los movimientos de la superficie pueden modelarse explícitamente a partir del retorno del subyacente, el moneyness y la vida restante mediante redes neuronales \citep{cao2019neural}.
 
 \textbf{En la práctica, esta superficie se lee a través de varios patrones.}
 
