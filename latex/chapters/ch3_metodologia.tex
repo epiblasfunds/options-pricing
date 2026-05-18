@@ -515,26 +515,43 @@ Las Figuras~\ref{fig:doc-dashboard-behaviour-surface-1}, \ref{fig:doc-dashboard-
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf}%
-\caption{\small Flujo de la pestaña Sample Explainability.}
-\label{fig:doc-dashboard-sample-explainability-1}
+
+\begin{subfigure}[t]{0.60\textwidth}
+    \centering
+    \includegraphics[
+        width=\textwidth,
+        height=0.30\textheight,
+        keepaspectratio
+    ]{../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf}
+    \caption{\small Flujo de la pestaña Sample Explainability.}
+    \label{fig:doc-dashboard-sample-explainability-1}
+\end{subfigure}%
+\hfill
+\begin{subfigure}[t]{0.38\textwidth}
+    \centering
+    \includegraphics[
+        width=\textwidth,
+        height=0.30\textheight,
+        keepaspectratio
+    ]{../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf}
+    \caption{\small Construcción de superficies locales de volatilidad.}
+    \label{fig:doc-dashboard-behaviour-volatility-surfaces-1}
+\end{subfigure}
+
+\caption{\small Diagramas de flujo de explicabilidad local y superficies de volatilidad.}
+\label{fig:doc-dashboard-sample-and-surfaces}
 \end{figure}
 
 \vspace{-0.3cm}
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.92\textwidth,height=0.30\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/diagnosis/01.pdf}%
+\includegraphics[width=0.9\textwidth]{../doc/mermaid-pdf/dashboard/diagnosis/01.pdf}%
 \caption{\small Vistas de diagnóstico del modelo final.}
 \label{fig:doc-dashboard-diagnosis-1}
 \end{figure}
 
-\vspace{-0.3cm}
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.80\textwidth,height=0.35\textheight,keepaspectratio]{../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf}%
-\caption{\small Construcción de superficies locales de volatilidad.}
-\label{fig:doc-dashboard-behaviour-volatility-surfaces-1}
-\end{figure}
+
+\newpage
 
 \section{API, almacenamiento y cloud}
 \label{sec:api-cloud-metodo}
