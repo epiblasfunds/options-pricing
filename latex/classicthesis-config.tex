@@ -188,14 +188,19 @@
 \makeatletter
 \@ifpackageloaded{babel}%
     {%
-       \addto\extrasamerican{%
-			\renewcommand*{\figureautorefname}{Figure}%
-			\renewcommand*{\tableautorefname}{Table}%
-			\renewcommand*{\partautorefname}{Part}%
-			\renewcommand*{\chapterautorefname}{Chapter}%
-			\renewcommand*{\sectionautorefname}{Section}%
-			\renewcommand*{\subsectionautorefname}{Section}%
-			\renewcommand*{\subsubsectionautorefname}{Section}%     
+       \addto\captionsspanish{%
+			\renewcommand{\figurename}{Figura}%
+			\renewcommand{\tablename}{Tabla}%
+			\renewcommand{\listtablename}{Lista de tablas}%
+                }%
+       \addto\extrasspanish{%
+			\renewcommand*{\figureautorefname}{Figura}%
+			\renewcommand*{\tableautorefname}{Tabla}%
+			\renewcommand*{\partautorefname}{Parte}%
+			\renewcommand*{\chapterautorefname}{Capítulo}%
+			\renewcommand*{\sectionautorefname}{Sección}%
+			\renewcommand*{\subsectionautorefname}{Sección}%
+			\renewcommand*{\subsubsectionautorefname}{Sección}%     
                 }%
        \addto\extrasngerman{% 
 			\renewcommand*{\paragraphautorefname}{Absatz}%
