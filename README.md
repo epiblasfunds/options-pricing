@@ -115,3 +115,10 @@ flowchart TD
 - `dashboard/`: visualization app.
 - `api/`: service layer for serving models.
 - `enums/` and `exceptions/`: shared types and domain errors.
+
+
+## License
+
+Source code in this repository is licensed under the Apache License 2.0. See `LICENSE`.
+
+The thesis/report material under `latex/` is licensed under CC BY 4.0. See `latex/LICENSE`.
