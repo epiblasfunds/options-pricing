@@ -17,17 +17,18 @@ Modelo & Entrenamiento & MAE test & RMSE test & \(R^2\) test \\
 \midrule
 Regresión lineal & estándar & 0.067585 & 0.183824 & 0.096059  \\
 Random Forest & estándar & 0.054366 & 0.088403 & 0.790941  \\
-XGBoost & estándar & 0.054604 & 0.091735 & 0.774885  \\
-Red neuronal secuencial & estándar & 0.055425 & 0.113506 & 0.655354  \\
-Quantum Inspired NN & estándar & 0.056056 & 0.143025 & 0.452787  \\
+XGBoost & estándar & 0.054555 & 0.091642 & 0.77534  \\
+Red neuronal secuencial & estándar & 0.056104 & 0.122067 & 0.601406  \\
+Quantum Inspired NN & estándar & 0.056056 & 0.143025 & 0.452784  \\
 \bottomrule
 \end{tabular}
 \caption{Comparación final de modelos.}
 \label{tab:resultados-modelos}
 \end{table}
 
-La Tabla~\ref{tab:resultados-modelos} muestra que las familias de árboles dominan el test. Random Forest estándar obtiene el menor RMSE y el mayor \(R^2\); XGBoost estándar queda cerca, pero con RMSE ligeramente superior. Las redes neuronales no superan a las familias de árboles en esta muestra, aunque la variante Quantum Inspired mejora claramente al aplicar progressive ATM frente a su versión estándar.
+La Tabla~\ref{tab:resultados-modelos} muestra que los métodos de árboles obtienen los mejores resultados. Random Forest lidera con RMSE = 0.0884 y \(R^2\) = 0.7909, explicando aproximadamente el 79\% de la variabilidad de volatilidad implícita. XGBoost es competitivo con RMSE = 0.0916 y \(R^2\) = 0.7753, apenas 0.3\% de diferencia relativa en RMSE. En contraste, la brecha hacia las redes neuronales es pronunciada: Sequential NN alcanza RMSE = 0.1221 (\(R^2\) = 0.6014) y Quantum Inspired NN degrada a RMSE = 0.1430 (\(R^2\) = 0.4528). La regresión lineal es casi inutilizable con RMSE = 0.1838 (\(R^2\) = 0.0961), confirmando que la volatilidad implícita depende de interacciones no lineales complejas entre variables financieras. La superioridad de los métodos basados en árboles (Random Forest y XGBoost) respecto a arquitecturas más simples o menos robustas es clara y cuantitativamente sólida en el conjunto final de test.
 
+\Needspace{12\baselineskip}
 
 \subsection{Entrenamiento estándar frente a progressive ATM}
 \label{subsec:normal-vs-progressive}
@@ -41,8 +42,8 @@ Familia & RMSE & RMSE ATM & \(\Delta\) & Lectura \\
 \midrule
 Regresión lineal & 0.183824 & 0.187747 & +0.003923 & Empeora levemente. \\
 Random Forest & 0.088403 & 0.088533 & +0.000130 & Prácticamente neutro. \\
-XGBoost & 0.091735 & 0.113606 & +0.021871 & Degrada test. \\
-Red neuronal secuencial & 0.113506 & 0.120161 & +0.006655 & Degrada test. \\
+XGBoost & 0.091642 & 0.113296 & +0.021654 & Degrada test. \\
+Red neuronal secuencial & 0.122067 & 0.120108 & -0.001959 & Mejora levemente. \\
 Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
 \bottomrule
 \end{tabularx}
@@ -50,26 +51,30 @@ Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
 \label{tab:progressive-segmentos}
 \end{table}
 
-El entrenamiento progressive ATM no produce una mejora universal. En Random Forest, que ya muestra un comportamiento muy estable en la comparación, el cambio es casi neutro; en XGBoost y en la red secuencial empeora el RMSE test; en Quantum Inspired sí actúa como regularizador útil. Esto encaja con la interpretación metodológica: ordenar por cercanía a ATM puede estabilizar arquitecturas iterativas más sensibles, pero también puede sesgar el aprendizaje si los extremos de moneyness contienen información necesaria para test. Por tanto, progressive ATM debe tratarse como variante experimental y no como decisión automática.
+El entrenamiento progressive ATM no produce una mejora universal. En regresión lineal el resultado empeora levemente; en Random Forest, que ya muestra un comportamiento muy estable en la comparación, el cambio es casi neutro; en XGBoost empeora el RMSE test; y en la red secuencial junto con Quantum Inspired aparece una mejora (leve en la primera, clara en la segunda). Esto encaja con la interpretación metodológica: ordenar por cercanía a ATM puede estabilizar arquitecturas iterativas más sensibles, pero también puede sesgar el aprendizaje si los extremos de moneyness contienen información necesaria para test. Por tanto, progressive ATM debe tratarse como variante experimental y no como decisión automática.
 
 La evidencia sugiere una lectura por familias.
 
 \begin{itemize}
+  \item En \textbf{regresión lineal}, el ligero deterioro confirma que el orden de entrenamiento apenas aporta en modelos de este tipo.
   \item En \textbf{Random Forest}, la proximidad de resultados indica que el bosque ya capta bien la señal central sin necesitar entrenamiento progresivo ATM.
-  \item En \textbf{XGBoost} y en la \textbf{red secuencial}, el deterioro sugiere que priorizar ATM puede dejar peor representadas zonas relevantes para la generalización final.
+  \item En \textbf{XGBoost}, el deterioro sugiere que priorizar ATM puede dejar peor representadas zonas relevantes para la generalización final.
+  \item En la \textbf{red secuencial}, la mejora es pequeña, por lo que el efecto parece positivo pero de magnitud limitada.
   \item En \textbf{Quantum Inspired}, la mejora apunta a que la estrategia sí puede actuar como regularizador estructural cuando la arquitectura es más sensible al orden de aprendizaje.
 \end{itemize}
 
-La conclusión práctica es sobria: progressive ATM es útil como hipótesis de trabajo y como herramienta de análisis, pero su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
+La conclusión práctica es clara: progressive ATM es útil como hipótesis de trabajo y como herramienta de análisis, pero su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
 
 \subsection{Modelo de referencia}
 \label{subsec:modelo-final}
 
-El modelo de referencia es el XGBoost:
+Para interpretar de forma consistente las pantallas del dashboard que vienen a continuación, conviene fijar un único modelo de referencia. En este trabajo, ese modelo es XGBoost:
 \begin{itemize}
-    \item Desempeño en test muy notable quedando muy cercano al mejor desempeño entre todas las familias.
-    \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R2=0.9264$. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
+  \item Desempeño en test muy notable, quedando muy cercano al mejor desempeño entre todas las familias.
+  \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R^2=0.9264$. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
 \end{itemize}
+
+En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa. ación.
 
 \subsection{Diagnóstico de rendimiento}
 \label{subsec:diagnostico-rendimiento}
