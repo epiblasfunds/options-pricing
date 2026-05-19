@@ -21,4 +21,18 @@ w_s \propto S-s,
 \label{eq:progressive-weights}
 \end{equation}
 
-La diferencia por familia es relevante: regresión lineal y Random Forest usan pesos de muestra; XGBoost reparte estimadores entre fases acumulativas; y las redes entrenan sucesivamente sobre datasets acumulados. En los resultados de este trabajo, progressive ATM mejora Quantum Inspired pero no mejora al Random Forest seleccionado. Por tanto, se conserva como estrategia analítica útil, pero no como regla general de entrenamiento.
+La diferencia por familia es relevante: regresión lineal y Random Forest usan pesos de muestra; XGBoost reparte estimadores entre fases acumulativas; y las redes entrenan sucesivamente sobre datasets acumulados.
+
+\section*{Análisis del impacto del entrenamiento Progressive ATM}
+
+El objetivo de esta variante es comprobar si reordenar el aprendizaje desde la zona ATM mejora la generalización fuera de muestra. Para ello, cada familia se reentrena bajo progressive ATM manteniendo la misma validación cruzada y los mismos hiperparámetros del entrenamiento estándar, y se comparan métricas test (RMSE, MAE y \(R^2\)) entre ambas versiones.
+
+Los resultados revelan un patrón no universal y dependiente de arquitectura:
+
+\begin{itemize}
+	\item \textbf{Modelos ya robustos en estándar (Random Forest y, en menor medida, XGBoost):} no se observa ganancia sistemática; en XGBoost el efecto es claramente negativo.
+	\item \textbf{Modelos más sensibles al orden (Sequential NN y, sobre todo, Quantum Inspired):} aparecen mejoras, aunque de magnitud muy distinta entre ambas familias.
+	\item \textbf{Modelos lineales:} el orden apenas aporta porque la hipótesis es global y no depende de trayectorias de aprendizaje.
+\end{itemize}
+
+En términos prácticos, progressive ATM debe interpretarse como herramienta experimental útil para diagnóstico y comparación entre familias, no como regla general de entrenamiento.

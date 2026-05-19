@@ -51,19 +51,9 @@ Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
 \label{tab:progressive-segmentos}
 \end{table}
 
-El entrenamiento progressive ATM no produce una mejora universal. En regresión lineal el resultado empeora levemente; en Random Forest, que ya muestra un comportamiento muy estable en la comparación, el cambio es casi neutro; en XGBoost empeora el RMSE test; y en la red secuencial junto con Quantum Inspired aparece una mejora (leve en la primera, clara en la segunda). Esto encaja con la interpretación metodológica: ordenar por cercanía a ATM puede estabilizar arquitecturas iterativas más sensibles, pero también puede sesgar el aprendizaje si los extremos de moneyness contienen información necesaria para test. Por tanto, progressive ATM debe tratarse como variante experimental y no como decisión automática.
+El entrenamiento progressive ATM no produce una mejora universal. El resultado empeora en regresión lineal y en XGBoost, es prácticamente neutro en Random Forest, mejora de forma leve en la red secuencial y mejora de forma clara en Quantum Inspired. Esta pauta es coherente con la intuición metodológica: ordenar por cercanía a ATM puede ayudar en arquitecturas más sensibles al orden de aprendizaje, pero también puede sesgar la representación de zonas extremas relevantes para test.
 
-La evidencia sugiere una lectura por familias.
-
-\begin{itemize}
-  \item En \textbf{regresión lineal}, el ligero deterioro confirma que el orden de entrenamiento apenas aporta en modelos de este tipo.
-  \item En \textbf{Random Forest}, la proximidad de resultados indica que el bosque ya capta bien la señal central sin necesitar entrenamiento progresivo ATM.
-  \item En \textbf{XGBoost}, el deterioro sugiere que priorizar ATM puede dejar peor representadas zonas relevantes para la generalización final.
-  \item En la \textbf{red secuencial}, la mejora es pequeña, por lo que el efecto parece positivo pero de magnitud limitada.
-  \item En \textbf{Quantum Inspired}, la mejora apunta a que la estrategia sí puede actuar como regularizador estructural cuando la arquitectura es más sensible al orden de aprendizaje.
-\end{itemize}
-
-La conclusión práctica es clara: progressive ATM es útil como hipótesis de trabajo y como herramienta de análisis, pero su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
+La conclusión práctica es clara: progressive ATM debe tratarse como variante experimental y no como decisión automática. Su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
 
 \subsection{Modelo de referencia}
 \label{subsec:modelo-final}
@@ -74,7 +64,7 @@ Para interpretar de forma consistente las pantallas del dashboard que vienen a c
   \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R^2=0.9264$. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
 \end{itemize}
 
-En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa. ación.
+En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa.
 
 \subsection{Diagnóstico de rendimiento}
 \label{subsec:diagnostico-rendimiento}
@@ -90,38 +80,6 @@ En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimien
 Las vistas del dashboard son necesarias para localizar dónde se concentra el error. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
 
 La Figura~\ref{fig:dash-diagnosis-comparison} sintetiza este diagnóstico y permite verificar visualmente si existe compresión hacia la media en los extremos de la superficie.
-
-
-
-\subsubsection{Análisis del impacto del entrenamiento Progressive ATM}
-\label{subsubsec:atm-impact}
-
-El proyecto incluyó una variante experimental denominada Progressive ATM (o \emph{Entrenamiento Progresivo Ordenado por ATM}): un enfoque de aprendizaje que reordena cronológicamente el entrenamiento para presentar primero observaciones cercanas al ATM (moneyness bajo, $|\log(F/K)| < 0.05$), donde se concentra la máxima liquidez y menor ruido, para después incorporar progresivamente observaciones hacia extremos de moneyness y vencimientos cortos. La motivación financiera es doble:
-\begin{enumerate}
-    \item La zona ATM en opciones sobre índices suele ser la más líquida y menos afectada por sesgos de selección.
-    \item Entrenar primero en datos menos ruidosos podría regularizar arquitecturas sensibles al orden de presentación, como redes neuronales secuenciales y modelos cuánticos inspirados.
-\end{enumerate}
-
-Esta lectura se complementa con el Apéndice \ref{app:progressive}.
-
-
-\textbf{Metodología de evaluación.} Se reentrenaron independientemente los cinco modelos de las familias seleccionadas bajo esta variante, conservando la validación cruzada 5-fold y los mismos hiperparámetros que en el entrenamiento estándar. Se compararon las métricas test de RMSE, MAE y $R^2$ entre ambas versiones (estándar vs.\ ATM) para cada familia. El análisis se complementó con inspección visual de residual heatmaps en el dashboard para verificar si la reordenación producía cambios en la distribución espacial del error (por moneyness y vencimiento).
-
-
-\textbf{Síntesis interpretativa del impacto ATM por arquitectura.} Los resultados revelan un patrón sistemático: la técnica Progressive ATM no produce un modelo mejor de forma universal, sino que su efectividad depende críticamente de la arquitectura subyacente.
-
-\begin{itemize}
-
-    \item Modelos ya óptimos (Random Forest, y en menor medida XGBoost base): El entrenamiento progresivo ATM no mejora; en XGBoost incluso resulta perjudicial. La razón es que estos modelos ya poseen mecanismos de regularización o agregación intrínsecos (bootstrap, boosting) que no se benefician de reordenamientos externos. Forzar un orden artificial puede introducir sesgo de inicialización que degrada capacidad global de la arquitectura, particularmente en modelos iterativos como boosting.
-    
-    \item Modelos de baja capacidad o convergencia frágil (Sequential NN, Quantum Inspired): El entrenamiento progresivo ATM produce mejoras tangibles. Estos modelos carecen de regularización inherente y son sensibles a inicialización y orden de muestras. Entrenar primero en región ATM establece trayectoria de aprendizaje más robusta, evitando convergencia a mínimos pobres que es frecuente cuando se enfrentan datos heterogéneos desde el inicio.
-    
-    \item Modelos lineales (Linear Regression): El orden es irrelevante puesto que la hipótesis es global. No hay beneficio de regularización local.
-    
-\end{itemize}
-
-
-
 \subsection{Behaviour And Surface}
 \label{subsec:behaviour-results}
 
@@ -185,7 +143,7 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
     Modelo & RMSE simbólico & MAE simbólico & \(R^2\) simbólico \\
     \midrule
     Regresión lineal & 0.0244 & 0.0135 & 0.7585 \\
-    Quantum Inspired NN & 0.1120 & 0.0277 & 0.5518 \\
+    Quantum Inspired NN & inf & inf & -inf \\
     Random Forest & 339.9547 & 3.5845 & -5,173,729.5872 \\
     Sequential NN & 0.0376 & 0.0316 & 0.8880 \\
     XGBoost & 0.0378 & 0.0219 & 0.9264 \\
@@ -197,7 +155,7 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
 
 Los modelos equivalentes explican el predictor, no la verdad de mercado. La regresión simbólica debe leerse aquí exactamente en ese sentido de surrogate y fidelidad, como se detalla en el apéndice \ref{app:symbolic-regression}. 
 
-La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del XGBoost. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica (ver Tabla \ref{tab:surrogate-rf}) generada para este paquete muestra métricas no utilizables para defensa del Random Forest ni del Quantum Inspired NN, con RMSE de fidelidad extremadamente alto; por tanto, el modelo más fiable que obtenemos es el XGBoost.
+La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del XGBoost. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica (ver Tabla \ref{tab:symbolic-fidelity-all-models}) generada para este paquete muestra métricas no utilizables para defensa del Random Forest ni del Quantum Inspired NN, con métricas de fidelidad extremadamente deficientes; por tanto, el modelo más fiable que obtenemos es el XGBoost.
 
 
 La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permiten una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
