@@ -564,9 +564,25 @@ La API se implementa con FastAPI como un servicio \emph{ad hoc} independiente de
   \item \texttt{/run\_model/sample\_explainability/}
 \end{itemize}
 
-La petición incluye modelo, tipo de opción, strike, subyacente, tiempo a vencimiento, tipo de interés y, opcionalmente, código de contrato y volatilidad real.
+La petición (\autoref{fig:api-request}) incluye modelo, tipo de opción, strike, subyacente, tiempo a vencimiento, tipo de interés y, opcionalmente, código de contrato y volatilidad real.
 
-La respuesta de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir. La operativa de workflows, automatización y despliegue reproducible que soporta esta separación se desarrolla con más detalle en el apéndice \ref{app:workflow-dev}.
+La respuesta (\autoref{fig:api-response}) de predicción incluye el modelo, la volatilidad estimada y la entrada normalizada. La respuesta de explicabilidad local añade waterfall SHAP, payload de contribuciones, vecinos históricos y distancias. API y dashboard comparten modelos y paquetes autocontenidos de dashboard, lo que reduce el riesgo de explicar una versión distinta de la usada para predecir. La operativa de workflows, automatización y despliegue reproducible que soporta esta separación se desarrolla con más detalle en el apéndice \ref{app:workflow-dev}.
+
+
+\begin{figure}[!htpb]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.56\textheight,keepaspectratio]{../imgs/api/request.png}%
+\caption{\small Request contract of \texttt{POST /run\_model/sample\_explainability/}.}
+\label{fig:api-request}
+\end{figure}
+
+\begin{figure}[!htpb]
+\centering
+\includegraphics[width=0.96\textwidth,height=0.56\textheight,keepaspectratio]{../imgs/api/response.png}%
+\caption{\small Response contract of \texttt{POST /run\_model/sample\_explainability/}.}
+\label{fig:api-response}
+\end{figure}
+
 
 
 
