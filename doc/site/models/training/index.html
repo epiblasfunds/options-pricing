@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Entrenamiento y selección - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Entrenamiento y selecci\u00f3n";
+        var mkdocs_page_input_path = "models\\training.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Validación y selección</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Modelos de volatilidad</li>
+          <li class="breadcrumb-item">Validación y selección</li>
+      <li class="breadcrumb-item active">Entrenamiento y selección</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="entrenamiento-y-seleccion">Entrenamiento y selección<a class="headerlink" href="#entrenamiento-y-seleccion" title="Permanent link">&para;</a></h1>
+<p>El entrenamiento se organiza en dos niveles. Primero se exploran hiperparámetros por familia mediante <a href="../splits-kfolds/">k-folds temporales</a>. Después se toma la mejor configuración y se reentrena en fases posteriores.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[Familia de modelo] --&gt; B[Construir candidatos de hiperparámetros]
+    B --&gt; C[Para cada candidato]
+    C --&gt; D[Entrenar en k-folds temporales]
+    D --&gt; E[Calcular métricas train y val]
+    E --&gt; F[Agregar media y desviación]
+    F --&gt; G[Calcular custom_error_1]
+    G --&gt; H[Seleccionar mejor candidato]
+    H --&gt; I[Guardar metadata de familia]
+</code></pre>
+<h2 id="busqueda-de-hiperparametros">Búsqueda de hiperparámetros<a class="headerlink" href="#busqueda-de-hiperparametros" title="Permanent link">&para;</a></h2>
+<p>Cada familia define su espacio de búsqueda. Cuando el espacio es vacío, se entrena una única configuración. Cuando hay múltiples opciones, se muestrean configuraciones con semilla fija para reproducibilidad.</p>
+<p>La búsqueda no agota necesariamente todo el espacio. Para familias grandes, el número de iteraciones está acotado. El sistema registra cuántas configuraciones se han explorado frente a la cardinalidad máxima.</p>
+<h2 id="metricas-base">Métricas base<a class="headerlink" href="#metricas-base" title="Permanent link">&para;</a></h2>
+<p>Las métricas base son:</p>
+<div class="doc-math">
+\[
+MAE = \frac{1}{n}\sum_i |y_i-\hat{y}_i|
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$MAE$ es el error absoluto medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<div class="doc-math">
+\[
+RMSE = \sqrt{\frac{1}{n}\sum_i (y_i-\hat{y}_i)^2}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$RMSE$ es la raíz del error cuadrático medio.</li>
+<li>$n$ es el número de observaciones.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo para la observación $i$.</li>
+</ul>
+<div class="doc-math">
+\[
+R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$R^2$ es el coeficiente de determinación.</li>
+<li>$y_i$ es el valor real observado.</li>
+<li>$\hat{y}_i$ es la predicción del modelo.</li>
+<li>$\bar{y}$ es la media de los valores reales.</li>
+</ul>
+<p>Se calculan para train y validation en cada fold. Luego se agregan media y desviación estándar entre folds.</p>
+<h2 id="metrica-de-seleccion">Métrica de selección<a class="headerlink" href="#metrica-de-seleccion" title="Permanent link">&para;</a></h2>
+<p>La selección no usa solo RMSE medio. Usa una métrica compuesta que penaliza:</p>
+<ul>
+<li>Error de validation.</li>
+<li>Variabilidad entre folds.</li>
+<li>Gap de sobreajuste cuando validation es peor que train.</li>
+</ul>
+<div class="doc-math">
+\[
+CE_1 = RMSE_{val}+\alpha \cdot std(RMSE_{val})+\beta \cdot \max(0, RMSE_{val}-RMSE_{train})
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$CE_1$ es la métrica compuesta de selección.</li>
+<li>$RMSE_{val}$ es el RMSE medio de validación.</li>
+<li>$RMSE_{train}$ es el RMSE medio de entrenamiento.</li>
+<li>$std(RMSE_{val})$ es la desviación estándar del RMSE de validación entre folds.</li>
+<li>$\alpha$ y $\beta$ son penalizaciones configuradas.</li>
+</ul>
+<p>Esto evita elegir una configuración que gane por poco en un fold pero sea inestable o claramente sobreajustada.</p>
+<h2 id="early-stopping">Early stopping<a class="headerlink" href="#early-stopping" title="Permanent link">&para;</a></h2>
+<p>El early stopping aparece en las familias con entrenamiento iterativo:</p>
+<ul>
+<li><a href="../families/xgboost/">XGBoost</a> usa un conjunto interno de validación para detener boosting cuando no mejora.</li>
+<li><a href="../families/neural-networks/">Redes neuronales</a> y <a href="../families/quantum-inspired/">Quantum Inspired</a> monitorizan RMSE de validación interna y restauran los mejores pesos.</li>
+<li>Las redes pueden reducir learning rate si el progreso se estanca.</li>
+</ul>
+<pre><code class="language-mermaid">flowchart LR
+    A[Train fold] --&gt; B[partición interna de ajuste]
+    A --&gt; C[partición interna de early stopping]
+    B --&gt; D[Entrenamiento iterativo]
+    C --&gt; D
+    D --&gt; E{Mejora val_rmse?}
+    E --&gt;|sí| F[Guardar mejor estado]
+    E --&gt;|no durante paciencia| G[Parar]
+    F --&gt; D
+</code></pre>
+<p>El conjunto externo de validation del fold no se usa para ajustar early stopping; se reserva para estimar rendimiento del candidato. Esto mantiene separadas las decisiones internas de optimización y la evaluación del fold.</p>
+<h2 id="escalado">Escalado<a class="headerlink" href="#escalado" title="Permanent link">&para;</a></h2>
+<p>Las familias neuronales guardan un scaler para features numéricas. El scaler se ajusta solo con datos permitidos en la fase correspondiente. En evaluación final, el scaler se ajusta con el bloque de entrenamiento disponible y se aplica a test sin aprender de test.</p>
+<p>Los modelos de árboles, <a href="../families/random-forest/">Random Forest</a> y <a href="../families/xgboost/">XGBoost</a>, y la <a href="../families/linear-regression/">regresión lineal</a> se guardan sin scaler adicional en el flujo actual.</p>
+<h2 id="artefactos-de-entrenamiento">Artefactos de entrenamiento<a class="headerlink" href="#artefactos-de-entrenamiento" title="Permanent link">&para;</a></h2>
+<p>Al terminar la búsqueda por familia se guarda:</p>
+<ul>
+<li>Nombre de familia.</li>
+<li>Mejor candidato.</li>
+<li>Parámetros del mejor candidato.</li>
+<li>Tabla de métricas de todos los candidatos.</li>
+<li>Métricas por fold.</li>
+<li>Predicciones de validación usadas para gráficos.</li>
+<li>Historial de épocas cuando la familia lo produce.</li>
+</ul>
+<p>Estos metadatos permiten reconstruir la justificación de selección sin reentrenar todo.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../splits-kfolds/" class="btn btn-neutral float-left" title="Splits temporales y k-folds"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../retraining-progressive/" class="btn btn-neutral float-right" title="Reentrenamiento y progressive training">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../splits-kfolds/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../retraining-progressive/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

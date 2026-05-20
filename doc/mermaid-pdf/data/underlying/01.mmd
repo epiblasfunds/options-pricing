@@ -1,0 +1,10 @@
+flowchart LR
+    O[(Opción ejecutada)] --> M[(Mapeo opción-futuro)]
+    M --> P[Identificar FutureContractCode por vencimiento]
+    F[(Trades del futuro)] --> Q[Buscar último trade con hora menor o igual que la opción]
+    P --> Q
+    Q --> U[(Base opción-subyacente)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class O,M,F,U dataset;
+    class P,Q process;

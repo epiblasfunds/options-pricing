@@ -1,0 +1,19 @@
+classDiagram
+    class VolatilityModelFamilyABC {
+      get_family_name()
+      get_fixed_params()
+      get_hyperparameter_search_space()
+      instantiate_model()
+      fit_model()
+      save_model()
+    }
+    class LinearRegressionFamily
+    class RandomForestFamily
+    class XGBoostFamily
+    class SequentialNNFamily
+    class QuantumInspiredNNFamily
+    VolatilityModelFamilyABC <|-- LinearRegressionFamily
+    VolatilityModelFamilyABC <|-- RandomForestFamily
+    VolatilityModelFamilyABC <|-- XGBoostFamily
+    VolatilityModelFamilyABC <|-- SequentialNNFamily
+    SequentialNNFamily <|-- QuantumInspiredNNFamily

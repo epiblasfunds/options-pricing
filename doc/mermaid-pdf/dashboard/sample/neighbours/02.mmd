@@ -1,0 +1,7 @@
+flowchart LR
+    A[Waterfall SHAP] --> C[Drivers de predicción]
+    B[Vecinos] --> D[Soporte empírico]
+    C --> E[Conclusión local]
+    D --> E
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E method;

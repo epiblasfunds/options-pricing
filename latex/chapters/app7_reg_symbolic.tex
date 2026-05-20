@@ -1,0 +1,322 @@
+
+\chapter{Fundamentos de Regresión Simbólica}
+\label{app:symbolic-regression}
+
+La regresión simbólica es una técnica de aprendizaje automático cuyo objetivo es encontrar una expresión matemática explícita que aproxime la relación entre un conjunto de variables de entrada y una variable objetivo. A diferencia de una regresión lineal, donde la forma funcional se fija de antemano, o de una red neuronal, donde la relación aprendida queda distribuida entre muchos parámetros, la regresión simbólica busca simultáneamente la estructura de la fórmula y sus coeficientes.
+
+En términos generales, dado un conjunto de observaciones
+
+\begin{equation}
+\mathcal{D}
+=
+\left\{
+(x_i, y_i)
+\right\}_{i=1}^{n},
+\qquad
+x_i \in \mathbb{R}^{p},
+\qquad
+y_i \in \mathbb{R},
+\label{eq:symbolic-dataset}
+\end{equation}
+
+el objetivo consiste en encontrar una función explícita \(g\) tal que
+
+\begin{equation}
+y_i \approx g(x_i),
+\label{eq:symbolic-approximation}
+\end{equation}
+
+donde \(g\) no pertenece necesariamente a una familia paramétrica cerrada previamente definida. En lugar de asumir, por ejemplo, una forma lineal, polinómica o exponencial concreta, la regresión simbólica explora un espacio de expresiones construido a partir de variables, constantes y operadores matemáticos.
+
+\section{Motivación}
+
+La motivación principal de la regresión simbólica es combinar capacidad predictiva e interpretabilidad. En muchos problemas, especialmente cuando se usan modelos no lineales complejos, el modelo entrenado puede producir buenas predicciones pero ser difícil de interpretar directamente. Una red neuronal, por ejemplo, puede aproximar relaciones muy flexibles, pero no suele proporcionar una ecuación simple que describa su comportamiento.
+
+La regresión simbólica aborda este problema buscando una fórmula cerrada que aproxime la relación aprendida. Esta fórmula puede utilizarse de dos maneras. En primer lugar, como modelo predictivo interpretable si se ajusta directamente sobre la variable objetivo. En segundo lugar, como modelo sustituto o \emph{surrogate} si se ajusta sobre las predicciones de otro modelo más complejo. En este segundo caso, la regresión simbólica no pretende descubrir necesariamente la verdadera ley económica del fenómeno, sino aproximar de forma interpretable el comportamiento de un modelo previamente entrenado.
+
+En este proyecto se utiliza esta segunda lectura. La regresión simbólica se ajusta sobre las predicciones generadas por los modelos de volatilidad implícita. Por tanto, la ecuación obtenida debe interpretarse como una aproximación funcional al modelo original, no como una fórmula financiera exacta ni como una alternativa directa a modelos clásicos de valoración.
+
+\section{Espacio de búsqueda de expresiones}
+
+El elemento central de la regresión simbólica es el espacio de expresiones candidatas. Una expresión simbólica puede construirse combinando variables, constantes y operadores. Por ejemplo, si las variables disponibles son \(x_1\), \(x_2\) y \(x_3\), y los operadores permitidos son suma, resta, producto y división, algunas expresiones candidatas podrían ser
+
+\begin{equation}
+g_1(x) = x_1 + x_2,
+\label{eq:symbolic-example-1}
+\end{equation}
+
+\begin{equation}
+g_2(x) = \frac{x_1}{x_2 + c},
+\label{eq:symbolic-example-2}
+\end{equation}
+
+o
+
+\begin{equation}
+g_3(x) = c_1 x_1^2 + c_2 x_3,
+\label{eq:symbolic-example-3}
+\end{equation}
+
+donde \(c\), \(c_1\) y \(c_2\) son constantes que también deben estimarse.
+
+Este espacio de búsqueda es mucho más amplio que el de una regresión tradicional. No solo hay que encontrar los valores de los coeficientes, sino también decidir qué variables aparecen, qué operadores se usan, cómo se combinan y cuál es la profundidad o complejidad de la expresión. Por ello, la regresión simbólica suele formularse como un problema de optimización sobre estructuras.
+
+Una forma habitual de representar las fórmulas candidatas es mediante árboles de expresión. En un árbol de expresión, las hojas representan variables o constantes, y los nodos internos representan operadores. Por ejemplo, la expresión
+
+\begin{equation}
+g(x) = \frac{x_1 + x_2}{x_3}
+\label{eq:symbolic-tree-expression}
+\end{equation}
+
+puede interpretarse como un árbol cuya raíz es una división, cuyo numerador es una suma y cuyo denominador es la variable \(x_3\). Esta representación permite aplicar operadores de búsqueda, mutación y recombinación sobre fórmulas completas.
+
+\section{Objetivo de optimización}
+
+La regresión simbólica no busca únicamente minimizar el error predictivo. También busca que la expresión resultante sea suficientemente simple para poder ser interpretada. Por ello, el problema se plantea habitualmente como un compromiso entre precisión y complejidad.
+
+Sea \(g\) una expresión candidata. Una forma general de definir el objetivo es
+
+\begin{equation}
+\mathcal{L}(g)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\ell
+\left(
+y_i,
+g(x_i)
+\right)
++
+\lambda C(g),
+\label{eq:symbolic-objective}
+\end{equation}
+
+donde \(\ell\) es una función de pérdida, por ejemplo el error cuadrático, \(C(g)\) mide la complejidad de la expresión y \(\lambda\) controla la penalización por complejidad.
+
+Si se utiliza error cuadrático medio, la parte de ajuste puede escribirse como
+
+\begin{equation}
+\operatorname{MSE}(g)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left(
+y_i - g(x_i)
+\right)^2.
+\label{eq:symbolic-mse}
+\end{equation}
+
+El término de complejidad puede depender del número de nodos del árbol, de la profundidad de la expresión, del número de operadores utilizados o de restricciones específicas sobre determinadas operaciones. En la práctica, esta penalización evita que el algoritmo elija fórmulas excesivamente largas que ajustan bien los datos pero son difíciles de interpretar y tienen peor capacidad de generalización.
+
+El parámetro \(\lambda\) refleja el principio de parsimonia: entre dos expresiones con precisión similar, debe preferirse la más simple. Este principio es especialmente importante en un proyecto de explicabilidad, donde una fórmula demasiado compleja puede perder gran parte de su utilidad interpretativa.
+
+\section{Búsqueda evolutiva}
+
+El espacio de posibles expresiones crece de forma combinatoria con el número de variables, operadores y niveles de profundidad permitidos. Por ello, no suele ser posible enumerar todas las fórmulas candidatas. En su lugar, muchos métodos de regresión simbólica emplean algoritmos evolutivos o estrategias de búsqueda heurística.
+
+El procedimiento general puede resumirse en los siguientes pasos. Primero, se genera una población inicial de fórmulas candidatas. Después, cada fórmula se evalúa de acuerdo con su error y su complejidad. Las expresiones con mejor comportamiento tienen mayor probabilidad de conservarse, modificarse o recombinarse para generar nuevas expresiones. Este proceso se repite durante muchas iteraciones, explorando progresivamente regiones prometedoras del espacio de búsqueda.
+
+De forma esquemática, si \(\mathcal{G}\) representa el conjunto de expresiones posibles, la regresión simbólica busca
+
+\begin{equation}
+g^{*}
+=
+\arg\min_{g \in \mathcal{G}}
+\left[
+\frac{1}{n}
+\sum_{i=1}^{n}
+\ell
+\left(
+y_i,
+g(x_i)
+\right)
++
+\lambda C(g)
+\right].
+\label{eq:symbolic-argmin}
+\end{equation}
+
+La dificultad reside en que \(\mathcal{G}\) no es un espacio vectorial simple, sino un conjunto discreto y estructurado de árboles de expresión. Por tanto, la búsqueda combina exploración de estructuras, ajuste de constantes y selección de modelos.
+
+\section{Frontera precisión-complejidad}
+
+Una característica importante de la regresión simbólica es que no produce necesariamente una única fórmula relevante. Normalmente genera una familia de ecuaciones candidatas con distintos niveles de complejidad y precisión. Algunas fórmulas son muy simples pero aproximan peor los datos. Otras son más complejas y reducen el error, pero resultan menos interpretables.
+
+Esto permite analizar una frontera precisión-complejidad. Para cada expresión candidata \(g_k\), pueden compararse dos magnitudes:
+
+\begin{equation}
+\operatorname{Error}(g_k)
+\qquad
+\text{y}
+\qquad
+C(g_k).
+\label{eq:symbolic-error-complexity}
+\end{equation}
+
+La selección final no debe basarse exclusivamente en el menor error. En contextos de explicabilidad, puede ser preferible una ecuación ligeramente menos precisa pero mucho más clara. Por ejemplo, una fórmula con tres términos interpretables puede aportar más valor analítico que una expresión muy extensa con una mejora marginal en RMSE.
+
+En este proyecto, el modelo simbólico seleccionado se evalúa mediante métricas como RMSE, MAE y \(R^2\), pero también se conserva información sobre la complejidad de la ecuación y sobre un conjunto de ecuaciones candidatas. Esta decisión permite no reducir la regresión simbólica a una competición puramente predictiva, sino tratarla como una herramienta de análisis del compromiso entre fidelidad e interpretabilidad.
+
+\section{Regresión simbólica como modelo sustituto}
+
+En el contexto del proyecto, la regresión simbólica se utiliza como modelo sustituto de modelos de predicción de volatilidad implícita. Sea \(f\) el modelo original, por ejemplo una red neuronal o cualquier otro estimador entrenado, y sea \(g\) la expresión simbólica buscada. El objetivo no es ajustar \(g\) directamente contra la volatilidad observada, sino aproximar las predicciones del modelo original:
+
+\begin{equation}
+g(x_i) \approx f(x_i).
+\label{eq:symbolic-surrogate}
+\end{equation}
+
+Por tanto, la pérdida se calcula frente a las predicciones del modelo base:
+
+\begin{equation}
+\mathcal{L}_{surrogate}(g)
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left(
+f(x_i) - g(x_i)
+\right)^2
++
+\lambda C(g).
+\label{eq:symbolic-surrogate-loss}
+\end{equation}
+
+Esta formulación tiene una interpretación clara. Si \(g\) aproxima bien a \(f\), entonces la ecuación simbólica proporciona una descripción interpretable del comportamiento aprendido por el modelo original. Sin embargo, la fidelidad de \(g\) respecto a \(f\) no implica necesariamente que \(f\) sea correcto respecto al mercado. Una ecuación simbólica puede explicar muy bien un modelo mal calibrado. Por ello, la regresión simbólica debe interpretarse junto con las métricas predictivas del modelo original y con validaciones financieras adicionales.
+
+\section{Configuración utilizada en el proyecto}
+
+La implementación del proyecto utiliza \texttt{PySRRegressor}, una herramienta de regresión simbólica basada en búsqueda evolutiva. El modelo simbólico se entrena sobre las predicciones generadas por el modelo original en el conjunto de entrenamiento y se valida sobre las predicciones del modelo original en el conjunto de test. De este modo, la evaluación mide la fidelidad del sustituto simbólico respecto al modelo base fuera de la muestra usada para ajustar la expresión.
+
+El flujo utilizado puede resumirse en cuatro fases. 
+\begin{enumerate}
+    \item Construir un marco de variables de explicabilidad a partir de los datos de referencia.
+    \item Codificar dichas variables mediante el encoder de explicabilidad, manteniendo un conjunto de variables financieramente interpretables.
+    \item Ajusta el regresor simbólico sobre las predicciones del modelo base.
+    \item Evalúa la ecuación obtenida sobre el conjunto de test, calculando métricas de fidelidad y almacenando tanto la mejor ecuación como un conjunto de ecuaciones candidatas.
+\end{enumerate}
+
+Las variables utilizadas en la capa simbólica coinciden con las variables de explicabilidad del proyecto. Esta decisión favorece que la fórmula resultante sea legible desde un punto de vista financiero. En lugar de ajustar una expresión sobre representaciones internas difíciles de interpretar, la regresión simbólica se aplica sobre variables visibles y relacionadas con el contrato, como el tipo de opción, el precio de ejercicio, el precio del subyacente, el tiempo a vencimiento y el tipo de interés.
+
+La configuración permite los operadores binarios
+
+\begin{equation}
++, \quad -, \quad *, \quad /, \quad \wedge,
+\label{eq:symbolic-binary-operators}
+\end{equation}
+
+y los operadores unarios
+
+\begin{equation}
+\operatorname{square}(x) = x^2,
+\qquad
+\operatorname{cube}(x) = x^3.
+\label{eq:symbolic-unary-operators}
+\end{equation}
+
+Además, se restringe el operador potencia mediante restricciones específicas para evitar expresiones demasiado inestables o difíciles de interpretar. Estas restricciones son relevantes porque operadores como la división o la potencia pueden producir fórmulas con gran capacidad de ajuste, pero también con comportamientos extremos fuera de la región de datos observada.
+
+La búsqueda se controla mediante parámetros como el número de iteraciones, el número de poblaciones, el tamaño de población, el número de ciclos por iteración, la penalización de parsimonia, el tamaño máximo de expresión, la profundidad máxima y el tiempo máximo de ejecución. En particular, el proyecto utiliza un tamaño de muestra simbólica controlado por \texttt{symbolic\_sample\_size}, un número elevado de iteraciones \texttt{symbolic\_niterations}, varias poblaciones en paralelo y un límite temporal de ejecución definido por \texttt{symbolic\_timeout\_seconds}. Estos parámetros reflejan el compromiso entre explorar suficientemente el espacio de fórmulas y mantener un coste computacional razonable dentro del dashboard.
+
+\section{Evaluación de fidelidad}
+
+Como el modelo simbólico actúa como sustituto, la evaluación principal mide la proximidad entre las predicciones del modelo original y las predicciones de la ecuación simbólica. Si \(\hat{y}^{\,f}_i = f(x_i)\) representa la predicción del modelo base y \(\hat{y}^{\,g}_i = g(x_i)\) la predicción simbólica, el residual de fidelidad se define como
+
+\begin{equation}
+r_i
+=
+\hat{y}^{\,f}_i
+-
+\hat{y}^{\,g}_i.
+\label{eq:symbolic-residual}
+\end{equation}
+
+A partir de estos residuos se calculan métricas como RMSE, MAE y \(R^2\). El RMSE de fidelidad puede escribirse como
+
+\begin{equation}
+\operatorname{RMSE}_{fid}
+=
+\sqrt{
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left(
+\hat{y}^{\,f}_i
+-
+\hat{y}^{\,g}_i
+\right)^2
+}.
+\label{eq:symbolic-rmse-fidelity}
+\end{equation}
+
+El MAE de fidelidad se define como
+
+\begin{equation}
+\operatorname{MAE}_{fid}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+\left|
+\hat{y}^{\,f}_i
+-
+\hat{y}^{\,g}_i
+\right|.
+\label{eq:symbolic-mae-fidelity}
+\end{equation}
+
+Estas métricas no comparan directamente la ecuación simbólica con la volatilidad observada, sino con el modelo que se quiere explicar. Por tanto, un bajo error de fidelidad indica que la ecuación simbólica reproduce bien el comportamiento del modelo base en la muestra evaluada.
+
+El coeficiente \(R^2\) de fidelidad mide qué proporción de la variabilidad de las predicciones del modelo base queda explicada por la fórmula simbólica:
+
+\begin{equation}
+R^2_{fid}
+=
+1
+-
+\frac{
+\sum_{i=1}^{n}
+\left(
+\hat{y}^{\,f}_i
+-
+\hat{y}^{\,g}_i
+\right)^2
+}{
+\sum_{i=1}^{n}
+\left(
+\hat{y}^{\,f}_i
+-
+\overline{\hat{y}^{\,f}}
+\right)^2
+}.
+\label{eq:symbolic-r2-fidelity}
+\end{equation}
+
+Un valor de \(R^2_{fid}\) próximo a uno indica alta fidelidad global, mientras que un valor bajo indica que la fórmula simbólica no captura adecuadamente la variabilidad del modelo original.
+
+\section{Interpretación de la ecuación simbólica}
+
+La ecuación simbólica final debe interpretarse como una aproximación analítica al comportamiento del modelo en la región de datos utilizada para entrenar y validar el sustituto. Su utilidad reside en que permite inspeccionar explícitamente qué variables aparecen en la fórmula, cómo se combinan y qué tipo de no linealidades emergen.
+
+Por ejemplo, si la ecuación utiliza principalmente el tiempo a vencimiento y el strike, puede interpretarse que el sustituto simbólico ha identificado esas variables como suficientes para reproducir una parte relevante del comportamiento del modelo. Si aparecen interacciones multiplicativas o cocientes entre variables, puede existir una relación no lineal aprendida por el modelo que merece ser analizada financieramente. Sin embargo, estas lecturas deben hacerse con prudencia: la presencia de una variable en la fórmula no demuestra causalidad, y la ausencia de una variable no implica necesariamente irrelevancia económica.
+
+También es importante considerar la estabilidad de la expresión. La regresión simbólica puede encontrar fórmulas matemáticamente válidas pero sensibles a pequeñas variaciones de entrada, especialmente si incluyen divisiones, potencias o combinaciones de alto grado. Por ello, las ecuaciones deben evaluarse no solo por su métrica agregada, sino también por su comportamiento en distintas regiones de la superficie de volatilidad, especialmente en vencimientos cortos, extremos de moneyness o zonas con menor densidad de observaciones.
+
+\section{Limitaciones}
+
+La regresión simbólica aporta interpretabilidad, pero no elimina las limitaciones propias del aprendizaje estadístico. En primer lugar, la búsqueda es heurística. El algoritmo no garantiza encontrar la mejor expresión posible en términos globales, sino una buena expresión dentro del espacio explorado y bajo las restricciones impuestas.
+
+En segundo lugar, la ecuación encontrada depende del conjunto de operadores permitido. Si se excluyen funciones relevantes, el algoritmo no podrá descubrir expresiones que las necesiten. Si se incluyen demasiados operadores, el espacio de búsqueda se vuelve más amplio y aumenta el riesgo de encontrar fórmulas difíciles de interpretar.
+
+En tercer lugar, la regresión simbólica puede sobreajustar. Una fórmula suficientemente compleja puede aproximar muy bien una muestra concreta y generalizar peor fuera de ella. Por este motivo, en el proyecto se evalúa la fidelidad sobre predicciones de test y se penaliza la complejidad mediante un término de parsimonia.
+
+En cuarto lugar, cuando la regresión simbólica se usa como sustituto, la explicación queda limitada por el modelo base. La fórmula explica el comportamiento del modelo original, no necesariamente el mecanismo real que genera los precios o volatilidades de mercado.
+
+Finalmente, las expresiones simbólicas deben interpretarse dentro del dominio observado. Una fórmula puede ser razonable para los rangos de strike, subyacente, vencimiento y tipos presentes en los datos, pero comportarse de forma inestable si se extrapola fuera de ellos. Por ello, su función principal en este trabajo es explicativa y diagnóstica, no la sustitución directa de los modelos de pricing o de predicción de volatilidad en producción.
+
+\section{Relación con la explicabilidad del proyecto}
+
+Dentro del sistema de explicabilidad desarrollado, la regresión simbólica cumple una función complementaria a otras técnicas. Mientras que SHAP ofrece atribuciones locales y agregaciones globales de importancia, la regresión simbólica intenta condensar el comportamiento del modelo en una fórmula explícita. Esta fórmula puede ayudar a detectar patrones aprendidos, dependencias no lineales, interacciones entre variables y posibles simplificaciones del modelo original.
+
+Su valor metodológico no está en afirmar que la ecuación descubierta sea una nueva ley cerrada de volatilidad implícita, sino en proporcionar una herramienta adicional para auditar modelos complejos. Si una expresión relativamente simple reproduce con alta fidelidad las predicciones de un modelo, entonces parte del comportamiento del modelo puede resumirse de forma transparente. Si, por el contrario, solo expresiones muy complejas alcanzan una fidelidad aceptable, esto sugiere que el modelo base está utilizando relaciones más difíciles de condensar en una fórmula interpretable.
+
+Por tanto, la regresión simbólica se incorpora en este proyecto como una técnica de explicabilidad global basada en modelos sustitutos. Su objetivo es mejorar la trazabilidad y la comprensión del modelo de volatilidad, manteniendo siempre la distinción entre fidelidad al modelo, precisión frente al mercado e interpretabilidad financiera.
+
+

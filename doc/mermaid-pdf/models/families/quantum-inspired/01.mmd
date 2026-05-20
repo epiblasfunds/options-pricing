@@ -1,0 +1,32 @@
+graph TB
+    subgraph prep["PREPARACIÓN"]
+        A["<b>Input</b><br/>n_in características"]
+        B["<b>Batch Norm</b><br/>Estabilización"]
+        C["<b>Embedding Denso</b><br/>n_in → ∏n_k<br/>Activación: Swish"]
+    end
+    
+    subgraph struct["TRANSFORMACIÓN ESTRUCTURAL"]
+        D["<b>Reshape</b><br/>Vector → Tensor<br/>∏n_k → n₁×n₂×...×n_d<br/>Matriz de altísima dim"]
+    end
+    
+    subgraph core["NÚCLEO QUANTUM INSPIRED"]
+        E["<b>Tensor-Train</b><br/>Factorización en d núcleos<br/>Cadena de contacto<br/>Rangos TT internos<br/>→ m_out características"]
+    end
+    
+    subgraph agg["AGREGACIÓN Y SALIDA"]
+        F["<b>Post-TT Dense</b><br/>m_out → dense_units<br/>Activación: Swish"]
+        G["<b>Dropout</b> (opcional)<br/>Regularización"]
+        H["<b>Output Dense</b><br/>dense_units → 1<br/>Volatilidad predicha"]
+    end
+    
+    A --> B --> C --> D --> E --> F --> G --> H
+    
+    classDef preparation fill:#e8f4f8,stroke:#0066cc,stroke-width:2px,color:#004499
+    classDef structure fill:#fff0f0,stroke:#cc3300,stroke-width:2px,color:#990000
+    classDef quantum fill:#f0f8e8,stroke:#339900,stroke-width:3px,color:#006600,font-weight:bold
+    classDef aggregation fill:#f8f0f8,stroke:#9933cc,stroke-width:2px,color:#663399
+    
+    class A,B,C preparation
+    class D structure
+    class E quantum
+    class F,G,H aggregation

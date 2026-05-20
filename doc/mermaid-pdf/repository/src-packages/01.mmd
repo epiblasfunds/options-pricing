@@ -1,0 +1,15 @@
+flowchart TD
+    CONFIG[src/config] --> DATA[src/data_management]
+    CONFIG --> VOL[src/volatility_models]
+    CONFIG --> PY[src/python_models]
+    CONFIG --> M2D[src/model2dashboard]
+    CONFIG --> DASH[src/dashboard]
+    CONFIG --> API[src/api]
+    ENUMS[src/enums] --> DATA
+    ENUMS --> VOL
+    ENUMS --> DASH
+    DATA --> VOL
+    PY --> VOL
+    VOL --> M2D
+    M2D --> DASH
+    M2D --> API

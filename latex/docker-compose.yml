@@ -1,0 +1,72 @@
+# LaTeX compilation with Docker
+#
+# Expected structure:
+#
+#   repo/
+#     dockerfiles/
+#       latex/
+#         Dockerfile
+#     latex/
+#       docker-compose.yml
+#       main.tex
+#
+# Run these commands from repo/latex/
+#
+# First time only:
+#   docker compose build latex
+#
+# Compile main.tex:
+#   docker compose run --rm latex
+#
+# Clean auxiliary files, keeping main.pdf:
+#   docker compose run --rm clean-latex
+#
+# Clean auxiliary files and remove main.pdf:
+#   docker compose run --rm clean-latex-full
+#
+# Check Docker disk usage:
+#   docker system df
+#
+# Remove unused Docker resources:
+#   docker system prune
+#
+# Note:
+#   The generated PDF will appear locally in repo/latex/.
+#   The --rm flag removes only the temporary container, not your project files.
+
+services:
+  latex:
+    build:
+      context: ..
+      dockerfile: dockerfiles/latex/Dockerfile
+    volumes:
+      - ..:/repo
+    working_dir: /repo/latex
+    command:
+      [
+        "latexmk",
+        "-pdf",
+        "-shell-escape",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-f",
+        "main.tex",
+      ]
+
+  clean-latex:
+    build:
+      context: ..
+      dockerfile: dockerfiles/latex/Dockerfile
+    volumes:
+      - ..:/repo
+    working_dir: /repo/latex
+    command: ["latexmk", "-c", "main.tex"]
+
+  clean-latex-full:
+    build:
+      context: ..
+      dockerfile: dockerfiles/latex/Dockerfile
+    volumes:
+      - ..:/repo
+    working_dir: /repo/latex
+    command: ["latexmk", "-C", "main.tex"]

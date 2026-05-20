@@ -1,0 +1,9 @@
+gantt
+    title Esquema conceptual de particiones temporales
+    dateFormat  YYYY-MM-DD
+    axisFormat  %Y
+    section Dataset
+    Train       :a1, 2017-01-01, 1200d
+    Lag         :a2, after a1, 30d
+    Validation  :a3, after a2, 220d
+    Test        :a4, after a3, 320d

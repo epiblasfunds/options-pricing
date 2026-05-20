@@ -1,0 +1,297 @@
+% Diagramas PDF incluidos directamente desde doc/mermaid-pdf.
+% Generado automaticamente a partir del manifest y del mapa de comandos existente.
+
+\newcommand{\DocPdfDiagram}[3]{%
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{#1}%
+\caption{#2}
+\label{#3}
+\end{figure}%
+}
+
+% Versión reducida para mejor integración
+\newcommand{\DocPdfDiagramSmall}[3]{%
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth,height=0.40\textheight,keepaspectratio]{#1}%
+\caption{\small #2}
+\label{#3}
+\end{figure}%
+}
+
+% Versión para dos diagramas lado a lado
+\newcommand{\DocPdfDiagramSideBySide}[6]{%
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{#1}%
+\caption{\small #2}
+\label{#3}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth,height=0.35\textheight,keepaspectratio]{#4}%
+\caption{\small #5}
+\label{#6}
+\end{minipage}
+\end{figure}%
+}
+
+\newcommand{\DiagramDashboardBehaviourIceOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/behaviour/ice/01.pdf}{Construcción de curvas ICE por feature.}{fig:doc-dashboard-behaviour-ice-1}%
+}
+
+\newcommand{\DiagramDashboardBehaviourVolatilitySurfacesOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/behaviour/volatility-surfaces/01.pdf}{Construcción de superficies locales de volatilidad.}{fig:doc-dashboard-behaviour-volatility-surfaces-1}%
+}
+
+\newcommand{\DiagramDashboardBehaviourSurfaceOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/behaviour-surface/01.pdf}{Flujo de la pestaña Behaviour And Surface.}{fig:doc-dashboard-behaviour-surface-1}%
+}
+
+\newcommand{\DiagramDashboardGlobalShapFundamentalsOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/shap-fundamentals/01.pdf}{Descomposición SHAP desde valor base hasta predicción explicada.}{fig:doc-dashboard-global-shap-fundamentals-1}%
+}
+
+\newcommand{\DiagramDashboardGlobalShapVisualizationsOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/shap-visualizations/01.pdf}{Estructura de datos usada por las visualizaciones SHAP.}{fig:doc-dashboard-global-shap-visualizations-1}%
+}
+
+\newcommand{\DiagramDashboardGlobalShapVisualizationsTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/shap-visualizations/02.pdf}{Lectura conjunta de visualizaciones SHAP.}{fig:doc-dashboard-global-shap-visualizations-2}%
+}
+
+\newcommand{\DiagramDashboardGlobalSurrogateTreesOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/surrogate-trees/01.pdf}{Entrenamiento y evaluación de árboles surrogate.}{fig:doc-dashboard-global-surrogate-trees-1}%
+}
+
+\newcommand{\DiagramDashboardGlobalSymbolicRegressionOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/symbolic-regression/01.pdf}{Entrenamiento del modelo simbólico surrogate.}{fig:doc-dashboard-global-symbolic-regression-1}%
+}
+
+\newcommand{\DiagramDashboardGlobalSymbolicRegressionTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global/symbolic-regression/02.pdf}{Búsqueda evolutiva de expresiones simbólicas.}{fig:doc-dashboard-global-symbolic-regression-2}%
+}
+
+\newcommand{\DiagramDashboardGlobalExplainabilityOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/global-explainability/01.pdf}{Flujo de la pestaña Global Explainability.}{fig:doc-dashboard-global-explainability-1}%
+}
+
+\newcommand{\DiagramDashboardIndexOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/index/01.pdf}{Entradas precomputadas consumidas por el dashboard.}{fig:doc-dashboard-index-1}%
+}
+
+\newcommand{\DiagramDashboardIndexTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/index/02.pdf}{Arquitectura de servicios del dashboard.}{fig:doc-dashboard-index-2}%
+}
+
+\newcommand{\DiagramDashboardModelToDashboardOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/model-to-dashboard/01.pdf}{Conversión de modelo final a paquete visualizable.}{fig:doc-dashboard-model-to-dashboard-1}%
+}
+
+\newcommand{\DiagramDashboardSampleLocalShapWaterfallOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/sample/local-shap-waterfall/01.pdf}{Construcción de una explicación local waterfall.}{fig:doc-dashboard-sample-local-shap-waterfall-1}%
+}
+
+\newcommand{\DiagramDashboardSampleNeighboursOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/sample/neighbours/01.pdf}{Cálculo de vecinos y proyección local.}{fig:doc-dashboard-sample-neighbours-1}%
+}
+
+\newcommand{\DiagramDashboardSampleNeighboursTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/sample/neighbours/02.pdf}{Relación entre SHAP local y soporte histórico.}{fig:doc-dashboard-sample-neighbours-2}%
+}
+
+\newcommand{\DiagramDashboardSampleExplainabilityOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/dashboard/sample-explainability/01.pdf}{Flujo de la pestaña Sample Explainability.}{fig:doc-dashboard-sample-explainability-1}%
+}
+
+\newcommand{\DiagramDataIndexOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/index/01.pdf}{Pipeline completo de datos hasta VOLATILITY\_DB.}{fig:doc-data-index-1}%
+}
+
+\newcommand{\DiagramDataIndexTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/index/02.pdf}{Validación e interpretación del código de contrato.}{fig:doc-data-index-2}%
+}
+
+\newcommand{\DiagramDataMergeRawOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/merge-raw/01.pdf}{Unión de operaciones con información contractual.}{fig:doc-data-merge-raw-1}%
+}
+
+\newcommand{\DiagramDataMergeRawTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/merge-raw/02.pdf}{Unión por código de contrato y año de sesión.}{fig:doc-data-merge-raw-2}%
+}
+
+\newcommand{\DiagramDataProductSplitOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/product-split/01.pdf}{Separación de operaciones por producto.}{fig:doc-data-product-split-1}%
+}
+
+\newcommand{\DiagramDataProductSplitTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/product-split/02.pdf}{Relación opción-futuro por vencimiento.}{fig:doc-data-product-split-2}%
+}
+
+\newcommand{\DiagramDataRawReadOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/raw-read/01.pdf}{Lectura y normalización de datos fuente.}{fig:doc-data-raw-read-1}%
+}
+
+\newcommand{\DiagramDataRawReadTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/raw-read/02.pdf}{Construcción de la base homogénea de tipos.}{fig:doc-data-raw-read-2}%
+}
+
+\newcommand{\DiagramDataUnderlyingOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/underlying/01.pdf}{Asignación de futuro subyacente a cada opción.}{fig:doc-data-underlying-1}%
+}
+
+\newcommand{\DiagramDataUnderlyingTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/underlying/02.pdf}{Selección temporal as-of del subyacente.}{fig:doc-data-underlying-2}%
+}
+
+\newcommand{\DiagramDataVolatilityOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/volatility/01.pdf}{Cálculo de volatilidad implícita.}{fig:doc-data-volatility-1}%
+}
+
+\newcommand{\DiagramDataVolatilityTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/data/volatility/02.pdf}{Solver por bisección de la volatilidad implícita.}{fig:doc-data-volatility-2}%
+}
+
+\newcommand{\DiagramIndexOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/index/01.pdf}{Visión general del proyecto.}{fig:doc-index-1}%
+}
+
+\newcommand{\DiagramIndexTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/index/02.pdf}{Secuencia principal de procesado de datos.}{fig:doc-index-2}%
+}
+
+\newcommand{\DiagramModelsFamiliesQuantumInspiredOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/families/quantum-inspired/01.pdf}{Arquitectura Quantum Inspired clásica basada en tensor-train.}{fig:doc-models-families-quantum-inspired-1}%
+}
+
+\newcommand{\DiagramModelsFamiliesOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/families/01.pdf}{Abstracción común de familias de modelos.}{fig:doc-models-families-1}%
+}
+
+\newcommand{\DiagramModelsFamiliesTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/families/02.pdf}{Selección de modelos mediante k-folds temporales.}{fig:doc-models-families-2}%
+}
+
+\newcommand{\DiagramModelsFeaturesOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/features/01.pdf}{Construcción de features financieras.}{fig:doc-models-features-1}%
+}
+
+\newcommand{\DiagramModelsFeaturesTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/features/02.pdf}{Motivación financiera de las features.}{fig:doc-models-features-2}%
+}
+
+\newcommand{\DiagramModelsIndexOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/index/01.pdf}{Flujo de modelización de volatilidad.}{fig:doc-models-index-1}%
+}
+
+\newcommand{\DiagramModelsIndexTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/index/02.pdf}{Control temporal y exclusividad de contratos.}{fig:doc-models-index-2}%
+}
+
+\newcommand{\DiagramModelsRetrainingProgressiveOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/retraining-progressive/01.pdf}{Reentrenamiento del mejor candidato.}{fig:doc-models-retraining-progressive-1}%
+}
+
+\newcommand{\DiagramModelsRetrainingProgressiveTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/retraining-progressive/02.pdf}{Entrenamiento progressive ATM por segmentos.}{fig:doc-models-retraining-progressive-2}%
+}
+
+\newcommand{\DiagramModelsSplitsKfoldsOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/splits-kfolds/01.pdf}{Esquema conceptual de particiones temporales.}{fig:doc-models-splits-kfolds-1}%
+}
+
+\newcommand{\DiagramModelsSplitsKfoldsTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/splits-kfolds/02.pdf}{Control de contratos compartidos entre splits.}{fig:doc-models-splits-kfolds-2}%
+}
+
+\newcommand{\DiagramModelsSplitsKfoldsThree}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/splits-kfolds/03.pdf}{Construcción de k-folds temporales.}{fig:doc-models-splits-kfolds-3}%
+}
+
+\newcommand{\DiagramModelsTrainingOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/training/01.pdf}{úsqueda de hiperparámetros por familia.}{fig:doc-models-training-1}%
+}
+
+\newcommand{\DiagramModelsTrainingTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/models/training/02.pdf}{Early stopping con validación interna.}{fig:doc-models-training-2}%
+}
+
+\newcommand{\DiagramOperationsApiDeploymentOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/operations/api-deployment/01.pdf}{API, almacenamiento y runtime comun.}{fig:doc-operations-api-deployment-1}%
+}
+
+\newcommand{\DiagramOperationsApiDeploymentTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/operations/api-deployment/02.pdf}{Seleccion de backend local o GCP.}{fig:doc-operations-api-deployment-2}%
+}
+
+\newcommand{\DiagramOperationsApiDeploymentThree}{%
+\DocPdfDiagram{../doc/mermaid-pdf/operations/api-deployment/03.pdf}{Flujo operativo recomendado.}{fig:doc-operations-api-deployment-3}%
+}
+
+\newcommand{\DiagramRepositoryConfigurationOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/configuration/01.pdf}{Configuración centralizada del proyecto.}{fig:doc-repository-configuration-1}%
+}
+
+\newcommand{\DiagramRepositoryConfigurationTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/configuration/02.pdf}{Carga local o GCP desde configuración cliente-servidor.}{fig:doc-repository-configuration-2}%
+}
+
+\newcommand{\DiagramRepositoryIndexOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/index/01.pdf}{Estructura lógica del repositorio.}{fig:doc-repository-index-1}%
+}
+
+\newcommand{\DiagramRepositoryIndexTwo}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/index/02.pdf}{Secuencia de ejecución entre paquetes.}{fig:doc-repository-index-2}%
+}
+
+\newcommand{\DiagramRepositoryIndexThree}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/index/03.pdf}{Cadena de salidas persistidas del proyecto.}{fig:doc-repository-index-3}%
+}
+
+\newcommand{\DiagramRepositorySrcPackagesOne}{%
+\DocPdfDiagram{../doc/mermaid-pdf/repository/src-packages/01.pdf}{Dependencias principales entre paquetes de src.}{fig:doc-repository-src-packages-1}%
+}
+
+% Versiones compactas para mejor integración en la sección de metodología
+
+\newcommand{\DiagramDataIndexOneSmall}{%
+\DocPdfDiagramSmall{../doc/mermaid-pdf/data/index/01.pdf}{Pipeline completo de datos hasta VOLATILITY\_DB.}{fig:doc-data-index-1-small}%
+}
+
+\newcommand{\DiagramModelsFeaturesSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/features/01.pdf}{Construcción de features financieras.}{fig:doc-models-features-1-small}{../doc/mermaid-pdf/models/features/02.pdf}{Motivación financiera de las features.}{fig:doc-models-features-2-small}%
+}
+
+\newcommand{\DiagramModelsFamiliesSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/families/01.pdf}{Abstracción común de familias de modelos.}{fig:doc-models-families-1-small}{../doc/mermaid-pdf/models/families/02.pdf}{Selección de modelos mediante k-folds temporales.}{fig:doc-models-families-2-small}%
+}
+
+\newcommand{\DiagramModelsSplitsSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/splits-kfolds/01.pdf}{Esquema conceptual de particiones temporales.}{fig:doc-models-splits-kfolds-1-small}{../doc/mermaid-pdf/models/splits-kfolds/02.pdf}{Control de contratos compartidos entre splits.}{fig:doc-models-splits-kfolds-2-small}%
+}
+
+\newcommand{\DiagramModelsTrainingSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/models/training/01.pdf}{Búsqueda de hiperparámetros por familia.}{fig:doc-models-training-1-small}{../doc/mermaid-pdf/models/training/02.pdf}{Early stopping con validación interna.}{fig:doc-models-training-2-small}%
+}
+
+\newcommand{\DiagramDashboardIndexSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/dashboard/index/01.pdf}{Entradas precomputadas consumidas por el dashboard.}{fig:doc-dashboard-index-1-small}{../doc/mermaid-pdf/dashboard/index/02.pdf}{Arquitectura de servicios del dashboard.}{fig:doc-dashboard-index-2-small}%
+}
+
+\newcommand{\DiagramOperationsApiSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/operations/api-deployment/01.pdf}{API, almacenamiento y runtime común.}{fig:doc-operations-api-deployment-1-small}{../doc/mermaid-pdf/operations/api-deployment/02.pdf}{Selección de backend local o GCP.}{fig:doc-operations-api-deployment-2-small}%
+}
+
+\newcommand{\DiagramRepositoryConfigSmallPair}{%
+\DocPdfDiagramSideBySide{../doc/mermaid-pdf/repository/configuration/01.pdf}{Configuración centralizada del proyecto.}{fig:doc-repository-configuration-1-small}{../doc/mermaid-pdf/repository/configuration/02.pdf}{Carga local o GCP desde configuración cliente-servidor.}{fig:doc-repository-configuration-2-small}%
+}
+
+\newcommand{\DiagramRepositoryIndexSmallTriple}{%
+\DocPdfDiagramSmall{../doc/mermaid-pdf/repository/index/01.pdf}{Estructura lógica del repositorio.}{fig:doc-repository-index-1-small}%
+}
+
+

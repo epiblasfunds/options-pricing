@@ -1,0 +1,9 @@
+flowchart LR
+    A[Beeswarm] --> B[Ranking y signo local]
+    B --> C[Importancia media]
+    C --> D[Dependence de top features]
+    D --> E[Heatmap por observaciones]
+    E --> F[Waterfall en casos representativos]
+    F --> G[Vecinos y diagnóstico]
+    classDef plot fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E,F,G plot;

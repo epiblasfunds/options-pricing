@@ -1,0 +1,14 @@
+flowchart TD
+    A[(TRADE_IBEX_DB)] --> B[Limpiar futuros vencidos]
+    B --> C[Validar base unificada]
+    C --> D[Filtrar opciones]
+    C --> E[Filtrar futuros]
+    D --> F[(OPTIONS_TRADES_DB)]
+    E --> G[(FUTURES_TRADES_DB)]
+    F --> H[Relación por vencimiento]
+    G --> H
+    H --> I[(OPTION_UNDERLYING_DB)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,F,G,I dataset;
+    class B,C,D,E,H process;

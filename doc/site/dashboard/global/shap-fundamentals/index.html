@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Fundamentos de SHAP - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Fundamentos de SHAP";
+        var mkdocs_page_input_path = "dashboard\\global\\shap-fundamentals.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Explicabilidad global</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Explicabilidad global</li>
+      <li class="breadcrumb-item active">Fundamentos de SHAP</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="fundamentos-de-shap">Fundamentos de SHAP<a class="headerlink" href="#fundamentos-de-shap" title="Permanent link">&para;</a></h1>
+<p><a href="./">SHAP</a> es el marco de explicabilidad usado en el proyecto para atribuir una predicción de volatilidad implícita a las variables visibles del dashboard: <code>OptionType</code>, <code>StrikePrice</code>, <code>UnderlyingPrice</code>, <code>TimeToExpiration</code> y <code>Rate</code>. La idea es descomponer una predicción individual en un valor base y una suma de contribuciones por feature.</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[Modelo principal] --&gt; B[Predicción]
+    C[Fondo de referencia] --&gt; D[Valor base]
+    B --&gt; E[Contribuciones SHAP]
+    D --&gt; E
+    E --&gt; F[Predicción explicada]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef result fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,D data;
+    class E method;
+    class F result;
+</code></pre>
+<h2 id="descomposicion-aditiva">Descomposición aditiva<a class="headerlink" href="#descomposicion-aditiva" title="Permanent link">&para;</a></h2>
+<p>La explicación SHAP tiene forma aditiva:</p>
+<div class="doc-math">
+\[
+f(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$f(x)$ es la predicción del modelo principal para la muestra $x$.</li>
+<li>$\phi_0$ es el valor base definido por el fondo del explicador.</li>
+<li>$\phi_j(x)$ es la contribución atribuida a la feature $j$ para la muestra $x$.</li>
+<li>$p$ es el número total de features explicadas.</li>
+</ul>
+<p>Una contribución positiva aumenta la volatilidad predicha respecto al valor base; una contribución negativa la reduce. Esta atribución no implica causalidad: explica el comportamiento del modelo entrenado bajo una referencia concreta.</p>
+<h2 id="valores-de-shapley">Valores de Shapley<a class="headerlink" href="#valores-de-shapley" title="Permanent link">&para;</a></h2>
+<p>SHAP se basa en los valores de Shapley de teoría de juegos cooperativos. En ese marco, las features son jugadores y la predicción es el pago a repartir. La atribución de una feature es su contribución marginal media al incorporarse a todos los posibles subconjuntos de features.</p>
+<div class="doc-math">
+\[
+\phi_j =
+\sum_{S \subseteq N \setminus \{j\}}
+\frac{|S|!(p-|S|-1)!}{p!}
+\left[
+v(S \cup \{j\})-v(S)
+\right]
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$N$ es el conjunto completo de features.</li>
+<li>$S$ es un subconjunto de features que no contiene la feature $j$.</li>
+<li>$p$ es el número total de features.</li>
+<li>$v(S)$ es el valor esperado del modelo cuando se conocen las features de $S$.</li>
+<li>$\phi_j$ es la atribución de Shapley asignada a la feature $j$.</li>
+</ul>
+<p>Esta definición aporta eficiencia, simetría, tratamiento nulo de features irrelevantes y consistencia aditiva. Por eso resulta más defendible que una importancia global sin descomposición local.</p>
+<h2 id="aproximacion-por-permutacion">Aproximación por permutación<a class="headerlink" href="#aproximacion-por-permutacion" title="Permanent link">&para;</a></h2>
+<p>El repositorio usa <code>shap.Explainer(..., algorithm="permutation")</code>. Esta variante trata el modelo como caja negra, por lo que sirve para <a href="../../../models/families/linear-regression/">regresión lineal</a>, <a href="../../../models/families/random-forest/">Random Forest</a>, <a href="../../../models/families/xgboost/">XGBoost</a>, <a href="../../../models/families/neural-networks/">redes neuronales</a> y <a href="../../../models/families/quantum-inspired/">Quantum Inspired</a> con una interfaz común.</p>
+<p>El presupuesto de evaluación por fila es:</p>
+<div class="doc-math">
+\[
+max\_evals = 2p+1
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$max_evals$ es el número máximo de evaluaciones del modelo por explicación.</li>
+<li>$p$ es el número de features de explicabilidad.</li>
+</ul>
+<p>El fondo se toma de una muestra controlada por <code>shap_background_size</code>; las filas explicadas globalmente por <code>shap_explain_size</code>; y las filas locales por <code>sample_option_size</code>.</p>
+<h2 id="variables-raw-y-fidelidad">Variables raw y fidelidad<a class="headerlink" href="#variables-raw-y-fidelidad" title="Permanent link">&para;</a></h2>
+<p>Las explicaciones se calculan sobre variables raw visibles. Esto mejora la lectura financiera: si <code>StrikePrice</code> tiene una contribución alta, el lector ve el efecto agregado del strike como input financiero, aunque internamente el modelo use transformaciones como <code>logMoneyness</code> o <code>logForwardMoneyness</code>.</p>
+<p>Esta capa se reconstruye mediante <code>ExplainabilityEncoder</code>: el explicador perturba variables raw, el encoder reconstruye un raw frame válido y el runtime vuelve a generar las features del modelo antes de predecir.</p>
+<h2 id="limitaciones">Limitaciones<a class="headerlink" href="#limitaciones" title="Permanent link">&para;</a></h2>
+<p>SHAP no prueba causalidad y puede verse afectado por correlación entre variables. En opciones, strike, subyacente, moneyness, vencimiento y tipos no son independientes. Por eso se complementa con <a href="../../behaviour/ale/">ALE</a>, <a href="../../behaviour/ice/">ICE</a>, <a href="../../sample/neighbours/">vecinos locales</a> y <a href="../../behaviour/volatility-surfaces/">superficies de volatilidad</a>.</p>
+<h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Shapley, L. S. (1953). <em>A Value for n-Person Games</em>. Contributions to the Theory of Games.</li>
+<li>Lundberg, S. M. y Lee, S.-I. (2017). <em>A Unified Approach to Interpreting Model Predictions</em>. NeurIPS.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../global-explainability/" class="btn btn-neutral float-left" title="Mapa de la pestaña"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../shap-visualizations/" class="btn btn-neutral float-right" title="Visualizaciones SHAP">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../global-explainability/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../shap-visualizations/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

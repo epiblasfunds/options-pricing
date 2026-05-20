@@ -1,0 +1,11 @@
+flowchart TD
+    A[resources/data_config.json] --> Z[Config global]
+    B[resources/volatility_models_config.json] --> Z
+    C[resources/dashboard_models_config.json] --> Z
+    D[resources/clientserver.json] --> Z
+    E[resources/cloud_config.json] --> Infra[Terraform y despliegue]
+    Z --> S[src/config]
+    S --> ETL[ETL]
+    S --> TRAIN[Entrenamiento]
+    S --> DASH[Dashboard]
+    S --> API[API]

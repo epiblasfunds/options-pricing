@@ -1,0 +1,11 @@
+flowchart LR
+    A[Valor base phi0] --> B[+ contribución OptionType]
+    B --> C[+ contribución StrikePrice]
+    C --> D[+ contribución UnderlyingPrice]
+    D --> E[+ contribución TimeToExpiration]
+    E --> F[+ contribución Rate]
+    F --> G[Predicción final]
+    classDef step fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef result fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,D,E,F step;
+    class G result;

@@ -11,6 +11,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from tqdm import tqdm
 
 from src.config.config import (
+    DASHBOARD_SAVED_MODELS_DIR_PATH,
     VOLATILITY_FAMILY_METADATA_DIR_PATH,
     VOLATILITY_RETRAINED_METADATA_DIR_PATH,
     config,
@@ -586,6 +587,7 @@ class Trainer:
         phase: TrainingPhase = TrainingPhase.TRAIN_VAL,
         upload_to_gcp: bool = True,
         progressive_training=False,
+        force_reload: bool = False,
     ):
         suffix = "_retrained_progressive" if progressive_training else ""
         base_family_name = self.model_family.get_family_name()
@@ -602,7 +604,7 @@ class Trainer:
             / f"{family_name}_{phase_suffix}_retrained_metadata.json"
         )
 
-        can_use_retrained_cache = is_train_val and retrained_metadata_path.exists()
+        can_use_retrained_cache = (not force_reload) and retrained_metadata_path.exists()
 
         if can_use_retrained_cache:
             with open(retrained_metadata_path, "r", encoding="utf-8") as f:
@@ -766,6 +768,9 @@ class Trainer:
 
 
 def _run_model2dashboard_pipeline(family_name: str):
+    _project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..")
+    )
     try:
         subprocess.run(
             [
@@ -776,6 +781,7 @@ def _run_model2dashboard_pipeline(family_name: str):
                 family_name,
             ],
             check=True,
+            cwd=_project_root,
         )
         logger.info(
             "model2dashboard pipeline for family '%s' completed successfully.",
@@ -865,15 +871,15 @@ def _upload_models_to_gcp(
     if credentials_path:
         env["GOOGLE_APPLICATION_CREDENTIALS"] = str(credentials_path)
 
-    dashboard_family_path = os.path.join(
-        "src", "dashboard", "saved_models", family_name
-    )
+    dashboard_family_path = DASHBOARD_SAVED_MODELS_DIR_PATH / family_name
 
     gcp_storage = config.clientserver_config.gcp_storage
     VOLATILITY_BUCKET = gcp_storage.trained_models_bucket
+    RETRAINED_METADATA_BUCKET = gcp_storage.retrained_metadata_bucket
     DASHBOARD_BUCKET = gcp_storage.explainability_artifacts_bucket
     TRAINED_MODELS_PREFIX = gcp_storage.trained_models_prefix.strip("/")
     RETRAINED_METADATA_PREFIX = gcp_storage.retrained_metadata_prefix.strip("/")
+    DASHBOARD_MODELS_PREFIX = gcp_storage.dashboard_models_prefix.strip("/")
 
     model_destination = (
         f"gs://{VOLATILITY_BUCKET}/{TRAINED_MODELS_PREFIX}/"
@@ -881,15 +887,26 @@ def _upload_models_to_gcp(
         else f"gs://{VOLATILITY_BUCKET}/"
     )
     metadata_destination = (
-        f"gs://{VOLATILITY_BUCKET}/{RETRAINED_METADATA_PREFIX}/"
+        f"gs://{RETRAINED_METADATA_BUCKET}/{RETRAINED_METADATA_PREFIX}/"
         if RETRAINED_METADATA_PREFIX
-        else f"gs://{VOLATILITY_BUCKET}/"
+        else f"gs://{RETRAINED_METADATA_BUCKET}/"
+    )
+    dashboard_destination = (
+        f"gs://{DASHBOARD_BUCKET}/{DASHBOARD_MODELS_PREFIX}/{family_name}/"
+        if DASHBOARD_MODELS_PREFIX
+        else f"gs://{DASHBOARD_BUCKET}/{family_name}/"
     )
     final_test_metadata_path = retrained_metadata_path
 
     if not VOLATILITY_BUCKET:
         logger.info(
             "trained_models_bucket is not configured. Skipping model/scaler/metadata upload for '%s'.",
+            family_name,
+        )
+
+    if not RETRAINED_METADATA_BUCKET:
+        logger.info(
+            "retrained_metadata_bucket is not configured. Skipping metadata upload for '%s'.",
             family_name,
         )
 
@@ -943,7 +960,7 @@ def _upload_models_to_gcp(
             )
 
         if (
-            VOLATILITY_BUCKET
+            RETRAINED_METADATA_BUCKET
             and final_test_metadata_path
             and os.path.isfile(final_test_metadata_path)
         ):
@@ -971,15 +988,14 @@ def _upload_models_to_gcp(
                 final_test_metadata_path,
             )
 
-        if DASHBOARD_BUCKET and os.path.isdir(dashboard_family_path):
-            dashboard_destination = f"gs://{DASHBOARD_BUCKET}/{family_name}/"
+        if DASHBOARD_BUCKET and dashboard_family_path.is_dir():
             subprocess.run(
                 [
                     gcloud_path,
                     "storage",
                     "cp",
                     "--recursive",
-                    os.path.join(dashboard_family_path, "*"),
+                    str(dashboard_family_path / "*"),
                     dashboard_destination,
                 ],
                 check=True,

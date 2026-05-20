@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Volatilidad implícita - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Volatilidad impl\u00edcita";
+        var mkdocs_page_input_path = "data\\volatility.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Volatilidad implícita</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#limpieza-de-operaciones">Limpieza de operaciones</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#validaciones">Validaciones</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tipo-compuesto-hasta-vencimiento">Tipo compuesto hasta vencimiento</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#formula-black-76">Fórmula Black-76</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#solver-de-volatilidad-implicita">Solver de volatilidad implícita</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filtro-de-tipo-de-operacion">Filtro de tipo de operación</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#salida-final">Salida final</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Datos</li>
+      <li class="breadcrumb-item active">Volatilidad implícita</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="volatility-step">Volatility Step<a class="headerlink" href="#volatility-step" title="Permanent link">&para;</a></h1>
+<p>El último paso del ETL calcula la volatilidad implícita de cada operación de opción. Para ello limpia operaciones sin subyacente fiable, calcula el tipo compuesto hasta vencimiento y resuelve numéricamente la volatilidad que iguala Black-76 al precio observado.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[(OPTION_TRADES_UNDERLYING_DB)] --&gt; B[Eliminar filas sin subyacente]
+    B --&gt; C[Filtrar lag máximo]
+    C --&gt; D[Validar coherencia temporal y contractual]
+    E[(RATES_DATABASE)] --&gt; F[Calcular tipo compuesto]
+    D --&gt; F
+    F --&gt; G[Filtrar tipo de operación configurado]
+    G --&gt; H[Resolver Black-76 inverso]
+    H --&gt; I[Eliminar soluciones no válidas]
+    I --&gt; J[(VOLATILITY_DB)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,E,J dataset;
+    class B,C,D,F,G,H,I process;
+</code></pre>
+<h2 id="limpieza-de-operaciones">Limpieza de operaciones<a class="headerlink" href="#limpieza-de-operaciones" title="Permanent link">&para;</a></h2>
+<p>Se descartan dos grupos de filas:</p>
+<ul>
+<li>Operaciones de opción sin contrato de futuro, precio de subyacente o fecha-hora de subyacente.</li>
+<li>Operaciones con lag de subyacente superior al umbral configurado.</li>
+</ul>
+<p>El filtro de lag es necesario porque un precio de futuro demasiado antiguo puede no representar el estado de mercado en el momento de la opción. Sin este control, la volatilidad implícita podría absorber errores de sincronización.</p>
+<h2 id="validaciones">Validaciones<a class="headerlink" href="#validaciones" title="Permanent link">&para;</a></h2>
+<p>Antes de valorar se exige:</p>
+<ul>
+<li>Precio de opción, precio de subyacente, strike y cantidad estrictamente positivos.</li>
+<li>Ausencia de missing values.</li>
+<li>Strike y vencimiento coherentes con el código de opción.</li>
+<li>Fecha-hora del subyacente no posterior a la opción.</li>
+<li>Fecha-hora del subyacente no fuera del rango permitido de la sesión.</li>
+<li>Tiempo a vencimiento no negativo.</li>
+<li>Serie de tipos sin missing values.</li>
+</ul>
+<h2 id="tipo-compuesto-hasta-vencimiento">Tipo compuesto hasta vencimiento<a class="headerlink" href="#tipo-compuesto-hasta-vencimiento" title="Permanent link">&para;</a></h2>
+<p>El tipo usado por Black-76 se calcula como un tipo compuesto desde la fecha de ejecución hasta vencimiento. Para períodos de al menos un día, se recorren días hábiles y se acumula:</p>
+<div class="doc-math">
+\[
+\prod_i \left(1 + r_i \frac{n_i}{N}\right)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$r_i$ es el tipo diario en decimal.</li>
+<li>$n_i$ es el número de días cubiertos por el tipo $i$.</li>
+<li>$N$ es la base anual de cómputo, configurada como 360.</li>
+</ul>
+<p>donde $N=360$, $r_i$ es el tipo diario en decimal y $n_i$ es el número de días naturales cubiertos por ese tipo. Los lunes cubren tres días para recoger el fin de semana.</p>
+<p>El tipo anualizado equivalente es:</p>
+<div class="doc-math">
+\[
+r_{comp} = \left(\prod_i \left(1 + r_i \frac{n_i}{N}\right)-1\right)\frac{N}{d_c}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$r_i$ es el tipo diario en decimal.</li>
+<li>$n_i$ es el número de días cubiertos por el tipo $i$.</li>
+<li>$N$ es la base anual de cómputo, configurada como 360.</li>
+</ul>
+<p>donde $d_c$ es el número de días naturales hasta vencimiento. Para vencimientos intradía se aplica una conversión proporcional con el tipo overnight disponible para evitar explosiones numéricas en vencimientos muy cortos.</p>
+<h2 id="formula-black-76">Fórmula Black-76<a class="headerlink" href="#formula-black-76" title="Permanent link">&para;</a></h2>
+<p>El modelo Black-76 valora opciones sobre forwards/futuros. Para una call:</p>
+<div class="doc-math">
+\[
+C=e^{-rT}\left(FN(d_1)-KN(d_2)\right)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
+<p>Para una put:</p>
+<div class="doc-math">
+\[
+P=e^{-rT}\left(KN(-d_2)-FN(-d_1)\right)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
+<p>con:</p>
+<div class="doc-math">
+\[
+d_1=\frac{\ln(F/K)+\frac{1}{2}\sigma^2T}{\sigma\sqrt{T}},
+\qquad
+d_2=d_1-\sigma\sqrt{T}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$C$ es el precio teórico de una call.</li>
+<li>$P$ es el precio teórico de una put.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el vencimiento en años.</li>
+<li>$r$ es el tipo compuesto.</li>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$N(\cdot)$ es la función de distribución normal estándar.</li>
+</ul>
+<p>En el proyecto:</p>
+<ul>
+<li>$F$ es el precio del futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el tiempo a vencimiento en años.</li>
+<li>$r$ es el tipo compuesto en decimal.</li>
+<li>$\sigma$ es la volatilidad implícita que se quiere resolver.</li>
+</ul>
+<h2 id="solver-de-volatilidad-implicita">Solver de volatilidad implícita<a class="headerlink" href="#solver-de-volatilidad-implicita" title="Permanent link">&para;</a></h2>
+<p>La volatilidad se obtiene buscando la raíz:</p>
+<div class="doc-math">
+\[
+g(\sigma)=P_{Black76}(F,K,T,r,\sigma)-P_{mercado}=0
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$g(\sigma)$ es la función cuya raíz se busca.</li>
+<li>$P_{Black76}$ es el precio teórico Black-76.</li>
+<li>$P_{mercado}$ es el precio observado.</li>
+<li>$\sigma$ es la volatilidad implícita candidata.</li>
+</ul>
+<p>El solver usa bisección entre los límites de volatilidad configurados. Si la función no cambia de signo o aparece un valor no finito, la fila se marca como no resoluble. Las filas sin solución dentro de los límites se eliminan antes de persistir la salida.</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[(sigma min)] --&gt; C{Signo válido?}
+    B[(sigma max)] --&gt; C
+    C --&gt;|no| D[(Volatilidad NaN)]
+    C --&gt;|sí| E[Bisección]
+    E --&gt; F{Tolerancia alcanzada}
+    F --&gt;|no| E
+    F --&gt;|sí| G[(ImpliedVolatility)]
+    classDef dataset fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef decisión fill:#fff7e6,stroke:#b7791f,stroke-width:1.5px,color:#4a2a00;
+    class A,B,D,G dataset;
+    class E process;
+    class C,F decisión;
+</code></pre>
+<h2 id="filtro-de-tipo-de-operacion">Filtro de tipo de operación<a class="headerlink" href="#filtro-de-tipo-de-operacion" title="Permanent link">&para;</a></h2>
+<p>Antes de calcular la volatilidad se filtra por el tipo de operación configurado. En la configuración actual se conserva el tipo <code>M</code>. Esto homogeneiza el origen de precios y evita mezclar modalidades de ejecución con interpretaciones distintas.</p>
+<h2 id="salida-final">Salida final<a class="headerlink" href="#salida-final" title="Permanent link">&para;</a></h2>
+<p><code>VOLATILITY_DB</code> es la base final del ETL. Contiene las columnas necesarias para entrenamiento y para reconstruir explicaciones:</p>
+<table>
+<thead>
+<tr>
+<th>Grupo</th>
+<th>Columnas conceptuales</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identificación</td>
+<td>fecha, contrato de opción, tipo de opción, trade id, mercado</td>
+</tr>
+<tr>
+<td>Precio</td>
+<td>precio de opción, precio de subyacente, strike, cantidad</td>
+</tr>
+<tr>
+<td>Tiempo</td>
+<td>vencimiento, ejecución, tiempo a vencimiento, ejecución del subyacente, lag</td>
+</tr>
+<tr>
+<td>Valoración</td>
+<td>tipo compuesto, contrato futuro, volatilidad implícita</td>
+</tr>
+</tbody>
+</table>
+<p>Esta tabla cierra el pipeline de datos y alimenta la <a href="../../models/features/">generación de features de modelos</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../underlying/" class="btn btn-neutral float-left" title="Subyacente de cada opción"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../models/" class="btn btn-neutral float-right" title="Visión general">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../underlying/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../models/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

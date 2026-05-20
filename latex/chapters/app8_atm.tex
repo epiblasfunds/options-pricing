@@ -1,0 +1,39 @@
+\chapter{Entrenamiento progressive ATM}
+\label{app:progressive}
+
+El entrenamiento progressive ATM se desarrolló como estudio paralelo para intentar mejorar el aprendizaje de la superficie. Su hipótesis de partida es financiera: la región ATM suele ser más líquida y central para la formación del nivel de volatilidad, mientras que los extremos de moneyness pueden contener más ruido, menor frecuencia o mayor sensibilidad a microestructura.
+
+El procedimiento ordena las observaciones por distancia a ATM:
+
+\begin{equation}
+d_{ATM}=|\log(F/K)|.
+\label{eq:dist-atm}
+\end{equation}
+
+Después divide el entrenamiento en segmentos. En la configuración actual se usan tres segmentos. Los modelos no iterativos reciben pesos mayores para tramos más cercanos al ATM; los modelos iterativos entrenan de forma acumulativa, empezando por la zona central e incorporando progresivamente tramos más alejados.
+
+Si hay \(S\) segmentos ordenados de ATM a tramos más alejados, los pesos conceptuales decrecen con el segmento:
+
+\begin{equation}
+w_s \propto S-s,
+\qquad
+\tilde{w}_i=\frac{w_i}{\bar{w}}.
+\label{eq:progressive-weights}
+\end{equation}
+
+La diferencia por familia es relevante: regresión lineal y Random Forest usan pesos de muestra; XGBoost reparte estimadores entre fases acumulativas; y las redes entrenan sucesivamente sobre datasets acumulados.
+
+\section*{Análisis del impacto del entrenamiento Progressive ATM}
+
+El objetivo de esta variante es comprobar si reordenar el aprendizaje desde la zona ATM mejora la generalización fuera de muestra. Para ello, cada familia se reentrena bajo progressive ATM manteniendo la misma validación cruzada y los mismos hiperparámetros del entrenamiento estándar, y se comparan métricas test (RMSE, MAE y \(R^2\)) entre ambas versiones.
+
+Los resultados revelan un patrón no universal y dependiente de arquitectura:
+
+\begin{itemize}
+	\item \textbf{Random Forest:} prácticamente neutro ($\Delta$ = +0.000130). El modelo es ya robusto en estándar y el reorden por ATM no aporta ni perjudica de forma significativa.
+	\item \textbf{XGBoost:} degradación clara en test ($\Delta$ = +0.021654). A diferencia de Random Forest, el entrenamiento progressive ATM perjudica el rendimiento de XGBoost de forma notable.
+	\item \textbf{Modelos más sensibles al orden (Sequential NN y, sobre todo, Quantum Inspired):} aparecen mejoras, aunque de magnitud distinta. Sequential NN mejora levemente ($\Delta$ = -0.000451) y Quantum Inspired mejora de forma clara ($\Delta$ = -0.025621).
+	\item \textbf{Regresión lineal:} empeora levemente ($\Delta$ = +0.003923) porque el orden apenas aporta cuando la hipótesis es global y no depende de trayectorias de aprendizaje.
+\end{itemize}
+
+En términos prácticos, estos resultados confirman que progressive ATM no es una mejora universal. Su efectividad depende completamente de la arquitectura: beneficiosa para redes más sensibles al orden, perjudicial para XGBoost y neutral para Random Forest. Por tanto, progressive ATM debe tratarse como herramienta experimental útil para diagnóstico y comparación entre familias, no como regla general de entrenamiento.

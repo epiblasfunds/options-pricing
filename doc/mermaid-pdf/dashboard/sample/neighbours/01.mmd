@@ -1,0 +1,16 @@
+flowchart TD
+    A[Training reference frame] --> B[Feature frame train]
+    C[Muestra a explicar] --> D[Feature frame muestra]
+    B --> E[Transformación runtime]
+    D --> E
+    E --> F[Estandarización]
+    F --> G[NearestNeighbors]
+    G --> H[Tabla de vecinos]
+    F --> I[PCA 3D]
+    I --> J[Mapa de distancias]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,D data;
+    class E,F,G,I process;
+    class H,J plot;

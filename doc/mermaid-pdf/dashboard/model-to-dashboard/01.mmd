@@ -1,0 +1,19 @@
+flowchart TD
+    A[trained_models] --> B[Cargar runtime del modelo]
+    C[retrained_metadata] --> B
+    B --> E[Predicciones train]
+    D[Train split raw] --> E
+    F[Test split raw] --> G[Predicciones test]
+    B --> G
+    G --> H[Dataset dashboard]
+    E --> I[Referencia de vecinos]
+    H --> J[SHAP]
+    H --> K[Surrogates]
+    H --> L[Superficies/ICE/ALE]
+    H --> M[Diagnóstico]
+    I --> N[Vecinos y PCA]
+    J --> O[Bundle saved_models/model_id]
+    K --> O
+    L --> O
+    M --> O
+    N --> O

@@ -23,3 +23,25 @@ src/dashboard/saved_models/*
 __pycache__/
 terraform/.terraform*
 .vscode/
+
+# LaTeX build artifacts
+latex/_minted/
+latex/*.aux
+latex/*.bbl
+latex/*.bcf
+latex/*.blg
+latex/*.fdb_latexmk
+latex/*.fls
+latex/*.lof
+latex/*.log
+latex/*.lot
+latex/*.nav
+latex/*.out
+latex/*.run.xml
+latex/*.snm
+latex/*.synctex.gz
+latex/*.toc
+latex/*.vrb
+latex/*.xdv
+latex/main.pdf
+latex/TFM_Pedro_Dani.pdf

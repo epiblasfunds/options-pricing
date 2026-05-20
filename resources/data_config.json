@@ -163,7 +163,7 @@
             "MaturityDatetime": "datetime",
             "ExecTime": "time",
             "ExecDatetime": "datetime",
-            "TimeToExpiration": "int",
+            "TimeToExpiration": "float",
             "UnderlyingExecDatetime": "datetime",
             "UnderlyingLagMinutes": "float"
         },

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Paquetes de src - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Paquetes de src";
+        var mkdocs_page_input_path = "repository\\src-packages.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Paquetes de src</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#srcconfig">src/config</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcenums">src/enums</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcdata_management">src/data_management</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcvolatility_models">src/volatility_models</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcpython_models">src/python_models</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcmodel2dashboard">src/model2dashboard</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcdashboard">src/dashboard</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcapi">src/api</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#srcexceptions">src/exceptions</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Estructura del repositorio</li>
+      <li class="breadcrumb-item active">Paquetes de src</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <!-- LTeX: language=es -->
+
+<h1 id="paquetes-de-src">Paquetes de <code>src</code><a class="headerlink" href="#paquetes-de-src" title="Permanent link">&para;</a></h1>
+<p>El directorio <code>src/</code> contiene los paquetes productivos. Cada paquete tiene una responsabilidad concreta y se comunica con los demás mediante artefactos o abstracciones estables.</p>
+<pre><code class="language-mermaid">flowchart TD
+    CONFIG[src/config] --&gt; DATA[src/data_management]
+    CONFIG --&gt; VOL[src/volatility_models]
+    CONFIG --&gt; PY[src/python_models]
+    CONFIG --&gt; M2D[src/model2dashboard]
+    CONFIG --&gt; DASH[src/dashboard]
+    CONFIG --&gt; API[src/api]
+    ENUMS[src/enums] --&gt; DATA
+    ENUMS --&gt; VOL
+    ENUMS --&gt; DASH
+    DATA --&gt; VOL
+    PY --&gt; VOL
+    VOL --&gt; M2D
+    M2D --&gt; DASH
+    M2D --&gt; API
+</code></pre>
+<h2 id="srcconfig"><code>src/config</code><a class="headerlink" href="#srcconfig" title="Permanent link">&para;</a></h2>
+<p>Carga los JSON de <code>resources/</code>, construye rutas absolutas y crea objetos de configuración por dominio. También inicializa logging. Es la primera pieza que se importa de forma transversal.</p>
+<p>Estructura conceptual:</p>
+<ul>
+<li>Configuración de datos: códigos de contrato, pasos ETL y esquemas.</li>
+<li>Configuración de modelos: features, splits, k-folds, métricas y progressive training.</li>
+<li>Configuración de dashboard: tamaños de muestras, caches, SHAP, surrogates y PySR.</li>
+<li>Configuración cliente-servidor: backend local/GCP y rutas de modelos.</li>
+<li>Configuración de logging.</li>
+</ul>
+<h2 id="srcenums"><code>src/enums</code><a class="headerlink" href="#srcenums" title="Permanent link">&para;</a></h2>
+<p>Centraliza nombres de columnas, tipos de contrato, tipos de opción, tipos de datos y enumeraciones de modelos. Esto reduce errores por cadenas escritas manualmente y hace que los esquemas de las bases sean consistentes.</p>
+<p>La parte más importante para datos es <code>database_schema</code>, que representa las columnas esperadas en cada base intermedia:</p>
+<ul>
+<li>Contratos.</li>
+<li>Trades genéricos.</li>
+<li>Trades IBEX unidos.</li>
+<li>Trades de opciones.</li>
+<li>Trades de futuros.</li>
+<li>Relación opción-futuro.</li>
+<li>Opción con subyacente.</li>
+<li>Base final de volatilidad.</li>
+<li>Datos de entrenamiento.</li>
+</ul>
+<h2 id="srcdata_management"><code>src/data_management</code><a class="headerlink" href="#srcdata_management" title="Permanent link">&para;</a></h2>
+<p>Contiene el ETL. Esta dividido en:</p>
+<table>
+<thead>
+<tr>
+<th>Subpaquete</th>
+<th>Responsabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>loaders</code></td>
+<td>Orquestan cada paso, leen caché, validan entradas y devuelven DataFrames tipados.</td>
+</tr>
+<tr>
+<td><code>builders</code></td>
+<td>Construyen y persisten las bases de cada paso.</td>
+</tr>
+<tr>
+<td><code>utils</code></td>
+<td>Utilidades de tipos y códigos de contrato.</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td>Punto de entrada secuencial del pipeline de datos.</td>
+</tr>
+</tbody>
+</table>
+<p>La estructura se repite por paso: lectura raw, unión raw, separación por producto, asignación de subyacente y cálculo de volatilidad.</p>
+<h2 id="srcvolatility_models"><code>src/volatility_models</code><a class="headerlink" href="#srcvolatility_models" title="Permanent link">&para;</a></h2>
+<p>Gestiona los datos de entrenamiento, la validación temporal, el entrenamiento por familia, la selección de hiperparámetros, el reentrenamiento y la persistencia de modelos/metadatos.</p>
+<p>Estructura conceptual:</p>
+<ul>
+<li>Utilidades de datos: carga de <code>VOLATILITY_DB</code>, split temporal, control de contratos compartidos y feature engineering.</li>
+<li>Utilidades de entrenamiento: métricas, k-folds, selección, reentrenamiento y subida opcional a GCP.</li>
+<li>Utilidades de visualización de entrenamiento: tablas, gráficos y curvas de aprendizaje.</li>
+<li>Carpetas de artefactos: modelos finales y metadatos.</li>
+</ul>
+<h2 id="srcpython_models"><code>src/python_models</code><a class="headerlink" href="#srcpython_models" title="Permanent link">&para;</a></h2>
+<p>Son clases de Python que modelan funcionalidad. Es el lugar donde viven las abstracciones de familias de modelos y los modelos equivalentes usados por explicabilidad.</p>
+<p>Componentes principales:</p>
+<ul>
+<li>Familia abstracta de modelos de volatilidad.</li>
+<li>Familias concretas: <a href="../../models/families/linear-regression/">regresión lineal</a>, <a href="../../models/families/random-forest/">Random Forest</a>, <a href="../../models/families/xgboost/">XGBoost</a>, <a href="../../models/families/neural-networks/">red neuronal secuencial</a> y <a href="../../models/families/quantum-inspired/">Quantum Inspired</a>.</li>
+<li>Modelo simbólico persistible.</li>
+<li>Estructuras de dashboard: bundle, SHAP almacenado, árbol surrogate, diagnóstico, PCA de vecinos y stub de API manual.</li>
+</ul>
+<h2 id="srcmodel2dashboard"><code>src/model2dashboard</code><a class="headerlink" href="#srcmodel2dashboard" title="Permanent link">&para;</a></h2>
+<p>Es el puente entre entrenamiento y visualización. Carga modelos finales y metadatos, reconstruye features, genera predicciones sobre train/test, calcula artefactos explicables y escribe un bundle autocontenido en <code>src/dashboard/saved_models/</code>.</p>
+<p>Artefactos que genera:</p>
+<ul>
+<li>Dataset de dashboard con predicción, residual y error absoluto.</li>
+<li>Muestras para explicabilidad local.</li>
+<li>Anclas para superficies.</li>
+<li>SHAP global y local.</li>
+<li>Árboles surrogate por profundidad.</li>
+<li>Regresor simbólico surrogate.</li>
+<li>Vecinos históricos.</li>
+<li>Superficies, ICE y ALE.</li>
+<li>Diagnóstico agregado.</li>
+</ul>
+<h2 id="srcdashboard"><code>src/dashboard</code><a class="headerlink" href="#srcdashboard" title="Permanent link">&para;</a></h2>
+<p>Implementa la aplicación Dash. La estructura separa layout, callbacks, servicios, gráficos y utilidades.</p>
+<table>
+<thead>
+<tr>
+<th>Subpaquete</th>
+<th>Papel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dashboard</code></td>
+<td>Layout, estilos, ids y callbacks.</td>
+</tr>
+<tr>
+<td><code>services</code></td>
+<td>Capa de aplicación: carga modelos, predice, calcula superficies, vecinos, SHAP y diagnósticos.</td>
+</tr>
+<tr>
+<td><code>plots</code></td>
+<td>Gráficos Plotly/imágenes para cada familia de visualizaciones.</td>
+</tr>
+<tr>
+<td><code>utils</code></td>
+<td>Validación, sampling, features auxiliares y diagnóstico.</td>
+</tr>
+<tr>
+<td><code>saved_models</code></td>
+<td>Bundles generados por <code>model2dashboard</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>El dashboard no reentrena modelos. Consume bundles precomputados y, para entradas manuales, puede pedir predicciones/explicaciones a la API.</p>
+<h2 id="srcapi"><code>src/api</code><a class="headerlink" href="#srcapi" title="Permanent link">&para;</a></h2>
+<p>Implementa una API FastAPI para predicción y explicabilidad local de muestras manuales. Carga el mismo modelo entrenado y el mismo bundle de dashboard que la UI, de modo que las respuestas de API y dashboard se basan en los mismos artefactos.</p>
+<p>Endpoints conceptuales:</p>
+<ul>
+<li>Salud del servicio.</li>
+<li>Predicción de volatilidad.</li>
+<li>Predicción con explicabilidad local, waterfall y vecinos.</li>
+</ul>
+<h2 id="srcexceptions"><code>src/exceptions</code><a class="headerlink" href="#srcexceptions" title="Permanent link">&para;</a></h2>
+<p>Define errores de datos específicos del dominio: claves duplicadas, valores missing, precios o cantidades no positivos, incoherencias de vencimiento, strikes inconsistentes, tiempos negativos y problemas de subyacente. Estos errores se lanzan durante validaciones de ETL para fallar pronto cuando una base intermedia no cumple contrato.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../configuration/" class="btn btn-neutral float-left" title="Configuración y resources"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../data/" class="btn btn-neutral float-right" title="Visión general del ETL">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../configuration/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../data/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../javascripts/mermaid-init.js"></script>
+      <script src="../../javascripts/nav-labels.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

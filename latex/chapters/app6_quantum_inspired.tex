@@ -1,0 +1,198 @@
+
+\chapter{Modelo Quantum Inspired}
+\label{app:quantum-inspired}
+
+Este apéndice describe la arquitectura \emph{Quantum Inspired}, una red neuronal clásica que adopta un paradigma distinto al de matrices densas: utiliza una \textbf{factorización tensorial} inspirada en redes tensoriales usadas en física cuántica simulada clásicamente. La idea central es convertir el espacio de características embebidas en un tensor multidimensional y descomponerlo en una cadena de núcleos pequeños interconectados.
+
+Esta estrategia es apropiada para sistemas con muchos grados de libertad (como la superficie de volatilidad) porque combina compresión estructural, regularización implícita y una lectura más trazable de cómo se propagan dependencias entre variables.
+
+\section{Arquitectura general: flujo de datos desde entrada a predicción}
+
+La arquitectura transforma un vector de entrada en una predicción escalar de volatilidad siguiendo tres bloques: preparación, núcleo Tensor-Train y agregación final. La Figura~\ref{fig:doc-models-families-quantum-inspired-1} resume el flujo.
+
+\DiagramModelsFamiliesQuantumInspiredOne
+
+\noindent La clave arquitectónica es que \textbf{el componente Quantum Inspired es la capa Tensor-Train}, no el conjunto completo. Las etapas anteriores preparan los datos; las posteriores agregan y refinan la salida. De este modo se separa la responsabilidad de cada bloque: preparación (embedding), transformación tensorial (TT) y agregación (post-TT dense).
+
+\section{Etapas preparatorias y transformación estructural}
+
+\subsection{Normalización e Embedding denso}
+
+Sea $n_{\text{in}}$ el número de variables de entrada. La primera operación es una normalización por lote con transformación $n_{\text{in}} \rightarrow n_{\text{in}}$, que centra y escala cada mini-lote durante entrenamiento.
+
+Después, el embedding denso aplica la transformación $n_{\text{in}} \rightarrow \prod_{k=1}^{d} n_k$, donde $d$ es el orden del tensor y $n_k$ es la dimensión del eje $k$ del tensor objetivo. Esta proyección es crítica porque:
+
+\begin{itemize}
+  \item \textbf{Captura relaciones no lineales:} modela interacciones entre variables desde el inicio.
+  \item \textbf{Mejora y enriquecimiento:} la proyección denso-no-lineal reorganiza el espacio de características, destacando direcciones relevantes. Es análogo a un cambio de base adaptativo.
+  \item \textbf{Evitación de cercanías espurias:} sin este paso, el reshape directo sería arbitrario. El embedding asegura que la interpretación de índices como ``adyacentes'' en el tensor tiene sentido matemático real.
+\end{itemize}
+
+El embedding se parametriza mediante:
+\begin{equation}
+\mathbf{z} = \sigma_{\text{emb}}\left(\mathbf{W}_{\text{emb}} \mathbf{x} + \mathbf{b}_{\text{emb}}\right),
+\label{eq:qi-embedding}
+\end{equation}
+donde $\mathbf{x} \in \mathbb{R}^{n_{\text{in}}}$ es el vector de entrada y $\sigma_{\text{emb}}$ es la activación Swish. El resultado es $\mathbf{z} \in \mathbb{R}^{\prod n_k}$.
+
+Se utiliza Swish en embedding porque suele mantener un flujo de gradientes más estable que alternativas más abruptas.
+
+\subsection{Reshape a tensor de alta dimensionalidad}
+
+El reshape realiza la transformación $\prod n_k \rightarrow n_1 \times n_2 \times \cdots \times n_d$. Es decir, el vector $\mathbf{z}$ se reinterpreta como un tensor de orden $d$:
+\begin{equation}
+\mathcal{Z} \in \mathbb{R}^{n_1 \times n_2 \times \cdots \times n_d},
+\label{eq:qi-reshape}
+\end{equation}
+donde cada dimensión ($n_1, n_2, \ldots, n_d$) representa un grado de libertad abstracto que puede codificar factores de riesgo agrupados.
+
+Este reshape no es un mero cambio de vista: es el pivote conceptual que permite pasar de un vector euclidiano a una estructura multiíndice. Una vez que $\mathbf{z}$ es visto como $\mathcal{Z}(i_1, i_2, \ldots, i_d)$ (con $1 \leq i_k \leq n_k$), se pueden aplicar contracciones tensoriales que de otro modo serían imposibles.
+
+La importancia radica en que \textbf{genera un objeto de altísima dimensionalidad implícita}. Si por ejemplo \((n_1, n_2, n_3, n_4) = (2,2,2,2)\), entonces $\prod n_k = 16$ componentes se reinterpretan como un tensor de \(2^4 = 16\) entradas. La contracción TT que viene después explotará esta estructura multidimensional para comprimir ese espacio de manera exponencial.
+
+\section{El núcleo Quantum Inspired: Descomposición Tensor-Train}
+
+La descomposición tensor-train (TT) es una forma estructurada de representar un tensor multidimensional mediante un producto de matrices pequeñas encadenadas. Para un tensor $\mathcal{Z}(i_1, \ldots, i_d)$, la descomposición TT escribe:
+
+\begin{equation}
+\mathcal{Z}(i_1,i_2,\ldots,i_d) \approx G_1[i_1] \cdot G_2[i_2] \cdot \ldots \cdot G_d[i_d],
+\label{eq:qi-tt-decomp}
+\end{equation}
+
+donde cada $G_k$ es un tensor de orden 3 con forma $(r_{k-1}, n_k, r_k)$:
+\begin{itemize}
+  \item $n_k$ es la dimensión del eje $k$ del tensor (determinada por la forma de $\mathcal{Z}$).
+  \item $r_{k-1}$ y $r_k$ son los \textbf{rangos tensoriales} internos que conectan el núcleo $k-1$ con el $k$.
+  \item Los rangos en las fronteras son forzados a 1: $r_0 = r_d = 1$, asegurando que el producto final es un escalar (o en nuestro caso, una componente de salida).
+\end{itemize}
+
+Para dejar el esquema claro desde el inicio: \textbf{cada salida TT tiene su propia cadena de núcleos}. Si la capa TT produce $m_{\text{out}}$ salidas, existen $m_{\text{out}}$ cadenas independientes, todas aplicadas sobre el mismo tensor de entrada.
+
+Cada núcleo $G_k$ puede pensarse como una célula local que captura cómo la información asociada al eje $k$ interactúa con sus vecinos a través de los rangos. El encadenamiento de núcleos es el \textbf{contact chain} (cadena de contacto), mecanismo por el cual la información y las dependencias se propagan de un extremo del tensor al otro.
+
+\subsection{La cadena de contacto (Contact Chain) y propagación de dependencias}
+
+Durante el entrenamiento, todos los núcleos $G_1, G_2, \ldots, G_d$ aprenden simultáneamente. Los rangos internos $r_1, r_2, \ldots, r_{d-1}$ actúan como conexiones que permiten que gradientes y actualizaciones de parámetros se propaguen:
+
+\begin{itemize}
+  \item Un cambio en el núcleo $G_k$ afecta directamente a $r_{k-1}$ y $r_k$.
+  \item Estos cambios, a su vez, repercuten en $G_{k-1}$ y $G_{k+1}$ a través de las contracciones tensoriales.
+  \item De este modo, la red de dependencias es densa y altamente acoplada.
+\end{itemize}
+
+Esto contrasta radicalmente con una red densa donde cada capa aprende ``de forma más independiente'': aquí, cada núcleo no solo aprende su propia parametrización, sino que está en constante diálogo con sus vecinos a través de la estructura tensorial compartida.
+
+\subsection{Implementación: estructura concreta de los núcleos}
+
+En código, cada núcleo para un output dado es creado como:
+
+\begin{minted}{python}
+# Para cada salida out_idx in range(output_dim):
+#   Para cada eje k del tensor de entrada:
+#     Crear el núcleo con forma (r_k, n_k, r_{k+1})
+tt_core = self.add_weight(
+  name=f"tt_core_{out_idx}_{core_idx}",
+    shape=(
+    self.tt_ranks[core_idx],      # r_k
+        mode_dim,                      # n_k  
+    self.tt_ranks[core_idx + 1],  # r_{k+1}
+    ),
+    initializer=GlorotUniform(),  # Inicialización apropiada
+    trainable=True,
+)
+\end{minted}
+
+Sobre inicialización, en el código actual los \textbf{núcleos TT} se inicializan con \textbf{Glorot Uniform}. El hiperparámetro \texttt{kernel\_initializer} (\texttt{glorot\_uniform}/\texttt{he\_uniform}) se aplica a las capas densas de embedding y post-TT, no a los núcleos de \texttt{TensorTrainLayer}. En todos los casos, el objetivo es arrancar con una escala de pesos compatible con entrenamiento estable en las primeras épocas.
+
+\subsection{Contracción: cómo se produce una salida TT}
+
+Dado un tensor $\mathcal{Z}(i_1, \ldots, i_d)$ y una cadena de núcleos $\{G_1, \ldots, G_d\}$, la contracción TT produce una salida mediante:
+
+\begin{equation}
+\text{output} = \sum_{i_1=1}^{n_1} \cdots \sum_{i_d=1}^{n_d}
+G_1[i_1] \cdot G_2[i_2] \cdot \ldots \cdot G_d[i_d] \cdot \mathcal{Z}(i_1, \ldots, i_d).
+\label{eq:qi-contraction}
+\end{equation}
+
+Conceptualmente, la operación itera a través de los núcleos, contrayendo los índices de cada eje del tensor de entrada y propagando información a través de los rangos internos. Lo crucial es que esta contracción se realiza para \emph{cada} output: si hay $m_{\text{out}}$ salidas, existen $m_{\text{out}}$ cadenas independientes de núcleos, cada una contraída separadamente. Todas comparten la misma entrada $\mathcal{Z}$, pero aprenden distintos patrones de interacción.
+
+En la ecuación~\ref{eq:qi-contraction}, $i_k$ recorre los índices del eje $k$, $G_k[i_k]$ es el bloque del núcleo $k$ asociado a ese índice, y el producto encadenado acumula la interacción entre ejes y rangos internos.
+
+\subsection{Ejemplo concreto: relación entre dimensiones de entrada, rangos y salidas}
+
+Supongamos:
+\begin{itemize}
+  \item Input original: $n_{\text{in}} = 5$ características (precio subyacente, strike, vencimiento, tasa, tipo).
+  \item Tensor target: $(n_1, n_2, n_3, n_4) = (2, 2, 2, 2)$, así $\prod n_k = 16$.
+  \item Embedding: capa densa $5 \to 16$.
+  \item Reshape: los 16 componentes se organizan como tensor $2 \times 2 \times 2 \times 2$.
+  \item Rangos TT: $(r_0, r_1, r_2, r_3, r_4) = (1, 2, 2, 2, 1)$.
+  \item Salidas TT: $m_{\text{out}} = 8$ (especificado en configuración).
+\end{itemize}
+
+Aquí conviene distinguir dos magnitudes distintas: el valor $16 = \prod n_k$ describe el tamaño del \textbf{tensor de entrada} que recibe la capa TT, mientras que $m_{\text{out}} = 8$ describe el número de \textbf{cadenas TT independientes} y, por tanto, el número de características de salida producidas por la capa.
+
+Para cada una de las 8 salidas:
+\begin{itemize}
+  \item Núcleo 1: forma $(1, 2, 2)$ — conecta ``antes'' (rango 0, siempre 1) con rango 1.
+  \item Núcleo 2: forma $(2, 2, 2)$ — conecta rango 1 con rango 2.
+  \item Núcleo 3: forma $(2, 2, 2)$ — conecta rango 2 con rango 3.
+  \item Núcleo 4: forma $(2, 2, 1)$ — conecta rango 3 con ``después'' (rango 4, siempre 1).
+\end{itemize}
+
+Total de parámetros por cadena: $(1 \times 2 \times 2) + (2 \times 2 \times 2) + (2 \times 2 \times 2) + (2 \times 2 \times 1) = 4 + 8 + 8 + 4 = 24$ elementos.
+
+Como la implementación crea \textbf{una cadena completa por cada salida} (no una única TT-matrix factorizando simultáneamente entrada y salida), el total en la capa TT es $8 \times 24 = 192$ parámetros. En el embedding, si contamos pesos y sesgo, son $5 \times 16 + 16 = 96$ parámetros. Esto sigue siendo compacto frente a una alternativa densa equivalente.
+
+Se utiliza \textbf{Swish} como activación post-TT y en el embedding por su suavidad y por mantener un entrenamiento estable.
+
+\section{Etapas finales: Agregación y salida}
+
+Tras la contracción TT, tenemos $m_{\text{out}}$ características aprendidas. Estas pasan por una capa densa intermedia ($m_{\text{out}} \rightarrow u_{\text{dense}}$), seguida opcionalmente de Dropout, y finalmente por una capa de salida ($u_{\text{dense}} \rightarrow 1$) que genera la predicción escalar de volatilidad.
+
+Esta última etapa ejecuta:
+\begin{equation}
+\hat{\sigma}(\mathbf{x}) = \mathbf{W}_{\text{out}} \cdot \phi(\mathbf{W}_{\text{post}} \cdot \mathbf{c}_{\text{TT}} + \mathbf{b}_{\text{post}}) + b_{\text{out}},
+\label{eq:qi-final-output}
+\end{equation}
+donde $\mathbf{c}_{\text{TT}}$ son las $m_{\text{out}}$ salidas de la contracción TT.
+
+Lectura rápida de los términos: $\mathbf{W}_{\text{post}}$ y $\mathbf{b}_{\text{post}}$ definen la proyección densa intermedia, $\phi(\cdot)$ representa la función de activación de ese bloque (en la configuración base se usa Swish), y $\mathbf{W}_{\text{out}}, b_{\text{out}}$ realizan la proyección final al escalar $\hat{\sigma}(\mathbf{x})$.
+
+El Dropout es una regularización estocástica que desactiva aleatoriamente algunas neuronas durante entrenamiento, reduciendo co-adaptación y mejorando generalización.
+
+\section{Justificación del enfoque Quantum Inspired}
+
+La etiqueta ``quantum inspired'' se refiere a que adoptamos paradigmas de redes tensoriales originarios de la simulación clásica de sistemas cuánticos. En física cuántica, un estado multiqubit se describe mediante un tensor exponencialmente grande (en principio, $2^N$ componentes para $N$ qubits). Para computación tratable se usan descomposiciones tensoriales como tensor-train (conocida como \emph{matrix product state}) que comprimen esa representación en productos de matrices pequeñas. Esta misma intuición de representación compacta y aprendizaje supervisado con redes tensoriales se ha formalizado en literatura de referencia para ML clásico \citep{stoudenmire2016supervised,novikov2015tensorizing}.
+
+La conexión con lo ``quantum'' está en la \textbf{estructura matemática} (red tensorial tipo MPS/TT), no en el hardware ni en el algoritmo de entrenamiento: aquí no hay qubits ni circuitos cuánticos, sino optimización clásica por gradiente sobre una parametrización inspirada en esas descomposiciones.
+
+Aquí hacemos lo análogo en contexto clásico (predicción de volatilidad): reconocemos que aunque los datos sugieren un espacio de altísima dimensionalidad, es potencialmente compresible mediante factorización. Los grados de libertad del sistema (strike, vencimiento, subyacente, tasas) no son independientes; están acoplados por dinámicas de mercado. Capturar esa estructura acoplada mediante núcleos tensoriales es más eficiente que parametrización densa.
+
+El contact chain (cadena de contacto) permite propagación bidireccional de dependencias durante entrenamiento: el modelo aprende no solo factores locales, sino cómo se \textbf{coordinan} esos factores en la cadena entera. Esto es esencial para capturar fenómenos como sonrisas de volatilidad.
+
+La inferencia y entrenamiento son completamente clásicos (CPUs/GPUs estándar). No hay computación cuántica real: es puramente una arquitectura neuronal inspirada en estructuras tensoriales de física cuántica, implementada como red clásica bajo el mismo protocolo que otros modelos.
+
+\section{Ventajas frente a una red densa estándar}
+
+Una red secuencial convencional con capas densas tendría el siguiente flujo:
+
+\begin{itemize}
+  \item Input (5 dimensiones) $\to$ Dense (32 unidades) $\to$ Dense (24 unidades) $\to$ Output (1 dimensión).
+\end{itemize}
+
+Cálculo de parámetros (incluyendo bias):
+$(5 \times 32 + 32) + (32 \times 24 + 24) + (24 \times 1 + 1) = 192 + 792 + 25 = 1009$ parámetros.
+
+La arquitectura Quantum Inspired, con la misma aproximación de complejidad computacional:
+
+\begin{itemize}
+  \item Embedding: $5 \to 16$ ($5 \times 16 + 16 = 96$ parámetros).
+  \item Tensor-Train (8 cadenas de salida, cada una con estructura $(2,2,2,2)$ y rangos $(1,2,2,2,1)$): $8 \times 24 = 192$ parámetros.
+  \item Post-TT Dense: $8 \to 32 \to 1$: $(8 \times 32 + 32) + (32 \times 1 + 1) = 288 + 33 = 321$ parámetros.
+  \item Total (sin BatchNorm): $96 + 192 + 321 = 609$ parámetros.
+\end{itemize}
+
+Con configuraciones similares de capacidad, el modelo TT es más compacto. Pero la ventaja no es solo la compresión de parámetros: es la \textbf{estructura inductiva} que impone la factorización tensorial. Mientras que una red densa puede representar cualquier función (dada suficiente capacidad), también puede aprender cualquier ruido. La factorización TT, al obligar a factorizar el espacio latente, \textbf{induce un sesgo inductivo} hacia soluciones que exhiben estructura de rango bajo, lo cual es a menudo una propiedad de sistemas complejos.
+
+Adicionalmente, la propagación de gradientes en una arquitectura TT es más directa: los rangos internos actúan como canales de comunicación entre núcleos, reduciendo la necesidad de capas densas muy anchas para capturar interacciones complejas.

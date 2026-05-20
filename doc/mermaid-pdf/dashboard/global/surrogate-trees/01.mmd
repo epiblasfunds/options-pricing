@@ -1,0 +1,17 @@
+flowchart TD
+    A[Train/Test Dataset] --> B[Train/Test Features+OriginalLabels]
+    A --> E[Train/Test Features]
+    B --> C[Modelo principal]
+    C --> D[Train/Test PredictedLabels]
+    D --> F[Train/test Features+PredictedLbales]
+    E --> F
+    F --> G[Modelo Surrogate Tree]
+    G --> H[Reglas textuales]
+    H --> I[Importancias]
+    I --> J[Métricas de fidelidad]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    classDef artifact fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,D,E,F data;
+    class C,G model;
+    class H,I,J artifact;

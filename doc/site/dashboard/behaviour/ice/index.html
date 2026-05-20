@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Curvas ICE - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Curvas ICE";
+        var mkdocs_page_input_path = "dashboard\\behaviour\\ice.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Superficies y respuesta</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Superficies y respuesta</li>
+      <li class="breadcrumb-item active">Curvas ICE</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="curvas-ice">Curvas ICE<a class="headerlink" href="#curvas-ice" title="Permanent link">&para;</a></h1>
+<p>Las curvas ICE, del inglés <em>Individual Conditional Expectation</em>, muestran cómo cambia la predicción de un modelo para observaciones individuales cuando se modifica una feature y se mantienen las demás variables fijas. En este proyecto se usan para analizar respuestas del modelo de volatilidad ante cambios de strike, subyacente, vencimiento o tipo de interés.</p>
+<p>Formalmente, para una feature $j$, una observación $x_i$ y un valor contrafactual $z$:</p>
+<div class="doc-math">
+\[
+ICE_i^{(j)}(z)=f(z, x_{i,-j})
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$ICE_i^{(j)}(z)$ es la respuesta individual de la observación $i$ para la feature $j$.</li>
+<li>$z$ es el valor contrafactual asignado a la feature analizada.</li>
+<li>$x_{i,-j}$ son las demás features de la observación $i$.</li>
+<li>$f$ es el modelo de predicción de volatilidad.</li>
+</ul>
+<p>donde $x_{i,-j}$ representa todas las variables de la observación salvo la feature analizada. Cada línea ICE es una trayectoria individual de predicción.</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[Muestras reales] --&gt; B[Seleccionar feature j]
+    B --&gt; C[Construir grilla por cuantiles]
+    C --&gt; D[Sustituir j por cada valor]
+    D --&gt; E[Predicción del modelo]
+    E --&gt; F[Curvas individuales ICE]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,C data;
+    class B,D,E process;
+    class F plot;
+</code></pre>
+<h2 id="implementacion-en-el-proyecto">Implementación en el proyecto<a class="headerlink" href="#implementacion-en-el-proyecto" title="Permanent link">&para;</a></h2>
+<p>La función <code>build_ice_frame</code>:</p>
+<ol>
+<li>Muestrea hasta <code>ice_sample_size</code> filas del dataset de dashboard.</li>
+<li>Para cada feature en <code>ANALYSIS_FEATURE_NAMES</code>, crea una grilla por cuantiles con <code>curve_points</code>.</li>
+<li>Modifica el raw frame mediante <code>apply_feature_override</code>.</li>
+<li>Vuelve a predecir con <code>predict_raw_frame</code>.</li>
+<li>Guarda <code>feature_name</code>, <code>sample_id</code>, <code>feature_value</code> y <code>prediction</code>.</li>
+</ol>
+<p>Los parámetros actuales son:</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th style="text-align: right;">Valor</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ice_sample_size</code></td>
+<td style="text-align: right;">24</td>
+<td>Número máximo de curvas individuales por feature.</td>
+</tr>
+<tr>
+<td><code>curve_points</code></td>
+<td style="text-align: right;">25</td>
+<td>Resolución de cada curva.</td>
+</tr>
+<tr>
+<td>Features</td>
+<td style="text-align: right;"><code>StrikePrice</code>, <code>UnderlyingPrice</code>, <code>TimeToExpiration</code>, <code>Rate</code></td>
+<td>Variables analizadas en respuesta.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="interpretacion">Interpretación<a class="headerlink" href="#interpretacion" title="Permanent link">&para;</a></h2>
+<p>Una curva ICE no resume el efecto medio. Muestra el efecto condicional para una observación concreta. Esto es crucial en volatilidad implícita, porque el efecto de mover strike puede depender del subyacente, del vencimiento y del tipo de opción.</p>
+<p>Patrones habituales:</p>
+<table>
+<thead>
+<tr>
+<th>Patrón ICE</th>
+<th>Lectura</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Curvas casi paralelas</td>
+<td>Efecto similar entre observaciones; poca interacción visible.</td>
+</tr>
+<tr>
+<td>Curvas con pendientes diferentes</td>
+<td>Heterogeneidad; interacción con otras variables.</td>
+</tr>
+<tr>
+<td>Cruces frecuentes</td>
+<td>El ranking de predicciones cambia al mover la feature.</td>
+</tr>
+<tr>
+<td>Saltos o dientes</td>
+<td>Posible discontinuidad del modelo o grilla en zona poco soportada.</td>
+</tr>
+</tbody>
+</table>
+<p>Si las curvas ICE de <code>StrikePrice</code> divergen mucho, el modelo no está usando strike de forma aislada; probablemente la relación con <code>UnderlyingPrice</code> y moneyness domina. Si las curvas ICE de <code>TimeToExpiration</code> cambian mucho en corto plazo, conviene cruzar la lectura con el diagnóstico por maturity.</p>
+<h2 id="diferencia-con-pdp">Diferencia con PDP<a class="headerlink" href="#diferencia-con-pdp" title="Permanent link">&para;</a></h2>
+<p>Un Partial Dependence Plot promedia las curvas ICE:</p>
+<div class="doc-math">
+\[
+PDP_j(z)=\frac{1}{n}\sum_{i=1}^{n}f(z,x_{i,-j})
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$PDP_j(z)$ es la dependencia parcial de la feature $j$.</li>
+<li>$n$ es el número de observaciones promediadas.</li>
+<li>$z$ es el valor contrafactual de la feature analizada.</li>
+<li>$x_{i,-j}$ son las demás features de la observación $i$.</li>
+</ul>
+<p>El PDP puede ocultar heterogeneidad. Si algunas curvas suben y otras bajan, el promedio puede parecer plano aunque el modelo tenga efectos locales fuertes. Por ese motivo el dashboard prioriza ICE para inspección detallada y <a href="../ale/">ALE</a> para estimar efectos acumulados más robustos ante correlación.</p>
+<h2 id="limitacion-principal-contrafactuales-irreales">Limitación principal: contrafactuales irreales<a class="headerlink" href="#limitacion-principal-contrafactuales-irreales" title="Permanent link">&para;</a></h2>
+<p>ICE puede evaluar combinaciones poco plausibles. Por ejemplo, cambiar <code>StrikePrice</code> manteniendo constante el resto puede llevar a moneyness muy alejadas de la distribución observada. El pipeline intenta mitigar esto usando grillas por cuantiles, pero no elimina el problema. Por eso una curva ICE debe interpretarse con soporte local:</p>
+<ul>
+<li>¿Existen vecinos históricos cerca del escenario?</li>
+<li>¿El valor de feature está dentro de rangos observadosí</li>
+<li>¿El diagnóstico muestra error alto en esa zona?</li>
+<li>¿La superficie local es suave alrededor de ese punto?</li>
+</ul>
+<h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Goldstein, A., Kapelner, A., Bleich, J. y Pitkin, E. (2015). <em>Peeking Inside the Black Box: Visualizing Statistical Learning with Plots of Individual Conditional Expectation</em>. Journal of Computational and Graphical Statistics.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capítulo de ICE y PDP.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../volatility-surfaces/" class="btn btn-neutral float-left" title="Superficies de volatilidad"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ale/" class="btn btn-neutral float-right" title="Curvas ALE">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../volatility-surfaces/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../ale/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

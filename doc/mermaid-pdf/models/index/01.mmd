@@ -1,0 +1,10 @@
+flowchart TD
+    A[VOLATILITY_DB] --> B[Selección de columnas]
+    B --> C[Split temporal train/val/test]
+    C --> D[Control de contratos compartidos]
+    D --> E[Feature engineering]
+    E --> F[K-folds temporales]
+    F --> G[Selección de hiperparámetros]
+    G --> H[Reentrenamiento train/val]
+    H --> I[Evaluación final test]
+    I --> J[Modelo final + metadatos]

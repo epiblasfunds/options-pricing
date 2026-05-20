@@ -1,0 +1,337 @@
+
+\chapter{Resultados y Discusión}
+\label{chap:resultados}
+
+\section{Resultados}
+\label{sec:resultados}
+
+\subsection{Comparativa general de modelos}
+\label{subsec:comparativa-modelos}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabular}{p{0.26\textwidth}p{0.17\textwidth}rrrr}
+\toprule
+Modelo & Entrenamiento & MAE test & RMSE test & \(R^2\) test \\
+\midrule
+Regresión lineal & estándar & 0.067585 & 0.183824 & 0.096059  \\
+Random Forest & estándar & 0.054366 & 0.088403 & 0.790941  \\
+XGBoost & estándar & 0.054555 & 0.091642 & 0.77534  \\
+Red neuronal secuencial & estándar & 0.055422 & 0.120559 & 0.611195  \\
+Quantum Inspired NN & estándar & 0.056056 & 0.143025 & 0.452784  \\
+\bottomrule
+\end{tabular}
+\caption{Comparación final de modelos.}
+\label{tab:resultados-modelos}
+\end{table}
+
+La Tabla~\ref{tab:resultados-modelos} muestra que los métodos de árboles obtienen los mejores resultados. Random Forest lidera con RMSE = 0.0884 y \(R^2\) = 0.7909, explicando aproximadamente el 79\% de la variabilidad de volatilidad implícita. XGBoost es competitivo con RMSE = 0.0916 y \(R^2\) = 0.7753, pero queda por detrás con una diferencia relativa cercana al 3.7\% en RMSE. En contraste, la brecha hacia las redes neuronales sigue siendo relevante: Sequential NN alcanza RMSE = 0.1206 (\(R^2\) = 0.6112) y Quantum Inspired NN degrada a RMSE = 0.1430 (\(R^2\) = 0.4528). La regresión lineal es casi inutilizable con RMSE = 0.1838 (\(R^2\) = 0.0961), confirmando que la volatilidad implícita depende de interacciones no lineales complejas entre variables financieras. La superioridad de los métodos basados en árboles (Random Forest y XGBoost) respecto a arquitecturas más simples o menos robustas es clara y cuantitativamente sólida en el conjunto final de test.
+
+\Needspace{12\baselineskip}
+
+\subsection{Entrenamiento estándar frente a progressive ATM}
+\label{subsec:normal-vs-progressive}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.22\textwidth}rrr>{\raggedright\arraybackslash}X}
+\toprule
+Familia & RMSE & RMSE ATM & \(\Delta\) & Lectura \\
+\midrule
+Regresión lineal & 0.183824 & 0.187747 & +0.003923 & Empeora levemente. \\
+Random Forest & 0.088403 & 0.088533 & +0.000130 & Prácticamente neutro. \\
+XGBoost & 0.091642 & 0.113296 & +0.021654 & Degrada test. \\
+Red neuronal secuencial & 0.120559 & 0.120108 & -0.000451 & Mejora levemente. \\
+Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
+\bottomrule
+\end{tabularx}
+\caption{Impacto agregado de progressive ATM frente a entrenamiento estándar.}
+\label{tab:progressive-segmentos}
+\end{table}
+
+El entrenamiento progressive ATM no produce una mejora universal. El resultado empeora en regresión lineal y en XGBoost, es prácticamente neutro en Random Forest, mejora de forma leve en la red secuencial y mejora de forma clara en Quantum Inspired. Esta pauta es coherente con la intuición metodológica: ordenar por cercanía a ATM puede ayudar en arquitecturas más sensibles al orden de aprendizaje, pero también puede sesgar la representación de zonas extremas relevantes para test.
+
+La conclusión práctica es clara: progressive ATM debe tratarse como variante experimental y no como decisión automática. Su activación debe justificarse por evidencia empírica en cada familia concreta. Se puede ver más en el apéndice \ref{app:progressive}.
+
+\subsection{Modelo de referencia}
+\label{subsec:modelo-final}
+
+Para interpretar de forma consistente las pantallas del dashboard que vienen a continuación, conviene fijar un único modelo de referencia. En este trabajo, ese modelo es Random Forest:
+\begin{itemize}
+  \item Es el mejor modelo en test entre todas las familias evaluadas, con $RMSE=0.088403$, $MAE=0.054366$ y $R^2=0.790941$.
+  \item Presenta una fidelidad simbólica alta en dashboard ($RMSE=0.0365$, $MAE=0.0206$, $R^2=0.9402$), lo que permite mantener capacidad explicativa operativa junto con el mejor rendimiento predictivo agregado. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
+\end{itemize}
+
+En resumen, la elección de Random Forest responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa en el estado actual de entrenamiento.
+
+\subsection{Diagnóstico de rendimiento}
+\label{subsec:diagnostico-rendimiento}
+
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\caption{\small \emph{Diagnosis} en Random Forest.}
+\label{fig:dash-diagnosis-comparison}
+\end{figure}
+
+Las vistas del dashboard son necesarias para localizar dónde se concentra el error. El scatter \emph{predicted vs actual} debe confirmar si los extremos altos y bajos se acercan a la media; el residual heatmap debe separar error por moneyness y vencimiento; y las cajas \emph{Error by Moneyness} y \emph{Error by Maturity} deben indicar si los extremos de moneyness o los vencimientos cortos concentran el fallo. La conclusión accionable es que el modelo es competitivo agregadamente, pero su uso debe acompañarse de diagnóstico por zonas de la superficie cuando se consulten contratos poco líquidos o alejados de ATM.
+
+La Figura~\ref{fig:dash-diagnosis-comparison} sintetiza este diagnóstico y permite verificar visualmente si existe compresión hacia la media en los extremos de la superficie.
+\subsection{Behaviour And Surface}
+\label{subsec:behaviour-results}
+
+El modelo final debe leerse como función financiera, no solo como tabla de errores. Las superficies generadas alrededor de puntos de referencia del test permiten inspeccionar \(\hat{\sigma}(m,T)\), smiles y estructuras temporales.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Behaviour And Surface - Random Forest II.png}
+\caption{\small \emph{Behaviour And Surface} de Random Forest.}
+\label{fig:dash-behaviour-best-models-id1406}
+\end{figure}
+
+La lectura recomendada es usar al menos tres puntos de referencia: una observación ATM líquida, una observación en extremos de moneyness y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
+
+La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smile y term-structure de Random Forest mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fijo).
+
+
+
+\subsection{Explicabilidad global}
+\label{subsec:global-results}
+
+La explicación global debe comprobar que los drivers principales son coherentes con la geometría de volatilidad: moneyness, vencimiento, subyacente, strike, tipo y tipo de opción. SHAP se calcula sobre variables raw visibles y el runtime reconstruye las features transformadas, por lo que una contribución de \texttt{StrikePrice} o \texttt{UnderlyingPrice} debe interpretarse en relación con moneyness y no como efecto causal aislado. La base formal de esta descomposición y sus limitaciones interpretativas se desarrollan en el apéndice \ref{app:shap}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Global Explainability - Random Forest I.png}
+\caption{\small SHAP global Random Forest.}
+\label{fig:dash-global-shap-comparison}
+\end{figure}
+
+La lectura correcta combina ranking, signo local y dependence plots. Si una variable domina el ranking pero tiene colores mezclados o contribuciones con mucha dispersión, el modelo está usando interacciones. Esa conclusión es razonable en opciones, porque strike, subyacente y vencimiento no son independientes. Si aparecen saltos en dependence plots, deben contrastarse con las superficies y con diagnóstico por zonas de la superficie.
+
+En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la jerarquía global aparece estable: \texttt{Time To Expiration (days)} como driver principal y \texttt{Strike Price} como segundo, seguidas por \texttt{Underlying Price}; \texttt{Rate} y \texttt{Option Type} tienen peso menor. La Figura~\ref{fig:dash-global-shap-comparison} hace visible esta regularidad, que coincide con la lectura financiera esperada de superficie. El punto importante es que la consistencia entre modelos se observa en el orden de importancia, no necesariamente en la magnitud de impacto: Quantum Inspired y Sequential NN muestran dispersión SHAP más amplia para algunos rangos, coherente con su mayor sensibilidad local en otras pestañas.
+
+
+
+\subsection{Modelos equivalentes: árboles y regresión simbólica}
+\label{subsec:equivalent-results}
+
+Este bloque combina dos perspectivas complementarias sobre explicabilidad global del modelo final. Primero se muestran reglas aproximadas mediante árboles surrogate; después, una ecuación compacta obtenida por regresión simbólica. La comparación entre ambas permite evaluar no solo interpretabilidad, sino también fidelidad real frente al predictor original.
+
+\begin{figure}[!htbp]
+  \centering
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[width=0.90\textwidth]{../imgs/dashboard/Global Explainability - Random Forest III.png}
+    \caption{\small Árboles surrogate por profundidad en Random Forest.}
+    \label{fig:dash-tree-depth-xgb}
+  \end{subfigure}
+
+  \vspace{0.5em}
+
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[width=0.90\textwidth]{../imgs/dashboard/Global Explainability - Random Forest II.png}
+    \caption{\small Regresión simbólica de Random Forest.}
+    \label{fig:dash-sr-xgb}
+  \end{subfigure}
+  \caption{\small Modelos equivalentes del Random Forest en dashboard.}
+  \label{fig:dash-equivalent-models-rf}
+\end{figure}
+
+La Figura~\ref{fig:dash-equivalent-models-rf} resume visualmente las dos aproximaciones en un único bloque para facilitar comparación directa. Sobre esa base visual, la Tabla~\ref{tab:symbolic-fidelity-all-models} cuantifica qué familias conservan mejor la fidelidad cuando se sustituyen por una expresión simbólica.
+
+
+
+\begin{table}[!htbp]
+    \centering
+    \small
+    \begin{tabular}{lrrr}
+    \toprule
+    Modelo & RMSE simbólico & MAE simbólico & \(R^2\) simbólico \\
+    \midrule
+    Regresión lineal & 0.0156 & 0.0049 & 0.8976 \\
+    Quantum Inspired NN & 0.1142 & 0.0382 & 0.5341 \\
+    Random Forest & 0.0365 & 0.0206 & 0.9402 \\
+    Sequential NN & 0.0295 & 0.0213 & 0.9168 \\
+    XGBoost & 0.0355 & 0.0238 & 0.9351 \\
+    \bottomrule
+    \end{tabular}
+    \caption{Fidelidad de regresión simbólica reportada en dashboard por familia de modelo.}
+    \label{tab:symbolic-fidelity-all-models}
+\end{table}
+
+Los modelos equivalentes explican el predictor, no la verdad de mercado. La regresión simbólica debe leerse aquí exactamente en ese sentido de surrogate y fidelidad, como se detalla en el apéndice \ref{app:symbolic-regression}. 
+
+La fidelidad de los árboles surrogate frente al Random Forest es limitada: ni siquiera profundidades altas reproducen por completo su comportamiento. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global completa. La regresión simbólica (ver Tabla \ref{tab:symbolic-fidelity-all-models}) sí ofrece en este caso una aproximación de alta fidelidad para el modelo de referencia, mientras que en otras familias la calidad del surrogate varía de forma apreciable.
+
+
+Antes de cerrar la comparación, conviene contrastar también la fidelidad de árboles surrogate por profundidad. Esa lectura completa la parte simbólica y evita sobredimensionar una única técnica de explicación.
+
+La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permiten una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
+
+
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{rrrr}
+    \toprule
+    Profundidad & RMSE fidelidad & MAE fidelidad & \(R^2\) fidelidad \\
+    \midrule
+  2 & 0.1395 & 0.0535 & 0.1291 \\
+  4 & 0.1352 & 0.0508 & 0.1815 \\
+  8 & 0.1419 & 0.0584 & 0.0986 \\
+  16 & 0.1446 & 0.0532 & 0.0637 \\
+    \bottomrule
+    \end{tabular}
+  \caption{Fidelidad de árboles surrogate frente al Random Forest.}
+    \label{tab:surrogate-rf}
+\end{table}
+
+
+\subsection{Explicabilidad local y soporte histórico}
+\label{subsec:local-results}
+
+\begin{figure}[!htbp]
+\centering
+\begin{subfigure}[t]{\textwidth}
+  \centering
+  \includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest I.png}
+  \caption{\small (Parte 1) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
+  \label{fig:dash-local-dataset-rf-xgb}
+\end{subfigure}
+
+\vspace{0.5em}
+
+\begin{subfigure}[t]{\textwidth}
+  \centering
+  \includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest II.png}
+  \caption{\small (Parte 2) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
+  \label{fig:dash-local-dataset-rf-xgb_2}
+\end{subfigure}
+\caption{\small Explicabilidad local en modo \emph{dataset} para la misma observación (ID 3018).}
+\label{fig:dash-local-dataset-rf-combined}
+\end{figure}
+
+El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones. La lógica matemática de SHAP y la semántica de valor base y contribuciones locales se desarrollan en el apéndice \ref{app:shap}.
+
+Las Figuras~\ref{fig:dash-local-dataset-rf-xgb} y~\ref{fig:dash-local-dataset-rf-xgb_2} recogen esta lectura en modo \emph{dataset} para la misma observación, separando la explicación local y el contexto de soporte histórico.
+
+Una vez fijado ese caso base, se introduce un escenario más exigente para comprobar estabilidad de la explicación cuando el contrato se desplaza hacia una zona potencialmente más sensible de la superficie.
+
+
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest III.png}
+\caption{\small Explicabilidad local en modo \emph{manual input} (stress corto vencimiento) en Random Forest: contraste de coherencia local y soporte histórico.}
+\label{fig:dash-local-manual-rf-xgb}
+\end{figure}
+
+La interpretación profesional debe combinar ambas piezas. Si una muestra tiene waterfall coherente y vecinos cercanos con volatilidades similares, la explicación es sólida. Si el waterfall parece razonable pero los vecinos están lejos, el modelo puede estar extrapolando; en ese caso, la predicción debe revisarse con diagnóstico por zonas de la superficie y superficie local. Así una explicación local es más defendible cuando se cumplen tres condiciones:
+
+La Figura~\ref{fig:dash-local-manual-rf-xgb} ilustra este contraste en modo \emph{manual input} bajo un escenario de estrés en vencimiento corto.
+
+\begin{itemize}
+  \item El signo y magnitud de las contribuciones SHAP son compatibles con la intuición financiera del caso.
+  \item Los vecinos cercanos muestran contratos, moneyness y vencimientos realmente parecidos.
+  \item El error por zonas del modelo no es anómalamente alto en esa área.
+\end{itemize}
+
+Cuando falla alguna de esas tres condiciones, la lectura debe cambiar: la explicación sigue diciendo cómo razona el modelo, pero deja de ser una justificación sólida de que la predicción sea fiable en términos de mercado.
+
+
+\section{Aplicaciones operativas y validación independiente}
+\label{sec:aplicaciones-operativas}
+
+Este apartado conecta los resultados del dashboard con usos profesionales concretos en valoración, control de riesgos y gobierno de modelos. El objetivo no es extrapolar más allá de la evidencia disponible, sino traducir lo observado en reglas de uso defendibles para un entorno de mesa de negociación y model validation. El detalle visual de sensibilidad por regiones se amplía en el Apéndice~\ref{app:sensibilidad-moneyness-vencimiento}.
+
+\subsection{Validación independiente de modelos internos}
+\label{subsec:validacion-independiente}
+
+El modelo final puede utilizarse como referencia independiente para contrastar superficies internas de valoración. En la práctica, la validación no se limita a comparar un único precio, sino que contrasta consistencia por regiones de moneyness y vencimiento. Un desacople localizado entre el pricer interno y la referencia empírica puede señalar problemas de parametrización, de datos de entrada o de régimen de mercado no recogido por el enfoque clásico.
+
+\begin{itemize}
+  \item \textbf{Nivel agregado:} contraste de RMSE/MAE y de dispersión global frente a un benchmark interno.
+  \item \textbf{Nivel por superficie:} contraste de residual heatmap y cajas de error por moneyness/vencimiento para detectar discrepancias localizadas.
+  \item \textbf{Nivel de caso:} uso de SHAP local y vecinos para justificar por qué una diferencia concreta es esperable o requiere revisión.
+\end{itemize}
+
+Este enfoque es especialmente útil cuando el área de validación necesita una segunda opinión cuantitativa que no comparta la misma familia paramétrica que el modelo interno de producción.
+
+\subsection{Interpolación y suavizado: alcance real del enfoque}
+\label{subsec:interpolacion-suavizado-alcance}
+
+La superficie se aprende de forma empírica a partir de observaciones de mercado mediante modelos supervisados. Por tanto, la ``interpolación'' se produce de forma implícita a través de la función aprendida $\hat{\sigma}(m,T,\dots)$ y se evalúa visualmente con las vistas de \emph{Behaviour And Surface} y \emph{Diagnosis}. El desglose más específico de sensibilidad por regiones de moneyness y vencimiento se recoge en el apéndice \ref{app:sensibilidad-moneyness-vencimiento}.
+
+La suavidad no se da por supuesta: se verifica. Si aparecen escalones locales o concentraciones de error en zonas concretas, el resultado se interpreta como limitación del modelo en esa región, no como propiedad financiera del mercado. Esta distinción es clave para no confundir capacidad predictiva local con una estructura de superficie económicamente robusta.
+
+\subsection{Detección de anomalías de precio y errores de mercado}
+\label{subsec:anomalias-precio-mercado}
+
+La detección de anomalías se construye en dos capas complementarias. La primera está en el ETL, con controles de calidad (precios y cantidades válidas, coherencia temporal opción-subyacente, resolución numérica estable de volatilidad implícita). La segunda está en diagnóstico posterior, donde los residuales por zona de superficie permiten localizar trades atípicos en extremos de moneyness o vencimientos cortos. El detalle estructural del ETL está desarrollado en el apéndice \ref{app:data-structures} y la lectura regional del error en el apéndice \ref{app:sensibilidad-moneyness-vencimiento}.
+
+En términos operativos, una anomalía no se define solo por error alto puntual, sino por contexto: error alto junto con baja densidad de vecinos, geometría local inestable o incoherencia entre explicación local y patrón global. Esta lectura mejora la utilidad del modelo como filtro de revisión manual.
+
+\subsection{Valoración de ilíquidas, control de mesa de negociación, auditoría y cobertura}
+\label{subsec:uso-operativo-derivados}
+
+Las aplicaciones más exigentes se apoyan en la misma secuencia de lectura: diagnóstico por zonas, contraste funcional de superficie y justificación local. Con ese flujo, el modelo aporta soporte en cuatro frentes conectados:
+
+\begin{itemize}
+  \item \textbf{Valoración de opciones ilíquidas o poco negociadas:} cuando no hay suficiente señal transaccional directa, la predicción basada en superficie y vecinos históricos ofrece una referencia empírica utilizable, con cautela reforzada en extremos.
+  \item \textbf{Control de riesgos de mesa de derivados:} la lectura por moneyness y vencimiento permite identificar dónde el error puede contaminar griegas, escenarios o límites de riesgo más que la media global.
+  \item \textbf{Explicación ante auditoría interna/model validation:} SHAP global/local, trazabilidad de pipeline y evidencias por superficie permiten defender decisiones de modelo con base reproducible.
+  \item \textbf{Soporte a decisiones de cobertura:} la geometría smile/term-structure más el diagnóstico local aportan contexto para priorizar coberturas en zonas de mayor sensibilidad o menor soporte histórico.
+\end{itemize}
+
+
+\section{Discusión}
+\label{sec:discusion}
+
+La pregunta planteada en \autoref{sec:planteamiento} puede responderse afirmativamente con matices. Sí es posible construir un modelo útil y consultable para volatilidad implícita de opciones del IBEX. El matiz es que la explicación no puede descansar en un único resumen global: la fidelidad de modelos equivalentes simples es limitada, y la defensa técnica debe combinar SHAP, superficies, ICE/ALE, vecinos y diagnóstico. Los fundamentos de SHAP, ALE y regresión simbólica que sostienen esta lectura se amplían en los apéndice \ref{app:shap}, apéndice \ref{app:ale} y apéndice \ref{app:symbolic-regression}.
+
+\subsection{Lectura financiera}
+\label{subsec:discusion-financiera}
+
+Financieramente, el proyecto trata la volatilidad como superficie y no como serie unidimensional. El buen RMSE agregado es relevante, pero el dato más importante para gestión de riesgos es dónde se produce el error. La compresión de volatilidades extremas sugiere que deben revisarse los extremos de moneyness y los vencimientos cortos con más cuidado. Este comportamiento es plausible en derivados: esas zonas suelen tener menos liquidez, más ruido de microestructura y mayor sensibilidad al desfase entre opción y futuro subyacente.
+
+\begin{itemize}
+  \item El modelo final es útil para lectura agregada y consulta, pero no debe tratarse como atajo automático del juicio financiero en zonas extremas.
+  \item La geometría de la superficie sigue siendo el criterio principal de plausibilidad: smiles, term structures y suavidad local importan tanto como el error medio.
+  \item La lectura de vecinos y soporte histórico es especialmente valiosa cuando se analiza un contrato poco líquido o lejano de ATM.
+\end{itemize}
+
+En otras palabras, el trabajo refuerza una idea clásica en derivados: el resultado útil no es un único número, sino una predicción situada dentro de una estructura de superficie, de un contexto de mercado y de una evidencia histórica comparable.
+
+También conviene subrayar una implicación práctica. Cuando el modelo se usa como apoyo a valoración o revisión manual, la pregunta correcta no es solo si ``acierta de media'', sino si conserva lógica financiera en la zona concreta que se está consultando. Esa exigencia explica por qué el documento dedica espacio a smiles, extremos de moneyness, vencimientos cortos y soporte local, y no solo a tablas globales de error. Esta lectura aplicada se concreta en la Sección~\ref{sec:aplicaciones-operativas} y se refuerza con el apéndice de sensibilidad por regiones de superficie (\ref{app:sensibilidad-moneyness-vencimiento}).
+
+\subsubsection*{Aportación frente a enfoques clásicos.}
+
+La comparación con enfoques clásicos debe plantearse como complementariedad y mejora operativa, no como sustitución automática. Los enfoques paramétricos aportan estructura financiera explícita y son valiosos para gobernanza. La propuesta de este trabajo añade valor en escenarios donde esa estructura no basta por sí sola:
+
+\begin{itemize}
+  \item \textbf{Mayor flexibilidad empírica:} captura interacciones no lineales entre moneyness, vencimiento, subyacente y tipo con menor rigidez funcional.
+  \item \textbf{Mejor lectura por zonas:} añade diagnóstico de error por región de superficie, clave para contratos ilíquidos o extremos de moneyness.
+  \item \textbf{Validación cruzada de pricing:} permite contrastar salidas de modelos clásicos internos con una referencia empírica independiente.
+\end{itemize}
+
+
+
+\subsection{Limitaciones}
+\label{subsec:limitaciones}
+
+Las limitaciones se agrupan en cuatro bloques. 
+
+\begin{enumerate}
+    \item La volatilidad implícita depende de la calidad del enlace opción-subyacente y del solver Black-76. 
+    \item El conjunto de datos es heterogéneo en liquidez y cobertura de moneyness/vencimiento, por lo que los extremos deben diagnosticarse localmente. No toda región del espacio de entrada tiene la misma densidad histórica ni la misma calidad de soporte.
+    \item La explicabilidad aproxima comportamientos del modelo y no sustituye validación económica. Un modelo explicable sigue pudiendo estar equivocado si aprende sesgos sistemáticos de los datos.
+    \item El despliegue cloud exige disciplina de versionado para evitar inconsistencias entre modelos, paquetes de dashboard y metadatos.
+\end{enumerate}
+
+

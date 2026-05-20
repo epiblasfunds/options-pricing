@@ -1,0 +1,7 @@
+flowchart TD
+    A[Ejecutar ETL] --> B[Entrenar familias]
+    B --> C[Reentrenar mejor modelo final]
+    C --> D[Generar bundle dashboard]
+    D --> E[Validar dashboard local]
+    D --> F[Subir artefactos opcionalmente]
+    F --> G[Desplegar API y dashboard]

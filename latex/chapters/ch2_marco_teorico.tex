@@ -1,0 +1,177 @@
+
+\chapter{Marco Teórico}
+\label{chap:marco}
+
+\section{Opciones, futuros y volatilidad implícita}
+\label{sec:opciones-vol}
+
+Una opción financiera otorga a su comprador el derecho, pero no la obligación, de comprar o vender un activo subyacente a un precio de ejercicio \(K\) en una fecha futura. En el caso de opciones sobre futuros, el subyacente relevante para valoración es el precio del futuro \(F\). La literatura de derivados enfatiza que el valor de una opción depende de la distribución esperada del subyacente y, de forma operativa, de la volatilidad usada en el modelo de valoración \citep{hull2022options}.
+
+En el modelo Black-76, una call europea sobre un futuro se valora como:
+
+\begin{equation}
+C = e^{-rT}\left(FN(d_1)-KN(d_2)\right),
+\label{eq:black76-call}
+\end{equation}
+
+donde
+
+\begin{equation}
+d_1 = \frac{\ln(F/K)+\frac{1}{2}\sigma^2T}{\sigma\sqrt{T}},
+\qquad
+d_2 = d_1-\sigma\sqrt{T}.
+\label{eq:black76-d}
+\end{equation}
+
+Para una put:
+
+\begin{equation}
+P = e^{-rT}\left(KN(-d_2)-FN(-d_1)\right).
+\label{eq:black76-put}
+\end{equation}
+
+En estas expresiones, \(r\) es el tipo de interés, \(T\) el tiempo a vencimiento en años, \(\sigma\) la volatilidad y \(N(\cdot)\) la función de distribución normal estándar. La volatilidad implícita \(\sigma_{imp}\) es el valor de \(\sigma\) que iguala el precio teórico al precio observado en mercado:
+
+\begin{equation}
+P_{mercado}=P_{Black76}(F,K,T,r,\sigma_{imp}).
+\label{eq:iv-inversion}
+\end{equation}
+
+La ecuación \eqref{eq:iv-inversion} no se puede resolver en forma cerrada en general; se obtiene mediante métodos numéricos. En el proyecto se emplea bisección dentro de límites configurados, descartando filas no resolubles o no finitas.
+
+\textbf{Para el proyecto, esta formulación tiene varias implicaciones directas.}
+
+\begin{itemize}
+  \item La calidad de la volatilidad implícita depende de la calidad del precio de opción y del emparejamiento con el futuro subyacente.
+  \item El tiempo a vencimiento no es un mero metadato: entra de forma no lineal a través de \(\sqrt{T}\), por lo que errores en fechas o vencimientos contaminan la variable objetivo.
+  \item El tipo de interés afecta tanto al descuento como a la construcción de variables derivadas basadas en el forward ajustado.
+  \item Calls y puts comparten el mismo concepto de volatilidad implícita, pero pueden situarse en zonas distintas de la superficie y, por tanto, inducir respuestas diferentes en el modelo.
+\end{itemize}
+
+Por eso la memoria no trata la volatilidad implícita como una etiqueta estadística cualquiera. Antes de entrenar ningún modelo, la variable objetivo debe quedar bien definida desde el punto de vista financiero y bajo un procedimiento numérico reproducible.
+
+\section{Smile, moneyness y estructura temporal}
+\label{sec:smile}
+
+Si la volatilidad fuese constante, opciones con distinto strike y vencimiento compartirían una misma \(\sigma\). En mercados reales aparece una superficie de volatilidad:
+
+\begin{equation}
+\sigma_{imp} = \sigma(K,T),
+\label{eq:surface}
+\end{equation}
+
+o, de forma más comparable entre niveles de mercado:
+
+\begin{equation}
+\sigma_{imp} = \sigma(m,T),
+\qquad
+m=\frac{F}{K}.
+\label{eq:moneyness}
+\end{equation}
+
+El moneyness \(m\) indica la posición relativa del subyacente frente al strike. Su transformación logarítmica,
+
+\begin{equation}
+\ell=\log(F/K),
+\label{eq:logmoneyness}
+\end{equation}
+
+es especialmente útil porque centra la región ATM en \(\ell=0\) y trata de forma más simétrica las zonas a ambos lados del strike. La literatura sobre smile subraya que la curvatura y pendiente de la volatilidad implícita contienen información sobre expectativas de mercado, asimetría y demanda de cobertura \citep{derman2016volatility}. Trabajos más recientes muestran además que los movimientos de la superficie pueden modelarse explícitamente a partir del retorno del subyacente, el moneyness y la vida restante mediante redes neuronales \citep{cao2019neural}.
+
+\textbf{En la práctica, esta superficie se lee a través de varios patrones.}
+
+\begin{itemize}
+  \item \textbf{Smile o skew:} describe cómo cambia la volatilidad implícita al alejarse de ATM.
+  \item \textbf{Estructura temporal:} muestra cómo cambia la volatilidad con el vencimiento para una región dada de moneyness.
+  \item \textbf{Interacción entre ambas:} la curvatura del smile no tiene por qué ser la misma en corto plazo que en vencimientos largos.
+\end{itemize}
+
+Esta lectura geométrica justifica el diseño posterior de variables y visualizaciones. Si el fenómeno financiero se organiza en torno a moneyness y vencimiento, es razonable que el feature engineering, la validación y los gráficos de comportamiento del modelo se construyan también alrededor de esas magnitudes.
+
+\section{Aprendizaje automático para volatilidad}
+\label{sec:ml-vol}
+
+El problema de modelización se formula como una regresión supervisada:
+
+\begin{equation}
+\hat{\sigma}=f(X),
+\label{eq:modelo-general}
+\end{equation}
+
+donde \(X\) contiene variables financieras observables y transformadas. La literatura reciente ha explorado redes neuronales no solo para aproximar precios de opciones, sino también para acelerar el cálculo de volatilidades implícitas y tareas de calibración asociadas \citep{liu2019pricing}. El proyecto compara familias con diferentes niveles de flexibilidad:
+
+\begin{itemize}
+  \item Regresión lineal, como baseline interpretable y control de complejidad.
+  \item Random Forest, basado en agregación de árboles para capturar interacciones no lineales \citep{breiman2001random}.
+  \item XGBoost, como boosting regularizado con early stopping y buen rendimiento en datos tabulares \citep{chen2016xgboost}.
+  \item Redes neuronales densas, como aproximadores flexibles de funciones no lineales \citep{hornik1989multilayer}.
+  \item Una red neuronal clásica \emph{quantum inspired}, que introduce una estructura tensorial inspirada en ideas de representación compacta y redes tensoriales para aprendizaje supervisado \citep{stoudenmire2016supervised,novikov2015tensorizing}. No se presenta como computación cuántica real, sino como una variante arquitectónica implementada en código. Su desarrollo conceptual y arquitectónico se amplía en el apéndice \ref{app:quantum-inspired}.
+\end{itemize}
+
+La comparación no puede basarse solo en error medio. En datos financieros temporales, una evaluación mal planteada puede introducir fuga de información. Por ello se emplean splits temporales, control de contratos compartidos y k-folds temporales, tal como se desarrolla en el \autoref{sec:validacion}.
+
+
+\section{Explicabilidad en modelos financieros}
+\label{sec:xai}
+
+La explicabilidad cumple una función técnica y una función de gobierno de modelos. Técnicamente, permite detectar variables dominantes, discontinuidades, extrapolaciones y errores locales. Profesionalmente, facilita responder por qué una predicción se considera razonable y en qué condiciones no debería confiarse en ella. En el ámbito financiero, esta necesidad se ha reforzado con trabajos recientes que estructuran la explicabilidad alrededor de transparencia, interpretabilidad y accountability, y que además la conectan con documentación, validación y revisión independiente \citep{solaimani2025beyond,perezcruz2025managing}.
+
+SHAP descompone la predicción de un modelo en un valor base y contribuciones por variable:
+
+\begin{equation}
+\hat{\sigma}(x)=\phi_0+\sum_{j=1}^{p}\phi_j(x),
+\label{eq:shap-additive_}
+\end{equation}
+
+donde \(\phi_j\) mide la contribución atribuida a la característica \(j\) \citep{lundberg2017unified}. En este proyecto se complementa con ICE, ALE, árboles surrogate, regresión simbólica y vecinos históricos. La razón es que ninguna herramienta por sí sola responde todas las preguntas relevantes: SHAP explica contribuciones, ICE muestra trayectorias individuales, ALE estima efectos acumulados locales, los modelos surrogate dan reglas aproximadas y los vecinos informan sobre soporte local. Los fundamentos formales de SHAP se desarrollan en el apéndice \ref{app:shap}, el detalle operativo de ALE en el apéndice \ref{app:ale} y la lectura de la regresión simbólica como surrogate en el apéndice \ref{app:symbolic-regression}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Métricas de error, estabilidad y fidelidad}
+\label{sec:metricas-teoria}
+
+La evaluación de un modelo de volatilidad requiere métricas complementarias. El error absoluto medio,
+
+\begin{equation}
+MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|,
+\label{eq:mae}
+\end{equation}
+
+ofrece una lectura directa en unidades de volatilidad. Es robusto y fácil de comunicar, pero no penaliza de forma diferencial los errores grandes. Por ese motivo se utiliza también RMSE:
+
+\begin{equation}
+RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}.
+\label{eq:rmse}
+\end{equation}
+
+El RMSE es especialmente relevante en model validation porque amplifica errores extremos. En una superficie de volatilidad, esos errores pueden aparecer en vencimientos cortos, extremos de moneyness o zonas con menor liquidez. El coeficiente de determinación,
+
+\begin{equation}
+R^2 = 1-\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{\sum_{i=1}^{n}(y_i-\bar{y})^2},
+\label{eq:r2}
+\end{equation}
+
+resume proporción de variabilidad explicada, aunque debe interpretarse con prudencia en datos financieros heterogéneos.
+
+Junto a estas métricas frente a mercado, el dashboard usa métricas de fidelidad para modelos explicables equivalentes. La fidelidad compara el surrogate con el modelo principal, no con la volatilidad real. Esta distinción es importante: un árbol surrogate puede ser muy fiel a un modelo sesgado, y un modelo principal puede tener buen RMSE pero ser difícil de resumir con reglas simples. Por tanto, la evaluación final debe combinar tres planos: precisión frente a mercado, estabilidad del proceso de selección y fidelidad de las explicaciones.
+
+
+\section{Gobierno de modelos y preguntas de validación}
+\label{sec:gobierno-modelos}
+
+En un entorno financiero, un modelo de volatilidad debería poder responder a preguntas de model validation. Algunas son cuantitativas: cuál es el error fuera de muestra, si existe gap entre entrenamiento y validación, si el error cambia por vencimiento o moneyness, y si el resultado es estable entre folds. Otras son cualitativas pero igualmente relevantes: si el modelo reacciona de forma razonable ante cambios de strike, si produce superficies suaves donde el mercado debería ser continuo, si una predicción manual se encuentra dentro de una región observada o si el predictor depende excesivamente de una variable que no debería dominar.
+
+El diseño del proyecto convierte esas preguntas en vistas concretas del dashboard. 
+\begin{itemize}
+    \item \textit{La pestaña de diagnóstico} responde dónde falla. 
+    \item \textit{La pestaña de superficie} responde cómo se comporta como función financiera. 
+    \item \textit{La explicabilidad global} responde qué variables tienen mayor influencia en las predicciones del modelo. 
+    \item \textit{La pestaña explicabilidad local} responde por qué una muestra concreta obtiene un valor determinado y si existen observaciones históricas cercanas.
+\end{itemize}
+
+Esto evita que una única visualización condicione toda la interpretación. En un entorno de derivados, la confianza en una predicción surge de la coherencia entre varias vistas, no de una sola gráfica llamativa o de una única métrica sintética.
+
+

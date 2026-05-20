@@ -1,3 +1,5 @@
+from sklearn.metrics import r2_score
+
 from src.dashboard.services.shared.feature_schema import (
     FeatureDefinition,
     FeatureSchema,
@@ -14,12 +16,7 @@ from src.model2dashboard.features import VISIBLE_RAW_INPUT_FEATURE_NAMES
 
 
 def _r2_score(y_true, y_pred) -> float:
-    residual_sum = float(((y_true - y_pred) ** 2).sum())
-    centered = y_true - y_true.mean()
-    total_sum = float((centered**2).sum())
-    if total_sum == 0.0:
-        return 0.0
-    return 1.0 - residual_sum / total_sum
+    return float(r2_score(y_true, y_pred, force_finite=True))
 
 
 def build_feature_schema() -> FeatureSchema:

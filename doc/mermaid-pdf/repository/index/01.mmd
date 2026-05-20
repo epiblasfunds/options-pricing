@@ -1,0 +1,15 @@
+flowchart TD
+    R[resources/*.json] --> C[src/config]
+    C --> D[src/data_management]
+    C --> M[src/volatility_models]
+    C --> P[src/python_models]
+    C --> B[src/model2dashboard]
+    C --> UI[src/dashboard]
+    C --> API[src/api]
+    D --> DATA[data/]
+    M --> TM[src/volatility_models/trained_models]
+    M --> META[src/volatility_models/trained_metadata]
+    B --> SM[src/dashboard/saved_models]
+    SM --> UI
+    TM --> API
+    SM --> API

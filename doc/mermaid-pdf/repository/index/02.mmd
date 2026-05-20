@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant JSON as resources
+    participant CFG as src/config
+    participant ETL as src/data_management
+    participant TR as src/volatility_models
+    participant PY as src/python_models
+    participant EXP as src/model2dashboard
+    participant DASH as src/dashboard
+    JSON->>CFG: carga declarativa de parámetros
+    CFG->>ETL: rutas, esquemas y umbrales
+    ETL->>ETL: genera bases por pasos
+    ETL->>TR: entrega VOLATILITY_DB
+    TR->>PY: instancia familias de modelos
+    PY->>TR: devuelve modelos entrenados
+    TR->>EXP: modelos finales y metadatos
+    EXP->>DASH: bundles explicables
+    DASH->>DASH: visualización interactiva
