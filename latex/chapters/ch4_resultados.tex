@@ -119,23 +119,34 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
 \subsection{Modelos equivalentes: árboles y regresión simbólica}
 \label{subsec:equivalent-results}
 
+Este bloque combina dos perspectivas complementarias sobre explicabilidad global del modelo final. Primero se muestran reglas aproximadas mediante árboles surrogate; después, una ecuación compacta obtenida por regresión simbólica. La comparación entre ambas permite evaluar no solo interpretabilidad, sino también fidelidad real frente al predictor original.
+
 \begin{figure}[!htbp]
+  \centering
+  \begin{subfigure}[t]{\textwidth}
     \centering
-  \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Random Forest III.png}
-  \caption{\small Árboles surrogate por profundidad en Random Forest.}
+    \includegraphics[width=0.90\textwidth]{../imgs/dashboard/Global Explainability - Random Forest III.png}
+    \caption{\small Árboles surrogate por profundidad en Random Forest.}
     \label{fig:dash-tree-depth-xgb}
-\end{figure}
+  \end{subfigure}
 
-\begin{figure}[!htbp]
+  \vspace{0.5em}
+
+  \begin{subfigure}[t]{\textwidth}
     \centering
-  \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Random Forest II.png}
-  \caption{\small Regresión simbólica de Random Forest.}
+    \includegraphics[width=0.90\textwidth]{../imgs/dashboard/Global Explainability - Random Forest II.png}
+    \caption{\small Regresión simbólica de Random Forest.}
     \label{fig:dash-sr-xgb}
+  \end{subfigure}
+  \caption{\small Modelos equivalentes del Random Forest en dashboard.}
+  \label{fig:dash-equivalent-models-rf}
 \end{figure}
 
+La Figura~\ref{fig:dash-equivalent-models-rf} resume visualmente las dos aproximaciones en un único bloque para facilitar comparación directa. Sobre esa base visual, la Tabla~\ref{tab:symbolic-fidelity-all-models} cuantifica qué familias conservan mejor la fidelidad cuando se sustituyen por una expresión simbólica.
 
 
-\begin{table}[htbp]
+
+\begin{table}[!htbp]
     \centering
     \small
     \begin{tabular}{lrrr}
@@ -157,6 +168,8 @@ Los modelos equivalentes explican el predictor, no la verdad de mercado. La regr
 
 La fidelidad de los árboles surrogate frente al Random Forest es limitada: ni siquiera profundidades altas reproducen por completo su comportamiento. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global completa. La regresión simbólica (ver Tabla \ref{tab:symbolic-fidelity-all-models}) sí ofrece en este caso una aproximación de alta fidelidad para el modelo de referencia, mientras que en otras familias la calidad del surrogate varía de forma apreciable.
 
+
+Antes de cerrar la comparación, conviene contrastar también la fidelidad de árboles surrogate por profundidad. Esa lectura completa la parte simbólica y evita sobredimensionar una única técnica de explicación.
 
 La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permiten una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
 
@@ -185,28 +198,36 @@ La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest I.png}
-\caption{\small (Parte 1) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
-\label{fig:dash-local-dataset-rf-xgb}
-\end{figure}
+\begin{subfigure}[t]{\textwidth}
+  \centering
+  \includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest I.png}
+  \caption{\small (Parte 1) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
+  \label{fig:dash-local-dataset-rf-xgb}
+\end{subfigure}
 
+\vspace{0.5em}
 
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest II.png}
-\caption{\small (Parte 2) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
-\label{fig:dash-local-dataset-rf-xgb_2}
+\begin{subfigure}[t]{\textwidth}
+  \centering
+  \includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest II.png}
+  \caption{\small (Parte 2) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
+  \label{fig:dash-local-dataset-rf-xgb_2}
+\end{subfigure}
+\caption{\small Explicabilidad local en modo \emph{dataset} para la misma observación (ID 3018).}
+\label{fig:dash-local-dataset-rf-combined}
 \end{figure}
 
 El análisis local debe seleccionar una muestra representativa y una muestra problemática. Para cada una, el waterfall SHAP explica la predicción como suma de valor base y contribuciones. Los vecinos históricos, calculados contra train en el espacio transformado y estandarizado, indican si la muestra está dentro de una región conocida. En el paquete se guardan hasta 200 vecinos por muestra, usando una referencia de entrenamiento de hasta 20.000 observaciones. La lógica matemática de SHAP y la semántica de valor base y contribuciones locales se desarrollan en el apéndice \ref{app:shap}.
 
 Las Figuras~\ref{fig:dash-local-dataset-rf-xgb} y~\ref{fig:dash-local-dataset-rf-xgb_2} recogen esta lectura en modo \emph{dataset} para la misma observación, separando la explicación local y el contexto de soporte histórico.
 
+Una vez fijado ese caso base, se introduce un escenario más exigente para comprobar estabilidad de la explicación cuando el contrato se desplaza hacia una zona potencialmente más sensible de la superficie.
+
 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest III.png}
+\includegraphics[width=0.89\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest III.png}
 \caption{\small Explicabilidad local en modo \emph{manual input} (stress corto vencimiento) en Random Forest: contraste de coherencia local y soporte histórico.}
 \label{fig:dash-local-manual-rf-xgb}
 \end{figure}
