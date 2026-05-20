@@ -18,7 +18,7 @@ Modelo & Entrenamiento & MAE test & RMSE test & \(R^2\) test \\
 Regresión lineal & estándar & 0.067585 & 0.183824 & 0.096059  \\
 Random Forest & estándar & 0.054366 & 0.088403 & 0.790941  \\
 XGBoost & estándar & 0.054555 & 0.091642 & 0.77534  \\
-Red neuronal secuencial & estándar & 0.056104 & 0.122067 & 0.601406  \\
+Red neuronal secuencial & estándar & 0.055422 & 0.120559 & 0.611195  \\
 Quantum Inspired NN & estándar & 0.056056 & 0.143025 & 0.452784  \\
 \bottomrule
 \end{tabular}
@@ -26,7 +26,7 @@ Quantum Inspired NN & estándar & 0.056056 & 0.143025 & 0.452784  \\
 \label{tab:resultados-modelos}
 \end{table}
 
-La Tabla~\ref{tab:resultados-modelos} muestra que los métodos de árboles obtienen los mejores resultados. Random Forest lidera con RMSE = 0.0884 y \(R^2\) = 0.7909, explicando aproximadamente el 79\% de la variabilidad de volatilidad implícita. XGBoost es competitivo con RMSE = 0.0916 y \(R^2\) = 0.7753, apenas 0.3\% de diferencia relativa en RMSE. En contraste, la brecha hacia las redes neuronales es pronunciada: Sequential NN alcanza RMSE = 0.1221 (\(R^2\) = 0.6014) y Quantum Inspired NN degrada a RMSE = 0.1430 (\(R^2\) = 0.4528). La regresión lineal es casi inutilizable con RMSE = 0.1838 (\(R^2\) = 0.0961), confirmando que la volatilidad implícita depende de interacciones no lineales complejas entre variables financieras. La superioridad de los métodos basados en árboles (Random Forest y XGBoost) respecto a arquitecturas más simples o menos robustas es clara y cuantitativamente sólida en el conjunto final de test.
+La Tabla~\ref{tab:resultados-modelos} muestra que los métodos de árboles obtienen los mejores resultados. Random Forest lidera con RMSE = 0.0884 y \(R^2\) = 0.7909, explicando aproximadamente el 79\% de la variabilidad de volatilidad implícita. XGBoost es competitivo con RMSE = 0.0916 y \(R^2\) = 0.7753, pero queda por detrás con una diferencia relativa cercana al 3.7\% en RMSE. En contraste, la brecha hacia las redes neuronales sigue siendo relevante: Sequential NN alcanza RMSE = 0.1206 (\(R^2\) = 0.6112) y Quantum Inspired NN degrada a RMSE = 0.1430 (\(R^2\) = 0.4528). La regresión lineal es casi inutilizable con RMSE = 0.1838 (\(R^2\) = 0.0961), confirmando que la volatilidad implícita depende de interacciones no lineales complejas entre variables financieras. La superioridad de los métodos basados en árboles (Random Forest y XGBoost) respecto a arquitecturas más simples o menos robustas es clara y cuantitativamente sólida en el conjunto final de test.
 
 \Needspace{12\baselineskip}
 
@@ -43,7 +43,7 @@ Familia & RMSE & RMSE ATM & \(\Delta\) & Lectura \\
 Regresión lineal & 0.183824 & 0.187747 & +0.003923 & Empeora levemente. \\
 Random Forest & 0.088403 & 0.088533 & +0.000130 & Prácticamente neutro. \\
 XGBoost & 0.091642 & 0.113296 & +0.021654 & Degrada test. \\
-Red neuronal secuencial & 0.122067 & 0.120108 & -0.001959 & Mejora levemente. \\
+Red neuronal secuencial & 0.120559 & 0.120108 & -0.000451 & Mejora levemente. \\
 Quantum Inspired NN & 0.143025 & 0.117404 & -0.025621 & Mejora clara. \\
 \bottomrule
 \end{tabularx}
@@ -58,13 +58,13 @@ La conclusión práctica es clara: progressive ATM debe tratarse como variante e
 \subsection{Modelo de referencia}
 \label{subsec:modelo-final}
 
-Para interpretar de forma consistente las pantallas del dashboard que vienen a continuación, conviene fijar un único modelo de referencia. En este trabajo, ese modelo es XGBoost:
+Para interpretar de forma consistente las pantallas del dashboard que vienen a continuación, conviene fijar un único modelo de referencia. En este trabajo, ese modelo es Random Forest:
 \begin{itemize}
-  \item Desempeño en test muy notable, quedando muy cercano al mejor desempeño entre todas las familias.
-  \item Los modelos de regresión simbólica y árboles de decisión consiguen explicar el modelo mejor que al resto de familias: $RMSE=0.0378$, $MAE=0.0219$, $R^2=0.9264$. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
+  \item Es el mejor modelo en test entre todas las familias evaluadas, con $RMSE=0.088403$, $MAE=0.054366$ y $R^2=0.790941$.
+  \item Presenta una fidelidad simbólica alta en dashboard ($RMSE=0.0365$, $MAE=0.0206$, $R^2=0.9402$), lo que permite mantener capacidad explicativa operativa junto con el mejor rendimiento predictivo agregado. La formulación e interpretación de la regresión simbólica como modelo sustituto se desarrollan en el apéndice \ref{app:symbolic-regression}.
 \end{itemize}
 
-En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa.
+En resumen, la elección de Random Forest responde al mejor equilibrio entre rendimiento predictivo y capacidad de explicación operativa en el estado actual de entrenamiento.
 
 \subsection{Diagnóstico de rendimiento}
 \label{subsec:diagnostico-rendimiento}
@@ -72,8 +72,8 @@ En resumen, la elección de XGBoost responde al mejor equilibrio entre rendimien
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Diagnosis - Xgboost.png}
-\caption{\small \emph{Diagnosis} en XGBoost.}
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\caption{\small \emph{Diagnosis} en Random Forest.}
 \label{fig:dash-diagnosis-comparison}
 \end{figure}
 
@@ -87,14 +87,14 @@ El modelo final debe leerse como función financiera, no solo como tabla de erro
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Behaviour And Surface - Xgboost II.png}
-\caption{\small \emph{Behaviour And Surface} de XGBoost.}
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Behaviour And Surface - Random Forest II.png}
+\caption{\small \emph{Behaviour And Surface} de Random Forest.}
 \label{fig:dash-behaviour-best-models-id1406}
 \end{figure}
 
 La lectura recomendada es usar al menos tres puntos de referencia: una observación ATM líquida, una observación en extremos de moneyness y una observación de vencimiento corto. Si el dashboard muestra saltos alrededor de un punto, la explicación debe cruzarse con vecinos y residual heatmap antes de atribuirlo a señal financiera. Si el smile es suave y el error local bajo, la predicción es más defendible.
 
-La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smile y term-structure de XGBoost mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fijo).
+La Figura~\ref{fig:dash-behaviour-best-models-id1406} muestra que las curvas smile y term-structure de Random Forest mantienen forma financiera interpretable (mínimo en entorno ATM y descenso de volatilidad al aumentar vencimiento para moneyness fijo).
 
 
 
@@ -105,8 +105,8 @@ La explicación global debe comprobar que los drivers principales son coherentes
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Global Explainability - Xgboost I.png}
-\caption{\small SHAP global XGBoost.}
+\includegraphics[width=0.8\textwidth]{../imgs/dashboard/Global Explainability - Random Forest I.png}
+\caption{\small SHAP global Random Forest.}
 \label{fig:dash-global-shap-comparison}
 \end{figure}
 
@@ -121,15 +121,15 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Xgboost III.png}
-    \caption{\small Árboles surrogate por profundidad en  XGBoost.}
+  \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Random Forest III.png}
+  \caption{\small Árboles surrogate por profundidad en Random Forest.}
     \label{fig:dash-tree-depth-xgb}
 \end{figure}
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Xgboost II.png}
-    \caption{\small Regresión simbólica del XGBoost.}
+  \includegraphics[width=0.9\textwidth]{../imgs/dashboard/Global Explainability - Random Forest II.png}
+  \caption{\small Regresión simbólica de Random Forest.}
     \label{fig:dash-sr-xgb}
 \end{figure}
 
@@ -142,11 +142,11 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
     \toprule
     Modelo & RMSE simbólico & MAE simbólico & \(R^2\) simbólico \\
     \midrule
-    Regresión lineal & 0.0244 & 0.0135 & 0.7585 \\
-    Quantum Inspired NN & inf & inf & -inf \\
-    Random Forest & 339.9547 & 3.5845 & -5,173,729.5872 \\
-    Sequential NN & 0.0376 & 0.0316 & 0.8880 \\
-    XGBoost & 0.0378 & 0.0219 & 0.9264 \\
+    Regresión lineal & 0.0156 & 0.0049 & 0.8976 \\
+    Quantum Inspired NN & 0.1142 & 0.0382 & 0.5341 \\
+    Random Forest & 0.0365 & 0.0206 & 0.9402 \\
+    Sequential NN & 0.0295 & 0.0213 & 0.9168 \\
+    XGBoost & 0.0355 & 0.0238 & 0.9351 \\
     \bottomrule
     \end{tabular}
     \caption{Fidelidad de regresión simbólica reportada en dashboard por familia de modelo.}
@@ -155,7 +155,7 @@ En las cinco variantes revisadas, y para lo que se visualiza en dashboard, la je
 
 Los modelos equivalentes explican el predictor, no la verdad de mercado. La regresión simbólica debe leerse aquí exactamente en ese sentido de surrogate y fidelidad, como se detalla en el apéndice \ref{app:symbolic-regression}. 
 
-La fidelidad de los árboles es limitada: ni siquiera profundidades altas reproducen bien el comportamiento completo del XGBoost. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global. La regresión simbólica (ver Tabla \ref{tab:symbolic-fidelity-all-models}) generada para este paquete muestra métricas no utilizables para defensa del Random Forest ni del Quantum Inspired NN, con métricas de fidelidad extremadamente deficientes; por tanto, el modelo más fiable que obtenemos es el XGBoost.
+La fidelidad de los árboles surrogate frente al Random Forest es limitada: ni siquiera profundidades altas reproducen por completo su comportamiento. Esto no invalida el modelo principal, pero sí limita el uso de reglas simples como explicación global completa. La regresión simbólica (ver Tabla \ref{tab:symbolic-fidelity-all-models}) sí ofrece en este caso una aproximación de alta fidelidad para el modelo de referencia, mientras que en otras familias la calidad del surrogate varía de forma apreciable.
 
 
 La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto con la Tabla~\ref{tab:surrogate-rf} y la Tabla~\ref{tab:symbolic-fidelity-all-models}, permiten una conclusión transversal: la facilidad para explicar un modelo mediante reglas o fórmulas compactas no coincide necesariamente con su capacidad predictiva final en test.
@@ -169,13 +169,13 @@ La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto
     \toprule
     Profundidad & RMSE fidelidad & MAE fidelidad & \(R^2\) fidelidad \\
     \midrule
-    2 & 0.1303 & 0.0528 & 0.1262 \\
-    4 & 0.1266 & 0.0504 & 0.1750 \\
-    8 & 0.1325 & 0.0566 & 0.0963 \\
-    16 & 0.1290 & 0.0434 & 0.1438 \\
+  2 & 0.1395 & 0.0535 & 0.1291 \\
+  4 & 0.1352 & 0.0508 & 0.1815 \\
+  8 & 0.1419 & 0.0584 & 0.0986 \\
+  16 & 0.1446 & 0.0532 & 0.0637 \\
     \bottomrule
     \end{tabular}
-    \caption{Fidelidad de árboles surrogate frente al XGBoost.}
+  \caption{Fidelidad de árboles surrogate frente al Random Forest.}
     \label{tab:surrogate-rf}
 \end{table}
 
@@ -185,16 +185,16 @@ La Figura~\ref{fig:dash-tree-depth-xgb} y la Figura~\ref{fig:dash-sr-xgb}, junto
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Xgboost I.png}
-\caption{\small (Parte 1) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 465) con XGBoost.}
+\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest I.png}
+\caption{\small (Parte 1) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
 \label{fig:dash-local-dataset-rf-xgb}
 \end{figure}
 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Xgboost II.png}
-\caption{\small (Parte 2) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 465) con XGBoost.}
+\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest II.png}
+\caption{\small (Parte 2) Explicabilidad local en modo \emph{dataset} para la misma muestra (ID 3018) con Random Forest.}
 \label{fig:dash-local-dataset-rf-xgb_2}
 \end{figure}
 
@@ -206,8 +206,8 @@ Las Figuras~\ref{fig:dash-local-dataset-rf-xgb} y~\ref{fig:dash-local-dataset-rf
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Xgboost III.png}
-\caption{\small Explicabilidad local en modo \emph{manual input} (stress corto vencimiento): contraste de coherencia local y soporte histórico en ambos finalistas.}
+\includegraphics[width=0.9\textwidth]{../imgs/dashboard/Sample Explainability - Random Forest III.png}
+\caption{\small Explicabilidad local en modo \emph{manual input} (stress corto vencimiento) en Random Forest: contraste de coherencia local y soporte histórico.}
 \label{fig:dash-local-manual-rf-xgb}
 \end{figure}
 

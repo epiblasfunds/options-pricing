@@ -8,16 +8,18 @@ Este apéndice desarrolla, en formato operativo, la sensibilidad del error por r
 \centering
 \begin{minipage}{0.49\textwidth}
 \centering
-\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Xgboost.png}
+\caption*{\small \textbf{(a) XGBoost}}
 \end{minipage}\hfill
 \begin{minipage}{0.49\textwidth}
 \centering
-\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Xgboost.png}
+\includegraphics[width=\textwidth,height=0.24\textheight,keepaspectratio]{../imgs/dashboard/Diagnosis - Random Forest.png}
+\caption*{\small \textbf{(b) Random Forest}}
 \end{minipage}
-\caption{\small Análisis de sensibilidad por moneyness y vencimiento en los dos finalistas. Cada vista de \emph{Diagnosis} integra el residual heatmap y las descomposiciones de error por maturity y por moneyness.}
+\caption{\small Comparación de sensibilidad por moneyness y vencimiento: XGBoost versus Random Forest.}
 \label{fig:app-sensitivity-rf-xgb}
 \end{figure}
 
-La Figura~\ref{fig:app-sensitivity-rf-xgb} permite una lectura directa por capas. Primero, el \emph{Residual Heatmap} identifica si la concentración de error se desplaza hacia extremos de moneyness o hacia tramos de vencimiento concretos. Segundo, \emph{Error by Maturity} resume si los vencimientos cortos, medios o largos concentran más desviación. Tercero, \emph{Error by Moneyness} separa el desempeño entre regiones ITM, ATM y OTM.
+La Figura~\ref{fig:app-sensitivity-rf-xgb} permite una lectura directa por capas y comparación entre modelos. Primero, el \emph{Residual Heatmap} identifica si la concentración de error se desplaza hacia extremos de moneyness o hacia tramos de vencimiento concretos. Segundo, \emph{Error by Maturity} resume si los vencimientos cortos, medios o largos concentran más desviación. Tercero, \emph{Error by Moneyness} separa el desempeño entre regiones ITM, ATM y OTM. La comparación lado a lado revela que Random Forest (b) mantiene un patrón de error más estable y consistente respecto a XGBoost (a), con especial énfasis en la robustez en zonas extremas de moneyness.
 
 Esta lectura es especialmente útil para mesa de derivados y tesorería porque conecta calidad predictiva con decisiones operativas. Si una zona presenta error estructuralmente mayor, esa zona requiere mayor prudencia en valoración, contraste adicional con modelos internos y monitorización reforzada de cobertura. En cambio, zonas con error bajo y patrón estable son candidatas a uso más sistemático del modelo como referencia de apoyo.

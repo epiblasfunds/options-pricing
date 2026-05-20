@@ -30,9 +30,10 @@ El objetivo de esta variante es comprobar si reordenar el aprendizaje desde la z
 Los resultados revelan un patrón no universal y dependiente de arquitectura:
 
 \begin{itemize}
-	\item \textbf{Modelos ya robustos en estándar (Random Forest y, en menor medida, XGBoost):} no se observa ganancia sistemática; en XGBoost el efecto es claramente negativo.
-	\item \textbf{Modelos más sensibles al orden (Sequential NN y, sobre todo, Quantum Inspired):} aparecen mejoras, aunque de magnitud muy distinta entre ambas familias.
-	\item \textbf{Modelos lineales:} el orden apenas aporta porque la hipótesis es global y no depende de trayectorias de aprendizaje.
+	\item \textbf{Random Forest:} prácticamente neutro ($\Delta$ = +0.000130). El modelo es ya robusto en estándar y el reorden por ATM no aporta ni perjudica de forma significativa.
+	\item \textbf{XGBoost:} degradación clara en test ($\Delta$ = +0.021654). A diferencia de Random Forest, el entrenamiento progressive ATM perjudica el rendimiento de XGBoost de forma notable.
+	\item \textbf{Modelos más sensibles al orden (Sequential NN y, sobre todo, Quantum Inspired):} aparecen mejoras, aunque de magnitud distinta. Sequential NN mejora levemente ($\Delta$ = -0.000451) y Quantum Inspired mejora de forma clara ($\Delta$ = -0.025621).
+	\item \textbf{Regresión lineal:} empeora levemente ($\Delta$ = +0.003923) porque el orden apenas aporta cuando la hipótesis es global y no depende de trayectorias de aprendizaje.
 \end{itemize}
 
-En términos prácticos, progressive ATM debe interpretarse como herramienta experimental útil para diagnóstico y comparación entre familias, no como regla general de entrenamiento.
+En términos prácticos, estos resultados confirman que progressive ATM no es una mejora universal. Su efectividad depende completamente de la arquitectura: beneficiosa para redes más sensibles al orden, perjudicial para XGBoost y neutral para Random Forest. Por tanto, progressive ATM debe tratarse como herramienta experimental útil para diagnóstico y comparación entre familias, no como regla general de entrenamiento.
