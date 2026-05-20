@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Regresión simbólica - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Regresi\u00f3n simb\u00f3lica";
+        var mkdocs_page_input_path = "dashboard/global/symbolic-regression.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Escriba el término de búsqueda aquí" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegación">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Explicabilidad global</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menú de navegación en móvil">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Explicabilidad global</li>
+      <li class="breadcrumb-item active">Regresión simbólica</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="regresion-simbolica">Regresión simbólica<a class="headerlink" href="#regresion-simbolica" title="Permanent link">&para;</a></h1>
+<p>La regresión simbólica busca una expresión matemática cerrada que aproxime una relación observada. En este proyecto se usa como modelo surrogate: la expresión no se ajusta directamente a la volatilidad implícita real, sino a las predicciones del modelo principal sobre una muestra del dataset de test.</p>
+<p>La forma objetivo es:</p>
+<div class="doc-math">
+\[
+\hat{\sigma}_{principal}(x) \approx \hat{\sigma}_{sym}(x)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal.</li>
+<li>$\hat{\sigma}_{sym}(x)$ es la predicción del symbolic regressor para la misma muestra.</li>
+<li>$x$ es el vector de features.</li>
+</ul>
+<p>El modelo de regresión simbólica $\hat{\sigma}_{sym}$ es una fórmula formada por variables, constantes y operadores permitidos: proporciona una aproximación algebraica del comportamiento del modelo, con una complejidad explícita y métricas de fidelidad. Es especialmente útil cuando el tribunal quiere entender si una red o un boosting está aprendiendo una relación interpretable o si depende de interacciones demasiado complejas para resumirse.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[&quot;Train/Test Dataset&quot;] --&gt; B[&quot;Train/Test Features + Original Labels&quot;]
+    A --&gt; E[&quot;Train/Test Features&quot;]
+    B --&gt; C[&quot;Modelo principal&quot;]
+    C --&gt; D[&quot;Train/Test Predicted Labels&quot;]
+    D --&gt; F[&quot;Train/Test Features + Predicted Labels&quot;]
+    E --&gt; F
+    F --&gt; G[&quot;Modelo Symbolic Regressor (búsqueda evolutiva)&quot;]
+    G --&gt; H[&quot;Conjunto de ecuaciones candidatas&quot;]
+    H --&gt; I[&quot;Selección de la mejor&quot;]
+
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    classDef artifact fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+
+    class A,B,D,E,F data;
+    class C,G model;
+    class H,I artifact;
+</code></pre>
+<h2 id="metodo-usado-pysr-y-busqueda-evolutiva">Método usado: PySR y búsqueda evolutiva<a class="headerlink" href="#metodo-usado-pysr-y-busqueda-evolutiva" title="Permanent link">&para;</a></h2>
+<p>El repositorio usa <code>PySRRegressor</code>, una interfaz Python para SymbolicRegression.jl. La regresión simbóliica se basa en búsquedas evolutivas: se mantienen poblaciones de fórmulas candidatas que se modifican mediante operaciones inspiradas en algoritmos genéticos, se evalúan por error y complejidad, y se seleccionan candidatas prometedoras.</p>
+<p>Conceptualmente:</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[Población inicial de expresiones] --&gt; B[Mutación y recombinación]
+    B --&gt; C[Evaluación: pérdida y complejidad]
+    C --&gt; D[Selección de candidatas]
+    D --&gt; B
+    D --&gt; E[Frente error-complejidad]
+    E --&gt; F[Ecuación seleccionada]
+    classDef method fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E,F method;
+</code></pre>
+<p>Las expresiones se comparan por su pérdida sobre datos de entrenamiento y por su complejidad estructural. PySR conserva una tabla de ecuaciones candidatas, no solo la mejor fórmula final. Esto es importante para auditoría: una ecuación ligeramente peor pero mucho más simple puede ser más defendible como explicación.</p>
+<h2 id="implementacion">Implementación<a class="headerlink" href="#implementacion" title="Permanent link">&para;</a></h2>
+<p>La función <code>build_symbolic_regressor_model</code> configura PySR con:</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th style="text-align: right;">Valor actual</th>
+<th>Interpretación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>symbolic_sample_size</code></td>
+<td style="text-align: right;">2500</td>
+<td>Número máximo de observaciones usadas para ajustar el surrogate simbólico.</td>
+</tr>
+<tr>
+<td><code>test_size</code></td>
+<td style="text-align: right;">0.2</td>
+<td>Parte reservada para medir fidelidad fuera del ajuste simbólico.</td>
+</tr>
+<tr>
+<td><code>niterations</code></td>
+<td style="text-align: right;">120000</td>
+<td>Número de iteraciones evolutivas. Aumentarlo amplía la búsqueda.</td>
+</tr>
+<tr>
+<td><code>populations</code></td>
+<td style="text-align: right;">12</td>
+<td>Número de poblaciones paralelas de expresiones.</td>
+</tr>
+<tr>
+<td><code>population_size</code></td>
+<td style="text-align: right;">80</td>
+<td>Tamaño de cada población.</td>
+</tr>
+<tr>
+<td><code>topn</code></td>
+<td style="text-align: right;">48</td>
+<td>Número de expresiones destacadas que se conservan internamente.</td>
+</tr>
+<tr>
+<td><code>ncycles_per_iteration</code></td>
+<td style="text-align: right;">1200</td>
+<td>Trabajo evolutivo por iteración.</td>
+</tr>
+<tr>
+<td><code>maxsize</code></td>
+<td style="text-align: right;">80</td>
+<td>Tamaño máximo permitido de la expresión.</td>
+</tr>
+<tr>
+<td><code>maxdepth</code></td>
+<td style="text-align: right;">24</td>
+<td>Profundidad máxima del árbol de expresión.</td>
+</tr>
+<tr>
+<td><code>timeout_in_seconds</code></td>
+<td style="text-align: right;">3600</td>
+<td>Límite temporal de búsqueda.</td>
+</tr>
+<tr>
+<td><code>batching</code></td>
+<td style="text-align: right;"><code>True</code></td>
+<td>Evalúa por lotes para reducir coste.</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td style="text-align: right;"><code>min(256, len(X_train))</code></td>
+<td>Tamaño de lote usado por PySR.</td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td style="text-align: right;">32</td>
+<td>Precisión numérica de cálculo.</td>
+</tr>
+</tbody>
+</table>
+<p>Los operadores permitidos son:</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Operadores</th>
+<th>Consecuencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binarios</td>
+<td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code></td>
+<td>Permiten suma, interacción multiplicativa, ratios y potencias.</td>
+</tr>
+<tr>
+<td>Unarios</td>
+<td><code>square</code>, <code>cube</code></td>
+<td>Permiten curvatura cuadrática y cúbica.</td>
+</tr>
+<tr>
+<td>Restricción</td>
+<td><code>^</code>: <code>(-1, 1)</code></td>
+<td>Limita complejidad de exponentes en potencias.</td>
+</tr>
+</tbody>
+</table>
+<p>La selección usa <code>model_selection="best"</code>, que elige una ecuación equilibrando pérdida y complejidad según el criterio interno de PySR. El bundle conserva también <code>candidate_equations</code>, con al menos <code>symbolic_min_candidate_equations</code> fórmulas normalizadas cuando están disponibles.</p>
+<h2 id="complejidad-e-interpretabilidad">Complejidad e interpretabilidad<a class="headerlink" href="#complejidad-e-interpretabilidad" title="Permanent link">&para;</a></h2>
+<p>La complejidad es una medida estructural de la expresión. Aumenta con variables, constantes y operadores. No equivale a número de parámetros en sentido estadístico clásico, pero funciona como proxy de legibilidad.</p>
+<p>Una fórmula con complejidad baja puede ser:</p>
+<div class="doc-math">
+\[
+    \hat{\sigma}_{sym}(x)=a+b\cdot TimeToExpiration
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$g(x)$ es la expresión simbólica candidata.</li>
+<li>$a$ es el término constante.</li>
+<li>$b$ es el coeficiente de la variable.</li>
+<li><code>TimeToExpiration</code> es el tiempo hasta vencimiento usado por la expresión.</li>
+</ul>
+<p>Una fórmula de complejidad alta puede incluir múltiples productos, cocientes y potencias. Aunque tenga menor error de fidelidad, puede dejar de ser útil como explicación si exige demasiado esfuerzo para interpretarla. En documentación técnica, la ecuación elegida debe presentarse siempre junto con:</p>
+<ul>
+<li>Complejidad.</li>
+<li>Features usadas.</li>
+<li>$RMSE$/$MAE$/$R^2$ de fidelidad.</li>
+<li>Tabla de candidatas alternativas.</li>
+</ul>
+<h2 id="metricas-de-fidelidad">Métricas de fidelidad<a class="headerlink" href="#metricas-de-fidelidad" title="Permanent link">&para;</a></h2>
+<p>La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:</p>
+<div class="doc-math">
+\[
+RMSE_{sym} =
+\sqrt{
+\frac{1}{n}\sum_i
+\left(
+\hat{\sigma}_{principal}(x_i)-\hat{\sigma}_{sym}(x_i)
+\right)^2
+}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$RMSE_{sym}$ es el error cuadrático medio de fidelidad de la expresión simbólica.</li>
+<li>$n$ es el número de observaciones del conjunto reservado.</li>
+<li>$\hat{\sigma}_{principal}(x_i)$ es la predicción del modelo principal.</li>
+<li>$g(x_i)$ es la predicción de la fórmula simbólica.</li>
+</ul>
+<p>Un RMSE bajo indica que la ecuación reproduce bien al modelo principal en la muestra evaluada. No garantiza buen comportamiento fuera de distribución, ni validez financiera universal. La ecuación simbólica debe usarse como resumen interpretable, no como sustituto operativo salvo validación adicional.</p>
+<h2 id="casos-de-uso">Casos de uso<a class="headerlink" href="#casos-de-uso" title="Permanent link">&para;</a></h2>
+<p>La <a href="../../../models/families/linear-regression/">regresión lineal</a> ofrece una fórmula, pero puede ser demasiado rígida. Un <a href="../../../models/families/random-forest/">Random Forest</a>, <a href="../../../models/families/xgboost/">XGBoost</a>, una <a href="../../../models/families/neural-networks/">red neuronal</a> o <a href="../../../models/families/quantum-inspired/">Quantum Inspired</a> pueden aproximar superficies no lineales, pero no producen una ecuación directamente legible. La regresión simbólica ocupa un punto intermedio: busca fórmulas no lineales con operadores simples, penalizando implícita o explícitamente la complejidad.</p>
+<p>En el contexto de volatilidad implícita, una ecuación simbólica puede revelar estructuras como:</p>
+<ul>
+<li>Dependencia con vencimiento.</li>
+<li>Curvatura respecto a strike o subyacente.</li>
+<li>Interacción entre precio relativo y tipo.</li>
+<li>Correcciones no lineales que el modelo principal usa de forma recurrente.</li>
+</ul>
+<p>La regresión simbólica aporta una pieza que otros métodos no dan:</p>
+<table>
+<thead>
+<tr>
+<th>Método</th>
+<th>Qué explica</th>
+<th>Qué no aporta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../shap-fundamentals/">SHAP</a></td>
+<td>Atribución local y ranking global.</td>
+<td>No produce una fórmula compacta.</td>
+</tr>
+<tr>
+<td><a href="../surrogate-trees/">árbol surrogate</a></td>
+<td>Reglas por umbrales.</td>
+<td>Puede ser discontinuo y grande.</td>
+</tr>
+<tr>
+<td>Regresión simbólica</td>
+<td>Fórmula algebraica aproximada.</td>
+<td>Puede perder fidelidad o extrapolar mal.</td>
+</tr>
+</tbody>
+</table>
+<p>La ecuación simbólica permite discutir si el comportamiento aprendido puede reducirse a una relación matemática razonable. Si la fórmula seleccionada usa <code>StrikePrice</code>, <code>UnderlyingPrice</code> y <code>TimeToExpiration</code> de forma coherente con la geometría de la superficie, refuerza la interpretabilidad del pipeline. Si la fórmula necesita mucha complejidad, esa conclusión también es informativa: el modelo principal no se deja resumir fácilmente.</p>
+<h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cranmer, M. (2023). <em>Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl</em>. arXiv.</li>
+<li>Schmidt, M. y Lipson, H. (2009). <em>Distilling Free-Form Natural Laws from Experimental Data</em>. Science.</li>
+<li>Koza, J. R. (1992). <em>Genetic Programming: On the Programming of Computers by Means of Natural Selection</em>.</li>
+<li>La Cava, W., Orzechowski, P., Burlacu, B. et al. (2021). <em>Contemporary Symbolic Regression Methods and their Relative Performance</em>. NeurIPS Datasets and Benchmarks.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegación de pie de página">
+        <a href="../surrogate-trees/" class="btn btn-neutral float-left" title="Árboles surrogate"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../../behaviour-surface/" class="btn btn-neutral float-right" title="Mapa de la pestaña">Siguiente <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído con <a href="https://www.mkdocs.org/">MkDocs</a> usando un <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a> provisto por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versiones">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../surrogate-trees/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../../behaviour-surface/" style="color: #fcfcfc">Siguiente &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

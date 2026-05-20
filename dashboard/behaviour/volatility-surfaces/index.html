@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Superficies de volatilidad - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Superficies de volatilidad";
+        var mkdocs_page_input_path = "dashboard/behaviour/volatility-surfaces.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Escriba el término de búsqueda aquí" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegación">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Superficies y respuesta</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menú de navegación en móvil">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Superficies y respuesta</li>
+      <li class="breadcrumb-item active">Superficies de volatilidad</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="superficies-de-volatilidad">Superficies de volatilidad<a class="headerlink" href="#superficies-de-volatilidad" title="Permanent link">&para;</a></h1>
+<p>La pestaña <a href="../../behaviour-surface/">Behaviour And Surface</a> trata el modelo como una función de superficie. En lugar de limitarse a predicciones punto a punto, se pregunta cómo se mueve la volatilidad estimada cuando se modifican moneyness y vencimiento alrededor de una operación real.</p>
+<p>En opciones, la volatilidad implícita se analiza habitualmente como una superficie:</p>
+<div class="doc-math">
+\[
+\sigma = \sigma(K,T)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el tiempo hasta vencimiento.</li>
+</ul>
+<p>o, de forma más comparable entre niveles de mercado:</p>
+<div class="doc-math">
+\[
+\sigma = \sigma(m,T), \quad m=\frac{F}{K}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$\sigma$ es la volatilidad implícita.</li>
+<li>$m$ es la moneyness, definida como $F/K$.</li>
+<li>$F$ es el futuro subyacente.</li>
+<li>$K$ es el strike.</li>
+<li>$T$ es el tiempo hasta vencimiento.</li>
+</ul>
+<p>El dashboard usa esta segunda lectura, porque la moneyness permite comparar contratos aunque el nivel del IBEX cambie.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[Ancla real del test] --&gt; B[Fijar variables de contexto]
+    B --&gt; C[Valores de moneyness 0.8-1.2]
+    B --&gt; D[Valores de vencimiento]
+    C --&gt; E[Reconstruir strike K=F/m]
+    D --&gt; E
+    E --&gt; F[Predicción del modelo]
+    F --&gt; G[Heatmap, superficie 3D, smile, term structure]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    classDef plot fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    class A,B,C,D data;
+    class E,F process;
+    class G plot;
+</code></pre>
+<p>De aquí en adelante, un <strong>ancla</strong> es una observación real del conjunto de test que se usa como punto de referencia para generar escenarios contrafactuales alrededor de sus condiciones de mercado.</p>
+<h2 id="construccion-en-el-repositorio">Construcción en el repositorio<a class="headerlink" href="#construccion-en-el-repositorio" title="Permanent link">&para;</a></h2>
+<p>La función <code>build_surfaces_frame</code> genera las superficies. Para cada ancla seleccionada:</p>
+<ol>
+<li>Toma una fila real del split de test.</li>
+<li>Fija el subyacente base $F$.</li>
+<li>Construye <code>surface_grid_size</code> valores de moneyness entre 0.8 y 1.2.</li>
+<li>Construye <code>surface_grid_size</code> valores de vencimiento entre 1 día y el máximo entre $1.5$ veces el vencimiento del ancla y 30 días.</li>
+<li>Reconstruye el strike como:</li>
+</ol>
+<div class="doc-math">
+\[
+K = \frac{F}{m}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$K$ es el strike reconstruido.</li>
+<li>$F$ es el precio del futuro subyacente fijado por el ancla.</li>
+<li>
+<p>$m$ es la moneyness objetivo de la grilla.</p>
+</li>
+<li>
+<p>Mantiene el resto de variables del ancla y predice la volatilidad con el modelo principal.</p>
+</li>
+</ul>
+<p>El parámetro actual <code>surface_grid_size</code> es 24. Por tanto, cada ancla genera $24 \times 24 = 576$ puntos contrafactuales. Este tamaño ofrece una superficie suficientemente densa para detectar curvatura y discontinuidades sin generar artefactos excesivamente pesados.</p>
+<h2 id="heatmap-de-superficie">Heatmap de superficie<a class="headerlink" href="#heatmap-de-superficie" title="Permanent link">&para;</a></h2>
+<p>El heatmap representa $\hat{\sigma}(m,T)$ con color. Es la visualización más estable para lectura técnica porque evita perspectiva 3D y permite detectar regiones.</p>
+<p>Lecturas relevantes:</p>
+<table>
+<thead>
+<tr>
+<th>Patrón</th>
+<th>Interpretación técnica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gradiente suave por moneyness</td>
+<td>El modelo aprende skew o smile regular.</td>
+</tr>
+<tr>
+<td>Curvatura central alrededor de $m=1$</td>
+<td>Posible estructura de smile alrededor de ATM.</td>
+</tr>
+<tr>
+<td>Saltos entre celdas vecinas</td>
+<td>Posible discontinuidad del modelo o falta de soporte local.</td>
+</tr>
+<tr>
+<td>Variación extrema en corto vencimiento</td>
+<td>Sensibilidad alta a microestructura o escasez de datos.</td>
+</tr>
+</tbody>
+</table>
+<p>El heatmap es contrafactual: algunos puntos de la grilla pueden no corresponder a contratos observados exactamente. Por eso se complementa con <a href="../../sample/neighbours/">vecinos locales</a> y <a href="../../diagnosis/">diagnóstico de error</a>.</p>
+<h2 id="superficie-3d">Superficie 3D<a class="headerlink" href="#superficie-3d" title="Permanent link">&para;</a></h2>
+<p>La superficie 3D representa la misma matriz que el heatmap. Su ventaja es visual: permite ver pendientes y curvaturas cuando el color no basta. Una superficie aceptable para un modelo de volatilidad debería evitar comportamientos erráticos no explicados. No se exige que sea perfectamente lisa, porque los datos de mercado contienen ruido y porque el modelo no impone restricciones de no arbitraje. Sin embargo, cambios abruptos en puntos muy próximos son una señal de revisión.</p>
+<h2 id="smile-curve">Smile curve<a class="headerlink" href="#smile-curve" title="Permanent link">&para;</a></h2>
+<p>Un smile es un corte de la superficie a vencimiento fijo:</p>
+<div class="doc-math">
+\[
+m \longmapsto \hat{\sigma}(m \mid T=T_k)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$m$ es la moneyness del corte.</li>
+<li>$\hat{\sigma}$ es la volatilidad predicha.</li>
+<li>$T_k$ es el vencimiento fijo usado para construir el smile.</li>
+</ul>
+<p>El smile permite comparar cómo cambia la curvatura entre vencimientos. En muchos mercados de equity index options se espera skew: volatilidades distintas entre strikes bajos y altos. El dashboard no impone esa forma; la muestra para inspeccionar si el modelo la aprende.</p>
+<h2 id="term-structure">Term structure<a class="headerlink" href="#term-structure" title="Permanent link">&para;</a></h2>
+<p>La term structure es el corte opuesto:</p>
+<div class="doc-math">
+\[
+T \longmapsto \hat{\sigma}(T \mid m=m_k)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$T$ es el tiempo hasta vencimiento del corte.</li>
+<li>$\hat{\sigma}$ es la volatilidad predicha.</li>
+<li>$m_k$ es la moneyness fija usada para construir la term structure.</li>
+</ul>
+<p>Permite evaluar si el modelo predice niveles distintos entre corto y largo plazo para una misma zona de moneyness. Esta vista es importante porque el vencimiento corto puede tener mayor ruido relativo y porque los contratos largos pueden estar menos representados.</p>
+<h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Gatheral, J. (2006). <em>The Volatility Surface: A Practitioner's Guide</em>.</li>
+<li>Derman, E. y Kani, I. (1994). <em>Riding on a Smile</em>. Risk.</li>
+<li>Cont, R. y da Fonseca, J. (2002). <em>Dynamics of Implied Volatility Surfaces</em>. Quantitative Finance.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegación de pie de página">
+        <a href="../../behaviour-surface/" class="btn btn-neutral float-left" title="Mapa de la pestaña"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../ice/" class="btn btn-neutral float-right" title="Curvas ICE">Siguiente <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído con <a href="https://www.mkdocs.org/">MkDocs</a> usando un <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a> provisto por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versiones">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../behaviour-surface/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../ice/" style="color: #fcfcfc">Siguiente &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

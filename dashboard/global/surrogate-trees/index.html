@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Árboles surrogate - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u00c1rboles surrogate";
+        var mkdocs_page_input_path = "dashboard/global/surrogate-trees.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Escriba el término de búsqueda aquí" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegación">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../models/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Familias de modelos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../models/families/quantum-inspired/">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Explicabilidad global</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../../global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menú de navegación en móvil">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Dashboard</li>
+          <li class="breadcrumb-item">Explicabilidad global</li>
+      <li class="breadcrumb-item active">Árboles surrogate</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="arboles-surrogate">Árboles surrogate<a class="headerlink" href="#arboles-surrogate" title="Permanent link">&para;</a></h1>
+<p>Un árbol surrogate es un modelo interpretable entrenado para imitar al modelo principal. En el proyecto no se entrena contra la volatilidad real, sino contra las predicciones finales del estimador seleccionado:</p>
+<div class="doc-math">
+\[
+\hat{\sigma}_{principal}(x) \longrightarrow \hat{\sigma}_{tree}(x)
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$\hat{\sigma}_{principal}(x)$ es la predicción del modelo principal para la muestra $x$.</li>
+<li>$\hat{\sigma}_{tree}(x)$ es la predicción del árbol surrogate para la misma muestra.</li>
+<li>$x$ es el vector de features.</li>
+</ul>
+<p>Por tanto, el árbol surrogate explica el comportamiento del modelo, no la verdad de mercado. Esta distinción es fundamental. Si el modelo principal tiene sesgos, el surrogate puede aproximar esos sesgos con reglas legibles. Su utilidad está en convertir una caja negra en una estructura de decisiones aproximada que se pueda revisar, no en demostrar que esas reglas sean leyes financieras.</p>
+<pre><code class="language-mermaid">flowchart TD
+    A[Train/Test Dataset] --&gt; B[Train/Test Features+OriginalLabels]
+    A --&gt; E[Train/Test Features]
+    B --&gt; C[Modelo principal]
+    C --&gt; D[Train/Test PredictedLabels]
+    D --&gt; F[Train/test Features+PredictedLbales]
+    E --&gt; F
+    F --&gt; G[Modelo Surrogate Tree]
+    G --&gt; H[Reglas textuales]
+    H --&gt; I[Importancias]
+    I --&gt; J[Métricas de fidelidad]
+    classDef data fill:#eaf4ff,stroke:#2f6fa8,stroke-width:1.5px,color:#17324d;
+    classDef model fill:#edf8f1,stroke:#2d7d46,stroke-width:1.5px,color:#173a24;
+    classDef artifact fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,D,E,F data;
+    class C,G model;
+    class H,I,J artifact;
+</code></pre>
+<h2 id="implementacion">Implementación<a class="headerlink" href="#implementacion" title="Permanent link">&para;</a></h2>
+<p>La función <code>build_surrogate_tree_models</code> construye los surrogates. El flujo es:</p>
+<ol>
+<li>Se genera un <code>explainability_frame</code> con las features raw visibles.</li>
+<li>Se codifican variables numéricas y categóricas mediante <code>ExplainabilityEncoder</code>.</li>
+<li>Se muestrea un máximo de <code>surrogate_sample_size</code> filas.</li>
+<li>Se separa un 20% para medir fidelidad.</li>
+<li>Para cada profundidad configurada en <code>surrogate_depths</code>, se entrena un <code>DecisionTreeRegressor</code>.</li>
+</ol>
+<p>Los parámetros actuales relevantes son:</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th style="text-align: right;">Valor en <code>resources/dashboard_models_config.json</code></th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>surrogate_depths</code></td>
+<td style="text-align: right;">2, 4, 8, 16</td>
+<td>Controla el máximo de niveles del árbol.</td>
+</tr>
+<tr>
+<td><code>surrogate_min_samples_leaf</code></td>
+<td style="text-align: right;">80</td>
+<td>Evita reglas basadas en hojas demasiado pequeñas.</td>
+</tr>
+<tr>
+<td><code>surrogate_sample_size</code></td>
+<td style="text-align: right;">12000</td>
+<td>Limita el coste y estabiliza la muestra de imitación.</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td style="text-align: right;">42</td>
+<td>Reproducibilidad del muestreo y split.</td>
+</tr>
+</tbody>
+</table>
+<p>El árbol se exporta con <code>export_text</code>, usando los nombres de features de explicabilidad. Una regla tiene forma:</p>
+<div class="doc-math">
+\[
+si\ x_j \leq c \quad entonces\ continuar\ por\ rama\ izquierda
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$x_j$ es el valor de la feature usada en el nodo del árbol.</li>
+<li>$c$ es el umbral aprendido por el árbol.</li>
+</ul>
+<p>En el caso de variables categóricas codificadas, las reglas deben interpretarse con cautela. <code>OptionType</code> se codifica numéricamente según niveles observados por el encoder; no debe leerse como una magnitud continua real. Para explicar opción call/put con precisión, conviene comprobar el mapeo de niveles en el bundle o contrastar la regla con observaciones filtradas.</p>
+<h2 id="complejidad-e-interpretabilidad">Complejidad e interpretabilidad<a class="headerlink" href="#complejidad-e-interpretabilidad" title="Permanent link">&para;</a></h2>
+<p>La profundidad máxima es el control principal de complejidad. Un árbol de profundidad 2 puede leerse como un pequeño conjunto de reglas globales. Un árbol de profundidad 16 puede acercarse mejor al modelo principal, pero puede ser demasiado grande para una lectura humana completa.</p>
+<p>La relación esperada es:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Profundidad</th>
+<th>Ventaja</th>
+<th>Riesgo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Reglas muy claras; útil para resumen ejecutivo técnico.</td>
+<td>Puede perder curvatura y regímenes locales.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Buen equilibrio inicial entre fidelidad y lectura.</td>
+<td>Puede ocultar interacciones finas.</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td>Captura más detalle de la superficie.</td>
+<td>Empieza a ser difícil de auditar manualmente.</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td>Alta capacidad de imitación.</td>
+<td>Riesgo de explicar con demasiadas reglas, perdiendo interpretabilidad.</td>
+</tr>
+</tbody>
+</table>
+<p>En la documentación del resultado conviene justificar qué profundidad se usa para discusión. Si la profundidad 2 tiene RMSE de fidelidad bajo, las reglas globales son especialmente valiosas. Si solo profundidades altas consiguen fidelidad aceptable, el modelo principal probablemente utiliza interacciones complejas y no debe resumirse con pocas reglas.</p>
+<h2 id="metricas-de-fidelidad">Métricas de fidelidad<a class="headerlink" href="#metricas-de-fidelidad" title="Permanent link">&para;</a></h2>
+<p>La fidelidad se evalúa comparando predicción del surrogate contra predicción del modelo principal:</p>
+<div class="doc-math">
+\[
+RMSE_{tree} =
+\sqrt{
+\frac{1}{n}\sum_{i=1}^{n}
+\left(
+\hat{\sigma}_{principal}(x_i)
+-
+\hat{\sigma}_{tree}(x_i)
+\right)^2
+}
+\]
+</div>
+
+<p>donde:</p>
+<ul>
+<li>$RMSE$ es el error cuadrático medio de fidelidad.</li>
+<li>$n$ es el número de observaciones de evaluación.</li>
+<li>$\hat{\sigma}_{principal}(x_i)$ es la predicción del modelo principal.</li>
+<li>$\hat{\sigma}_{tree}(x_i)$ o $g(x_i)$ es la predicción del modelo explicable.</li>
+</ul>
+<p>También se guardan $MAE$ y $R^2$ cuando están configurados. Estas métricas no son métricas de mercado. Un surrogate puede tener excelente fidelidad a un modelo malo, y un surrogate con peor fidelidad puede seguir ser útil como resumen parcial. Por eso se debe presentar junto con las métricas de diagnóstico del modelo principal.</p>
+<h2 id="casos-de-uso">Casos de uso<a class="headerlink" href="#casos-de-uso" title="Permanent link">&para;</a></h2>
+<p>Los árboles surrogate son útiles para contestar preguntas como:</p>
+<ul>
+<li>Qué variable separa primero el espacio predictivo del modelo.</li>
+<li>Qué condiciones producen volatilidades altas o bajas según el modelo.</li>
+<li>Si el modelo está usando moneyness y vencimiento antes que variables menos justificables.</li>
+<li>Si una familia compleja puede resumirse con reglas simples sin perder demasiada fidelidad.</li>
+</ul>
+<p>Su lectura debe presentarse como aproximación. La frase correcta no es "el mercado sigue estas reglas", sino "el modelo entrenado puede aproximarse mediante estas reglas con la fidelidad indicada".</p>
+<h2 id="referencias">Referencias<a class="headerlink" href="#referencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Craven, M. y Shavlik, J. W. (1996). <em>Extracting Tree-Structured Representations of Trained Networks</em>. NeurIPS.</li>
+<li>Molnar, C. (2022). <em>Interpretable Machine Learning</em>. Capítulo de global surrogate models.</li>
+<li>Breiman, L., Friedman, J. H., Olshen, R. A. y Stone, C. J. (1984). <em>Classification and Regression Trees</em>.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegación de pie de página">
+        <a href="../shap-visualizations/" class="btn btn-neutral float-left" title="Visualizaciones SHAP"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../symbolic-regression/" class="btn btn-neutral float-right" title="Regresión simbólica">Siguiente <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído con <a href="https://www.mkdocs.org/">MkDocs</a> usando un <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a> provisto por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versiones">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../shap-visualizations/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../symbolic-regression/" style="color: #fcfcfc">Siguiente &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

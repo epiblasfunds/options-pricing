@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="es" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Proyecto TFM" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>Quantum Inspired - Volatilidad explicable en opciones del IBEX</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quantum Inspired";
+        var mkdocs_page_input_path = "models/families/quantum-inspired.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../.." class="icon icon-home"> Volatilidad explicable en opciones del IBEX
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Escriba el término de búsqueda aquí" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegación">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../..">Inicio</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Estructura del repositorio</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/configuration/">Configuración y resources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../repository/src-packages/">Paquetes de src</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Datos</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/">Visión general del ETL</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/raw-read/">Lectura raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/merge-raw/">Unión de mercado y contratos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/product-split/">Separación por producto</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/underlying/">Subyacente de cada opción</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../data/volatility/">Volatilidad implícita</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Modelos de volatilidad</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../">Visión general</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diseño de variables</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../features/">Características financieras</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Validación y selección</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../splits-kfolds/">Splits temporales y k-folds</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../training/">Entrenamiento y selección</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../retraining-progressive/">Reentrenamiento y progressive training</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" >Familias de modelos</a>
+    <ul class="current">
+                <li class="toctree-l2"><a class="reference internal" href="../">Comparativa de familias</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../linear-regression/">Regresión lineal</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../random-forest/">Random Forest</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../xgboost/">XGBoost</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../neural-networks/">Redes neuronales</a>
+                </li>
+                <li class="toctree-l2 current"><a class="reference internal current" href="#">Quantum Inspired</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dashboard</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../dashboard/">Cometido del dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Generación de artefactos</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/model-to-dashboard/">De modelo entrenado a bundle visualizable</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad global</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/shap-fundamentals/">Fundamentos de SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/shap-visualizations/">Visualizaciones SHAP</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/surrogate-trees/">Árboles surrogate</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/global/symbolic-regression/">Regresión simbólica</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Superficies y respuesta</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour-surface/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/volatility-surfaces/">Superficies de volatilidad</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/ice/">Curvas ICE</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/behaviour/ale/">Curvas ALE</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Explicabilidad local</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample-explainability/">Mapa de la pestaña</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample/local-shap-waterfall/">SHAP local y waterfall</a>
+                </li>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/sample/neighbours/">Vecinos y soporte local</a>
+                </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" >Diagnóstico</a>
+    <ul>
+                <li class="toctree-l2"><a class="reference internal" href="../../../dashboard/diagnosis/">Diagnóstico de rendimiento</a>
+                </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Operación</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../../operations/api-deployment/">API, almacenamiento y despliegue</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menú de navegación en móvil">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../..">Volatilidad explicable en opciones del IBEX</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Modelos de volatilidad</li>
+          <li class="breadcrumb-item">Familias de modelos</li>
+      <li class="breadcrumb-item active">Quantum Inspired</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quantum-inspired">Quantum Inspired<a class="headerlink" href="#quantum-inspired" title="Permanent link">&para;</a></h1>
+<h2 id="objetivo-dentro-del-proyecto">Objetivo dentro del proyecto<a class="headerlink" href="#objetivo-dentro-del-proyecto" title="Permanent link">&para;</a></h2>
+<p>La familia <code>QuantumInspiredNNFamily</code> extiende la <a href="../neural-networks/">red neuronal secuencial</a> con una estructura tensorial inspirada en conceptos de computación cuántica. Es importante el matiz: el repositorio ejecuta una red neuronal clásica, no un circuito cuántico y no requiere hardware cuántico. Se denomina Quantum Inspired porque reutiliza ideas de representación de estados cuánticos y redes tensoriales para comprimir interacciones entre variables.</p>
+<h2 id="marco-teorico-quantum-inspired">Marco teórico quantum inspired<a class="headerlink" href="#marco-teorico-quantum-inspired" title="Permanent link">&para;</a></h2>
+<p>En computación cuántica, un estado de $n$ qubits se describe mediante amplitudes en un espacio de dimensión $2^n$. Esa representación crece exponencialmente, pero muchos estados relevantes pueden aproximarse de forma compacta mediante redes tensoriales. Una de las formas más conocidas es la descomposición tipo matrix product state, equivalente en aprendizaje automático a una factorización tensor-train.</p>
+<p>La intuición que se toma prestada es la siguiente:</p>
+<ul>
+<li>Cada dimensión del tensor actúa como un modo o "subespacio" análogo a componentes de un sistema de qubits.</li>
+<li>Los rangos internos del tensor-train controlan cuánta dependencia cruzada se permite entre modos, de forma parecida a cómo la estructura de entrelazamiento limita o habilita correlaciones en un estado cuántico.</li>
+<li>La contracción de cores tensoriales combina información local y dependencias entre modos sin aprender un tensor denso completo.</li>
+</ul>
+<p>Por eso la arquitectura es más extraña que una red secuencial densa: antes de aplicar el bloque tensorial, las features se proyectan a un embedding cuyo tamaño puede reordenarse como tensor. Ese tensor se contrae mediante cores de bajo rango. La aproximación es quantum inspired porque adapta una herramienta usada para representar sistemas cuánticos de muchos cuerpos, pero todo el cálculo se hace con tensores clásicos en Keras.</p>
+<h2 id="estructura-del-modelo">Estructura del modelo<a class="headerlink" href="#estructura-del-modelo" title="Permanent link">&para;</a></h2>
+<p>El flujo es:</p>
+<pre><code class="language-mermaid">flowchart LR
+    A[Features financieras] --&gt; B[Batch normalization]
+    B --&gt; C[Embedding denso]
+    C --&gt; D[Tensorización]
+    D --&gt; E[Contracción tensor-train]
+    E --&gt; F[Capa densa posterior]
+    F --&gt; G[Volatilidad predicha]
+    classDef process fill:#f7f1ff,stroke:#7c4dbe,stroke-width:1.5px,color:#2d1948;
+    class A,B,C,D,E,F,G process;
+</code></pre>
+<p>En el código, <code>TensorTrainLayer</code> recibe un tensor de dimensiones <code>tensor_dims</code> y produce <code>tt_output_dim</code> salidas contrayendo cores con rangos <code>tt_ranks</code>. El nombre interno de la capa conserva la técnica tensor-train porque describe la operación matemática; el nombre de familia en documentación y navegación es Quantum Inspired.</p>
+<h2 id="configuracion-y-busqueda">Configuración y búsqueda<a class="headerlink" href="#configuracion-y-busqueda" title="Permanent link">&para;</a></h2>
+<p>Parámetros fijos principales:</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>patience</code></td>
+<td>12</td>
+<td>Paciencia de early stopping.</td>
+</tr>
+<tr>
+<td><code>epochs</code></td>
+<td>150</td>
+<td>Número máximo de épocas.</td>
+</tr>
+<tr>
+<td><code>embedding_activation</code></td>
+<td><code>swish</code></td>
+<td>Activación del embedding previo a tensorización.</td>
+</tr>
+<tr>
+<td><code>post_tt_activation</code></td>
+<td><code>swish</code></td>
+<td>Activación después de la contracción tensorial.</td>
+</tr>
+<tr>
+<td><code>use_batch_norm</code></td>
+<td><code>True</code></td>
+<td>Normaliza entrada antes del embedding.</td>
+</tr>
+</tbody>
+</table>
+<p>Espacio de búsqueda:</p>
+<table>
+<thead>
+<tr>
+<th>Hiperparámetro</th>
+<th>Valores</th>
+<th>Influencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tt_configuration</code></td>
+<td>combinaciones de <code>tensor_dims</code>, <code>tt_ranks</code>, <code>tt_output_dim</code></td>
+<td>Define estructura tensorial, rango efectivo y capacidad.</td>
+</tr>
+<tr>
+<td><code>dense_units</code></td>
+<td>16 a 64</td>
+<td>Capacidad posterior al bloque tensorial.</td>
+</tr>
+<tr>
+<td><code>dropout_rate</code></td>
+<td>0 a 0.15</td>
+<td>Regularización.</td>
+</tr>
+<tr>
+<td><code>l2_reg</code></td>
+<td>0 a 1e-4</td>
+<td>Penalización de pesos.</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>3e-4 a 1e-3</td>
+<td>Optimización Adam.</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>128 a 1024</td>
+<td>Coste y estabilidad.</td>
+</tr>
+<tr>
+<td><code>loss</code></td>
+<td><code>huber</code>, <code>mse</code></td>
+<td>Robustez del ajuste.</td>
+</tr>
+<tr>
+<td><code>use_lr_scheduler</code></td>
+<td><code>True</code>, <code>False</code></td>
+<td>Ajuste dinámico del learning rate.</td>
+</tr>
+<tr>
+<td><code>kernel_initializer</code></td>
+<td><code>glorot_uniform</code>, <code>he_uniform</code></td>
+<td>Inicialización.</td>
+</tr>
+</tbody>
+</table>
+<p>Se exploran 50 configuraciones, menos que en otras familias neuronales por mayor coste estructural.</p>
+<h2 id="entrenamiento-y-progressive-training">Entrenamiento y progressive training<a class="headerlink" href="#entrenamiento-y-progressive-training" title="Permanent link">&para;</a></h2>
+<p>El entrenamiento reutiliza la lógica de la familia neuronal: escalado numérico, early stopping, posible reducción de learning rate y guardado del scaler. En modo progresivo, se entrena sucesivamente sobre datasets acumulados por cercanía a ATM, manteniendo la misma arquitectura Quantum Inspired en cada fase.</p>
+<h2 id="interpretabilidad-y-cautelas">Interpretabilidad y cautelas<a class="headerlink" href="#interpretabilidad-y-cautelas" title="Permanent link">&para;</a></h2>
+<p>La arquitectura puede capturar interacciones compactas, pero no produce una explicación directa. La interpretación debe venir de los artefactos del dashboard: <a href="../../../dashboard/global/shap-fundamentals/">SHAP</a>, <a href="../../../dashboard/global/surrogate-trees/">surrogates</a>, <a href="../../../dashboard/global/symbolic-regression/">regresión simbólica</a>, <a href="../../../dashboard/behaviour/ice/">ICE</a>, <a href="../../../dashboard/behaviour/ale/">ALE</a> y superficies.</p>
+<p>La documentación debe evitar afirmar ventaja cuántica. Lo defendible es que se prueba una arquitectura clásica que aplica ideas de computación cuántica, especialmente la representación compacta de estados mediante redes tensoriales y la noción de correlaciones controladas por rangos internos.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegación de pie de página">
+        <a href="../neural-networks/" class="btn btn-neutral float-left" title="Redes neuronales"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../../../dashboard/" class="btn btn-neutral float-right" title="Cometido del dashboard">Siguiente <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído con <a href="https://www.mkdocs.org/">MkDocs</a> usando un <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a> provisto por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versiones">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../neural-networks/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../../../dashboard/" style="color: #fcfcfc">Siguiente &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../../..";</script>
+    <script src="../../../js/theme_extra.js"></script>
+    <script src="../../../js/theme.js"></script>
+      <script src="../../../javascripts/mathjax-config.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script src="../../../javascripts/mermaid-init.js"></script>
+      <script src="../../../javascripts/nav-labels.js"></script>
+      <script src="../../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
